@@ -103,7 +103,7 @@
                     <!-- <div class="input-group-prepend">
                           <div class="input-group-text">Filter</div>
                         </div> -->
-                    <input type="text" class="form-control" id="shipFilterText" placeholder="filter string">
+                    <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
                     <div class="input-group-append">
                         <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
                       </div>
@@ -133,6 +133,7 @@
 
 
         <div id="shipCounterer" class="content-panel" style="display:none">Counterer</div>
+        <div id="matchDatabase" class="content-panel" style="display:none">Thinkin' about archiving scs matches, ships and wins in a database</div>
         <div id="about" class="content-panel" style="display:none">About</div>
 
       </div>
@@ -200,12 +201,12 @@
             <tr>
               <td rowspan="4">` + row[0] + `</td>
               <td rowspan="4">` + row[1] + `</td>
-              <td rowspan="4">` + row[2].replace(/,/gi, "\n") + `</td>
+              <td rowspan="4">` + row[2].replace(/,/gi, "<br>") + `</td>
               <td>` + row[3] + `</td>
               <td>` + row[7] + `</td>
               <td rowspan="4">` + row[11] + `</td>
-              <td rowspan="4">` + row[12] + `</td>
-              <td rowspan="4">` + row[13] + `</td>
+              <td rowspan="4">` + row[12].replace(/,/gi, "<br>") + `</td>
+              <td rowspan="4">` + row[13].replace(/,/gi, "<br>") + `</td>
             </tr>
             <tr>
               <td>` + row[4] + `</td>
