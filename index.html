@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Best Boats</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- <link rel="stylesheet" href="tabs.css"> -->
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
+
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+    crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+
+  <script src="utils.js"></script>
+  <script src="docsapi.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
+     crossorigin="anonymous"></script>
+   <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
+     crossorigin="anonymous"></script> -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+    crossorigin="anonymous">
+
+</head>
+
+<body>
+
+
+  <div class="wrapper">
+    <!-- Sidebar  -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <h3>Guns of Icarus Info</h3>
+      </div>
+      <div class="sidebar-header collapsed">
+        <h3><i class="fas fa-atom"></i></h3>
+      </div>
+
+      <ul class="list-unstyled components">
+
+        <li id="shipBuildsLink" data-show="#shipBuilds">
+          <a href="#" class="active">
+            <i class="fas fa-ship"></i>
+            Ship builds
+          </a>
+        </li>
+
+
+        <li id="shipCountererLink" data-show="#shipCounterer">
+          <a href="#">
+            <i class="fas fa-skull"></i>
+            Ship countererer
+          </a>
+        </li>
+        <li id="matchesLink" data-show="#matchDatabase">
+          <a href="#">
+            <i class="fas fa-book"></i>
+            Competative match database
+          </a>
+        </li>
+        <li id="aboutLink" data-show="#about">
+          <a href="#">
+            <i class="far fa-question-circle"></i>
+            About
+          </a>
+        </li>
+
+      </ul>
+
+    </nav>
+
+    <div id="page">
+      <!-- Page Content  -->
+      <div id="content" class="container-fluid">
+
+        <div id="shipBuilds" class="content-panel" style="display:block">
+
+          <div class="row row-margin">
+            <div class="col-6">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">Filter</div>
+                    </div>
+      
+      
+                    <select class="form-control" id="shipFilterSelect">
+                      <option>Show all</option>
+                      <option>Ship</option>
+                      <option>Build name</option>
+                      <option>Guns</option>
+                      <option>Strong VS</option>
+                      <option>Weak VS</option>
+                    </select>
+                    <!-- <div class="input-group-prepend">
+                          <div class="input-group-text">Filter</div>
+                        </div> -->
+                    <input type="text" class="form-control" id="shipFilterText" placeholder="Username">
+                    <div class="input-group-append">
+                        <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
+                      </div>
+                  </div>
+            </div>
+            
+          </div>
+
+          <div class="row">
+            <!-- <div class="col"></div> -->
+            <div class="col">
+                <table id="shipsTable" class="table table-bordered">
+                    <!-- <tr>
+                          <th>Ship</th>
+                          <th>Name</th>
+                          <th>Gun loadout</th>
+                          <th>Crew loadouts</th>
+                          <th>Crew positions</th>
+                          <th>Strategy</th>
+                        </tr> -->
+                  </table>
+            </div>
+              
+          </div>
+          
+        </div>
+
+
+        <div id="shipCounterer" class="content-panel" style="display:none">Counterer</div>
+        <div id="about" class="content-panel" style="display:none">About</div>
+
+      </div>
+
+
+    </div>
+  </div>
+
+
+  <script>
+    // https://www.brainbell.com/javascript/making-resizable-table-js.html
+
+    var sheet;
+    $(document).ready(function () {
+
+      // var table = document.getElementById('tableId');
+      // resizableGrid(table);
+
+      $("li").on("click", sidebarLinkClicked);
+      $("#shipFilterBtn").on("click", filterSubmitted);
+
+      sheet = new Sheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, sheetLoaded);
+    });
+
+    function filterSubmitted(){
+      let filterType = $("#shipFilterSelect").val();
+      let filterText = $("#shipFilterText").val();
+      if (filterType == "Show all"){
+        setShipTableItem(sheet.getDbRows());
+      }
+      else{
+        setShipTableItem(sheet.getDbRowsByString(filterText, filterType));
+      }
+      console.log(filterText, filterType);
+
+    }
+
+    function sheetLoaded() {
+      console.log("Loaded callback")
+      console.log(sheet.getDbCell(0, 0));
+      console.log(sheet.getDbRow(0));
+      console.log(sheet.getDbRowsByString("Stormbreaker", "Ship"));
+      setShipTableItem(sheet.getDbRows());
+    }
+
+    function setShipTableItem(rows) {
+      // let rows = sheet.getDbRowsByString("Stormbreaker", "Ship");
+      $("#shipsTable").empty();
+      let table_title = $(`
+            <tr>
+              <th>Ship</th>
+              <th>Name</th>
+              <th>Gun loadout</th>
+              <th>Crew loadouts</th>
+              <th>Crew positions</th>
+              <th>Strategy</th>
+              <th>Strong VS</th>
+              <th>Weak VS</th>
+            </tr>`);
+      $("#shipsTable").append(table_title);
+
+      for (let i = 0; i < rows.length; i++) {
+        let row = rows[i]
+        let ship_table_div = $(`
+            <tr>
+              <td rowspan="4">` + row[0] + `</td>
+              <td rowspan="4">` + row[1] + `</td>
+              <td rowspan="4">` + row[2].replace(/,/gi, "\n") + `</td>
+              <td>` + row[3] + `</td>
+              <td>` + row[7] + `</td>
+              <td rowspan="4">` + row[11] + `</td>
+              <td rowspan="4">` + row[12] + `</td>
+              <td rowspan="4">` + row[13] + `</td>
+            </tr>
+            <tr>
+              <td>` + row[4] + `</td>
+              <td>` + row[8] + `</td>
+            </tr>
+            <tr>
+              <td>` + row[5] + `</td>
+              <td>` + row[9] + `</td>
+            </tr>
+            <tr>
+              <td>` + row[6] + `</td>
+              <td>` + row[10] + `</td>
+            </tr>`)
+
+        // $("#shipsTable").append(ship_table_div);
+        $("#shipsTable").append(ship_table_div);
+      }
+
+    }
+
+
+    function sidebarLinkClicked() {
+      if ($(this).hasClass("subLink")) {
+        $("#sidebar a").not($(this).parent().parent().find("> li > a")).removeClass("active");
+        $(this).parent().parent().find("> li > a").addClass("active")
+      }
+      else {
+        $("#sidebar a").removeClass("active");
+      }
+      $(this).find("> a").addClass("active");
+
+      var div = $($(this).data("show")).show();
+      div.siblings("div").hide();
+      console.log("sidebar link clicked")
+    }
+
+
+  </script>
+
+
+</body>
+
+</html>
