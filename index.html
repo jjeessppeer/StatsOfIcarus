@@ -142,19 +142,19 @@
                 <div class="input-group-prepend">
                   <div class="input-group-text">Filter</div>
                 </div>
-                <select class="form-control" id="shipFilterModeSelect">
+                <select class="form-control" id="matchFilterModeSelect">
                   <option>Include</option>
                   <option>Exclude</option>
                 </select>
-                <select class="form-control" id="shipFilterSelect">
+                <select class="form-control" id="matchFilterSelect">
                   <option>All</option>
                   <option>Date after (DDMMYYYY)</option>
-                  <option>Data before (DDMMYYYY)</option>
+                  <option>Date before (DDMMYYYY)</option>
                   <option>Event</option>
                   <option>Ship</option>
                   <option>Pilot</option>
                 </select>
-                <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
+                <input type="text" class="form-control" id="matchFilterText" placeholder="filter substring">
                 <!-- <div class="input-group-append">
                   <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
                 </div> -->
@@ -168,16 +168,7 @@
           <div class="row">
             <!-- <div class="col"></div> -->
             <div class="col">
-              <table id="shipsTable" class="table table-bordered">
-                <tr>
-                  <th>Date</th>
-                  <th>Event</th>
-                  <th>Result</th>
-                  <th>T1 Ships</th>
-                  <th>T2 Ships</th>
-                  <th>T1 Pilots</th>
-                  <th>T2 Pilots</th>
-                </tr>
+              <table id="matchTable" class="table table-bordered">
               </table>
             </div>
 
@@ -209,6 +200,9 @@
 
     var ship_sheet;
     var ship_dataset;
+
+    var match_sheet;
+    var match_dataset;
     $(document).ready(function () {
 
       // var table = document.getElementById('tableId');
@@ -218,9 +212,32 @@
       // $("#shipFilterBtn").on("click", shipFilterSubmitted);
       $("#shipFilterSelect,#shipFilterModeSelect").on("change", shipFilterSubmitted);
       $("#shipFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", shipFilterSubmitted);
+      $("#matchFilterSelect,#matchFilterModeSelect").on("change", matchFilterSubmitted);
+      $("#matchFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", matchFilterSubmitted);
 
-      ship_sheet = new Sheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, sheetLoaded);
+      ship_sheet = new Sheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, shipSheetLoaded);
+      match_sheet = new Sheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, matchSheetLoaded);
     });
+
+    function shipSheetLoaded() {
+      console.log("Ship sheet loaded")
+      ship_dataset = ship_sheet.getDataset();
+      // console.log(ship_sheet.sheet_json);
+      // console.log(ship_dataset.getDatasetCell(0, 0));
+      // console.log(ship_dataset.getDatasetRow(0));
+      // console.log(ship_dataset.filterByString("Stormbreaker", "Ship").getDatasetRows());
+      // console.log(ship_dataset.filterByString("Lumber", "Build name").getDatasetRows());
+      setShipTableItem(ship_dataset.getDatasetRows());
+      shipFilterSubmitted();
+
+    }
+    
+    function matchSheetLoaded(){
+      console.log("Match sheet loaded")
+      match_dataset = match_sheet.getDataset();
+      // console.log(match_dataset)
+      setMatchTableItems(match_dataset.getDatasetRows());
+    }
 
     function shipFilterSubmitted() {
       let filterType = $("#shipFilterSelect").val();
@@ -235,21 +252,74 @@
       else
         dataset = ship_dataset.filterByString(filterText, filterType, filterMode, false);
       setShipTableItem(dataset.getDatasetRows());
-      console.log(filterText, filterType);
-      console.log(ship_dataset.filterByString("", filterType, false, false).getDatasetRows());
+      // console.log(filterText, filterType);
+      // console.log(ship_dataset.filterByString("", filterType, false, false).getDatasetRows());
 
     }
+    
+    function matchFilterSubmitted() {
+      console.log("Filtering matches");
+      let filterType = $("#matchFilterSelect").val();
+      let filterMode = $("#matchFilterModeSelect").val() == "Exclude";
+      let filterText = $("#matchFilterText").val();
+      // match_dataset.filterByDate(filterText, "Date of match", false, true);
+      console.log(filterType);
+      let dataset = null;
+      if (filterType == "All" && !filterMode) 
+        dataset = match_dataset;
+      else if (filterType == "All" && filterMode)
+        dataset = match_dataset.getEmptyContent();
+      else if (filterType == "Date after (DDMMYYYY)")
+        dataset = match_dataset.filterByDate(filterText, "Date of match", filterMode, true);
+      else if (filterType == "Date before (DDMMYYYY)")
+        dataset = match_dataset.filterByDate(filterText, "Date of match", filterMode, false);
+      else if(filterType == "Ship")
+        dataset = match_dataset.filterByStringMultiCol(filterText, ["T1 Ship 1", "T1 Ship 2", "T2 Ship 1", "T2 Ship 2"], filterMode, false);
+      else if(filterType == "Pilot")
+        dataset = match_dataset.filterByStringMultiCol(filterText, ["T1S1 Pilot", "T1S2 Pilot", "T2S1 Pilot", "T2S2 Pilot"], filterMode, false);
+      else
+        dataset = match_dataset.filterByString(filterText, filterType, filterMode, false);
 
-    function sheetLoaded() {
-      console.log("Loaded callback")
-      console.log(ship_sheet.sheet_json);
-      ship_dataset = ship_sheet.getDataset();
-      console.log(ship_dataset.getDatasetCell(0, 0));
-      console.log(ship_dataset.getDatasetRow(0));
-      console.log(ship_dataset.filterByString("Stormbreaker", "Ship").getDatasetRows());
-      console.log(ship_dataset.filterByString("Lumber", "Build name").getDatasetRows());
-      setShipTableItem(ship_dataset.getDatasetRows());
-      shipFilterSubmitted();
+
+      console.log(dataset.getDatasetRows());
+
+      setMatchTableItems(dataset.getDatasetRows());
+    }
+
+
+    
+
+    
+    
+
+    function setMatchTableItems(rows){
+      $("#matchTable").empty();
+      let table_title = $(`
+                <tr>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Result</th>
+                  <th>T1 Ships</th>
+                  <th>T2 Ships</th>
+                  <th>T1 Pilots</th>
+                  <th>T2 Pilots</th>
+                </tr>`);
+      $("#matchTable").append(table_title);
+
+      for (let i = 0; i < rows.length; i++) {
+        let row = rows[i]
+        let match_table_row = $(`
+                <tr>
+                  <td>` + row[1] + `</td>
+                  <td>` + row[2] + `</td>
+                  <td>` + row[3] + ":" + row[4] + `</td>
+                  <td>` + row[5] + "<br>" + row[6] + `</td>
+                  <td>` + row[7] + "<br>" + row[8] + `</td>
+                  <td>` + row[9] + "<br>" + row[10] + `</td>
+                  <td>` + row[11] + "<br>" + row[12] + `</td>
+                </tr>`);
+        $("#matchTable").append(match_table_row);
+      }
     }
 
     function setShipTableItem(rows) {
@@ -292,7 +362,7 @@
             <tr>
               <td>` + row[6] + `</td>
               <td>` + row[10] + `</td>
-            </tr>`)
+            </tr>`);
 
         // $("#shipsTable").append(ship_table_div);
         $("#shipsTable").append(ship_table_div);
@@ -313,7 +383,7 @@
 
       var div = $($(this).data("show")).show();
       div.siblings("div").hide();
-      console.log("sidebar link clicked")
+      // console.log("sidebar link clicked")
     }
 
 

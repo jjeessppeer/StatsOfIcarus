@@ -1,40 +1,90 @@
 
 
 class Dataset {
-    constructor(title_array, content_array){
+    constructor(title_array, content_array) {
         this.titles = title_array;
         this.content = content_array;
     }
 
-    filterByString(query_string, query_title, exclude, case_sensitive){
+
+    filterByStringMultiCol(query_string, dataset_titles, exclude, case_sensitive) {
         // Return matching 
-        let col_index = this.titles.indexOf(query_title);
+        let col_idxs = [];
+        for (let i = 0; i < dataset_titles.length; i++) {
+            let col_index = this.titles.indexOf(dataset_titles[i]);
+            if (col_index == -1)
+                return new Dataset(this.titles, []);
+            col_idxs.push(col_index);
+        }
+
+        let result_rows = []
+        for (let i = 0; i < this.content.length; i++) {
+            for (let j = 0; j < col_idxs.length; j++) {
+                console.log(col_idxs[j]);
+                if (case_sensitive && exclude != this.content[i][col_idxs[j]].includes(query_string)){
+                    result_rows.push(this.content[i]);
+                    break;
+                }
+                else if (!case_sensitive && exclude != this.content[i][col_idxs[j]].toLowerCase().includes(query_string.toLowerCase())){
+                    result_rows.push(this.content[i]);
+                    break;
+                }
+            }
+
+        }
+        return new Dataset(this.titles, result_rows);
+    }
+
+
+    filterByString(query_string, dataset_title, exclude, case_sensitive) {
+        // Return matching 
+        let col_index = this.titles.indexOf(dataset_title);
         if (col_index == -1)
             return new Dataset(this.titles, []);
         let result_rows = []
-        for(let i=0; i<this.content.length; i++){
+        for (let i = 0; i < this.content.length; i++) {
             if (case_sensitive && exclude != this.content[i][col_index].includes(query_string))
                 result_rows.push(this.content[i]);
-            else if(!case_sensitive && exclude != this.content[i][col_index].toLowerCase().includes(query_string.toLowerCase()))
+            else if (!case_sensitive && exclude != this.content[i][col_index].toLowerCase().includes(query_string.toLowerCase()))
                 result_rows.push(this.content[i]);
         }
         return new Dataset(this.titles, result_rows);
     }
 
-    getDatasetRows(){
+    filterByDate(query, dataset_title, exclude, after) {
+        console.log("DATE FILTER");
+        let query_date = parseDate(query);
+        let col_index = this.titles.indexOf(dataset_title);
+        if (col_index == -1)
+            return new Dataset(this.titles, []);
+        let result_rows = []
+        for (let i = 0; i < this.content.length; i++) {
+            let db_date = new Date(this.content[i][col_index]);
+            if (exclude != (after == (query_date <= db_date)))
+                result_rows.push(this.content[i]);
+
+        }
+        return new Dataset(this.titles, result_rows);
+    }
+
+    getDatasetRows() {
         return this.content;
     }
 
-    getDatasetRow(x){
+    getDatasetRow(x) {
         return this.content[x];
     }
 
-    getDatasetCell(x, y){
+    getDatasetCell(x, y) {
         return this.content[x][y];
     }
 
-    getEmptyContent(){
+    getEmptyContent() {
         return new Dataset(this.titles, []);
+    }
+
+    mergeDataset(otherDataset) {
+        return new Dataset(this.titles, this.content.concat(otherDataset.content));
     }
 
 }
@@ -61,20 +111,20 @@ class Sheet {
             });
     }
 
-    getDataset(){
+    getDataset() {
         return this.dataset;
     }
-    
-    buildDatabaseArray(sheet_json){
+
+    buildDatabaseArray(sheet_json) {
         let entries = sheet_json.feed.entry;
 
         let db_arr = [];
-        
+
         let last_y = -1;
-        for (let i=0; i < entries.length; i++){
+        for (let i = 0; i < entries.length; i++) {
             let coord_text = entries[i].title["$t"];
             let [x, y] = textToXYCoords(coord_text);
-            if (y != last_y){
+            if (y != last_y) {
                 // Create new row
                 last_y = y;
                 db_arr.push([]);
