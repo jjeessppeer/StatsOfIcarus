@@ -103,16 +103,16 @@
                 </select>
                 <select class="form-control" id="shipFilterSelect">
                   <option>All</option>
-                  <option>Ship</option>
+                  <option selected>Ship</option>
                   <option>Build name</option>
                   <option>Guns</option>
                   <option>Strong VS</option>
                   <option>Weak VS</option>
                 </select>
                 <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
-                <div class="input-group-append">
+                <!-- <div class="input-group-append">
                   <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
-                </div>
+                </div> -->
               </div>
             </div>
 
@@ -142,8 +142,12 @@
                 <div class="input-group-prepend">
                   <div class="input-group-text">Filter</div>
                 </div>
-                <select class="form-control" id="matchFilterSelect">
-                  <option>Show all</option>
+                <select class="form-control" id="shipFilterModeSelect">
+                  <option>Include</option>
+                  <option>Exclude</option>
+                </select>
+                <select class="form-control" id="shipFilterSelect">
+                  <option>All</option>
                   <option>Date after (DDMMYYYY)</option>
                   <option>Data before (DDMMYYYY)</option>
                   <option>Event</option>
@@ -151,11 +155,12 @@
                   <option>Pilot</option>
                 </select>
                 <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
-                <div class="input-group-append">
-                  <button id="matchFilterBtn" class="btn btn-primary">Filter</button>
-                </div>
+                <!-- <div class="input-group-append">
+                  <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
+                </div> -->
               </div>
             </div>
+
           </div>
 
           <button id="matchAddFilterBtn" class="btn btn-primary">Add another filter</button>
@@ -168,10 +173,8 @@
                   <th>Date</th>
                   <th>Event</th>
                   <th>Result</th>
-                  <th>T1S1</th>
-                  <th>T1S2</th>
-                  <th>T2S1</th>
-                  <th>T2S2</th>
+                  <th>T1 Ships</th>
+                  <th>T2 Ships</th>
                   <th>T1 Pilots</th>
                   <th>T2 Pilots</th>
                 </tr>
@@ -212,7 +215,7 @@
       // resizableGrid(table);
 
       $("li").on("click", sidebarLinkClicked);
-      $("#shipFilterBtn").on("click", shipFilterSubmitted);
+      // $("#shipFilterBtn").on("click", shipFilterSubmitted);
       $("#shipFilterSelect,#shipFilterModeSelect").on("change", shipFilterSubmitted);
       $("#shipFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", shipFilterSubmitted);
 
