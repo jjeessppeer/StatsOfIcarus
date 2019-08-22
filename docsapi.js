@@ -52,8 +52,10 @@ class Dataset {
     }
 
     filterByDate(query, dataset_title, exclude, after) {
-        console.log("DATE FILTER");
         let query_date = parseDate(query);
+        if (!query_date) {
+            return new Dataset(this.titles, this.content);
+        }
         let col_index = this.titles.indexOf(dataset_title);
         if (col_index == -1)
             return new Dataset(this.titles, []);
