@@ -73,6 +73,13 @@
             Submit match to history
           </a>
         </li>
+
+        <li id="gunnerCalculatorLink" data-show="#gunnerCalculator">
+          <a href="#">
+            <i class="fas fa-bomb"></i>
+            Gunnery calculator
+          </a>
+        </li>
         <li id="aboutLink" data-show="#about">
           <a href="#">
             <i class="far fa-question-circle"></i>
@@ -83,173 +90,289 @@
       </ul>
 
     </nav>
+    <!-- Page Content  -->
+    <div id="content" class="container-fluid">
 
-    <div id="page">
-      <!-- Page Content  -->
-      <div id="content" class="container-fluid">
+      <!-- Ship database -->
+      <div id="shipBuilds" class="content-panel" style="display:block">
 
-        <!-- Ship database -->
-        <div id="shipBuilds" class="content-panel" style="display:block">
-
-          <div class="row row-margin">
-            <div class="col-sm-6">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Filter</div>
-                </div>
-                <select class="form-control" id="shipFilterModeSelect">
-                  <option>Include</option>
-                  <option>Exclude</option>
-                </select>
-                <select class="form-control" id="shipFilterSelect">
-                  <option>All</option>
-                  <option selected>Ship</option>
-                  <option>Build name</option>
-                  <option>Guns</option>
-                  <option>Strong VS</option>
-                  <option>Weak VS</option>
-                </select>
-                <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
-                <!-- <div class="input-group-append">
+        <div class="row row-margin">
+          <div class="col-sm-6">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Filter</div>
+              </div>
+              <select class="form-control" id="shipFilterModeSelect">
+                <option>Include</option>
+                <option>Exclude</option>
+              </select>
+              <select class="form-control" id="shipFilterSelect">
+                <option>All</option>
+                <option selected>Ship</option>
+                <option>Build name</option>
+                <option>Guns</option>
+                <option>Strong VS</option>
+                <option>Weak VS</option>
+              </select>
+              <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
+              <!-- <div class="input-group-append">
                   <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
                 </div> -->
-              </div>
             </div>
-
-          </div>
-
-          <div class="row">
-            <!-- <div class="col"></div> -->
-            <div class="col">
-              <table id="shipsTable" class="table table-bordered">
-              </table>
-            </div>
-
           </div>
 
         </div>
 
-        <!-- Ship counterer -->
-        <div id="shipCounterer" class="content-panel" style="display:none">Counterer (Future, if i can collect a decent
-          history of scs matches)
-        </div>
-
-        <!-- Match Database -->
-        <div id="matchDatabase" class="content-panel" style="display:none">
-          <div class="row row-margin">
-            <div class="col-sm-6">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Filter</div>
-                </div>
-                <select class="form-control" id="matchFilterModeSelect">
-                  <option>Include</option>
-                  <option>Exclude</option>
-                </select>
-                <select class="form-control" id="matchFilterSelect">
-                  <option>All</option>
-                  <option>Date after (DDMMYYYY)</option>
-                  <option>Date before (DDMMYYYY)</option>
-                  <option>Event</option>
-                  <option>Ship</option>
-                  <option>Pilot</option>
-                </select>
-                <input type="text" class="form-control" id="matchFilterText" placeholder="filter substring">
-                <!-- <div class="input-group-append">
-                  <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
-                </div> -->
-              </div>
-            </div>
-
+        <div class="row">
+          <!-- <div class="col"></div> -->
+          <div class="col">
+            <table id="shipsTable" class="table table-bordered">
+            </table>
           </div>
 
-          <button id="matchAddFilterBtn" class="btn btn-primary">Add another filter</button>
-
-          <div class="row">
-            <!-- <div class="col"></div> -->
-            <div class="col">
-              <table id="matchTable" class="table table-bordered">
-              </table>
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- Match Submissions -->
-        <div id="matchSubmission" class="content-panel" style="display:none">
-          <p>Here you can submit a match to the database.</p>
-          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8Fyrz4MRAJ8MoDke7it8zB_ihARWv12TBQMtIKstVY3cGXw/viewform?embedded=true"
-            width="640" height="2317" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-        </div>
-        <div id="about" class="content-panel" style="display:none">
-          <h3>About</h3>
-          <p>
-            Database can be found here: <br><a href="https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing">https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing</a>.
-          </p>
-          <p>
-            Contact: <br> jjeessppeer+GoI@gmail.com
-          </p>
         </div>
 
       </div>
 
+      <!-- Ship counterer -->
+      <div id="shipCounterer" class="content-panel" style="display:none">Counterer (Future, if i can collect a decent
+        history of scs matches)
+      </div>
+
+      <!-- Match Database -->
+      <div id="matchDatabase" class="content-panel" style="display:none">
+        <div class="row row-margin">
+          <div class="col-sm-6">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Filter</div>
+              </div>
+              <select class="form-control" id="matchFilterModeSelect">
+                <option>Include</option>
+                <option>Exclude</option>
+              </select>
+              <select class="form-control" id="matchFilterSelect">
+                <option>All</option>
+                <option>Date after (DDMMYYYY)</option>
+                <option>Date before (DDMMYYYY)</option>
+                <option>Event</option>
+                <option>Ship</option>
+                <option>Pilot</option>
+              </select>
+              <input type="text" class="form-control" id="matchFilterText" placeholder="filter substring">
+              <!-- <div class="input-group-append">
+                  <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
+                </div> -->
+            </div>
+          </div>
+        </div>
+
+        <button id="matchAddFilterBtn" class="btn btn-primary">Add another filter</button>
+        <div class="row">
+          <!-- <div class="col"></div> -->
+          <div class="col">
+            <table id="matchTable" class="table table-bordered">
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Submissions -->
+      <div id="matchSubmission" class="content-panel" style="display:none">
+        <p>Here you can submit a match to the database.</p>
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8Fyrz4MRAJ8MoDke7it8zB_ihARWv12TBQMtIKstVY3cGXw/viewform?embedded=true"
+          width="640" height="2317" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+      </div>
+
+      <!-- Gunnery calculator -->
+      <div id="gunnerCalculator" class="content-panel" style="display:none">
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Gun</div>
+              </div>
+              <select class="form-control" id="gunSelect">
+                <option>Artemis</option>
+                <option>Light Flak</option>
+                <option>Gatling</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Ammo</div>
+              </div>
+              <select class="form-control" id="ammoSelect">
+                <option>Normal</option>
+                <option>Lochnagar</option>
+                <option>Incendiary</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <table id="gunTable" class="table table-bordered">
+          <tr>
+            <th>Range</th>
+            <th>Arming distance</th>
+            <th>Seconds / clip</th>
+            <th>Rate of fire</th>
+            <th>AOE</th>
+            <th></th>
+          </tr>
+        </table>
+        <table id="damageTotalTable" class="table table-bordered">
+          <tr>
+            <th>Damage (primary + secondary)</th>
+            <td>Armor</td>
+            <td>Hull</th>
+            <td>Balloon</td>
+            <td>Engine/Gun</td>
+          </tr>
+          <tr>
+            <th>Damage / projectile</th>
+            <td>DTA</td>
+            <td>DTH</td>
+            <td>DTB</td>
+            <td>DTC</td>
+          </tr>
+          <tr>
+            <th>Damage / second (no reload)</th>
+            <td>DTA</td>
+            <td>DTH</td>
+            <td>DTB</td>
+            <td>DTC</td>
+          </tr>
+          <tr>
+            <th>Damage / second (reload)</th>
+            <td>DTA</td>
+            <td>DTH</td>
+            <td>DTB</td>
+            <td>DTC</td>
+          </tr>
+          <tr>
+            <th>Damage / clip</th>
+            <td>DTA</td>
+            <td>DTH</td>
+            <td>DTB</td>
+            <td>DTC</td>
+          </tr>
+          <tr>
+            <th>Fire / clip</th>
+            <td>DTA</td>
+            <td>DTH</td>
+            <td>DTB</td>
+            <td>DTC</td>
+          </tr>
+        </table>
+        <!-- <table id="damageSecondaryTable" class="table table-bordered">
+          <tr>
+            <th>Damage (secondary only)</th>
+            <td>Armor</td>
+            <td>Hull</th>
+            <td>Balloon</td>
+            <td>Engine/Gun</td>
+          </tr>
+          <tr>
+            <th>Damage / projectile</th>
+          </tr>
+          <tr>
+            <th>Damage / second (no reload)</th>
+          </tr>
+          <tr>
+            <th>Damage / second (reload)</th>
+          </tr>
+          <tr>
+            <th>Damage / clip</th>
+          </tr>
+          <tr>
+            <th>Fire / clip</th>
+          </tr>
+        </table> -->
+      </div>
+
+      <!-- About -->
+      <div id="about" class="content-panel" style="display:none">
+        <h3>About</h3>
+        <p>
+          Database can be found here: <br><a href="https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing">https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing</a>.
+        </p>
+        <p>
+          Contact: <br> jjeessppeer+GoI@gmail.com
+        </p>
+      </div>
 
     </div>
+
+
+  </div>
   </div>
 
 
   <script>
     // https://www.brainbell.com/javascript/making-resizable-table-js.html
 
-    var ship_sheet;
-    var ship_dataset;
-
     var match_sheet;
     var match_dataset;
+    
+    var gun_dataset = null;
+    var ammo_dataset = null;
+
     $(document).ready(function () {
 
-      // var table = document.getElementById('tableId');
-      // resizableGrid(table);
-
       $("li").on("click", sidebarLinkClicked);
-      // $("#shipFilterBtn").on("click", shipFilterSubmitted);
       $("#shipFilterSelect,#shipFilterModeSelect").on("change", shipFilterSubmitted);
       $("#shipFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", shipFilterSubmitted);
       $("#matchFilterSelect,#matchFilterModeSelect").on("change", matchFilterSubmitted);
       $("#matchFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", matchFilterSubmitted);
+      $("#gunSelect,#ammoSelect").on("change", gunnerySelectionSubmitted);
 
-      ship_sheet = new Sheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, shipSheetLoaded);
-      match_sheet = new Sheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, matchSheetLoaded);
+
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, shipDatasetLoaded);
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, matchDatasetLoaded);
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 4, gunDatasetLoaded);
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 5, ammoDatasetLoaded);
     });
 
-    function shipSheetLoaded() {
+    function shipDatasetLoaded(dataset) {
       console.log("Ship sheet loaded")
-      ship_dataset = ship_sheet.getDataset();
-      // console.log(ship_sheet.sheet_json);
-      // console.log(ship_dataset.getDatasetCell(0, 0));
-      // console.log(ship_dataset.getDatasetRow(0));
-      // console.log(ship_dataset.filterByString("Stormbreaker", "Ship").getDatasetRows());
-      // console.log(ship_dataset.filterByString("Lumber", "Build name").getDatasetRows());
+      ship_dataset = dataset;
       setShipTableItem(ship_dataset.getDatasetRows());
       shipFilterSubmitted();
 
     }
-    
-    function matchSheetLoaded(){
+
+    function matchDatasetLoaded(dataset) {
       console.log("Match sheet loaded")
-      match_dataset = match_sheet.getDataset();
-      // console.log(match_dataset)
+      match_dataset = dataset;
       setMatchTableItems(match_dataset.getDatasetRows());
+      matchFilterSubmitted();
+    }
+
+    function gunDatasetLoaded(dataset) {
+      console.log("Gun database loaded");
+      gun_dataset = dataset;
+      // if (ammo_dataset){
+      // }
+    }
+
+    function ammoDatasetLoaded(dataset){
+      console.log("Ammo database loaded");
+      ammo_dataset = dataset;
+      // if (gun_dataset){
+      // }
     }
 
     function shipFilterSubmitted() {
       let filterType = $("#shipFilterSelect").val();
       let filterMode = $("#shipFilterModeSelect").val() == "Exclude";
       let filterText = $("#shipFilterText").val();
-      
+
       let dataset = null;
-      if (filterType == "All" && !filterMode) 
+      if (filterType == "All" && !filterMode)
         dataset = ship_dataset;
       else if (filterType == "All" && filterMode)
         dataset = ship_dataset.getEmptyContent();
@@ -260,16 +383,14 @@
       // console.log(ship_dataset.filterByString("", filterType, false, false).getDatasetRows());
 
     }
-    
+
     function matchFilterSubmitted() {
       console.log("Filtering matches");
       let filterType = $("#matchFilterSelect").val();
       let filterMode = $("#matchFilterModeSelect").val() == "Exclude";
       let filterText = $("#matchFilterText").val();
-      // match_dataset.filterByDate(filterText, "Date of match", false, true);
-      console.log(filterType);
       let dataset = null;
-      if (filterType == "All" && !filterMode) 
+      if (filterType == "All" && !filterMode)
         dataset = match_dataset;
       else if (filterType == "All" && filterMode)
         dataset = match_dataset.getEmptyContent();
@@ -277,20 +398,26 @@
         dataset = match_dataset.filterByDate(filterText, "Date of match", filterMode, true);
       else if (filterType == "Date before (DDMMYYYY)")
         dataset = match_dataset.filterByDate(filterText, "Date of match", filterMode, false);
-      else if(filterType == "Ship")
+      else if (filterType == "Ship")
         dataset = match_dataset.filterByStringMultiCol(filterText, ["T1 Ship 1", "T1 Ship 2", "T2 Ship 1", "T2 Ship 2"], filterMode, false);
-      else if(filterType == "Pilot")
+      else if (filterType == "Pilot")
         dataset = match_dataset.filterByStringMultiCol(filterText, ["T1S1 Pilot", "T1S2 Pilot", "T2S1 Pilot", "T2S2 Pilot"], filterMode, false);
       else
         dataset = match_dataset.filterByString(filterText, filterType, filterMode, false);
 
-
-      console.log(dataset.getDatasetRows());
-
       setMatchTableItems(dataset.getDatasetRows());
     }
 
-    function setMatchTableItems(rows){
+    function gunnerySelectionSubmitted(){
+      console.log("Changing gun selection");
+      let gunAlias = $("#gunSelect").val();
+      let ammoAlias = $("#ammoSelect").val();
+      setGunneryItems(
+        gun_dataset.filterByString(gunAlias, "Alias").getDatasetRows(), 
+        ammo_dataset.filterByString(ammoAlias, "Alias").getDatasetRows());
+    }
+
+    function setMatchTableItems(rows) {
       $("#matchTable").empty();
       let table_title = $(`
                 <tr>
@@ -368,6 +495,12 @@
 
     }
 
+    function setGunneryItems(gunRow, ammoRow){
+      console.log(gunRow);
+      console.log(ammoRow);
+
+    }
+
 
     function sidebarLinkClicked() {
       if ($(this).hasClass("subLink")) {
@@ -381,7 +514,6 @@
 
       var div = $($(this).data("show")).show();
       div.siblings("div").hide();
-      // console.log("sidebar link clicked")
     }
 
 

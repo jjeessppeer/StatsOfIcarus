@@ -212,8 +212,13 @@ a.article:hover {
     width: 100%;
     padding: 20px;
     min-height: 100vh;
+    /* min-width: 1000px; */
     /* transition: all 0.3s; */
 }
+
+/* #content-panel {
+    min-width: 1000px;
+} */
 
 /* ---------------------------------------------------
     MEDIAQUERIES
