@@ -1,6 +1,11 @@
 
 
 
+/* th fixed size */
+/* table{
+    max-width: 270px;
+} */
+
 .row.row-margin{
     margin-bottom: 5px;
 }
