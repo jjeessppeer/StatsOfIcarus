@@ -236,6 +236,10 @@
             </div>
           </div>
         </div>
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="buffedCheckbox">
+          <label class="form-check-label" for="buffedCheckbox">Buffed</label>
+        </div>
         
         <table id="gunTable" class="table table-bordered fixed" style="width:600px">
         </table>
@@ -280,7 +284,7 @@
       $("#shipFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", shipFilterSubmitted);
       $("#matchFilterSelect,#matchFilterModeSelect").on("change", matchFilterSubmitted);
       $("#matchFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", matchFilterSubmitted);
-      $("#gunSelect,#ammoSelect").on("change", gunnerySelectionSubmitted);
+      $("#gunSelect,#ammoSelect,#buffedCheckbox").on("change", gunnerySelectionSubmitted);
 
       // Load all databases
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, function(dataset){
@@ -434,6 +438,7 @@
 
     function setGunneryItems(gunRow, ammoRow){
       
+      let buffed = $("#buffedCheckbox").is(':checked');
 
       // Calculate stuff
       let clip_size = Math.max(1, Math.round(gunRow[8] * ammoRow[4]));
@@ -448,8 +453,8 @@
       let damage_type_primary = gunRow[2];
       let damage_type_secondary = gunRow[4];
 
-      let damage_hit_primary = gunRow[3] * ammoRow[7];
-      let damage_hit_secondary = gunRow[5] * ammoRow[7] * (aoe > 0 ? ammoRow[6] : 1);
+      let damage_hit_primary = gunRow[3] * ammoRow[7] * (buffed ? 1.2 : 1);
+      let damage_hit_secondary = gunRow[5] * ammoRow[7] * (aoe > 0 ? ammoRow[6] : 1) * (buffed ? 1.2 : 1);
 
       let damage_clip_primary = damage_hit_primary * clip_size;
       let damage_clip_secondary = damage_hit_secondary * clip_size;
@@ -531,10 +536,10 @@
           </tr>
           <tr>
             <th>Fire / clip (avg.)</th>
-            <td>` + (fire_clip_armor_primary + fire_clip_armor_secondary) + `</td>
+            <td>` + (fire_clip_armor_primary + fire_clip_armor_secondary).toFixed(1) + `</td>
             <td>` + "-" + `</td>
-            <td>` + (fire_clip_balloon_primary + fire_clip_balloon_secondary) + `</td>
-            <td>` + (fire_clip_component_primary + fire_clip_component_secondary) + `</td>
+            <td>` + (fire_clip_balloon_primary + fire_clip_balloon_secondary).toFixed(1) + `</td>
+            <td>` + (fire_clip_component_primary + fire_clip_component_secondary).toFixed(1) + `</td>
           </tr>
       `);
 
