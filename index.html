@@ -210,18 +210,14 @@
               <select class="form-control" id="ammoSelect">
                 <option>Normal</option>
                 <option>Lochnagar</option>
+                <option>Heavy</option>
                 <option>Incendiary</option>
               </select>
             </div>
           </div>
         </div>
         <table id="gunTable" class="table table-bordered">
-          <tr>
-            <th>Range (m)</th>
-            <th>Arming distance (m)</th>
-            <th>Seconds / clip (s)</th>
-            <th>AOE (m)</th>
-          </tr>
+          
         </table>
         <table id="damageTotalTable" class="table table-bordered">
           <tr>
@@ -412,8 +408,8 @@
       let gunAlias = $("#gunSelect").val();
       let ammoAlias = $("#ammoSelect").val();
       setGunneryItems(
-        gun_dataset.filterByString(gunAlias, "Alias").getDatasetRows(), 
-        ammo_dataset.filterByString(ammoAlias, "Alias").getDatasetRows());
+        gun_dataset.filterByString(gunAlias, "Alias").getDatasetRow(0), 
+        ammo_dataset.filterByString(ammoAlias, "Alias").getDatasetRow(0));
     }
 
     function setMatchTableItems(rows) {
@@ -497,7 +493,53 @@
     function setGunneryItems(gunRow, ammoRow){
       console.log(gunRow);
       console.log(ammoRow);
+      console.log(JSON.stringify(gunRow));
+      console.log(JSON.stringify(ammoRow));
+      
+      // Calculate stuff
+      let clip_size = Math.max(1, Math.round(gunRow[8] * ammoRow[4]));
+      let rate_of_fire = gunRow[6] * ammoRow[9]
 
+      let range = gunRow[10] * ammoRow[10];
+      let arming_distance = gunRow[15] * gunRow[9] * ammoRow[5] * ammoRow[10];
+      let seconds_clip = clip_size / rate_of_fire; 
+      let aoe = gunRow[13] * ammoRow[5];
+      
+
+      let damage_type_pri = gunRow[2];
+      let damage_type_sec = gunRow[4];
+      let damage_clip_pri = gunRow[3] * clip_size * ammoRow[7];
+      let damage_clip_sec = gunRow[5] * clip_size * ammoRow[7]
+      
+
+      // console.log(clip_size);
+      // console.log(rate_of_fire);
+      console.log(clip_size);
+      console.log(damage_clip_pri);
+      console.log(damage_clip_sec);
+      
+
+      // Fill out UI
+
+      let gunTableTitles = $(`
+          <tr>
+            <th>Range (m)</th>
+            <th>Arming distance (m)</th>
+            <th>Seconds / clip (s)</th>
+            <th>AOE (m)</th>
+          </tr>`);
+      let gunTableContents = $(`
+          <tr>
+            <td>` + range + `</td>
+            <td>` + arming_distance + `</td>
+            <td>` + seconds_clip + `</td>
+            <td>` + aoe + `</td>
+          </tr>
+        `);
+      $("#gunTable").empty();
+      $("#gunTable").append(gunTableTitles);
+      $("#gunTable").append(gunTableContents);
+      
     }
 
 
