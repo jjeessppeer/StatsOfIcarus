@@ -3,6 +3,7 @@
 
 <head>
   <title>Best Boats</title>
+  <link rel="shortcut icon" href="blimp-icon.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- <link rel="stylesheet" href="tabs.css"> -->
@@ -454,7 +455,8 @@
       let damage_type_secondary = gunRow[4];
 
       let damage_hit_primary = gunRow[3] * ammoRow[7] * (buffed ? 1.2 : 1);
-      let damage_hit_secondary = gunRow[5] * ammoRow[7] * (aoe > 0 ? ammoRow[6] : 1) * (buffed ? 1.2 : 1);
+      let damage_hit_secondary = gunRow[5] * ammoRow[7] * ammoRow[6] * (buffed ? 1.2 : 1);
+      // let damage_hit_secondary = gunRow[5] * ammoRow[7] * (aoe > 0 ? ammoRow[6] : 1) * (buffed ? 1.2 : 1);
 
       let damage_clip_primary = damage_hit_primary * clip_size;
       let damage_clip_secondary = damage_hit_secondary * clip_size;
