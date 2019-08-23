@@ -28,3 +28,7 @@ function parseDate(text){
     if(text)
     return false;
 }
+
+function getDamageMod(damageType, target){
+    return damage_dataset.getCellByString(damageType, "Name", target)
+  }
