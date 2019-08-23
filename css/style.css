@@ -16,10 +16,20 @@ table.fixed td, table.fixed th{
     width: 110px;
 }
 
-table.fixed > tr > th:first-child{
+table.fixed.fist-wide > tr > th:first-child{
     overflow:hidden;
     width: 250px;
 }
+
+/* table.fixed.uniform-width td, table.fixed.uniform-width th{
+    overflow:hidden;
+    width: 110px;
+}
+
+table.fixed.uniform-width td, table.fixed.uniform-width th{
+    overflow:hidden;
+    width: 50px;
+} */
 
 
 
