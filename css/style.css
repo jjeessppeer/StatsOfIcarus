@@ -5,6 +5,26 @@
 /* table{
     max-width: 270px;
 } */
+table.fixed { 
+    table-layout:fixed; 
+    width: 0px;
+    /* max-width: 600px; */
+}
+
+table.fixed td, table.fixed th{
+    overflow:hidden;
+    width: 110px;
+}
+
+table.fixed > tr > th:first-child{
+    overflow:hidden;
+    width: 250px;
+}
+
+
+
+/* table.fixed td { overflow: hidden; } */
+/* table.fixed th { overflow: hidden; } */
 
 .row.row-margin{
     margin-bottom: 5px;

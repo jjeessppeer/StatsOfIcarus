@@ -237,10 +237,10 @@
           </div>
         </div>
         
-        <table id="gunTable" class="table table-bordered">
+        <table id="gunTable" class="table table-bordered fixed" style="width:600px">
         </table>
 
-        <table id="damageTotalTable" class="table table-bordered" style="width:600px">
+        <table id="damageTotalTable" class="fixed table table-bordered">
         </table>
         
       </div>
@@ -449,7 +449,7 @@
       let damage_type_secondary = gunRow[4];
 
       let damage_hit_primary = gunRow[3] * ammoRow[7];
-      let damage_hit_secondary = gunRow[5] * ammoRow[7] * ammoRow[6];
+      let damage_hit_secondary = gunRow[5] * ammoRow[7] * (aoe > 0 ? ammoRow[6] : 1);
 
       let damage_clip_primary = damage_hit_primary * clip_size;
       let damage_clip_secondary = damage_hit_secondary * clip_size;
@@ -484,10 +484,10 @@
           </tr>`);
       let gunTableContents = $(`
           <tr>
-            <td>` + range + `</td>
-            <td>` + arming_distance + `</td>
-            <td>` + seconds_clip + `</td>
-            <td>` + aoe + `</td>
+            <td>` + range.toFixed(0) + `</td>
+            <td>` + arming_distance.toFixed(0) + `</td>
+            <td>` + seconds_clip.toFixed(1) + `</td>
+            <td>` + aoe.toFixed(2) + `</td>
           </tr>`);
       $("#gunTable").empty();
       $("#gunTable").append(gunTableTitles);
@@ -499,7 +499,7 @@
             <th class="medium">Armor</th>
             <th class="medium">Hull</th>
             <th class="medium">Balloon</th>
-            <th class="medium">Engine/Gun</th>
+            <th class="medium">Component</th>
           </tr>
           <tr>
             <th>Damage / shot</th>
