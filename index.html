@@ -55,12 +55,12 @@
         </li> -->
 
 
-        <!-- <li id="shipCountererLink" data-show="#shipCounterer">
+        <li id="matchAnalysisLink" data-show="#matchAnalysis">
           <a href="#">
-            <i class="fas fa-skull"></i>
-            Ship countererer
+            <i class="fas fa-glasses"></i>
+            Match history analysis
           </a>
-        </li> -->
+        </li>
         <li id="matchesLink" data-show="#matchDatabase">
           <a href="#">
             <i class="fas fa-book"></i>
@@ -135,8 +135,7 @@
       </div>
 
       <!-- Ship counterer -->
-      <div id="shipCounterer" class="content-panel" style="display:none">Counterer (Future, if i can collect a decent
-        history of scs matches)
+      <div id="matchAnalysis" class="content-panel" style="display:none">Statistical analysis on match history
       </div>
 
       <!-- Match Database -->
@@ -197,6 +196,10 @@
                 <option>Artemis</option>
                 <option>Light Flak</option>
                 <option>Gatling</option>
+                <option>Flamethrower</option>
+                <option>Light Carronade</option>
+                <option>Harpoon</option>
+                <option>Flare</option>
               </select>
             </div>
           </div>
@@ -440,11 +443,11 @@
       
       let fire_clip_base = parseFloat(gunRow[12] * ammoRow[11] * clip_size)
       let fire_clip_armor_primary = fire_clip_base + ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
-      let fire_clip_armor_secondary = fire_clip_base + ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
+      let fire_clip_armor_secondary = ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
       let fire_clip_balloon_primary = fire_clip_base + ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Balloon");
-      let fire_clip_balloon_secondary = fire_clip_base + ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
+      let fire_clip_balloon_secondary = ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
       let fire_clip_component_primary = fire_clip_base + ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Components");
-      let fire_clip_component_secondary = fire_clip_base + ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
+      let fire_clip_component_secondary = ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
 
 
       console.log(fire_clip_base);
