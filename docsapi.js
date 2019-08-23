@@ -66,6 +66,14 @@ class Dataset {
         return new Dataset(this.titles, result_rows);
     }
 
+    getCellByString(query_string, search_title, return_title){
+        // Return first cell matching query and title, if multiple matches exist returns top one.
+        let col_index = this.titles.indexOf(return_title);
+        if (col_index == -1)
+            return false;
+        return this.filterByString(query_string, search_title).getDatasetRow(0)[col_index];
+    }
+
     getDatasetRows() {
         return this.content;
     }
