@@ -491,6 +491,7 @@
             <th>Range (m)</th>
             <th>Arming distance (m)</th>
             <th>Seconds / clip (s)</th>
+            <th>Clip size</th>
             <th>AOE (m)</th>
           </tr>`);
       let gunTableContents = $(`
@@ -498,6 +499,7 @@
             <td>` + range.toFixed(0) + `</td>
             <td>` + arming_distance.toFixed(0) + `</td>
             <td>` + seconds_clip.toFixed(1) + `</td>
+            <td>` + clip_size + `</td>
             <td>` + aoe.toFixed(2) + `</td>
           </tr>`);
       $("#gunTable").empty();
@@ -514,31 +516,31 @@
           </tr>
           <tr>
             <th>Damage / shot</th>
-            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Armor") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(1) + `</td>
-            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Hull") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(1) + `</td>
-            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Balloon") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(1) + `</td>
-            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Components") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(1) + `</td>
+            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Armor") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
+            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Hull") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
+            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Balloon") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
+            <td>` + (damage_hit_primary*getDamageMod(damage_type_primary, "Components") + damage_hit_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
           </tr>
           <tr>
             <th>Damage / second (one clip)</th>
-            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Armor") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(1) + `</td>
-            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Hull") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(1) + `</td>
-            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Balloon") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(1) + `</td>
-            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Components") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(1) + `</td>
+            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Armor") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
+            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Hull") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
+            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Balloon") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
+            <td>` + (damage_second_1_primary*getDamageMod(damage_type_primary, "Components") + damage_second_1_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
           </tr>
           <tr>
             <th>Damage / second (with reloading)</th>
-            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Armor") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(1) + `</td>
-            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Hull") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(1) + `</td>
-            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Balloon") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(1) + `</td>
-            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Components") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(1) + `</td>
+            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Armor") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
+            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Hull") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
+            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Balloon") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
+            <td>` + (damage_seconds_2_primary*getDamageMod(damage_type_primary, "Components") + damage_seconds_2_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
           </tr>
           <tr>
             <th>Damage / clip</th>
-            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Armor") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(1) + `</td>
-            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Hull") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(1) + `</td>
-            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Balloon") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(1) + `</td>
-            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Components") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(1) + `</td>
+            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Armor") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
+            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Hull") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
+            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Balloon") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
+            <td>` + (damage_clip_primary*getDamageMod(damage_type_primary, "Components") + damage_clip_secondary*getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
           </tr>
           <tr>
             <th>Fire / clip (avg.)</th>
