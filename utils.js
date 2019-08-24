@@ -48,10 +48,10 @@ function getProjectileArc(speed, angle, start_height, drop, start, end, steps){
     return points;
 }
 
-function searchAngle(speed, start_height, drop, target_point){
+function searchAngle(speed, drop, start_height, target_point){
     let y;
     let angle = - Math.PI / 2;
-    let angle_step = Math.PI / 100;
+    let angle_step = Math.PI / 50;
     let max_loops = Math.PI / angle_step;
     let loops = 0;
 
@@ -71,11 +71,11 @@ function searchAngle(speed, start_height, drop, target_point){
         
     }while(y < target_point[1]);
     angle -= angle_step;
-    console.log(angle)
-    console.log(angle-angle_step)
+    // console.log(angle)
+    // console.log(angle-angle_step)
 
-    console.log("Angle found: ", angle, " : ", precise(y, 3), " : ", precise(target_point[1], 3));
-    console.log("Angle found: ", (angle-angle_step), " : ", precise(y, 3), " : ", precise(target_point[1], 3));
+    // console.log("Angle found: ", angle, " : ", precise(y, 3), " : ", precise(target_point[1], 3));
+    // console.log("Angle found: ", (angle-angle_step), " : ", precise(y, 3), " : ", precise(target_point[1], 3));
     // Refine for 10 iterations
     let a1 = angle;
     let a2 = angle - angle_step;
@@ -92,16 +92,14 @@ function searchAngle(speed, start_height, drop, target_point){
         let d2 = projectilePos(t2, speed, a2, drop, start_height)[1] - target_point[1];
         let d3 = projectilePos(t3, speed, a3, drop, start_height)[1] - target_point[1];
         
-        // console.log("a3: ", a3);
-        // console.log
-        console.log("\nHalving iteration");
-        // console.log("a1", a1);
-        // console.log("a2", a2);
-        // console.log("a3", a3);
-        console.log("Diff")
-        console.log(d1);
-        console.log(d2);
-        console.log(d3);
+        // console.log("\nHalving iteration");
+        // // console.log("a1", a1);
+        // // console.log("a2", a2);
+        // // console.log("a3", a3);
+        // console.log("Diff")
+        // console.log(d1);
+        // console.log(d2);
+        // console.log(d3);
 
 
         if (d3 > 0 && d3 < d1) a1 = a3;
@@ -115,7 +113,7 @@ function searchAngle(speed, start_height, drop, target_point){
     let t = tAtHit(speed, a1, target_point[0]);
     y = projectilePos(t, speed, a1, drop, start_height)[1];
 
-    console.log("Angle refined: ", a1, " : ", y, " : ", precise(target_point[1], 3));
+    // console.log("Angle refined: ", a1, " : ", y, " : ", precise(target_point[1], 3));
 
 
 

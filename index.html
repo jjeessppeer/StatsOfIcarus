@@ -413,17 +413,42 @@
       // drawCanvas(angle)})
 
       $("#targetUp").on("click", function(){
-        target_point[1] += 10;
+        target_point[1] += 100;
         drawCanvas(angle, target_point)});
       $("#targetDown").on("click", function(){
-        target_point[1] -= 10;
+        target_point[1] -= 100;
         drawCanvas(angle, target_point)});
       $("#targetRight").on("click", function(){
-        target_point[0] += 10;
+        target_point[0] += 100;
         drawCanvas(angle, target_point)});
       $("#targetLeft").on("click", function(){
-        target_point[0] -= 10;
+        target_point[0] -= 100;
         drawCanvas(angle, target_point)});
+      
+
+
+
+      var canvas_down = false;
+      // $("#myCanvas").on("mousedown", function(e){
+      //   canvas_down = true;
+      // });
+      // $("#myCanvas").on("mouseup", function(e){
+      //   // console.log(e);
+      //   // console.log(e.pageX - $(this).offset().left);
+      //   // console.log(e.pageY - $(this).offset().top);
+      //   target_point[0] = (e.pageX - $(this).offset().left) / 0.2;
+      //   target_point[1] = 400/0.2-(e.pageY - $(this).offset().top) / 0.2;
+      //   drawCanvas( angle, target_point);
+      // });
+      $("#myCanvas").on("mousemove", function(e){
+        if (e.buttons != 1) return;
+        // console.log(e.pageX - $(this).offset().left);
+        // console.log(e.pageY - $(this).offset().top);
+        target_point[0] = (e.pageX - $(this).offset().left) / 0.2;
+        target_point[1] = 400/0.2-(e.pageY - $(this).offset().top) / 0.2;
+        drawCanvas( angle, target_point);
+      });
+
 
       drawCanvas( angle, target_point);
       // drawCanvas( Math.PI/4);
@@ -433,34 +458,38 @@
 
     });
 
-    function drawCanvas(angle, target_point) {
+    function drawCanvas(angle, target_point, source_point) {
+      let speed = 275;
+      let drop = 20;
+  
       let canvas = document.getElementById("myCanvas");
       let ctx = canvas.getContext("2d");
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      let data = searchAngle(20, 200, 0.7,target_point);
+      
+      let data = searchAngle(speed, drop, 200, target_point);
+      let scale = 0.2;
       for (let i=0; i<data.length-1; i++){
         ctx.beginPath();
-        ctx.moveTo(data[i][0], 400-data[i][1]);
-        ctx.lineTo(data[i+1][0], 400-data[i+1][1]);
+        ctx.moveTo(data[i][0]*scale, 400-data[i][1]*scale);
+        ctx.lineTo(data[i+1][0]*scale, 400-data[i+1][1]*scale);
         ctx.stroke();
       }
 
 
 
-      let data2 = getProjectileArc(20,angle, 200, 0.7, 0, tAtHit(20, angle, target_point[0]), 100);
-      // console.log(angle/Math.PI);
-      // console.log(tAtHit(20, angle, target_point[0]))
-      for (let i=0; i<data2.length-1; i++){
-        ctx.beginPath();
-        ctx.moveTo(data2[i][0], 400-data2[i][1]);
-        ctx.lineTo(data2[i+1][0], 400-data2[i+1][1]);
-        ctx.stroke();
-      }
+      // let data2 = getProjectileArc(20,angle, 200, 0.7, 0, tAtHit(20, angle, target_point[0]), 100);
+      // // console.log(angle/Math.PI);
+      // // console.log(tAtHit(20, angle, target_point[0]))
+      // for (let i=0; i<data2.length-1; i++){
+      //   ctx.beginPath();
+      //   ctx.moveTo(data2[i][0], 400-data2[i][1]);
+      //   ctx.lineTo(data2[i+1][0], 400-data2[i+1][1]);
+      //   ctx.stroke();
+      // }
 
       ctx.beginPath();
-      ctx.arc(target_point[0], 400-target_point[1], 4, 0, 2 * Math.PI, false);
+      ctx.arc(target_point[0]*scale, 400-target_point[1]*scale, 4, 0, 2 * Math.PI, false);
       ctx.fillStyle = "red";
       ctx.fill();
       ctx.stroke();
@@ -745,7 +774,6 @@
       $("#damageTableContent").append(damageTableContents);
 
     }
-
 
     function sidebarLinkClicked() {
       if ($(this).hasClass("subLink")) {
