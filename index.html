@@ -81,6 +81,12 @@
             Gunnery calculator
           </a>
         </li>
+        <li id="projectileArcsLink" data-show="#projectileArcs">
+            <a href="#">
+            <i class="fas fa-meteor"></i>
+            Projectile arcs
+            </a>
+          </li>
         <li id="aboutLink" data-show="#about">
           <a href="#">
             <i class="far fa-question-circle"></i>
@@ -304,6 +310,20 @@
 
       </div>
 
+      <!-- Arc calculator -->
+
+      <div id="projectileArcs" class="content-panel" style="display:none">
+
+        <canvas id="myCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
+            Your browser does not support the HTML5 canvas tag.</canvas>
+
+            <!-- <button type="button" id="arcDown">arc down</button> -->
+            <!-- <button type="button" id="arcUp">arc up</button> -->
+            <button type="button" id="targetUp">target up</button>
+            <button type="button" id="targetDown">target down</button>
+            <button type="button" id="targetRight">target right</button>
+            <button type="button" id="targetLeft">target left</button>
+      </div>
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
         <h3>About</h3>
@@ -380,7 +400,70 @@
         ship_dataset = dataset;
         gunnerySelectionSubmitted();
       });
+
+
+      var angle = -Math.PI/2;
+      var target_point = [350, 300];
+      // $("#arcDown").on("click", function(){
+      //   angle -= Math.PI / 10;
+      //   drawCanvas(angle)})
+      // $("#arcUp").on("click", function(){
+      // angle += Math.PI / 10;
+      // drawCanvas(angle)})
+
+      $("#targetUp").on("click", function(){
+        target_point[1] += 10;
+        drawCanvas(angle, target_point)});
+      $("#targetDown").on("click", function(){
+        target_point[1] -= 10;
+        drawCanvas(angle, target_point)});
+      $("#targetRight").on("click", function(){
+        target_point[0] += 10;
+        drawCanvas(angle, target_point)});
+      $("#targetLeft").on("click", function(){
+        target_point[0] -= 10;
+        drawCanvas(angle, target_point)});
+
+      drawCanvas( angle, target_point);
+      // drawCanvas( Math.PI/4);
+      // drawCanvas( Math.PI/5);
+      // drawCanvas( Math.PI/6);
+
+
     });
+
+    function drawCanvas(angle, target_point) {
+      let canvas = document.getElementById("myCanvas");
+      let ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let data = searchAngle(20, 200, 0.7,target_point);
+      for (let i=0; i<data.length-1; i++){
+        ctx.beginPath();
+        ctx.moveTo(data[i][0], 400-data[i][1]);
+        ctx.lineTo(data[i+1][0], 400-data[i+1][1]);
+        ctx.stroke();
+      }
+
+
+
+      let data2 = getProjectileArc(20,angle, 200, 0.7, 0, tAtHit(20, angle, target_point[0]), 100);
+      // console.log(angle/Math.PI);
+      // console.log(tAtHit(20, angle, target_point[0]))
+      for (let i=0; i<data2.length-1; i++){
+        ctx.beginPath();
+        ctx.moveTo(data2[i][0], 400-data2[i][1]);
+        ctx.lineTo(data2[i+1][0], 400-data2[i+1][1]);
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(target_point[0], 400-target_point[1], 4, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "red";
+      ctx.fill();
+      ctx.stroke();
+    }
 
 
     function shipFilterSubmitted() {
