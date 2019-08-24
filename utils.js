@@ -29,6 +29,12 @@ function parseDate(text){
     return false;
 }
 
+function precise(x, digits){
+    // return Number.parseFloat(x).toPrecision(digits);
+    return parseFloat(Number.parseFloat(x).toPrecision(digits));
+}
+
+
 function getDamageMod(damageType, target){
     return damage_dataset.getCellByString(damageType, "Name", target)
   }

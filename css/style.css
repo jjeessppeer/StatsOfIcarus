@@ -1,6 +1,28 @@
 
 
 
+/* Mini select */
+select.btn-mini {
+    height: auto;
+    font-size: 10px;
+    /* line-height: 14px;
+    margin-left: -20px;
+    margin-top: 9px; */
+}
+
+/* this is optional (see below) */
+/* select.btn {
+    -webkit-appearance: button;
+       -moz-appearance: button;
+            appearance: button;
+    padding-right: 16px;
+}
+
+select.btn-mini + .caret {
+    margin-left: -20px;
+    margin-top: 9px;
+} */
+
 /* th fixed size */
 /* table{
     max-width: 270px;
@@ -13,7 +35,7 @@ table.fixed {
 
 table.fixed td, table.fixed th{
     overflow:hidden;
-    width: 110px;
+    width: 150px;
 }
 
 table.fixed.fist-wide > tr > th:first-child{

@@ -241,11 +241,65 @@
           <input type="checkbox" class="form-check-input" id="buffedCheckbox">
           <label class="form-check-label" for="buffedCheckbox">Buffed</label>
         </div>
-
-        <table id="gunTable" class="fixed table table-bordered"">
+        
+        <table id="gunTable" class="fixed table table-bordered">
+          <tr>
+            <th>Range (m)</th>
+            <th>Arming distance (m)</th>
+            <th>Seconds / clip (s)</th>
+            <th>Clip size</th>
+            <th>AOE (m)</th>
+          </tr>
+          <tbody id="gunContent"></tbody>
         </table>
 
         <table id="damageTotalTable" class="fixed fist-wide table table-bordered">
+          <tr>
+            <th class="medium">Damage (primary + secondary)</th>
+            <th class="medium">
+              Armor
+              <br>
+              <select id="armorUnitSelect" class="btn btn-mini">
+                <option>HP</option>
+                <option>Mallets</option>
+                <option>Galleon A.</option>
+                <option>Pyramidion A.</option>
+                <option>Stormbreaker A.</option>
+              </select>
+            </th>
+            <th class="medium">
+              Hull
+              <br>
+              <select id="hullUnitSelect" class="btn btn-mini">
+                <option>HP</option>
+                <option>Galleon H.</option>
+                <option>Pyramidion H.</option>
+                <option>Stormbreaker H.</option>
+              </select>
+            </th>
+            <th class="medium">
+              Balloon
+              <br>
+              <select id="balloonUnitSelect" class="btn btn-mini">
+                <option>HP</option>
+                <option>B. Mallets</option>
+                <option>Balloons</option>
+              </select>
+            </th>
+            <th class="medium">
+              Component
+              <br>
+              <select id="componentUnitSelect" class="btn btn-mini">
+                <option>HP</option>
+                <option>Mallets</option>
+                <option>Light Guns</option>
+                <option>Heavy Guns</option>
+                <option>Light Engines</option>
+                <option>Heavy Engines</option>
+              </select>
+            </th>
+          </tr>
+          <tbody id="damageTableContent"></tbody>
         </table>
 
       </div>
@@ -282,6 +336,9 @@
     var gun_dataset = null;
     var ammo_dataset = null;
     var damage_dataset = null;
+    var ship_dataset = null;
+    var tool_dataset = null;
+    var component_dataset = null;
 
     $(document).ready(function () {
 
@@ -290,14 +347,10 @@
       $("#shipFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", shipFilterSubmitted);
       $("#matchFilterSelect,#matchFilterModeSelect").on("change", matchFilterSubmitted);
       $("#matchFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", matchFilterSubmitted);
-      $("#gunSelect,#ammoSelect,#buffedCheckbox").on("change", gunnerySelectionSubmitted);
+      $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect").on("change", gunnerySelectionSubmitted);
 
       // Load all databases
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 1, function (dataset) {
-        ship_dataset = dataset;
-        setShipTableItems(ship_dataset.getDatasetRows());
-        shipFilterSubmitted();
-      });
+      
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, function (dataset) {
         match_dataset = dataset;
         setMatchTableItems(match_dataset.getDatasetRows());
@@ -305,15 +358,27 @@
       });
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 4, function (dataset) {
         gun_dataset = dataset;
-        if (ammo_dataset && damage_dataset) gunnerySelectionSubmitted();
+        gunnerySelectionSubmitted();
       });
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 5, function (dataset) {
         ammo_dataset = dataset;
-        if (gun_dataset && damage_dataset) gunnerySelectionSubmitted();
+        gunnerySelectionSubmitted();
       });
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 6, function (dataset) {
         damage_dataset = dataset;
-        if (gun_dataset && ammo_dataset) gunnerySelectionSubmitted();
+        gunnerySelectionSubmitted();
+      });
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 7, function (dataset) {
+        tool_dataset = dataset;
+        gunnerySelectionSubmitted();
+      });
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 8, function (dataset) {
+        component_dataset = dataset;
+        gunnerySelectionSubmitted();
+      });
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 9, function (dataset) {
+        ship_dataset = dataset;
+        gunnerySelectionSubmitted();
       });
     });
 
@@ -361,6 +426,10 @@
     }
 
     function gunnerySelectionSubmitted() {
+      if (!(gun_dataset && ammo_dataset && damage_dataset && tool_dataset && component_dataset && ship_dataset)) {
+        console.log("Still loading");
+        return;
+      }
       console.log("Changing gun selection");
       let gunAlias = $("#gunSelect").val();
       let ammoAlias = $("#ammoSelect").val();
@@ -448,6 +517,10 @@
     }
 
     function setGunneryItems(gunRow, ammoRow) {
+      if (!(gun_dataset && ammo_dataset && damage_dataset && tool_dataset && component_dataset && ship_dataset)) {
+        console.log("Still loading");
+        return;
+      }
 
       let buffed = $("#buffedCheckbox").is(':checked');
 
@@ -474,32 +547,68 @@
       let damage_second_1_primary = damage_clip_primary / seconds_clip;
       let damage_second_1_secondary = damage_clip_secondary / seconds_clip;
 
-      let damage_seconds_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gunRow[7]));
-      let damage_seconds_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gunRow[7]));
+      let damage_second_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gunRow[7]));
+      let damage_second_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gunRow[7]));
+      
 
+      // Damage unit scales
+      let unit_dict = {
+        "HP": 1, 
+        "Mallets": tool_dataset.getCellByString("Mallet", "Name", "Repair"),
+        "Galleon A.": ship_dataset.getCellByString("Galleon", "Ship Type", "Armor"), 
+        "Pyramidion A.": ship_dataset.getCellByString("Pyramidion", "Ship Type", "Armor"),
+        "Stormbreaker A.": ship_dataset.getCellByString("Stormbreaker", "Ship Type", "Armor"),
+        "Galleon H.": ship_dataset.getCellByString("Galleon", "Ship Type", "Hull Health"),
+        "Pyramidion H.": ship_dataset.getCellByString("Pyramidion", "Ship Type", "Hull Health"),
+        "Stormbreaker H.": ship_dataset.getCellByString("Stormbreaker", "Ship Type", "Hull Health"),
+        "B. Mallets": (tool_dataset.getCellByString("Mallet", "Name", "Repair") / 0.76),
+        "Balloons": component_dataset.getCellByString("Balloon", "Name", "HP"),
+        "Light Guns": component_dataset.getCellByString("Light Gun", "Name", "HP"),
+        "Heavy Guns": component_dataset.getCellByString("Heavy Gun", "Name", "HP"),
+        "Light Engines": component_dataset.getCellByString("Light Engine", "Name", "HP"),
+        "Heavy Engines": component_dataset.getCellByString("Heavy Engine", "Name", "HP")
+      };
 
+      let armor_unit_scale = 1 / unit_dict[$("#armorUnitSelect").val()];
+      let hull_unit_scale = 1 / unit_dict[$("#hullUnitSelect").val()];
+      let balloon_unit_scale = 1 / unit_dict[$("#balloonUnitSelect").val()];
+      let component_unit_scale = 1 / unit_dict[$("#componentUnitSelect").val()];
+      
+      // Damage / shot
+      let damage_shot_armor =     armor_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Armor") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Armor"));
+      let damage_shot_hull =      hull_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Hull") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Hull"));
+      let damage_shot_balloon =   balloon_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Balloon") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Balloon"));
+      let damage_shot_component = component_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Components") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Components"));
+      
+      // Damage / clip
+      let damage_clip_armor =     armor_unit_scale * (damage_clip_primary * getDamageMod(damage_type_primary, "Armor") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor"));
+      let damage_clip_hull =      hull_unit_scale * (damage_clip_primary * getDamageMod(damage_type_primary, "Hull") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Hull"));
+      let damage_clip_balloon =   balloon_unit_scale * (damage_clip_primary * getDamageMod(damage_type_primary, "Balloon") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon"));
+      let damage_clip_component = component_unit_scale * (damage_clip_primary * getDamageMod(damage_type_primary, "Components") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Components"));
+
+      // Damage / second (one clip)
+      let damage_second_1_armor =     armor_unit_scale * (damage_second_1_primary * getDamageMod(damage_type_primary, "Armor") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Armor"));
+      let damage_second_1_hull =      hull_unit_scale * (damage_second_1_primary * getDamageMod(damage_type_primary, "Hull") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Hull"));
+      let damage_second_1_balloon =   balloon_unit_scale * (damage_second_1_primary * getDamageMod(damage_type_primary, "Balloon") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Balloon"));
+      let damage_second_1_component = component_unit_scale * (damage_second_1_primary * getDamageMod(damage_type_primary, "Components") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Components"));
+      
+      // Damage / second (with reloading)
+      let damage_second_2_armor =     armor_unit_scale * (damage_second_2_primary * getDamageMod(damage_type_primary, "Armor") + damage_second_2_secondary * getDamageMod(damage_type_secondary, "Armor"));
+      let damage_second_2_hull =      hull_unit_scale * (damage_second_2_primary * getDamageMod(damage_type_primary, "Hull") + damage_second_2_secondary * getDamageMod(damage_type_secondary, "Hull"));
+      let damage_second_2_balloon =   balloon_unit_scale * (damage_second_2_primary * getDamageMod(damage_type_primary, "Balloon") + damage_second_2_secondary * getDamageMod(damage_type_secondary, "Balloon"));
+      let damage_second_2_component = component_unit_scale * (damage_second_2_primary * getDamageMod(damage_type_primary, "Components") + damage_second_2_secondary * getDamageMod(damage_type_secondary, "Components"));
+      
+      // Fire / clip
       let fire_clip_base = parseFloat(gunRow[12] * ammoRow[11] * clip_size)
-      let fire_clip_armor_primary = fire_clip_base + ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
-      let fire_clip_armor_secondary = ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
-      let fire_clip_balloon_primary = fire_clip_base + ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Balloon");
-      let fire_clip_balloon_secondary = ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
-      let fire_clip_component_primary = fire_clip_base + ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Components");
-      let fire_clip_component_secondary = ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
-
-
-
-      // console.log(damage_dataset.getCellByString(damage_type_pri, "Name", "Balloon"));
+      let fire_clip_armor_primary = ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
+      let fire_clip_armor_secondary = fire_clip_base + ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
+      let fire_clip_balloon_primary = ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Balloon");
+      let fire_clip_balloon_secondary = fire_clip_base + ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
+      let fire_clip_component_primary = ammoRow[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Components");
+      let fire_clip_component_secondary = fire_clip_base + ammoRow[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
 
       // Fill out UI
 
-      let gunTableTitles = $(`
-          <tr>
-            <th>Range (m)</th>
-            <th>Arming distance (m)</th>
-            <th>Seconds / clip (s)</th>
-            <th>Clip size</th>
-            <th>AOE (m)</th>
-          </tr>`);
       let gunTableContents = $(`
           <tr>
             <td>` + range.toFixed(0) + `</td>
@@ -508,57 +617,48 @@
             <td>` + clip_size + `</td>
             <td>` + aoe.toFixed(2) + `</td>
           </tr>`);
-      $("#gunTable").empty();
-      $("#gunTable").append(gunTableTitles);
-      $("#gunTable").append(gunTableContents);
+      $("#gunContent").empty();
+      $("#gunContent").append(gunTableContents);
 
       let damageTableContents = $(`
           <tr>
-            <th class="medium">Damage (primary + secondary)</th>
-            <th class="medium">Armor</th>
-            <th class="medium">Hull</th>
-            <th class="medium">Balloon</th>
-            <th class="medium">Component</th>
-          </tr>
-          <tr>
             <th>Damage / shot</th>
-            <td>` + (damage_hit_primary * getDamageMod(damage_type_primary, "Armor") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
-            <td>` + (damage_hit_primary * getDamageMod(damage_type_primary, "Hull") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
-            <td>` + (damage_hit_primary * getDamageMod(damage_type_primary, "Balloon") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
-            <td>` + (damage_hit_primary * getDamageMod(damage_type_primary, "Components") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
+            <td>` + precise(damage_shot_armor, 3) + `</td>
+            <td>` + precise(damage_shot_hull, 3) + `</td>
+            <td>` + precise(damage_shot_balloon, 3) + `</td>
+            <td>` + precise(damage_shot_component, 3) + `</td>
           </tr>
           <tr>
             <th>Damage / second (one clip)</th>
-            <td>` + (damage_second_1_primary * getDamageMod(damage_type_primary, "Armor") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
-            <td>` + (damage_second_1_primary * getDamageMod(damage_type_primary, "Hull") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
-            <td>` + (damage_second_1_primary * getDamageMod(damage_type_primary, "Balloon") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
-            <td>` + (damage_second_1_primary * getDamageMod(damage_type_primary, "Components") + damage_second_1_secondary * getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
+            <td>` + precise(damage_second_1_armor, 3) + `</td>
+            <td>` + precise(damage_second_1_hull, 3) + `</td>
+            <td>` + precise(damage_second_1_balloon, 3) + `</td>
+            <td>` + precise(damage_second_1_component, 3) + `</td>
           </tr>
           <tr>
             <th>Damage / second (with reloading)</th>
-            <td>` + (damage_seconds_2_primary * getDamageMod(damage_type_primary, "Armor") + damage_seconds_2_secondary * getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
-            <td>` + (damage_seconds_2_primary * getDamageMod(damage_type_primary, "Hull") + damage_seconds_2_secondary * getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
-            <td>` + (damage_seconds_2_primary * getDamageMod(damage_type_primary, "Balloon") + damage_seconds_2_secondary * getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
-            <td>` + (damage_seconds_2_primary * getDamageMod(damage_type_primary, "Components") + damage_seconds_2_secondary * getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
+            <td>` + precise(damage_second_2_armor, 3) + `</td>
+            <td>` + precise(damage_second_2_hull, 3) + `</td>
+            <td>` + precise(damage_second_2_balloon, 3) + `</td>
+            <td>` + precise(damage_second_2_component, 3) + `</td>
           </tr>
           <tr>
             <th>Damage / clip</th>
-            <td>` + (damage_clip_primary * getDamageMod(damage_type_primary, "Armor") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor")).toFixed(0) + `</td>
-            <td>` + (damage_clip_primary * getDamageMod(damage_type_primary, "Hull") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Hull")).toFixed(0) + `</td>
-            <td>` + (damage_clip_primary * getDamageMod(damage_type_primary, "Balloon") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon")).toFixed(0) + `</td>
-            <td>` + (damage_clip_primary * getDamageMod(damage_type_primary, "Components") + damage_clip_secondary * getDamageMod(damage_type_secondary, "Components")).toFixed(0) + `</td>
+            <td>` + precise(damage_clip_armor, 3) + `</td>
+            <td>` + precise(damage_clip_hull, 3) + `</td>
+            <td>` + precise(damage_clip_balloon, 3) + `</td>
+            <td>` + precise(damage_clip_component, 3) + `</td>
           </tr>
           <tr>
             <th>Fire / clip (avg.)</th>
-            <td>` + (fire_clip_armor_primary + fire_clip_armor_secondary).toFixed(1) + `</td>
+            <td>` + precise(fire_clip_armor_primary + fire_clip_armor_secondary, 3) + `</td>
             <td>` + "-" + `</td>
-            <td>` + (fire_clip_balloon_primary + fire_clip_balloon_secondary).toFixed(1) + `</td>
-            <td>` + (fire_clip_component_primary + fire_clip_component_secondary).toFixed(1) + `</td>
+            <td>` + precise(fire_clip_balloon_primary + fire_clip_balloon_secondary, 3) + `</td>
+            <td>` + precise(fire_clip_component_primary + fire_clip_component_secondary, 3) + `</td>
           </tr>
       `);
-
-      $("#damageTotalTable").empty();
-      $("#damageTotalTable").append(damageTableContents);
+      $("#damageTableContent").empty();
+      $("#damageTableContent").append(damageTableContents);
 
     }
 
