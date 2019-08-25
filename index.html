@@ -324,6 +324,11 @@
                 <img id="mapImage" class='img' src="map-images/dunes.png" width="400" height="400"/>
                 <canvas id="mapCanvas" width="400" height="400"></canvas>
             </div>
+
+            <div id="gunContainer" class="img-canvas-container">
+              <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="400" height="478"/>
+              <canvas id="gunCanvas" width="400" height="478"></canvas>
+          </div>
         
           
           
@@ -503,14 +508,17 @@
       let y_start = start_point[2];
       
       let speed = 275;
-      let drop = 20*0.7;
+      let drop = 20;
   
       let canvas = document.getElementById("myCanvas");
       let ctx = canvas.getContext("2d");
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let angle = searchAngle(speed, drop, y_start, [x_target, y_target]);
       
-      let data = searchAngle(speed, drop, y_start, [x_target, y_target]);
+      // let data = searchAngle(speed, drop, y_start, [x_target, y_target]);
+      let data = getProjectileArc(speed, angle, y_start, drop, 0, tAtHit(speed, angle, x_target), 100)
       for (let i=0; i<data.length-1; i++){
         ctx.beginPath();
         ctx.moveTo(x_draw_offset + data[i][0]/draw_scale, 400-data[i][1]/draw_scale);

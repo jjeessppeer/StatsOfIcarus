@@ -49,15 +49,7 @@ function getDamageMod(damageType, target){
 
 // Projectile arcs
 
-function getProjectileArc(speed, angle, start_height, drop, start, end, steps){
-    // Return list of points containing the projectile arc.
-    let points = [];
-    for (let i=0; i<steps; i++){
-        let t = start + (end - start) * i / steps;
-        points.push(projectilePos(t, speed, angle, drop, start_height));
-    }
-    return points;
-}
+
 
 function searchAngle(speed, drop, start_height, target_point){
     // Return angle required to hit point.
@@ -70,8 +62,9 @@ function searchAngle(speed, drop, start_height, target_point){
     // First find out if target is reachable, and figure out rough angle
     do{
         if (loops > max_loops){
-            console.log("hit not found");
-            break;
+            console.log("Hit not possible.");
+            return 0;
+            // break;
         }
         loops++;
         
@@ -111,12 +104,23 @@ function searchAngle(speed, drop, start_height, target_point){
     y = projectilePos(t, speed, a1, drop, start_height)[1];
 
     // console.log("Angle refined: ", a1, " : ", y, " : ", precise(target_point[1], 3));
-    return getProjectileArc(speed, a1, start_height, drop, 0, tAtHit(speed, a1, target_point[0]), 100);
+    return a1;
+    // return getProjectileArc(speed, a1, start_height, drop, 0, tAtHit(speed, a1, target_point[0]), 100);
 
 
 }
 
 // trigonometry yo
+
+function getProjectileArc(speed, angle, start_height, drop, start, end, steps){
+    // Return list of points containing the projectile arc.
+    let points = [];
+    for (let i=0; i<steps; i++){
+        let t = start + (end - start) * i / steps;
+        points.push(projectilePos(t, speed, angle, drop, start_height));
+    }
+    return points;
+}
 
 function projectilePos(t, speed, angle, drop, start_height){
     // Return projectile position after t seconds

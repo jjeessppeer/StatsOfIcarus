@@ -103,7 +103,7 @@ function loadDatasetFromSheet(sheet_id, sheet_page, load_callback) {
             return response.json();
         })
         .then((myJson) => {
-            console.log(myJson);
+            // console.log(myJson);
             let dataset = sheetToDataset(myJson);
             load_callback(dataset);
         })
