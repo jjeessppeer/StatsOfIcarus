@@ -314,6 +314,7 @@
       <!-- Arc calculator -->
       <div id="projectileArcs" class="content-panel" style="display:none">
         <h1>Aim arc thingy.</h1>
+        <h5>Drag the points on either of the first images to change altitudes and distances.</h5>
         <div class="form-check">
           <input type="checkbox" class="form-check-input" id="lesmokCheckbox">
           <label class="form-check-label" for="lesmokCheckbox">Lesmok</label>
@@ -514,7 +515,6 @@
 
       
       let lesmok = $("#lesmokCheckbox").is(':checked');
-      console.log(lesmok)
       let speed = 275 * (lesmok ? 1.7 : 1);
       let drop = 20*0.7 * (lesmok ? 0.7 : 1);
   
@@ -560,7 +560,6 @@
 
 
 
-      console.log(angle_diff);
       // angle = 10.46;
       // console.log(angle);
       let gun_image = document.querySelector("#gunImage")
