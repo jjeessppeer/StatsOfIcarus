@@ -32,10 +32,22 @@ function precise(x, digits){
     return parseFloat(Number.parseFloat(x).toPrecision(digits));
 }
 
+// Math
+
+function dist2D(p1, p2){
+    let d_x = p1[0] - p2[0];
+    let d_y = p1[1] - p2[1];
+    return Math.sqrt( d_x*d_x + d_y*d_y );
+}
+
+// Database
+
 function getDamageMod(damageType, target){
     return damage_dataset.getCellByString(damageType, "Name", target)
 }
 
+
+// Projectile arcs
 
 function getProjectileArc(speed, angle, start_height, drop, start, end, steps){
     // Return list of points containing the projectile arc.
@@ -52,7 +64,7 @@ function searchAngle(speed, drop, start_height, target_point){
     let y;
     let angle = - Math.PI / 2;
     let angle_step = Math.PI / 50;
-    let max_loops = Math.PI / angle_step;
+    let max_loops = Math.PI / angle_step + 2;
     let loops = 0;
 
     // First find out if target is reachable, and figure out rough angle

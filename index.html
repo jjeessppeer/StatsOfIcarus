@@ -312,7 +312,6 @@
       </div>
 
       <!-- Arc calculator -->
-
       <div id="projectileArcs" class="content-panel" style="display:none">
         <h1>Warning, construction zone ahead. Wear you hardhat.</h1>
 
@@ -321,10 +320,14 @@
 
             <!-- <button type="button" id="arcDown">arc down</button> -->
             <!-- <button type="button" id="arcUp">arc up</button> -->
-            <button type="button" id="targetUp">target up</button>
-            <button type="button" id="targetDown">target down</button>
-            <button type="button" id="targetRight">target right</button>
-            <button type="button" id="targetLeft">target left</button>
+            <div id="mapContainer" class="img-canvas-container">
+                <img id="mapImage" class='img' src="dunes-grid-small.png" width="400" height="400"/>
+                <canvas id="mapCanvas" width="400" height="400"></canvas>
+            </div>
+        
+          
+          
+          
       </div>
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
@@ -370,8 +373,11 @@
       $("#matchFilterSelect,#matchFilterModeSelect").on("change", matchFilterSubmitted);
       $("#matchFilterText").on("input keydown keyup mousedown mouseup select contextmenu drop", matchFilterSubmitted);
       $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect").on("change", gunnerySelectionSubmitted);
+      
 
-      // Load all databases
+      $('#mapImage').on('dragstart', function(event) { event.preventDefault(); });
+
+      
       
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, function (dataset) {
         match_dataset = dataset;
@@ -404,94 +410,114 @@
       });
 
 
-      var angle = -Math.PI/2;
-      var target_point = [350, 300];
-      // $("#arcDown").on("click", function(){
-      //   angle -= Math.PI / 10;
-      //   drawCanvas(angle)})
-      // $("#arcUp").on("click", function(){
-      // angle += Math.PI / 10;
-      // drawCanvas(angle)})
+      var start_point = [1000, 1000, 100];
+      var target_point = [2000, 2000, 100];
+      let map_image = document.querySelector("#mapImage");
+      var map_scale = 10.54 / (map_image.width / map_image.naturalWidth);
+      var arc_scale = 10;
 
-      $("#targetUp").on("click", function(){
-        target_point[1] += 100;
-        drawCanvas(angle, target_point)});
-      $("#targetDown").on("click", function(){
-        target_point[1] -= 100;
-        drawCanvas(angle, target_point)});
-      $("#targetRight").on("click", function(){
-        target_point[0] += 100;
-        drawCanvas(angle, target_point)});
-      $("#targetLeft").on("click", function(){
-        target_point[0] -= 100;
-        drawCanvas(angle, target_point)});
-      
+      $("#mapCanvas").on("mousemove mousedown", function(e){
+        if (e.buttons != 1) return;
+        let clickX = e.pageX - $(this).offset().left;
+        let clickY = this.width - e.pageY + $(this).offset().top;
+        let world_click_pos = [clickX * map_scale, clickY * map_scale];
+        
+        if (dist2D(target_point, world_click_pos) < dist2D(start_point, world_click_pos)){
+          target_point[0] = world_click_pos[0];
+          target_point[1] = world_click_pos[1];
+        }
+        else{
+          start_point[0] = world_click_pos[0];
+          start_point[1] = world_click_pos[1];
+        }
 
+        // target_point[0] = (e.pageX - $(this).offset().left) * map_scale
+        // target_point[1] = (400 - e.pageY + $(this).offset().top) * map_scale
 
+        // console.log(JSON.stringify(target_point))
 
-      var canvas_down = false;
-      // $("#myCanvas").on("mousedown", function(e){
-      //   canvas_down = true;
-      // });
-      // $("#myCanvas").on("mouseup", function(e){
-      //   // console.log(e);
-      //   // console.log(e.pageX - $(this).offset().left);
-      //   // console.log(e.pageY - $(this).offset().top);
-      //   target_point[0] = (e.pageX - $(this).offset().left) / 0.2;
-      //   target_point[1] = 400/0.2-(e.pageY - $(this).offset().top) / 0.2;
-      //   drawCanvas( angle, target_point);
-      // });
+        drawMapCanvas(start_point, target_point, map_scale);
+        drawProjectileArc(target_point, start_point, arc_scale);
+      });
+
       $("#myCanvas").on("mousemove", function(e){
         if (e.buttons != 1) return;
-        // console.log(e.pageX - $(this).offset().left);
-        // console.log(e.pageY - $(this).offset().top);
-        target_point[0] = (e.pageX - $(this).offset().left) / 0.2;
-        target_point[1] = 400/0.2-(e.pageY - $(this).offset().top) / 0.2;
-        drawCanvas( angle, target_point);
+        let clickX = e.pageX - $(this).offset().left;
+        let clickY = this.width - e.pageY + $(this).offset().top;
+        
+        let scaledClickPos = [clickX*arc_scale, clickY*arc_scale];
+
+        let targetPos = [20 + dist2D(start_point, target_point), target_point[2]];
+        let startPos = [20, start_point[2]];
+        if (dist2D(scaledClickPos, targetPos) < dist2D(scaledClickPos, startPos)){
+          target_point[2] = scaledClickPos[1];
+        }
+        else{
+          start_point[2] = scaledClickPos[1];
+        }
+
+        // target_point[2] = worldY;
+
+        drawProjectileArc(target_point, start_point, arc_scale);
       });
 
 
-      drawCanvas( angle, target_point);
-      // drawCanvas( Math.PI/4);
-      // drawCanvas( Math.PI/5);
-      // drawCanvas( Math.PI/6);
-
-
+      drawProjectileArc(target_point, start_point, arc_scale);
+      drawMapCanvas(start_point, target_point, map_scale);
     });
 
-    function drawCanvas(angle, target_point, source_point) {
+
+    function drawMapCanvas(start_point, target_point, map_scale){
+      canvas = document.getElementById("mapCanvas");
+      ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(target_point[0] / map_scale, 400 - target_point[1] / map_scale, 10, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "red";
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(start_point[0] / map_scale, 400 - start_point[1] / map_scale, 10, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "blue";
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawProjectileArc(target_point, start_point, draw_scale) {
+      // Draw the side view of the projectile arc as shot from a point to another.
+
+      let x_draw_offset = 20;
+
+      let x_target = dist2D(target_point, start_point);
+      let y_target = target_point[2];
+      let y_start = start_point[2];
+      
       let speed = 275;
-      let drop = 20;
+      let drop = 20*0.7;
   
       let canvas = document.getElementById("myCanvas");
       let ctx = canvas.getContext("2d");
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      let data = searchAngle(speed, drop, 200, target_point);
-      let scale = 0.2;
+      let data = searchAngle(speed, drop, y_start, [x_target, y_target]);
       for (let i=0; i<data.length-1; i++){
         ctx.beginPath();
-        ctx.moveTo(data[i][0]*scale, 400-data[i][1]*scale);
-        ctx.lineTo(data[i+1][0]*scale, 400-data[i+1][1]*scale);
+        ctx.moveTo(x_draw_offset + data[i][0]/draw_scale, 400-data[i][1]/draw_scale);
+        ctx.lineTo(x_draw_offset + data[i+1][0]/draw_scale, 400-data[i+1][1]/draw_scale);
         ctx.stroke();
       }
 
-
-
-      // let data2 = getProjectileArc(20,angle, 200, 0.7, 0, tAtHit(20, angle, target_point[0]), 100);
-      // // console.log(angle/Math.PI);
-      // // console.log(tAtHit(20, angle, target_point[0]))
-      // for (let i=0; i<data2.length-1; i++){
-      //   ctx.beginPath();
-      //   ctx.moveTo(data2[i][0], 400-data2[i][1]);
-      //   ctx.lineTo(data2[i+1][0], 400-data2[i+1][1]);
-      //   ctx.stroke();
-      // }
+      ctx.beginPath();
+      ctx.arc(x_draw_offset + x_target/draw_scale, canvas.height-y_target/draw_scale, 4, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "red";
+      ctx.fill();
+      ctx.stroke();
 
       ctx.beginPath();
-      ctx.arc(target_point[0]*scale, 400-target_point[1]*scale, 4, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "red";
+      ctx.arc(x_draw_offset, canvas.height-y_start/draw_scale, 4, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "blue";
       ctx.fill();
       ctx.stroke();
     }

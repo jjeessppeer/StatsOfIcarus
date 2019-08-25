@@ -1,5 +1,25 @@
 
 
+/* Image with canvas overlay */
+/* body{text-align: center;background: #f2f6f8;} */
+.img{position:absolute;z-index:1;}
+
+.img-canvas-container{
+    display:inline-block;
+    /* width:320px;  */
+    /* height:480px; */
+    margin: 0 auto; 
+    background: black; 
+    position:relative; 
+    /* border:5px solid black;  */
+    /* border-radius: 10px;  */
+    /* box-shadow: 0 5px 50px #333 */
+}
+
+#mapCanvas{
+    position:relative;
+    z-index:20;
+}
 
 /* Mini select */
 select.btn-mini {
