@@ -57,38 +57,38 @@
 
 
         <li id="matchAnalysisLink" data-show="#matchAnalysis">
-          <a href="#">
+          <a href="#matchAnalysis">
             <i class="fas fa-glasses"></i>
             Match history analysis
           </a>
         </li>
         <li id="matchesLink" data-show="#matchDatabase">
-          <a href="#">
+          <a href="#matchDatabase">
             <i class="fas fa-book"></i>
             Competative match database
           </a>
         </li>
         <li id="matchSubmissionLink" data-show="#matchSubmission">
-          <a href="#">
+          <a href="#matchSubmission">
             <i class="fas fa-pen-nib"></i>
             Submit match to history
           </a>
         </li>
 
         <li id="gunnerCalculatorLink" data-show="#gunnerCalculator">
-          <a href="#" class="active">
+          <a href="#gunnerCalculator" class="active">
             <i class="fas fa-bomb"></i>
             Gunnery calculator
           </a>
         </li>
         <li id="projectileArcsLink" data-show="#projectileArcs">
-            <a href="#">
+            <a href="#projectileArcs">
             <i class="fas fa-meteor"></i>
             Projectile arcs
             </a>
           </li>
         <li id="aboutLink" data-show="#about">
-          <a href="#">
+          <a href="#about">
             <i class="far fa-question-circle"></i>
             About
           </a>
@@ -366,6 +366,7 @@
     var component_dataset = null;
 
     $(document).ready(function () {
+      
 
       $("li").on("click", sidebarLinkClicked);
       $("#shipFilterSelect,#shipFilterModeSelect").on("change", shipFilterSubmitted);
@@ -464,6 +465,10 @@
 
       drawProjectileArc(target_point, start_point, arc_scale);
       drawMapCanvas(start_point, target_point, map_scale);
+
+      console.log("Click before")
+      $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click")
+      console.log("Click after")
     });
 
 
@@ -803,6 +808,7 @@
     }
 
     function sidebarLinkClicked() {
+      console.log("Sidebar link clicked")
       if ($(this).hasClass("subLink")) {
         $("#sidebar a").not($(this).parent().parent().find("> li > a")).removeClass("active");
         $(this).parent().parent().find("> li > a").addClass("active")
