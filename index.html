@@ -321,7 +321,7 @@
             <!-- <button type="button" id="arcDown">arc down</button> -->
             <!-- <button type="button" id="arcUp">arc up</button> -->
             <div id="mapContainer" class="img-canvas-container">
-                <img id="mapImage" class='img' src="dunes-grid-small.png" width="400" height="400"/>
+                <img id="mapImage" class='img' src="map-images/dunes.png" width="400" height="400"/>
                 <canvas id="mapCanvas" width="400" height="400"></canvas>
             </div>
         
@@ -408,6 +408,10 @@
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 9, function (dataset) {
         ship_dataset = dataset;
         gunnerySelectionSubmitted();
+      });
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 10, function (dataset) {
+        console.log("Map dataset: ")
+        console.log(dataset);
       });
 
 
