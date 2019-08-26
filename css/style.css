@@ -1,12 +1,14 @@
 
 /* Side by side divs */
-.column {
+.sbs-column {
     float: left;
+    /* margin: 0px 0px 0px 50px; */
+    padding-right: 50px;
     /* width: 50%; */
 }
 
 /* Clear floats after the columns */
-.container:after {
+.sbs-container:after {
     content: "";
     display: table;
     clear: both;

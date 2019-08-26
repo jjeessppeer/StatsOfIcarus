@@ -364,18 +364,15 @@
         </div>
         <!-- <h5>Drag the points on either of the first images to change altitudes and distances.</h5>¨ -->
       
-        
-        
-        
-        <div class="container">
-          <div id="mapContainer" class="img-canvas-container column">
+        <div class="sbs-container">
+          <div id="mapContainer" class="img-canvas-container sbs-column">
             <b>Select ship positions (distance)</b>
             <br>
-            <img id="mapImage" class='img' src="map-images/dunes.png" width="400" height="400" />
+            <img id="mapImage" class='img' src="map-images/fjords.png" width="400" height="400" />
             <canvas id="mapCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
           </div>
         
-          <div class="column">
+          <div class="sbs-column">
             <b>Projectile arc side view. Height changeable.</b>
             <br>
             <canvas id="arcCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
@@ -383,15 +380,25 @@
           </div>
         </div>
         
-        <div id="gunContainer" class="img-canvas-container">
-          <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="400" height="478" />
-          <canvas id="gunCanvas" width="400" height="478">
-            Your browser does not support the HTML5 canvas tag.</canvas>
+        
+        <div class="sbs-container">
+          <div class="sbs-column">
+        
+            <b>Gunner view, aim with the red line</b>
+            <br>
+            <div id="gunContainer" class="img-canvas-container column">
+              <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="400" height="478" />
+              <canvas id="gunCanvas" width="400" height="478">
+                Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+          </div>
+          
+          <div class="sbs-column">
+              <b>Data</b>
+          </div>
         </div>
-      
-      
-      
-      
+
+
       </div>
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
@@ -482,7 +489,8 @@
       var start_point = [1000, 1000, 100];
       var target_point = [2000, 2000, 100];
       let map_image = document.querySelector("#mapImage");
-      var map_scale = 10.54 / (map_image.width / map_image.naturalWidth);
+      var map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
+      // console.log(map_scale);
       var arc_scale = 10;
 
       $("#mapCanvas").on("mousemove mousedown", function(e){
@@ -499,11 +507,6 @@
           start_point[0] = world_click_pos[0];
           start_point[1] = world_click_pos[1];
         }
-
-        // target_point[0] = (e.pageX - $(this).offset().left) * map_scale
-        // target_point[1] = (400 - e.pageY + $(this).offset().top) * map_scale
-
-        // console.log(JSON.stringify(target_point))
 
         drawMapCanvas(start_point, target_point, map_scale);
         drawProjectileArc(target_point, start_point, arc_scale);
@@ -539,6 +542,20 @@
       $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click")
       console.log("Click after")
     });
+
+
+    // function redrawArcCanvases(start_point, target_point){
+    //   // start_point and target_point are 3d points with canvas-local coordinates
+    //   // must be scaled to world coords
+
+    //   let map_image = document.querySelector("#mapImage");
+    //   let map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
+    //   let arc_scale = 10;
+
+    //   let world_target = [target_point[0]*map_scale, target_point[1]*map_scale, target_point[2]*]
+
+    //   // Map canvas
+    // }
 
 
     function drawMapCanvas(start_point, target_point, map_scale){
