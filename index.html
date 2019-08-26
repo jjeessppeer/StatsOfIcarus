@@ -525,7 +525,7 @@
         redrawArcCanvases(start_point, target_point);
       });
       $("#lesmokCheckbox").on("change", function(){drawProjectileArc(target_point, start_point, arc_scale)});
-
+      $("#arcGunSelect,#arcAmmoSelect").on("change", function(){redrawArcCanvases(start_point, target_point);});
 
       redrawArcCanvases(start_point, target_point);
 
@@ -536,10 +536,13 @@
 
 
     function redrawArcCanvases(start_point, target_point){
-   
-      // if ()
+      if (!(gun_dataset && ammo_dataset && ship_dataset)) {
+        console.log("Still loading");
+        setTimeout(function(){ redrawArcCanvases(start_point, target_point); }, 1000);
+        return;
+      }
 
-      
+
       // start_point and target_point are 3d points with canvas-local coordinates
       // must be scaled to world coords
       // Get world coords
@@ -549,15 +552,13 @@
 
       let world_target = [target_point[0]*map_scale, target_point[1]*map_scale, target_point[2]*arc_scale];
       let world_start = [start_point[0]*map_scale, start_point[1]*map_scale, start_point[2]*arc_scale];
-      
-      // console.log("\n")
-      // console.log(JSON.stringify(world_start))
-      // console.log(JSON.stringify(world_target))
 
       // Gun and ammo data
-      let lesmok = $("#lesmokCheckbox").is(':checked');
-      let speed = 275 * (lesmok ? 1.7 : 1);
-      let drop = 20*0.7 * (lesmok ? 0.7 : 1);
+      let gun_type = $("#arcGunSelect").val();
+      let ammo_type = $("#arcAmmoSelect").val();
+
+      let speed = gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed") * ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed");
+      let drop = gun_dataset.getCellByString(gun_type, "Alias", "Shell drop") * ammo_dataset.getCellByString(ammo_type, "Alias", "Lift");
       let angle = searchAngle(world_start, world_target, speed, drop);
       let target_dist = dist2D(world_start, world_target);
 
