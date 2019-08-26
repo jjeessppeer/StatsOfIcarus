@@ -1,4 +1,17 @@
 
+/* Side by side divs */
+.column {
+    float: left;
+    /* width: 50%; */
+}
+
+/* Clear floats after the columns */
+.container:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
 
 /* Image with canvas overlay */
 /* body{text-align: center;background: #f2f6f8;} */
@@ -9,14 +22,14 @@
     /* width:320px;  */
     /* height:480px; */
     margin: 0 auto; 
-    background: rgb(163, 163, 163); 
+    /* background: rgb(163, 163, 163);  */
     position:relative; 
     /* border:5px solid black;  */
     /* border-radius: 10px;  */
     /* box-shadow: 0 5px 50px #333 */
 }
 
-#mapCanvas{
+.img-canvas-container > canvas{
     position:relative;
     z-index:20;
 }

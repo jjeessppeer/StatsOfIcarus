@@ -314,29 +314,84 @@
       <!-- Arc calculator -->
       <div id="projectileArcs" class="content-panel" style="display:none">
         <h1>Aim arc thingy.</h1>
-        <h5>Drag the points on either of the first images to change altitudes and distances.</h5>
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="lesmokCheckbox">
-          <label class="form-check-label" for="lesmokCheckbox">Lesmok</label>
-        </div>
-        <canvas id="myCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
-            Your browser does not support the HTML5 canvas tag.</canvas>
-
-            <!-- <button type="button" id="arcDown">arc down</button> -->
-            <!-- <button type="button" id="arcUp">arc up</button> -->
-            <div id="mapContainer" class="img-canvas-container">
-                <img id="mapImage" class='img' src="map-images/dunes.png" width="400" height="400"/>
-                <canvas id="mapCanvas" width="400" height="400"></canvas>
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Gun</div>
+              </div>
+              <select class="form-control" id="arcGunSelect">
+                <option>Lumberjack</option>
+                <option>Hades</option>
+                <option>Heavy Flak</option>
+              </select>
             </div>
-
-            <div id="gunContainer" class="img-canvas-container">
-              <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="400" height="478"/>
-              <canvas id="gunCanvas" width="400" height="478"></canvas>
+          </div>
+        </div>
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Ammo</div>
+              </div>
+              <select class="form-control" id="arcAmmoSelect">
+                <option>Normal</option>
+                <option>Lochnagar</option>
+                <option>Heavy</option>
+                <option>Incendiary</option>
+                <option>Burst</option>
+                <option>Greased</option>
+                <option>Lesmok</option>
+                <option>Heatsink</option>
+                <option>Charged</option>
+                <option>Extended</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Map</div>
+              </div>
+              <select class="form-control" id="arcMapSelect">
+                <option>Dunes</option>
+                <option>Fjords</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- <h5>Drag the points on either of the first images to change altitudes and distances.</h5>¨ -->
+      
+        
+        
+        
+        <div class="container">
+          <div id="mapContainer" class="img-canvas-container column">
+            <b>Select ship positions (distance)</b>
+            <br>
+            <img id="mapImage" class='img' src="map-images/dunes.png" width="400" height="400" />
+            <canvas id="mapCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
           </div>
         
-          
-          
-          
+          <div class="column">
+            <b>Projectile arc side view. Height changeable.</b>
+            <br>
+            <canvas id="arcCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
+              Your browser does not support the HTML5 canvas tag.</canvas>
+          </div>
+        </div>
+        
+        <div id="gunContainer" class="img-canvas-container">
+          <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="400" height="478" />
+          <canvas id="gunCanvas" width="400" height="478">
+            Your browser does not support the HTML5 canvas tag.</canvas>
+        </div>
+      
+      
+      
+      
       </div>
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
@@ -454,7 +509,7 @@
         drawProjectileArc(target_point, start_point, arc_scale);
       });
 
-      $("#myCanvas").on("mousemove", function(e){
+      $("#arcCanvas").on("mousemove", function(e){
         if (e.buttons != 1) return;
         let clickX = e.pageX - $(this).offset().left;
         let clickY = this.width - e.pageY + $(this).offset().top;
@@ -518,7 +573,7 @@
       let speed = 275 * (lesmok ? 1.7 : 1);
       let drop = 20*0.7 * (lesmok ? 0.7 : 1);
   
-      let canvas = document.getElementById("myCanvas");
+      let canvas = document.getElementById("arcCanvas");
       let ctx = canvas.getContext("2d");
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -562,8 +617,8 @@
 
       // angle = 10.46;
       // console.log(angle);
-      let gun_image = document.querySelector("#gunImage")
-      let image_scale = (gun_image.width / gun_image.naturalWidth)
+      let gun_image = document.querySelector("#gunImage");
+      let image_scale = (gun_image.width / gun_image.naturalWidth);
 
       // let y_start = 213;
       let y = (213 + 256 * angle_diff / 10.46) * image_scale;
