@@ -486,8 +486,8 @@
       });
 
 
-      var start_point = [1000, 1000, 100];
-      var target_point = [2000, 2000, 100];
+      var start_point = [100, 100, 100];
+      var target_point = [200, 200, 100];
       let map_image = document.querySelector("#mapImage");
       var map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
       // console.log(map_scale);
@@ -495,48 +495,39 @@
 
       $("#mapCanvas").on("mousemove mousedown", function(e){
         if (e.buttons != 1) return;
-        let clickX = e.pageX - $(this).offset().left;
-        let clickY = this.width - e.pageY + $(this).offset().top;
-        let world_click_pos = [clickX * map_scale, clickY * map_scale];
+        let click_pos = [e.pageX - $(this).offset().left, this.width - e.pageY + $(this).offset().top];
         
-        if (dist2D(target_point, world_click_pos) < dist2D(start_point, world_click_pos)){
-          target_point[0] = world_click_pos[0];
-          target_point[1] = world_click_pos[1];
+        if (dist2D(target_point, click_pos) < dist2D(start_point, click_pos)){
+          target_point[0] = click_pos[0];
+          target_point[1] = click_pos[1];
         }
         else{
-          start_point[0] = world_click_pos[0];
-          start_point[1] = world_click_pos[1];
+          start_point[0] = click_pos[0];
+          start_point[1] = click_pos[1];
         }
-
-        drawMapCanvas(start_point, target_point, map_scale);
-        drawProjectileArc(target_point, start_point, arc_scale);
+        redrawArcCanvases(start_point, target_point);
+        // drawMapCanvas(start_point, target_point, map_scale);
+        // drawProjectileArc(target_point, start_point, arc_scale);
       });
 
-      $("#arcCanvas").on("mousemove", function(e){
+      $("#arcCanvas").on("mousemove mousedown", function(e){
         if (e.buttons != 1) return;
-        let clickX = e.pageX - $(this).offset().left;
-        let clickY = this.width - e.pageY + $(this).offset().top;
+        let click_pos = [20 + e.pageX - $(this).offset().left, this.width - e.pageY + $(this).offset().top];
+        let target_2d = [dist2D(target_point, start_point) + 20, target_point[2]];
+        let start_2d = [20, start_point[2]];
         
-        let scaledClickPos = [clickX*arc_scale, clickY*arc_scale];
-
-        let targetPos = [20 + dist2D(start_point, target_point), target_point[2]];
-        let startPos = [20, start_point[2]];
-        if (dist2D(scaledClickPos, targetPos) < dist2D(scaledClickPos, startPos)){
-          target_point[2] = scaledClickPos[1];
+        if (dist2D(target_2d, click_pos) < dist2D(start_2d, click_pos)){
+          target_point[2] = click_pos[1];
         }
         else{
-          start_point[2] = scaledClickPos[1];
+          start_point[2] = click_pos[1];
         }
-
-        // target_point[2] = worldY;
-
-        drawProjectileArc(target_point, start_point, arc_scale);
+        redrawArcCanvases(start_point, target_point);
       });
       $("#lesmokCheckbox").on("change", function(){drawProjectileArc(target_point, start_point, arc_scale)});
 
 
-      drawProjectileArc(target_point, start_point, arc_scale);
-      drawMapCanvas(start_point, target_point, map_scale);
+      redrawArcCanvases(start_point, target_point);
 
       console.log("Click before")
       $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click")
@@ -544,113 +535,100 @@
     });
 
 
-    // function redrawArcCanvases(start_point, target_point){
-    //   // start_point and target_point are 3d points with canvas-local coordinates
-    //   // must be scaled to world coords
-
-    //   let map_image = document.querySelector("#mapImage");
-    //   let map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
-    //   let arc_scale = 10;
-
-    //   let world_target = [target_point[0]*map_scale, target_point[1]*map_scale, target_point[2]*]
-
-    //   // Map canvas
-    // }
-
-
-    function drawMapCanvas(start_point, target_point, map_scale){
-      canvas = document.getElementById("mapCanvas");
-      ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.arc(target_point[0] / map_scale, 400 - target_point[1] / map_scale, 10, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "red";
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(start_point[0] / map_scale, 400 - start_point[1] / map_scale, 10, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "blue";
-      ctx.fill();
-      ctx.stroke();
-    }
-
-    function drawProjectileArc(target_point, start_point, draw_scale) {
-      // Draw the side view of the projectile arc as shot from a point to another.
-
-      let x_draw_offset = 20;
-
-      let x_target = dist2D(target_point, start_point);
-      let y_target = target_point[2];
-      let y_start = start_point[2];
-      
+    function redrawArcCanvases(start_point, target_point){
+   
+      // if ()
 
       
+      // start_point and target_point are 3d points with canvas-local coordinates
+      // must be scaled to world coords
+      // Get world coords
+      let map_image = document.querySelector("#mapImage");
+      let map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
+      let arc_scale = 10;
+
+      let world_target = [target_point[0]*map_scale, target_point[1]*map_scale, target_point[2]*arc_scale];
+      let world_start = [start_point[0]*map_scale, start_point[1]*map_scale, start_point[2]*arc_scale];
+      
+      // console.log("\n")
+      // console.log(JSON.stringify(world_start))
+      // console.log(JSON.stringify(world_target))
+
+      // Gun and ammo data
       let lesmok = $("#lesmokCheckbox").is(':checked');
       let speed = 275 * (lesmok ? 1.7 : 1);
       let drop = 20*0.7 * (lesmok ? 0.7 : 1);
-  
-      let canvas = document.getElementById("arcCanvas");
-      let ctx = canvas.getContext("2d");
+      let angle = searchAngle(world_start, world_target, speed, drop);
+      let target_dist = dist2D(world_start, world_target);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Map canvas
+      let mapCanvas = document.getElementById("mapCanvas");
+      let mapCtx = mapCanvas.getContext("2d");
+      mapCtx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
 
-      let angle = searchAngle(speed, drop, y_start, [x_target, y_target]);
-      
-      // let data = searchAngle(speed, drop, y_start, [x_target, y_target]);
-      let data = getProjectileArc(speed, angle, y_start, drop, 0, tAtHit(speed, angle, x_target), 100)
+      mapCtx.beginPath();
+      mapCtx.arc(target_point[0], mapCanvas.height - target_point[1], 10, 0, 2 * Math.PI, false);
+      mapCtx.fillStyle = "red";
+      mapCtx.fill();
+      mapCtx.stroke();
+
+      mapCtx.beginPath();
+      mapCtx.arc(start_point[0], mapCanvas.height - start_point[1], 10, 0, 2 * Math.PI, false);
+      mapCtx.fillStyle = "blue";
+      mapCtx.fill();
+      mapCtx.stroke();
+
+      // Arc canvas
+      let arcCanvas = document.getElementById("arcCanvas");
+      let arcCtx = arcCanvas.getContext("2d");
+      arcCtx.clearRect(0, 0, arcCanvas.width, arcCanvas.height);
+
+      let data = getProjectileArc(speed, angle, world_start[2], drop, 0, tAtHit(speed, angle, target_dist), 100);
       for (let i=0; i<data.length-1; i++){
-        ctx.beginPath();
-        ctx.moveTo(x_draw_offset + data[i][0]/draw_scale, 400-data[i][1]/draw_scale);
-        ctx.lineTo(x_draw_offset + data[i+1][0]/draw_scale, 400-data[i+1][1]/draw_scale);
-        ctx.stroke();
+        arcCtx.beginPath();
+        arcCtx.moveTo(20 + data[i][0]/arc_scale, arcCanvas.height - data[i][1]/arc_scale);
+        arcCtx.lineTo(20 + data[i+1][0]/arc_scale, arcCanvas.height - data[i+1][1]/arc_scale);
+        arcCtx.stroke();
       }
       
-      // Draw dots at start and end
-      ctx.beginPath();
-      ctx.arc(x_draw_offset + x_target/draw_scale, canvas.height-y_target/draw_scale, 4, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "red";
-      ctx.fill();
-      ctx.stroke();
+      arcCtx.beginPath();
+      arcCtx.arc(20 + target_dist / arc_scale, arcCanvas.height - target_point[2], 4, 0, 2 * Math.PI, false);
+      arcCtx.fillStyle = "red";
+      arcCtx.fill();
+      arcCtx.stroke();
 
-      ctx.beginPath();
-      ctx.arc(x_draw_offset, canvas.height-y_start/draw_scale, 4, 0, 2 * Math.PI, false);
-      ctx.fillStyle = "blue";
-      ctx.fill();
-      ctx.stroke();
+      arcCtx.beginPath();
+      arcCtx.arc(20, arcCanvas.height - start_point[2], 4, 0, 2 * Math.PI, false);
+      arcCtx.fillStyle = "blue";
+      arcCtx.fill();
+      arcCtx.stroke();
 
-      drawGunAngle(angle, x_target, y_target, y_start);
-    }
-    
 
-    function drawGunAngle(angle, x_target, y_target, y_start){
-      // angle *= 57.2957795;
-      let laser_angle = Math.atan2((y_target-y_start), x_target);
-      
+      // Draw gun sight angle
+      // (angle straight to target) - (angle gun has to aim) = angle in gun sights
+      let laser_angle = Math.atan2((world_target[2]-world_start[2]), dist2D(world_start, world_target));
       let angle_diff = angle - laser_angle;
-      angle_diff *= 57.2957795;
 
-
-
-      // angle = 10.46;
-      // console.log(angle);
       let gun_image = document.querySelector("#gunImage");
-      let image_scale = (gun_image.width / gun_image.naturalWidth);
+      let gun_image_scale = (gun_image.width / gun_image.naturalWidth);
+      
+      let gun_sights_start_y = 213; // TODO base on gun
+      let gun_sights_start_x = 110;
+      let gun_sights_end_x = 206;
+      let gun_sights_px_per_rad = 10.46 / 258 * Math.PI / 180;
+      let gun_sights_aim_y = gun_sights_start_y + angle_diff / gun_sights_px_per_rad;
 
-      // let y_start = 213;
-      let y = (213 + 256 * angle_diff / 10.46) * image_scale;
-      // console.log(y);
-
-      let canvas = document.getElementById("gunCanvas");
-      let ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.strokeStyle = "red";
-      ctx.moveTo(110*image_scale, y);
-      ctx.lineTo(206*image_scale, y);
-      ctx.stroke();
-
+      let gunCanvas = document.getElementById("gunCanvas");
+      let gunCtx = gunCanvas.getContext("2d");
+      gunCtx.clearRect(0, 0, gunCanvas.width, gunCanvas.height);
+      gunCtx.beginPath();
+      gunCtx.strokeStyle = "red";
+      gunCtx.moveTo(gun_sights_start_x*gun_image_scale, gun_sights_aim_y*gun_image_scale);
+      gunCtx.lineTo(gun_sights_end_x*gun_image_scale, gun_sights_aim_y*gun_image_scale);
+      gunCtx.stroke();
     }
+
+
 
     function shipFilterSubmitted() {
       let filterType = $("#shipFilterSelect").val();

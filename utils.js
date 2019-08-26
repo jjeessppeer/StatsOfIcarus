@@ -51,8 +51,14 @@ function getDamageMod(damageType, target){
 
 
 
-function searchAngle(speed, drop, start_height, target_point){
+// function searchAngle(speed, drop, start_height, target_point){
+function searchAngle(start_point, target_point, speed, drop){
     // Return angle required to hit point.
+    let x_dist = dist2D(start_point, target_point);
+    let start_height = start_point[2];
+    let target_height = target_point[2];
+
+
     let y;
     let angle = - Math.PI / 2;
     let angle_step = Math.PI / 50;
@@ -68,30 +74,27 @@ function searchAngle(speed, drop, start_height, target_point){
         }
         loops++;
         
-        let t = tAtHit(speed, angle, target_point[0]);
+        let t = tAtHit(speed, angle, x_dist);
         y = projectilePos(t, speed, angle, drop, start_height)[1];
         angle += angle_step;
         // console.log("Testing angle: ", precise(angle/Math.PI,3), " : ", precise(y, 3), " : ", precise(target_point[1], 3))
         
-    }while(y < target_point[1]);
+    }while(y < target_height);
     angle -= angle_step;
 
     // Search for correct angle
     let a1 = angle;
     let a2 = angle - angle_step;
-    let a3 = (a1 + a2) / 2;
-
     for (i=0; i<5; i++){
         let a3 = (a1 + a2) / 2;
-        let t1 = tAtHit(speed, a1, target_point[0]);
-        let t2 = tAtHit(speed, a2, target_point[0]);
-        let t3 = tAtHit(speed, a3, target_point[0]);
+        let t1 = tAtHit(speed, a1, x_dist);
+        let t2 = tAtHit(speed, a2, x_dist);
+        let t3 = tAtHit(speed, a3, x_dist);
 
-
-        let d1 = projectilePos(t1, speed, a1, drop, start_height)[1] - target_point[1];
-        let d2 = projectilePos(t2, speed, a2, drop, start_height)[1] - target_point[1];
-        let d3 = projectilePos(t3, speed, a3, drop, start_height)[1] - target_point[1];
-
+        let d1 = projectilePos(t1, speed, a1, drop, start_height)[1] - target_height;
+        let d2 = projectilePos(t2, speed, a2, drop, start_height)[1] - target_height;
+        let d3 = projectilePos(t3, speed, a3, drop, start_height)[1] - target_height;
+        
         if (d3 > 0 && d3 < d1) a1 = a3;
         else if (d3 < 0 && d3 > d2) a2 = a3;
         else{
@@ -106,8 +109,6 @@ function searchAngle(speed, drop, start_height, target_point){
     // console.log("Angle refined: ", a1, " : ", y, " : ", precise(target_point[1], 3));
     return a1;
     // return getProjectileArc(speed, a1, start_height, drop, 0, tAtHit(speed, a1, target_point[0]), 100);
-
-
 }
 
 // trigonometry yo
