@@ -574,7 +574,7 @@
       let ammo_type = $("#arcAmmoSelect").val();
 
       let speed = gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed") * ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed");
-      let drop = gun_dataset.getCellByString(gun_type, "Alias", "Shell drop") * ammo_dataset.getCellByString(ammo_type, "Alias", "Lift");
+      let drop = gun_dataset.getCellByString(gun_type, "Alias", "Shell drop") * ( 2 - ammo_dataset.getCellByString(ammo_type, "Alias", "Lift"));
       let angle = searchAngle(world_start, world_target, speed, drop);
       let target_dist = dist2D(world_start, world_target);
 
