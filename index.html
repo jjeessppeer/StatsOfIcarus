@@ -357,7 +357,7 @@
               </div>
               <select class="form-control" id="arcMapSelect">
                 <option>Dunes</option>
-                <option>Fjords</option>
+                <option selected>Fjords</option>
               </select>
             </div>
           </div>
@@ -394,7 +394,8 @@
           </div>
           
           <div class="sbs-column">
-              <b>Data</b>
+              <b>Data (soon)</b>
+              <p>Time to impact <br> Aim angle <br> Distance <br></p>
           </div>
         </div>
 
@@ -488,10 +489,10 @@
 
       var start_point = [100, 100, 100];
       var target_point = [200, 200, 100];
-      let map_image = document.querySelector("#mapImage");
-      var map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
+      // let map_image = document.querySelector("#mapImage");
+      // var map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
       // console.log(map_scale);
-      var arc_scale = 10;
+      // var arc_scale = 10;
 
       $("#mapCanvas").on("mousemove mousedown", function(e){
         if (e.buttons != 1) return;
@@ -526,6 +527,7 @@
       });
       $("#lesmokCheckbox").on("change", function(){drawProjectileArc(target_point, start_point, arc_scale)});
       $("#arcGunSelect,#arcAmmoSelect").on("change", function(){redrawArcCanvases(start_point, target_point);});
+      // $("#arcMapSelect").on("change", function(){$("#mapImage").attr("src", "map-images/dunes.png");});
 
       redrawArcCanvases(start_point, target_point);
 
