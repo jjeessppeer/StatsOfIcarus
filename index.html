@@ -394,8 +394,25 @@
           </div>
           
           <div class="sbs-column">
-              <b>Data (soon)</b>
-              <p>Time to impact <br> Aim angle <br> Distance <br></p>
+              <b>Data</b>
+              <table id="arcDataTable" class="fixed table table-bordered">
+                <tr>
+                  <th class="medium">Time to hit</th>
+                  <td id="arcTableTime">10m</td>
+                </tr>
+                <tr>
+                  <th class="medium">Distance</th>
+                  <td id="arcTableDistance">10s</td>
+                </tr>
+                <tr>
+                  <th class="medium">Aim angle over target</th>
+                  <td id="arcTableAngleRel">10</td>
+                </tr>
+                <tr>
+                  <th class="medium">Aim angle over horizon</th>
+                  <td id="arcTableAngleAbs">10</td>
+                </tr>
+              </table>
           </div>
         </div>
 
@@ -425,7 +442,6 @@
 
 
   <script>
-    // https://www.brainbell.com/javascript/making-resizable-table-js.html
 
     var match_sheet;
     var match_dataset;
@@ -506,7 +522,7 @@
           start_point[0] = click_pos[0];
           start_point[1] = click_pos[1];
         }
-        redrawArcCanvases(start_point, target_point);
+        updateArcPanel(start_point, target_point);
         // drawMapCanvas(start_point, target_point, map_scale);
         // drawProjectileArc(target_point, start_point, arc_scale);
       });
@@ -523,13 +539,12 @@
         else{
           start_point[2] = click_pos[1];
         }
-        redrawArcCanvases(start_point, target_point);
+        updateArcPanel(start_point, target_point);
       });
-      $("#lesmokCheckbox").on("change", function(){drawProjectileArc(target_point, start_point, arc_scale)});
-      $("#arcGunSelect,#arcAmmoSelect").on("change", function(){redrawArcCanvases(start_point, target_point);});
+      $("#arcGunSelect,#arcAmmoSelect").on("change", function(){updateArcPanel(start_point, target_point);});
       // $("#arcMapSelect").on("change", function(){$("#mapImage").attr("src", "map-images/dunes.png");});
 
-      redrawArcCanvases(start_point, target_point);
+      updateArcPanel(start_point, target_point);
 
       console.log("Click before")
       $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click")
@@ -537,13 +552,12 @@
     });
 
 
-    function redrawArcCanvases(start_point, target_point){
+    function updateArcPanel(start_point, target_point){
       if (!(gun_dataset && ammo_dataset && ship_dataset)) {
         console.log("Still loading");
-        setTimeout(function(){ redrawArcCanvases(start_point, target_point); }, 1000);
+        setTimeout(function(){ updateArcPanel(start_point, target_point); }, 1000);
         return;
       }
-
 
       // start_point and target_point are 3d points with canvas-local coordinates
       // must be scaled to world coords
@@ -618,7 +632,7 @@
       let gun_sights_start_y = 213; // TODO base on gun
       let gun_sights_start_x = 110;
       let gun_sights_end_x = 206;
-      let gun_sights_px_per_rad = 10.46 / 258 * Math.PI / 180;
+      let gun_sights_px_per_rad = 10.46 / 255 * Math.PI / 180;
       let gun_sights_aim_y = gun_sights_start_y + angle_diff / gun_sights_px_per_rad;
 
       let gunCanvas = document.getElementById("gunCanvas");
@@ -629,6 +643,13 @@
       gunCtx.moveTo(gun_sights_start_x*gun_image_scale, gun_sights_aim_y*gun_image_scale);
       gunCtx.lineTo(gun_sights_end_x*gun_image_scale, gun_sights_aim_y*gun_image_scale);
       gunCtx.stroke();
+
+      // Update data table
+      $("#arcTableTime").text(precise(tAtHit(speed, angle, target_dist), 2) + "s");
+      $("#arcTableDistance").text(precise(target_dist, 3) + "m");
+      $("#arcTableAngleRel").text(precise(angle_diff * 180 / Math.PI, 2) + "\u00B0");
+      $("#arcTableAngleAbs").text(precise(angle * 180 / Math.PI, 2) + "\u00B0");
+
     }
 
 
