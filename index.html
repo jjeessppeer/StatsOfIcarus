@@ -590,7 +590,7 @@
       // Get world coords
       let map_image = document.querySelector("#mapImage");
       let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth);
-      console.log(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)"))
+      // console.log(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)"))
       let arc_scale = 10;
 
       let world_target = [target_point[0]*map_scale, target_point[1]*map_scale, target_point[2]*arc_scale];
