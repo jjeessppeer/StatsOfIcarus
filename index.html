@@ -109,11 +109,11 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Filter</div>
               </div>
-              <select class="form-control" id="shipFilterModeSelect">
+              <select class="form-control" id="shipFilterModeSelect" autocomplete="off">
                 <option>Include</option>
                 <option>Exclude</option>
               </select>
-              <select class="form-control" id="shipFilterSelect">
+              <select class="form-control" id="shipFilterSelect" autocomplete="off">
                 <option>All</option>
                 <option selected>Ship</option>
                 <option>Build name</option>
@@ -153,11 +153,11 @@
               <div class="input-group-prepend">
                 <div class="input-group-text">Filter</div>
               </div>
-              <select class="form-control" id="matchFilterModeSelect">
+              <select class="form-control" id="matchFilterModeSelect" autocomplete="off">
                 <option>Include</option>
                 <option>Exclude</option>
               </select>
-              <select class="form-control" id="matchFilterSelect">
+              <select class="form-control" id="matchFilterSelect" autocomplete="off">
                 <option>All</option>
                 <option>Date after (DDMMYYYY)</option>
                 <option>Date before (DDMMYYYY)</option>
@@ -199,7 +199,7 @@
               <div class="input-group-prepend small">
                 <div class="input-group-text">Gun</div>
               </div>
-              <select class="form-control" id="gunSelect">
+              <select class="form-control" id="gunSelect" autocomplete="off">
                 <option>Artemis</option>
                 <option>Light Flak</option>
                 <option>Gatling</option>
@@ -229,7 +229,7 @@
               <div class="input-group-prepend small">
                 <div class="input-group-text">Ammo</div>
               </div>
-              <select class="form-control" id="ammoSelect">
+              <select class="form-control" id="ammoSelect" autocomplete="off">
                 <option>Normal</option>
                 <option>Lochnagar</option>
                 <option>Heavy</option>
@@ -266,7 +266,7 @@
             <th class="medium">
               Armor
               <br>
-              <select id="armorUnitSelect" class="btn btn-mini">
+              <select id="armorUnitSelect" class="btn btn-mini" autocomplete="off">
                 <option>HP</option>
                 <option>Mallets</option>
                 <option>Galleon A.</option>
@@ -277,7 +277,7 @@
             <th class="medium">
               Hull
               <br>
-              <select id="hullUnitSelect" class="btn btn-mini">
+              <select id="hullUnitSelect" class="btn btn-mini" autocomplete="off">
                 <option>HP</option>
                 <option>Galleon H.</option>
                 <option>Pyramidion H.</option>
@@ -287,7 +287,7 @@
             <th class="medium">
               Balloon
               <br>
-              <select id="balloonUnitSelect" class="btn btn-mini">
+              <select id="balloonUnitSelect" class="btn btn-mini" autocomplete="off">
                 <option>HP</option>
                 <option>B. Mallets</option>
                 <option>Balloons</option>
@@ -296,7 +296,7 @@
             <th class="medium">
               Component
               <br>
-              <select id="componentUnitSelect" class="btn btn-mini">
+              <select id="componentUnitSelect" class="btn btn-mini" autocomplete="off">
                 <option>HP</option>
                 <option>Mallets</option>
                 <option>Light Guns</option>
@@ -320,7 +320,7 @@
               <div class="input-group-prepend small">
                 <div class="input-group-text">Gun</div>
               </div>
-              <select class="form-control" id="arcGunSelect">
+              <select class="form-control" id="arcGunSelect" autocomplete="off">
                 <option>Lumberjack</option>
                 <option>Hades</option>
                 <option>Heavy Flak</option>
@@ -334,7 +334,7 @@
               <div class="input-group-prepend small">
                 <div class="input-group-text">Ammo</div>
               </div>
-              <select class="form-control" id="arcAmmoSelect">
+              <select class="form-control" id="arcAmmoSelect" autocomplete="off">
                 <option>Normal</option>
                 <option>Lochnagar</option>
                 <option>Heavy</option>
@@ -355,7 +355,7 @@
               <div class="input-group-prepend small">
                 <div class="input-group-text">Map</div>
               </div>
-              <select class="form-control" id="arcMapSelect">
+              <select class="form-control" id="arcMapSelect" autocomplete="off">
                 <option>Dunes</option>
                 <option selected>Fjords</option>
               </select>
@@ -452,6 +452,8 @@
     var ship_dataset = null;
     var tool_dataset = null;
     var component_dataset = null;
+    var crosshair_dataset = null;
+    var map_dataset = null;
 
     $(document).ready(function () {
       
@@ -498,18 +500,19 @@
         gunnerySelectionSubmitted();
       });
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 10, function (dataset) {
-        console.log("Map dataset: ")
-        console.log(dataset);
+        map_dataset = dataset;
+      });
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 11, function (dataset) {
+        crosshair_dataset = dataset;
       });
 
 
+      // Aim calculator variables
       var start_point = [100, 100, 100];
       var target_point = [200, 200, 100];
-      // let map_image = document.querySelector("#mapImage");
-      // var map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
-      // console.log(map_scale);
-      // var arc_scale = 10;
+      updateArcPanel(start_point, target_point);
 
+      // Aim calculator events
       $("#mapCanvas").on("mousemove mousedown", function(e){
         if (e.buttons != 1) return;
         let click_pos = [e.pageX - $(this).offset().left, this.width - e.pageY + $(this).offset().top];
@@ -542,18 +545,20 @@
         updateArcPanel(start_point, target_point);
       });
       $("#arcGunSelect,#arcAmmoSelect").on("change", function(){updateArcPanel(start_point, target_point);});
-      // $("#arcMapSelect").on("change", function(){$("#mapImage").attr("src", "map-images/dunes.png");});
+      $("#arcMapSelect").on("change", function(){
+        let map_srcs = {"Dunes": "map-images/dunes.png", "Fjords": "map-images/fjords.png"};
+        $("#mapImage").attr("src", map_srcs[$(this).val()]);
+        updateArcPanel(start_point, target_point);
+        });
 
       updateArcPanel(start_point, target_point);
 
-      console.log("Click before")
-      $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click")
-      console.log("Click after")
+      $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click");
     });
 
 
     function updateArcPanel(start_point, target_point){
-      if (!(gun_dataset && ammo_dataset && ship_dataset)) {
+      if (!(gun_dataset && ammo_dataset && ship_dataset && crosshair_dataset && map_dataset)) {
         console.log("Still loading");
         setTimeout(function(){ updateArcPanel(start_point, target_point); }, 1000);
         return;
@@ -563,12 +568,13 @@
       // must be scaled to world coords
       // Get world coords
       let map_image = document.querySelector("#mapImage");
-      let map_scale = 4.23 / (map_image.width / map_image.naturalWidth);
+      let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth);
+      console.log(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)"))
       let arc_scale = 10;
 
       let world_target = [target_point[0]*map_scale, target_point[1]*map_scale, target_point[2]*arc_scale];
       let world_start = [start_point[0]*map_scale, start_point[1]*map_scale, start_point[2]*arc_scale];
-
+      
       // Gun and ammo data
       let gun_type = $("#arcGunSelect").val();
       let ammo_type = $("#arcAmmoSelect").val();
@@ -632,7 +638,7 @@
       let gun_sights_start_y = 213; // TODO base on gun
       let gun_sights_start_x = 110;
       let gun_sights_end_x = 206;
-      let gun_sights_px_per_rad = 10.46 / 255 * Math.PI / 180;
+      let gun_sights_px_per_rad = crosshair_dataset.getCellByString("Lumberjack", "Name", "Deg per pixel") * Math.PI / 180;
       let gun_sights_aim_y = gun_sights_start_y + angle_diff / gun_sights_px_per_rad;
 
       let gunCanvas = document.getElementById("gunCanvas");

@@ -116,15 +116,16 @@ function sheetToDataset(sheet_json) {
 
     let last_y = -1;
     for (let i = 0; i < entries.length; i++) {
-        let coord_text = entries[i].title["$t"];
-        let [x, y] = textToXYCoords(coord_text);
+        let y = parseInt(entries[i]["gs$cell"].row) - 1;
+        let x = parseInt(entries[i]["gs$cell"].col) - 1;
+        // console.log("x: ", x, ", y: ", y);
         if (y != last_y) {
             // Create new row
             last_y = y;
             db_arr.push([]);
         }
         // Push column to current row
-        db_arr[last_y].push(entries[i].content["$t"]);
+        db_arr[last_y].push(entries[i]["gs$cell"].inputValue);
     }
 
     titles = db_arr[0];
