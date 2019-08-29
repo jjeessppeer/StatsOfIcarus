@@ -12,14 +12,21 @@
    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
 
 
+  <!-- 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
     crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-    crossorigin="anonymous"></script>
+    crossorigin="anonymous"></script> 
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
     crossorigin="anonymous"></script>
+  -->
+
+  <link rel="stylesheet" href="deps/bootstrap.min.css">
+  <script src="deps/jquery-3.4.1.slim.min.js"></script>
+  <script src="deps/popper.min.js"></script>
+  <script src="deps/bootstrap.min.js"></script>
 
   <script src="utils.js"></script>
   <script src="docsapi.js"></script>
@@ -323,7 +330,7 @@
               <select class="form-control" id="arcGunSelect" autocomplete="off">
                 <option>Lumberjack</option>
                 <option>Hades</option>
-                <option>Heavy Flak</option>
+                <option>Heavy Flak Mk. II</option>
               </select>
             </div>
           </div>
@@ -544,7 +551,17 @@
         }
         updateArcPanel(start_point, target_point);
       });
-      $("#arcGunSelect,#arcAmmoSelect").on("change", function(){updateArcPanel(start_point, target_point);});
+      $("#arcAmmoSelect").on("change", function(){updateArcPanel(start_point, target_point);});
+
+      $("#arcGunSelect").on("change", function(){
+        // let gun_srcs = {"Lumberjack": "gun-images/lumberjack.png", "Heavy Flak Mk. II": "gun-images/flak.png", "Hades": "gun-images/lumberjack.png"};
+        // let gun_image = $("#gunImage")[0];
+        // gun_image.src = gun_srcs[$(this).val()];
+        // // $("#gunImage").attr("src", gun_srcs[$(this).val()]);
+        // let image_height = 400;
+        // let image_scale = gun_image.
+        updateArcPanel(start_point, target_point);
+      });
       $("#arcMapSelect").on("change", function(){
         let map_srcs = {"Dunes": "map-images/dunes.png", "Fjords": "map-images/fjords.png"};
         $("#mapImage").attr("src", map_srcs[$(this).val()]);
