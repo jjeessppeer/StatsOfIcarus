@@ -329,7 +329,7 @@
               </div>
               <select class="form-control" id="arcGunSelect" autocomplete="off">
                 <option>Lumberjack</option>
-                <option>Hades</option>
+                <!-- <option>Hades</option> -->
                 <option>Heavy Flak Mk. II</option>
               </select>
             </div>
@@ -394,8 +394,8 @@
             <b>Gunner view, aim with the red line</b>
             <br>
             <div id="gunContainer" class="img-canvas-container column">
-              <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="400" height="478" />
-              <canvas id="gunCanvas" width="400" height="478">
+              <img id="gunImage" class='img' src="gun-images/lumberjack.png" width="334" height="400" />
+              <canvas id="gunCanvas" width="334" height="400">
                 Your browser does not support the HTML5 canvas tag.</canvas>
             </div>
           </div>
@@ -463,7 +463,6 @@
     var map_dataset = null;
 
     $(document).ready(function () {
-      
 
       $("li").on("click", sidebarLinkClicked);
       $("#shipFilterSelect,#shipFilterModeSelect").on("change", shipFilterSubmitted);
@@ -533,8 +532,6 @@
           start_point[1] = click_pos[1];
         }
         updateArcPanel(start_point, target_point);
-        // drawMapCanvas(start_point, target_point, map_scale);
-        // drawProjectileArc(target_point, start_point, arc_scale);
       });
 
       $("#arcCanvas").on("mousemove mousedown", function(e){
@@ -553,14 +550,20 @@
       });
       $("#arcAmmoSelect").on("change", function(){updateArcPanel(start_point, target_point);});
 
-      $("#arcGunSelect").on("change", function(){
-        // let gun_srcs = {"Lumberjack": "gun-images/lumberjack.png", "Heavy Flak Mk. II": "gun-images/flak.png", "Hades": "gun-images/lumberjack.png"};
-        // let gun_image = $("#gunImage")[0];
-        // gun_image.src = gun_srcs[$(this).val()];
-        // // $("#gunImage").attr("src", gun_srcs[$(this).val()]);
-        // let image_height = 400;
-        // let image_scale = gun_image.
-        updateArcPanel(start_point, target_point);
+      $("#arcGunSelect").on("change", function () {
+        let gun_srcs = { "Lumberjack": "gun-images/lumberjack.png", "Heavy Flak Mk. II": "gun-images/flak.png", "Hades": "gun-images/lumberjack.png" };
+        let gun_image = $("#gunImage")[0];
+        gun_image.src = gun_srcs[$(this).val()];
+        runOnComplete(gun_image, function(gun_image){
+          let gun_canvas = document.querySelector("#gunCanvas");
+          let image_height = 400;
+          let image_scale = image_height / gun_image.naturalHeight;
+          gun_image.height = image_height;
+          gun_canvas.height = image_height;
+          gun_image.width = gun_image.naturalWidth * image_scale;
+          gun_canvas.width = gun_image.naturalWidth * image_scale;
+          updateArcPanel(start_point, target_point);
+        })
       });
       $("#arcMapSelect").on("change", function(){
         let map_srcs = {"Dunes": "map-images/dunes.png", "Fjords": "map-images/fjords.png"};
@@ -652,10 +655,11 @@
       let gun_image = document.querySelector("#gunImage");
       let gun_image_scale = (gun_image.width / gun_image.naturalWidth);
       
-      let gun_sights_start_y = 213; // TODO base on gun
-      let gun_sights_start_x = 110;
-      let gun_sights_end_x = 206;
-      let gun_sights_px_per_rad = crosshair_dataset.getCellByString("Lumberjack", "Name", "Deg per pixel") * Math.PI / 180;
+
+      let gun_sights_start_y = parseInt(crosshair_dataset.getCellByString(gun_type, "Name", "Start y")); // TODO base on gun
+      let gun_sights_start_x = parseInt(crosshair_dataset.getCellByString(gun_type, "Name", "Start x"));
+      let gun_sights_end_x = parseInt(crosshair_dataset.getCellByString(gun_type, "Name", "End x"));
+      let gun_sights_px_per_rad = crosshair_dataset.getCellByString(gun_type, "Name", "Deg per pixel") * Math.PI / 180;
       let gun_sights_aim_y = gun_sights_start_y + angle_diff / gun_sights_px_per_rad;
 
       let gunCanvas = document.getElementById("gunCanvas");
@@ -663,6 +667,7 @@
       gunCtx.clearRect(0, 0, gunCanvas.width, gunCanvas.height);
       gunCtx.beginPath();
       gunCtx.strokeStyle = "red";
+      gunCtx.lineWidth = 4; 
       gunCtx.moveTo(gun_sights_start_x*gun_image_scale, gun_sights_aim_y*gun_image_scale);
       gunCtx.lineTo(gun_sights_end_x*gun_image_scale, gun_sights_aim_y*gun_image_scale);
       gunCtx.stroke();

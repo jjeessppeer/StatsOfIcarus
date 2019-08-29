@@ -34,6 +34,13 @@
 .img-canvas-container > canvas{
     position:relative;
     z-index:20;
+    /* background: rgb(163, 163, 163);  */
+}
+
+.img-canvas-container > img{
+    /* position:relative; */
+    /* z-index:20; */
+    background: rgb(163, 163, 163); 
 }
 
 /* Mini select */

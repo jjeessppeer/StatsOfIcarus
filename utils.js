@@ -1,3 +1,16 @@
+function runOnComplete(object, callback) {
+    if (object.complete) {
+        callback(object);
+    } else {
+        object.addEventListener('load', function(){callback(object)});
+        object.addEventListener('error', function () {
+            alert('error');
+        })
+    }
+
+}
+
+
 
 function textToXYCoords(text_coords){
     //Convert coordinates on form A1 into [x, y]. Example B2 -> [1, 1]
