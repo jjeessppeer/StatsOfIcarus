@@ -320,6 +320,7 @@
 
       <!-- Arc calculator -->
       <div id="projectileArcs" class="content-panel" style="display:none">
+        <h1>Work in progress</h1>
         <h1>Projectile arcs and aiming</h1>
         <div class="row row-margin">
           <div class="col-sm-4">
@@ -601,6 +602,7 @@
 
       let speed = gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed") * ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed");
       let drop = gun_dataset.getCellByString(gun_type, "Alias", "Shell drop") * ( 2 - ammo_dataset.getCellByString(ammo_type, "Alias", "Lift"));
+      // console.log(drop);
       let angle = searchAngle(world_start, world_target, speed, drop);
       let target_dist = dist2D(world_start, world_target);
 
