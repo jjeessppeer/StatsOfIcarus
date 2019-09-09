@@ -9,59 +9,13 @@ function initializeDamageCalculator() {
     updateGunInfoTable();
 }
 
-// function gunnerySelectionSubmitted() {
-//     if (!(gun_dataset && ammo_dataset && damage_dataset && tool_dataset && component_dataset && ship_dataset)) {
-//         console.log("Still loading");
-//         return;
-//     }
-//     console.log("Changing gun selection");
-//     let gunAlias = $("#gunSelect").val();
-//     let ammoAlias = $("#ammoSelect").val();
-//     updateGunInfoTable();
-// }
-
-function getGunNumbers(gunName, ammoName, distance = 0, chargeupTime = 0) {
+function getGunNumbers(gunName, ammoName) {
     let buffed = $("#buffedCheckbox").is(':checked');
     let gun_type = $("#gunSelect").val();
     let ammo_type = $("#ammoSelect").val();
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
     let ammo_data = ammo_dataset.filterByString(ammo_type, "Alias").getDatasetRow(0);
-
-    // Calculate stuff
-
-    let clip_size = Math.max(1, Math.round(gun_data[8] * ammo_data[4]));
-    let rate_of_fire = gun_data[6] * ammo_data[9];
-
-    let range = gun_data[10] * ammo_data[10];
-    let arming_distance = gun_data[15] * gun_data[9] * ammo_data[5] * ammo_data[10];
-    let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
-    let aoe = gun_data[13] * ammo_data[5];
-
-    
-    let info_dict = {
-        "range": range, 
-        "arming distance": arming_distance, 
-        "seconds per clip": seconds_clip, 
-        "clip size": clip_size, 
-        "aoe": aoe};
-
-
-    let damage_type_primary = gun_data[2];
-    let damage_type_secondary = gun_data[4];
-
-    let damage_hit_primary = gun_data[3] * ammo_data[7] * (buffed ? 1.2 : 1);
-    let damage_hit_secondary = gun_data[5] * ammo_data[7] * ammo_data[6] * (buffed ? 1.2 : 1);
-
-    let damage_clip_primary = damage_hit_primary * clip_size;
-    let damage_clip_secondary = damage_hit_secondary * clip_size;
-
-    let damage_second_1_primary = damage_clip_primary / seconds_clip;
-    let damage_second_1_secondary = damage_clip_secondary / seconds_clip;
-
-    let damage_second_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
-    let damage_second_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
-
 
     // Damage unit scales
     let unit_dict = {
@@ -80,14 +34,87 @@ function getGunNumbers(gunName, ammoName, distance = 0, chargeupTime = 0) {
         "Light Engines": component_dataset.getCellByString("Light Engine", "Name", "HP"),
         "Heavy Engines": component_dataset.getCellByString("Heavy Engine", "Name", "HP")
     };
-
     let armor_unit_scale = 1 / unit_dict[$("#armorUnitSelect").val()];
     let hull_unit_scale = 1 / unit_dict[$("#hullUnitSelect").val()];
     let balloon_unit_scale = 1 / unit_dict[$("#balloonUnitSelect").val()];
     let component_unit_scale = 1 / unit_dict[$("#componentUnitSelect").val()];
 
-    // Calculate damages
+    // Calculate stuff
+
+    let clip_size = Math.max(1, Math.round(gun_data[8] * ammo_data[4]));
+    let rate_of_fire = gun_data[6] * ammo_data[9];
+
+    let range = gun_data[10] * ammo_data[10];
+    let arming_distance = gun_data[15] * gun_data[9] * ammo_data[5] * ammo_data[10];
+    let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
+    let aoe = gun_data[13] * ammo_data[5];
+
+    let special_info = null;
     let damage_dict = {};
+    let info_dict = {
+        "range": range, 
+        "arming distance": arming_distance, 
+        "seconds per clip": seconds_clip, 
+        "clip size": clip_size, 
+        "aoe": aoe};
+
+
+    let damage_type_primary = gun_data[2];
+    let damage_type_secondary = gun_data[4];
+
+    let damage_hit_primary = gun_data[3] * ammo_data[7] * (buffed ? 1.2 : 1);
+    let damage_hit_secondary = gun_data[5] * ammo_data[7] * ammo_data[6] * (buffed ? 1.2 : 1);
+    
+    // Aten Lens special case
+    if (gun_type == "Aten Lens Array"){
+        special_info = "laser";
+
+        // Laser dont shoot for first 1.75 seconds
+        seconds_clip += 1.75;
+
+        // Calculate damage done in X seconds
+
+        let shooting_time = 10;
+        let damage_X_mod = laserAvgDamage(gun_data, ammo_data, 400, shooting_time);
+        let shots_per_X = Math.floor(shooting_time * rate_of_fire);
+        let damage_X_primary = damage_hit_primary * shots_per_X * damage_X_mod;
+        let damage_X_secondary = damage_hit_secondary * shots_per_X * damage_X_mod;
+        
+        console.log("Shots per X: ", shots_per_X);
+        console.log("damage_X_mod: ", damage_X_mod);
+        console.log("Shots per X: ", shots_per_X);
+
+
+        damage_dict["per X seconds"] = {};
+        damage_dict["per X seconds"]["armor"] = armor_unit_scale * (damage_X_primary * getDamageMod(damage_type_primary, "Armor") + damage_X_secondary * getDamageMod(damage_type_secondary, "Armor"));
+        damage_dict["per X seconds"]["hull"] = hull_unit_scale * (damage_X_primary * getDamageMod(damage_type_primary, "Hull") + damage_X_secondary * getDamageMod(damage_type_secondary, "Hull"));
+        damage_dict["per X seconds"]["balloon"] = balloon_unit_scale * (damage_X_primary * getDamageMod(damage_type_primary, "Balloon") + damage_X_secondary * getDamageMod(damage_type_secondary, "Balloon"));
+        damage_dict["per X seconds"]["component"] = component_unit_scale * (damage_X_primary * getDamageMod(damage_type_primary, "Components") + damage_X_secondary * getDamageMod(damage_type_secondary, "Components"));
+        
+
+        // Scale damage for later calculations
+        let laser_damage_modifier = laserAvgDamage(gun_data, ammo_data, 400, seconds_clip);
+        damage_hit_primary *= laser_damage_modifier;
+        damage_hit_secondary *= laser_damage_modifier;
+    }
+    // TODO tempest special case
+
+    let damage_clip_primary = damage_hit_primary * clip_size;
+    let damage_clip_secondary = damage_hit_secondary * clip_size;
+
+    let damage_second_1_primary = damage_clip_primary / seconds_clip;
+    let damage_second_1_secondary = damage_clip_secondary / seconds_clip;
+
+    let damage_second_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
+    let damage_second_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
+
+    
+
+    
+
+    
+
+    // Calculate damages
 
     // Damage / shot
     damage_dict["per shot"] = {};
@@ -131,6 +158,12 @@ function getGunNumbers(gunName, ammoName, distance = 0, chargeupTime = 0) {
     damage_dict["fire"]["balloon"] = fire_clip_balloon_primary + fire_clip_balloon_secondary;
     damage_dict["fire"]["component"] = fire_clip_component_primary + fire_clip_component_secondary;
 
+    // // Aten Lens special case
+    // if (gun_type == "Aten Lens Array"){
+    //     damage_dict["per X seconds"] = {};
+
+    // }
+
     return {"damage": damage_dict, "info": info_dict};
 }
 
@@ -162,8 +195,17 @@ function updateGunInfoTable() {
           <td>` + precise(gun_numbers.damage["per shot"]["hull"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per shot"]["balloon"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per shot"]["component"], 3) + `</td>
-        </tr>
-        <tr>
+        </tr>` + 
+        (!gun_numbers.damage.hasOwnProperty("per X seconds") ? 
+        "" :  
+        `<tr>
+          <th>Damage in 10 seconds</th>
+          <td>` + precise(gun_numbers.damage["per X seconds"]["armor"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per X seconds"]["hull"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per X seconds"]["balloon"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per X seconds"]["component"], 3) + `</td>
+        </tr>`) + 
+        `<tr>
           <th>Damage / second (one clip)</th>
           <td>` + precise(gun_numbers.damage["per second"]["armor"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per second"]["hull"], 3) + `</td>

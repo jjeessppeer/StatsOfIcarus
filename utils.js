@@ -146,3 +146,39 @@ function tAtHit(speed, angle, target_x){
     // Return time that projectile reaches target
     return target_x/(speed * Math.cos(angle));
 }
+
+
+// Damage calculations
+
+
+function laserAvgDamage(gun_data, ammo_data, distance, time) {
+    // Hardcoded numbers, very sad :(
+    let chargeup_time = 1.75;
+    let damage_falloff_start = 300;
+    let damage_falloff_per_second = 1.65;    
+
+    // Damage falloff starts at 300m scales linearly
+    let distance_modifier = 1 - damage_falloff_per_second * (distance - damage_falloff_start) / (gun_data[9] * ammo_data[10]);
+
+    // Laser chargeup damage modifier
+    let active_time = Math.max(0, time - chargeup_time);
+
+    let t_r = Math.min(6, active_time);
+    let final_ramping_damage = 1 + 3 * (t_r / 6);
+    let avg_ramping_damage = (1 + final_ramping_damage) / 2;
+
+    let t_s = active_time - t_r;
+    let damage_stable = 4;
+
+    let time_modifier = active_time <= 0 ? 0 : (t_r * avg_ramping_damage + t_s * damage_stable) / active_time;
+
+    // Avg damage per hit.
+    let laser_damage_modifier = time_modifier * distance_modifier;
+    console.log("Distance modifier: ", distance_modifier);
+    console.log("Time modifier: ", time_modifier);
+    console.log("Damage modifier: ", laser_damage_modifier);
+    return laser_damage_modifier;
+
+
+   
+}
