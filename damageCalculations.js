@@ -5,9 +5,18 @@ function initializeDamageCalculator() {
     // Bind events
     $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect").on("change", updateGunInfoTable);
 
+
+
+    $("#distanceRange,#timeRange").on("input", updateGunInfoTable);
+    // $("#distanceText").inputFilter(function (value) {
+    //     console.log(this);
+    //     return /^[\d]*?$/.test(value) && (!parseInt(value) || parseInt(value) < 100) //allow float in range 0 to 1, or nothing.
+    //   });
     // Update table
     updateGunInfoTable();
 }
+
+
 
 function getGunNumbers(gunName, ammoName) {
     let buffed = $("#buffedCheckbox").is(':checked');
@@ -74,16 +83,17 @@ function getGunNumbers(gunName, ammoName) {
 
         // Calculate damage done in X seconds
 
-        let shooting_time = 10;
-        let damage_X_mod = laserAvgDamage(gun_data, ammo_data, 400, shooting_time);
+        let shooting_time = parseFloat($("#timeRange").val());
+        let target_distance = parseFloat($("#distanceRange").val());
+        info_dict["shooting time"] = shooting_time;
+        let damage_X_mod = laserAvgDamage(gun_data, ammo_data, target_distance, shooting_time);
         let shots_per_X = Math.floor(shooting_time * rate_of_fire);
         let damage_X_primary = damage_hit_primary * shots_per_X * damage_X_mod;
         let damage_X_secondary = damage_hit_secondary * shots_per_X * damage_X_mod;
         
-        console.log("Shots per X: ", shots_per_X);
-        console.log("damage_X_mod: ", damage_X_mod);
-        console.log("Shots per X: ", shots_per_X);
-
+        // console.log("Shots per X: ", shots_per_X);
+        // console.log("damage_X_mod: ", damage_X_mod);
+        // console.log("Shots per X: ", shots_per_X);
 
         damage_dict["per X seconds"] = {};
         damage_dict["per X seconds"]["armor"] = armor_unit_scale * (damage_X_primary * getDamageMod(damage_type_primary, "Armor") + damage_X_secondary * getDamageMod(damage_type_secondary, "Armor"));
@@ -93,7 +103,7 @@ function getGunNumbers(gunName, ammoName) {
         
 
         // Scale damage for later calculations
-        let laser_damage_modifier = laserAvgDamage(gun_data, ammo_data, 400, seconds_clip);
+        let laser_damage_modifier = laserAvgDamage(gun_data, ammo_data, target_distance, seconds_clip);
         damage_hit_primary *= laser_damage_modifier;
         damage_hit_secondary *= laser_damage_modifier;
     }
@@ -107,12 +117,6 @@ function getGunNumbers(gunName, ammoName) {
 
     let damage_second_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
     let damage_second_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
-
-    
-
-    
-
-    
 
     // Calculate damages
 
@@ -158,11 +162,6 @@ function getGunNumbers(gunName, ammoName) {
     damage_dict["fire"]["balloon"] = fire_clip_balloon_primary + fire_clip_balloon_secondary;
     damage_dict["fire"]["component"] = fire_clip_component_primary + fire_clip_component_secondary;
 
-    // // Aten Lens special case
-    // if (gun_type == "Aten Lens Array"){
-    //     damage_dict["per X seconds"] = {};
-
-    // }
 
     return {"damage": damage_dict, "info": info_dict};
 }
@@ -174,7 +173,23 @@ function updateGunInfoTable() {
         return;
     }
 
+    // get gun data
     let gun_numbers = getGunNumbers();
+
+    // Hide/show laser ui
+    let laser_div = $("#laserExtras");
+    $("#gunSelect").val() == "Aten Lens Array" ? laser_div.show() : laser_div.hide();
+    if ($("#gunSelect").val() == "Aten Lens Array"){
+        let dist_range = $("#distanceRange");
+        let time_range = $("#timeRange");
+
+        dist_range.prop("max", gun_numbers.info.range);
+        time_range.prop("max", gun_numbers.info["seconds per clip"]);
+
+        $("#distanceText").val(dist_range.val());
+        $("#timeText").val(parseFloat(time_range.val()).toFixed(1));
+    }
+
     // Fill out UI
 
     let gunTableContents = $(`
@@ -189,23 +204,23 @@ function updateGunInfoTable() {
     $("#gunContent").append(gunTableContents);
 
     let damageTableContents = $(`
-        <tr>
-          <th>Damage / shot</th>
-          <td>` + precise(gun_numbers.damage["per shot"]["armor"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per shot"]["hull"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per shot"]["balloon"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per shot"]["component"], 3) + `</td>
-        </tr>` + 
+        <tr>` + 
         (!gun_numbers.damage.hasOwnProperty("per X seconds") ? 
         "" :  
         `<tr>
-          <th>Damage in 10 seconds</th>
+          <th>Damage in `+gun_numbers.info["shooting time"]+` seconds</th>
           <td>` + precise(gun_numbers.damage["per X seconds"]["armor"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per X seconds"]["hull"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per X seconds"]["balloon"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per X seconds"]["component"], 3) + `</td>
         </tr>`) + 
-        `<tr>
+        `
+          <th>Damage / shot</th>
+          <td>` + precise(gun_numbers.damage["per shot"]["armor"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per shot"]["hull"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per shot"]["balloon"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per shot"]["component"], 3) + `</td>
+        </tr><tr>
           <th>Damage / second (one clip)</th>
           <td>` + precise(gun_numbers.damage["per second"]["armor"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per second"]["hull"], 3) + `</td>

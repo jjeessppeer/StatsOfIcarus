@@ -154,11 +154,13 @@ function tAtHit(speed, angle, target_x){
 function laserAvgDamage(gun_data, ammo_data, distance, time) {
     // Hardcoded numbers, very sad :(
     let chargeup_time = 1.75;
-    let damage_falloff_start = 300;
+    let damage_falloff_start = 300 * ammo_data[10];
     let damage_falloff_per_second = 1.65;    
 
     // Damage falloff starts at 300m scales linearly
-    let distance_modifier = 1 - damage_falloff_per_second * (distance - damage_falloff_start) / (gun_data[9] * ammo_data[10]);
+    let distance_modifier = distance > damage_falloff_start ? 
+        1 - damage_falloff_per_second * (distance - damage_falloff_start) / (gun_data[9] * ammo_data[10]) : 
+        1;
 
     // Laser chargeup damage modifier
     let active_time = Math.max(0, time - chargeup_time);
@@ -174,11 +176,24 @@ function laserAvgDamage(gun_data, ammo_data, distance, time) {
 
     // Avg damage per hit.
     let laser_damage_modifier = time_modifier * distance_modifier;
-    console.log("Distance modifier: ", distance_modifier);
-    console.log("Time modifier: ", time_modifier);
-    console.log("Damage modifier: ", laser_damage_modifier);
+    // console.log("Distance modifier: ", distance_modifier);
+    // console.log("Time modifier: ", time_modifier);
+    // console.log("Damage modifier: ", laser_damage_modifier);
     return laser_damage_modifier;
 
 
    
 }
+
+$.fn.inputFilter = function (inputFilter) {
+    return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function () {
+      if (inputFilter(this.value)) {
+        this.oldValue = this.value;
+        this.oldSelectionStart = this.selectionStart;
+        this.oldSelectionEnd = this.selectionEnd;
+      } else if (this.hasOwnProperty("oldValue")) {
+        this.value = this.oldValue;
+        this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+      }
+    });
+  };
