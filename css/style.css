@@ -44,13 +44,10 @@
 }
 
 /* Mini select */
-select.btn-mini {
+/* select.btn-mini {
     height: auto;
     font-size: 10px;
-    /* line-height: 14px;
-    margin-left: -20px;
-    margin-top: 9px; */
-}
+} */
 
 /* this is optional (see below) */
 /* select.btn {
