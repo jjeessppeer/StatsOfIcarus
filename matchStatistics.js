@@ -397,7 +397,7 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
                 },
                 title: {
                     display: true,
-                    text: 'Win ratio against  ships'
+                    text: 'Win rate against enemy ship'
                 },
                 tooltips: {
                     callbacks: {
