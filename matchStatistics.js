@@ -119,12 +119,16 @@ function updateStatsPanel(active_ship) {
         
         let [p, t] = pickRateShip(match_dataset.getDatasetRows(), SHIP_LIST[i]);
         data.x = p/t;
+        data.r = 12;
 
-        scatter_data.push(data);
-
-        if (active_ship == SHIP_LIST[i]) scatter_colours.push("rgba(50, 200, 50, 1)");
+        if (active_ship == SHIP_LIST[i]){
+            scatter_colours.push("rgba(50, 200, 50, 1)");
+            data.r = 18;
+        } 
         else scatter_colours.push('rgba(150, 150, 150, 1)');
         scatter_labels.push(SHIP_LIST[i]);
+        
+        scatter_data.push(data);
     }
 
 
@@ -185,12 +189,12 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
     let [scatter_data, scatter_labels, scatter_colours] = scatter;
     if (!scatterChart){
         scatterChart = new Chart(ctx_bub, {
-            type: 'scatter',
+            type: 'bubble',
             data: {
                 datasets: [{
                     label: 'Scatter Dataset',
-                    pointRadius: 10,
-                    pointHoverRadius: 15,
+                    // pointRadius: 10,
+                    // pointHoverRadius: 15,
                     data: scatter_data,
                     backgroundColor: scatter_colours
                 }],
@@ -247,6 +251,7 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
     }
     else{
         scatterChart.data.datasets[0].backgroundColor = scatter_colours;
+        scatterChart.data.datasets[0].data = scatter_data;
         scatterChart.update();
 
     }
