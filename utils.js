@@ -1,3 +1,26 @@
+var SHIP_LIST = [
+    'Goldfish', 
+    'Junker', 
+    'Squid', 
+    'Galleon',
+    'Spire',
+    'Pyramidion',
+    'Mobula',
+    'Magnate',
+    'Crusader',
+    'Judgement',
+    'Corsair',
+    'Shrike',
+    'Stormbreaker'
+]
+
+function randomRGB(alpha=1){
+    let r = Math.floor(Math.random() * 256);
+    let g = Math.floor(Math.random() * 256);
+    let b = Math.floor(Math.random() * 256);
+    return "rgba("+r+", "+b+", "+g+", "+alpha+")";
+}
+
 function runOnComplete(object, callback) {
     if (object.complete) {
         callback(object);

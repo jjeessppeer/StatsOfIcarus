@@ -27,10 +27,12 @@
   <script src="deps/jquery-3.4.1.slim.min.js"></script>
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
 
   <script src="utils.js"></script>
   <script src="docsapi.js"></script>
   <script src="damageCalculations.js"></script>
+  <script src="matchStatistics.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <!-- <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
      crossorigin="anonymous"></script>
@@ -89,6 +91,14 @@
             Damage calculator
           </a>
         </li>
+
+        <li id="rangeLink" data-show="#rangeVisualizer">
+          <a href="#rangeVisualizer">
+            <i class="fas fa-binoculars"></i>
+            Range Visualizer
+          </a>
+        </li>
+
         <li id="projectileArcsLink" data-show="#projectileArcs">
             <a href="#projectileArcs">
             <i class="fas fa-meteor"></i>
@@ -149,8 +159,54 @@
 
       </div>
 
-      <!-- Ship counterer -->
-      <div id="matchAnalysis" class="content-panel" style="display:none">TODO: Statistical analysis on match history
+      <!-- Match history analysis -->
+      <div id="matchAnalysis" class="content-panel" style="display:none">
+        <h1>Match history statistics</h1>
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Ship</div>
+              </div>
+              <select class="form-control" id="statsShipSelect" autocomplete="off">
+                <option selected>Goldfish</option>
+                <option>Junker</option>
+                <option>Squid</option>
+                <option>Galleon</option>
+                <option>Spire</option>
+                <option>Pyramidion</option>
+                <option>Mobula</option>
+                <option>Magnate</option>
+                <option>Crusader</option>
+                <option>Judgement</option>
+                <option>Corsair</option>
+                <option>Shrike</option>
+                <option>Stormbreaker</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-s-3">
+              <canvas id="prChart" width="200" height="200"></canvas>
+          </div>
+          <div class="col-s-3">
+              <canvas id="wlChart" width="200" height="200"></canvas>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-s-5">
+            <canvas id="winRatioEnemyChart" width="400" height="400"></canvas>
+          </div>
+          <div class="col-s-2">
+            &nbsp &nbsp &nbsp
+          </div>
+      
+          <div class="col-s-5">
+            <canvas id="winRatioAllyChart" width="400" height="400"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- Match Database -->
@@ -343,9 +399,18 @@
 
       </div>
 
+      <!-- Range visualizer -->
+      <div id="rangeVisualizer" class="content-panel" style="display:none">
+        <h3>UNDER CONSTRUCTION</h3>
+        <div id="rangeMapContainer" class="img-canvas-container">
+          <br>
+          <img id="mapImage" class='img' src="map-images/dunes.png" width="400" height="400" />
+          <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
+        </div>
+      </div>
+
       <!-- Arc calculator -->
       <div id="projectileArcs" class="content-panel" style="display:none">
-        <h1>Work in progress</h1>
         <h1>Projectile arcs and aiming</h1>
         <div class="row row-margin">
           <div class="col-sm-4">
@@ -592,8 +657,94 @@
 
       updateArcPanel(start_point, target_point);
 
+      
+      
+      //--- Range visualization ---
+      updateRangeVis();
+
+      //--- Match statistics ---
+      initializeMatchStatistics();
+      
+      
       $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click");
+
+
     });
+
+  
+
+    function updateRangeVis(){
+      if (!(gun_dataset && ammo_dataset && ship_dataset && map_dataset)) {
+        console.log("Still loading");
+        setTimeout(function(){ updateRangeVis(); }, 1000);
+        return;
+      }
+
+
+      // Map canvas
+      let rangeCanvas = document.getElementById("rangeCanvas");
+      let ctx = rangeCanvas.getContext("2d");
+      //ctx.clearRect(0, 0, rangeCanvas.width, rangeCanvas.height);
+      
+      // TODO wrong image
+      let map_image = document.querySelector("#mapImage");
+      let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth);
+      
+      let gun_type = "Lumberjack";
+      let ammo_type = "Charged";
+      
+
+      let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
+      let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
+
+
+      let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
+      let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
+      
+      console.log("Speeds", proj_speed_mod, ", ", proj_speed, ", ", arming_range);
+      let range_px = range/map_scale;
+      let arming_range_px = arming_range/map_scale;
+      let side_angle = gun_dataset.getCellByString("Gatling", "Alias", "Side angle");
+
+      let cy = 300;
+      let cx = 200;
+
+      let initial_angle = -Math.PI/2
+      
+      
+      //ctx.stroke(); // or context.fill()
+      
+      ctx.fillStyle = "red";
+      ctx.globalAlpha = 0.5;
+
+      //Draw arc
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx, cy, range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
+      ctx.lineTo(cx,cy);
+      ctx.fill();
+
+      //Draw arc
+      ctx.globalAlpha =1;
+      ctx.beginPath();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx, cy, arming_range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
+      ctx.lineTo(cx,cy);
+      ctx.fill();
+
+
+      //Draw position
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = "blue";
+      ctx.globalAlpha = 1;
+      ctx.beginPath();      
+      ctx.arc(cx, cy, 10, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.stroke();
+      console.log("GUNARC", arming_range, ", ", range);
+
+    }
 
 
     function updateArcPanel(start_point, target_point){
