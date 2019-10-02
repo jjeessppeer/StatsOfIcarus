@@ -8,10 +8,12 @@ var prDoughnut;
 var wlDoughnut;
 var enemyRadar;
 var allyRadar;
+var scatterChart;
+
+var totalMatches = 1;
 
 function initializeMatchStatistics(){
     $("#statsShipSelect").on("change", function(){
-        console.log("Changarro")
         updateStatsPanel($(this).val());
     });
     updateStatsPanel($("#statsShipSelect").val());
@@ -99,8 +101,32 @@ function updateStatsPanel(active_ship) {
 
     let data_rows = match_dataset.filterByStringMultiCol(active_ship, ["T1 Ship 1", "T1 Ship 2", "T2 Ship 1", "T2 Ship 2"]).getDatasetRows();
     //let n_matches = data_rows.getNOfRows();
+    totalMatches = match_dataset.getNOfRows();
 
     let [wins, losses] = calcWins(data_rows, active_ship);
+
+    // // Get all ships base win and pick ratio
+    let scatter_data = [];
+    let scatter_colours = [];
+    let scatter_labels = [];
+    for (var i = 0; i < SHIP_LIST.length; i++) {
+        let data = {};
+
+        let [w, l] = calcWins(data_rows, SHIP_LIST[i], "all", "all");
+        let total = w+l;
+        if (total == 0) data.y = 0; 
+        else data.y = w/total;
+        
+        let [p, t] = pickRateShip(match_dataset.getDatasetRows(), SHIP_LIST[i]);
+        data.x = p/t;
+
+        scatter_data.push(data);
+
+        if (active_ship == SHIP_LIST[i]) scatter_colours.push("rgba(50, 200, 50, 1)");
+        else scatter_colours.push('rgba(150, 150, 150, 1)');
+        scatter_labels.push(SHIP_LIST[i]);
+    }
+
 
     // Get enemy win data.
     let win_vs_ratios = [];
@@ -147,11 +173,83 @@ function updateStatsPanel(active_ship) {
         wins, losses, 
         [pick_rates, pick_labels, pick_colors],
         [win_vs_ratios, win_vs_ships],
-        [win_ally_ratios, win_ally_ships]);
+        [win_ally_ratios, win_ally_ships],
+        [scatter_data, scatter_labels, scatter_colours]);
 }
 
 
-function updateCharts(wins, losses, pick_data, enemy_data, ally_data){
+function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
+
+    let ctx_bub = document.getElementById('bubbleChart').getContext('2d');
+    // let [win_ratios, pick_ratios, ship_labels, colours]
+    let [scatter_data, scatter_labels, scatter_colours] = scatter;
+    if (!scatterChart){
+        scatterChart = new Chart(ctx_bub, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Scatter Dataset',
+                    pointRadius: 10,
+                    pointHoverRadius: 15,
+                    data: scatter_data,
+                    backgroundColor: scatter_colours
+                }],
+                labels: scatter_labels
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom',
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Pick rate"
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Win rate"
+                        }
+                    }]
+                    
+                },
+                title: {
+                    display: true,
+                    text: 'Ship win and pick rates'
+                },
+                legend: {
+                    display: false,
+                },
+                tooltips: {
+                    callbacks: {
+                        title: function(tooltipItem, data) {
+                            let value = "";
+                            tooltipItem.forEach(function(item){
+                                value += data.labels[item.index] + "\n";
+                            });
+                            value = value.replace(/\n$/, "");
+                            return value;
+                        },
+                        label: function(tooltipItem, data){
+                            let value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                            let wr = value.y;
+                            let pr = value.x;
+                            return ["Win rate: " + precise(100*wr, 3) + "%", "Pick rate: " + precise(100*pr, 3) + "% [" + pr*totalMatches*4 + "]"];
+                        }
+                    }   
+                }
+            }
+        });
+    }
+    else{
+        scatterChart.data.datasets[0].backgroundColor = scatter_colours;
+        scatterChart.update();
+
+    }
 
     // Pick rate pie chart
     var ctx_pr = document.getElementById('prChart').getContext('2d');
@@ -316,6 +414,12 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data){
                             return precise(100*value, 3) + "%";
                         }
                     }   
+                },
+                scale: {
+                    display: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
                 }
             }
         });
@@ -369,6 +473,12 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data){
                             return precise(100*value, 3) + "%";
                         }
                     }   
+                },
+                scale: {
+                    display: true,
+                    ticks: {
+                        beginAtZero: true
+                    }
                 }
             }
         });
