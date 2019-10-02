@@ -201,6 +201,7 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
                 labels: scatter_labels
             },
             options: {
+                responsive: false,
                 scales: {
                     xAxes: [{
                         type: 'linear',
