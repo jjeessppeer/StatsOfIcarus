@@ -34,6 +34,7 @@
   <script src="damageCalculations.js"></script>
   <script src="matchStatistics.js"></script>
   <script src="randomMap.js"></script>
+  <script src="mapSpawns.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <!-- <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
      crossorigin="anonymous"></script>
@@ -108,8 +109,16 @@
         </li>
         <li id="randomMapLink" data-show="#randomMap">
           <a href="#randomMap">
-            <i class="fas fa-map"></i>
+            <!-- <i class="fas fa-map"></i> -->
+            <i class="fas fa-random"></i>
             Random map
+          </a>
+        </li>
+        <li id="mapSpawnsLink" data-show="#spawns">
+          <a href="#spawns">
+            <i class="fas fa-map"></i>
+            <!-- <i class="fas fa-random"></i> -->
+            Spawn positions
           </a>
         </li>
         <li id="aboutLink" data-show="#about">
@@ -541,6 +550,26 @@
             <!-- </div> -->
       </div>
 
+      <div id="spawns" class="content-panel" style="display:none">
+        <div class="row row-margin">
+          <div class="col-sm-4">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">Map</div>
+              </div>
+              <select class="form-control" id="spawnMapSelect" autocomplete="off">
+                <!-- <option>Include</option> -->
+                <!-- <option>Exclude</option> -->
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <img id="spawnImage" src="" width="700" height="700">
+        <p>Credit to Nerdhector for creating images.</p>
+        <!-- <img id="spawnImage" class='img' src="" width="700" height="700" /> -->
+      </div>
+
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
         <h3>About</h3>
@@ -692,6 +721,7 @@
       initializeMatchStatistics();
 
       initializeRandomMap();
+      initializeSpawns();
       
       
       $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click");
