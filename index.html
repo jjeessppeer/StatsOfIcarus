@@ -33,6 +33,7 @@
   <script src="docsapi.js"></script>
   <script src="damageCalculations.js"></script>
   <script src="matchStatistics.js"></script>
+  <script src="randomMap.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <!-- <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
      crossorigin="anonymous"></script>
@@ -100,11 +101,17 @@
         </li>
 
         <li id="projectileArcsLink" data-show="#projectileArcs">
-            <a href="#projectileArcs">
+          <a href="#projectileArcs">
             <i class="fas fa-meteor"></i>
             Projectile arcs
-            </a>
-          </li>
+          </a>
+        </li>
+        <li id="randomMapLink" data-show="#randomMap">
+          <a href="#randomMap">
+            <i class="fas fa-map"></i>
+            Random map
+          </a>
+        </li>
         <li id="aboutLink" data-show="#about">
           <a href="#about">
             <i class="far fa-question-circle"></i>
@@ -522,6 +529,18 @@
 
 
       </div>
+
+      
+      <div id="randomMap" class="content-panel" style="display:none">
+        <button id="randomMapButton" class="btn btn-primary">Randomize map</button>
+            <!-- <div class="container"> -->
+              <h1 id="randomMapTitle">Click button to get a random map</h1>
+              <p id="randomMapModes"></p>
+              <p id="randomMapPreviewText" style="display:none">Map preview not available.</p>
+              <img id="randomMapPreview" class='img' src="" width="500" height="500" style="display:none" />
+            <!-- </div> -->
+      </div>
+
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
         <h3>About</h3>
@@ -537,6 +556,7 @@
           If you for some reason wanna see the source i can send you a link.
         </p>
       </div>
+
 
     </div>
 
@@ -670,6 +690,8 @@
 
       //--- Match statistics ---
       initializeMatchStatistics();
+
+      initializeRandomMap();
       
       
       $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click");
