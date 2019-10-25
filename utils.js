@@ -14,6 +14,15 @@ var SHIP_LIST = [
     'Stormbreaker'
 ]
 
+function degToRad(deg){
+    return deg * Math.PI / 180;
+}
+
+function pointStringToInts(input){
+    return input.split(", ").map(function(item){return parseInt(item)});
+    
+}
+
 function randomRGB(alpha=1){
     let r = Math.floor(Math.random() * 256);
     let g = Math.floor(Math.random() * 256);

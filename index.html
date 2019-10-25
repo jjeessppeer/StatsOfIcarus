@@ -35,6 +35,7 @@
   <script src="matchStatistics.js"></script>
   <script src="randomMap.js"></script>
   <script src="mapSpawns.js"></script>
+  <script src="shipBuilder.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <!-- <script defer src="https://use.fontawesome.com/releases/v5.6.3/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
      crossorigin="anonymous"></script>
@@ -87,17 +88,17 @@
           </a>
         </li>
 
+        <li id="shipBuilderLink" data-show="#shipBuilder">
+          <a href="#shipBuilder">
+            <i class="fas fa-hammer"></i>
+            Ship builder
+          </a>
+        </li>
+
         <li id="damageCalculatorLink" data-show="#damageCalculator">
           <a href="#damageCalculator" class="active">
             <i class="fas fa-bomb"></i>
             Damage calculator
-          </a>
-        </li>
-
-        <li id="rangeLink" data-show="#rangeVisualizer">
-          <a href="#rangeVisualizer">
-            <i class="fas fa-binoculars"></i>
-            Range Visualizer
           </a>
         </li>
 
@@ -276,6 +277,24 @@
           width="640" height="2317" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
       </div>
 
+      <!-- Ship builder -->
+      <div id="shipBuilder" class="content-panel" style="display:none">
+        <h3>UNDER CONSTRUCTION</h3>
+        <div class="img-canvas-container">
+          <br>
+          <img id="shipBuilderImage" class='img' src="ship-images/mobula.jpg" width="400" height="429" />
+          <canvas id="shipBuilderCanvas" width="400" height="429">Your browser does not support the HTML5 canvas tag.</canvas>
+        </div>
+        <br>
+        beepboop
+        <br>
+        <div id="rangeMapContainer" class="img-canvas-container">
+            <br>
+            <img id="rangeImage" class='img' src="map-images/dunes.png" width="400" height="400" />
+            <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
+          </div>
+      </div>
+
       <!-- Gunnery calculator -->
       <div id="damageCalculator" class="content-panel" style="display:block">
         <h1>Damage numbers</h1>
@@ -419,16 +438,6 @@
           <tbody id="damageTableContent"></tbody>
         </table>
 
-      </div>
-
-      <!-- Range visualizer -->
-      <div id="rangeVisualizer" class="content-panel" style="display:none">
-        <h3>UNDER CONSTRUCTION</h3>
-        <div id="rangeMapContainer" class="img-canvas-container">
-          <br>
-          <img id="rangeImage" class='img' src="map-images/dunes.png" width="400" height="400" />
-          <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
-        </div>
       </div>
 
       <!-- Arc calculator -->
@@ -607,6 +616,7 @@
     var component_dataset = null;
     var crosshair_dataset = null;
     var map_dataset = null;
+    var ship_guns_dataset = null;
 
     $(document).ready(function () {
 
@@ -649,6 +659,9 @@
       });
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 11, function (dataset) {
         crosshair_dataset = dataset;
+      });
+      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 12, function (dataset) {
+        ship_guns_dataset = dataset;
       });
 
 
@@ -715,6 +728,7 @@
       
       
       //--- Range visualization ---
+      updateShipBuildImage();
       updateRangeVis();
 
       //--- Match statistics ---
@@ -728,81 +742,6 @@
 
 
     });
-
-  
-
-    function updateRangeVis(){
-      if (!(gun_dataset && ammo_dataset && ship_dataset && map_dataset)) {
-        console.log("Still loading");
-        setTimeout(function(){ updateRangeVis(); }, 1000);
-        return;
-      }
-
-
-      // Map canvas
-      let rangeCanvas = document.getElementById("rangeCanvas");
-      let ctx = rangeCanvas.getContext("2d");
-      //ctx.clearRect(0, 0, rangeCanvas.width, rangeCanvas.height);
-      
-      // TODO wrong image
-      let map_image = document.querySelector("#mapImage");
-      let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth);
-      
-      let gun_type = "Lumberjack";
-      let ammo_type = "Charged";
-      
-
-      let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
-      let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
-
-
-      let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
-      let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
-      
-      console.log("Speeds", proj_speed_mod, ", ", proj_speed, ", ", arming_range);
-      let range_px = range/map_scale;
-      let arming_range_px = arming_range/map_scale;
-      let side_angle = gun_dataset.getCellByString("Gatling", "Alias", "Side angle");
-
-      let cy = 300;
-      let cx = 200;
-
-      let initial_angle = -Math.PI/2
-      
-      
-      //ctx.stroke(); // or context.fill()
-      
-      ctx.fillStyle = "red";
-      ctx.globalAlpha = 0.5;
-
-      //Draw arc
-      ctx.beginPath();
-      ctx.moveTo(cx,cy);
-      ctx.arc(cx, cy, range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
-      ctx.lineTo(cx,cy);
-      ctx.fill();
-
-      //Draw arc
-      ctx.globalAlpha =1;
-      ctx.beginPath();
-      ctx.globalCompositeOperation = "destination-out";
-      ctx.moveTo(cx,cy);
-      ctx.arc(cx, cy, arming_range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
-      ctx.lineTo(cx,cy);
-      ctx.fill();
-
-
-      //Draw position
-      ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "blue";
-      ctx.globalAlpha = 1;
-      ctx.beginPath();      
-      ctx.arc(cx, cy, 10, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.stroke();
-      console.log("GUNARC", arming_range, ", ", range);
-
-    }
 
 
     function updateArcPanel(start_point, target_point){
