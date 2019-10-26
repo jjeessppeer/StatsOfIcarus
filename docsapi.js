@@ -94,8 +94,8 @@ class Dataset {
         return this.content[x];
     }
 
-    getDatasetCell(x, y) {
-        return this.content[x][y];
+    getDatasetCell(y, x) {
+        return this.content[y][x];
     }
 
     getEmptyContent() {

@@ -1,5 +1,78 @@
 
 
+var selected_guns = ["None", "None", "None", "None", "None", "None"];
+
+function initializeShipBuilder(){
+
+  updateShipBuilder();
+
+  updateShipBuildImage();
+  updateRangeVis();
+
+
+  $('#shipBuilderCanvas').mousedown(shipCanvasClicked);
+}
+
+
+function updateShipBuilder(){
+  if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
+    console.log("Still loading");
+    setTimeout(function(){ updateShipBuilder(); }, 1000);
+    return;
+  }
+
+
+
+}
+
+
+function shipCanvasClicked(event){
+  if(!event) event = window.event;  
+  
+
+  let click_pos = [event.pageX - $(this).offset().left, event.pageY - $(this).offset().top];
+  var x = event.pageX - $(this).offset().left;  
+  var y = event.pageY - $(this).offset().top;   
+  console.log(x, ", ", y, " : ", click_pos);
+  var styles = {
+          "left" : x, 
+          "top" : y
+  };
+
+
+  let data_row = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
+  let n_guns = parseInt(data_row[1]);
+  let gun_i = -1;
+  for (let i=0; i < n_guns; i++){
+    if (dist2D([x, y], pointStringToInts(data_row[8+i])) < 10) gun_i = i; 
+  }
+  console.log(gun_i);
+
+
+  let available_guns = gun_dataset.filterByString(data_row[14+gun_i], "Weapon slot");
+  $("#shipBuildGunSelector").empty();
+  for (let i=0; i < available_guns.getNOfRows(); i++){
+    console.log(available_guns.getDatasetCell(i, 1));
+    let btn = $('<button type="button" class="btn btn-secondary text-left">'+available_guns.getDatasetCell(i, 1)+'</button>')
+    $("#shipBuildGunSelector").append(btn)
+  }
+
+
+  if (gun_i == -1){
+    $("#shipBuildGunSelector").hide();
+    return;
+  }
+
+  $("#shipBuildGunSelector").show();
+  $("#shipBuildGunSelector").css("left", x);
+  $("#shipBuildGunSelector").css("top", y);
+  // $("#shipBuildGunSelector").hide();
+  // var template = $("#shipBuildGunSelector");
+  // $(template).css( styles ) 
+  // .show();  
+  // $(template).remove(); 
+  // $(this).append(template); 
+}
 
 
 function updateShipBuildImage(){
