@@ -245,35 +245,76 @@ function updateShipBuildImage(){
   for (let i=0; i < n_guns; i++){
 
     let gun_type = ship_builder_guns[i];
-    let gun_angle = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Side angle"));
+
+    let gun_numbers = getGunNumbers(gun_type, "Normal", false);
+
+
+    let gun_angle = gun_numbers.info.angle;
 
     let angle = degToRad(-90 + parseFloat(data_row[2+i]));
     let right_angle = angle + degToRad(gun_angle);
     let left_angle = angle - degToRad(gun_angle);
 
-    
-    let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range"));
+    let range = gun_numbers.info.range;
 
     let [cx, cy] = pointStringToInts(data_row[8+i])
-    // cx += build_offset_x;
-    // cy += build_offset_y;
+
     //Draw position
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "rgb(30, 255, 100)";
-    // ctx.fillStyle = randomRGB();
+    ctx.fillStyle = "rgb(30, 150, 30)";
     ctx.globalAlpha = 1;
     ctx.beginPath();      
     ctx.arc(cx, cy, 7, 0, 2*Math.PI);
     ctx.fill();
     ctx.stroke();
 
+    // //Draw arc
+    // ctx.fillStyle = "rgb(30, 50, 30)";
+    // ctx.beginPath();
+    // ctx.globalAlpha = 0.3;
+    // ctx.moveTo(cx,cy);
+    // ctx.arc(cx, cy, range/0.128, left_angle, right_angle);
+    // ctx.lineTo(cx,cy);
+    // ctx.fill();
+
+
+
+
+    let offscreen = document.querySelector("#shipBuilderCanvasOffscreen");
+    let off_ctx = offscreen.getContext('2d');
+    // off_ctx.clearRect(0, 0, offscreen.width, offscreen.height);
+
+    off_ctx.save();
+    off_ctx.setTransform(1, 0, 0, 1, 0, 0);
+    off_ctx.clearRect(0, 0, canvas.width, canvas.height);
+    off_ctx.restore();
+
+    off_ctx.setTransform(ctx.getTransform());
     //Draw arc
-    ctx.beginPath();
-    ctx.globalAlpha = 0.3;
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx, cy, range, left_angle, right_angle);
-    ctx.lineTo(cx,cy);
-    ctx.fill();
+    off_ctx.fillStyle = "rgb(30, 50, 30)";
+    off_ctx.globalAlpha = 0.3;
+    off_ctx.globalCompositeOperation = "source-over";
+
+    off_ctx.beginPath();
+    off_ctx.moveTo(cx,cy);
+    off_ctx.arc(cx, cy, gun_numbers.info.range/0.128, left_angle, right_angle);
+    off_ctx.lineTo(cx,cy);
+    off_ctx.fill();
+
+    //Clear arc
+    off_ctx.globalAlpha = 1;
+    off_ctx.globalCompositeOperation = "destination-out";
+    off_ctx.beginPath();
+    off_ctx.moveTo(cx,cy);
+    off_ctx.arc(cx, cy, gun_numbers.info["arming distance"]/0.128, left_angle, right_angle);
+    off_ctx.lineTo(cx,cy);
+    off_ctx.fill();
+
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(offscreen, 0, 0);
+    ctx.restore();
   }
 }
 

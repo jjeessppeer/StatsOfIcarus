@@ -18,10 +18,14 @@ function initializeDamageCalculator() {
 
 
 
-function getGunNumbers(gunName, ammoName) {
-    let buffed = $("#buffedCheckbox").is(':checked');
-    let gun_type = $("#gunSelect").val();
-    let ammo_type = $("#ammoSelect").val();
+function getGunNumbers(gun_type, ammo_type, buffed) {
+
+    if (!buffed)
+        buffed = $("#buffedCheckbox").is(':checked');
+    if (!gun_type)
+        gun_type = $("#gunSelect").val();
+    if (!ammo_type)
+        ammo_type = $("#ammoSelect").val();
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
     let ammo_data = ammo_dataset.filterByString(ammo_type, "Alias").getDatasetRow(0);
@@ -58,6 +62,9 @@ function getGunNumbers(gunName, ammoName) {
     let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
     let aoe = gun_data[13] * ammo_data[5];
 
+    //TODO ammo changes
+    let angle = parseFloat(gun_data[16]);
+
     let special_info = null;
     let damage_dict = {};
     let info_dict = {
@@ -65,7 +72,8 @@ function getGunNumbers(gunName, ammoName) {
         "arming distance": arming_distance, 
         "seconds per clip": seconds_clip, 
         "clip size": clip_size, 
-        "aoe": aoe};
+        "aoe": aoe,
+        "angle": angle};
 
 
     let damage_type_primary = gun_data[2];
