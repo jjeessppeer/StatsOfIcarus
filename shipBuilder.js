@@ -13,11 +13,26 @@ function initializeShipBuilder(){
   console.log("GUNS INITIALZIED");
 
   $('#shipBuilderCanvas').mousedown(shipCanvasClicked);
+  // $('#rangeCanvas').mousemove(function(event){
+  //   // var x = event.layerX;
+  //   // var y = event.layerY;
+    
+  //   let [x, y] = [event.pageX - $(this).offset().left, event.pageY - $(this).offset().top];
+  //   let rangeCanvas = document.getElementById("rangeCanvas");
+  //   let ctx = rangeCanvas.getContext("2d");
+  //   // console.log(x, ", ", y)
+  //   var pixel = ctx.getImageData(x, y, 1, 1);
+  //   var data = pixel.data;
+  //   var rgba = 'rgba(' + data[0] + ', ' + data[1] +
+  //              ', ' + data[2] + ', ' + data[3] + ')';
+  //   console.log(rgba)
+  // });
 
   $("#weaponSelections select").on("change", function(e){
     ship_builder_guns[$(this).parent().index()/2] = $(this).val();
     console.log(ship_builder_guns);
     updateShipBuildImage();
+    updateRangeVis();
   });
 }
 
@@ -46,10 +61,6 @@ function shipBuilderShipChanged(){
   }
   console.log(ship_builder_guns)
 }
-
-
-
-
 
 
 function shipCanvasClicked(event){
@@ -121,10 +132,9 @@ function updateShipBuildImage(){
     let gun_type = ship_builder_guns[i];
     let gun_angle = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Side angle"));
 
-    let angle = degToRad(90 + parseInt(data_row[2+i]));
+    let angle = degToRad(-90 + parseFloat(data_row[2+i]));
     let right_angle = angle + degToRad(gun_angle);
     let left_angle = angle - degToRad(gun_angle);
-    // let [cx, cy] = 100;
 
 
     let [cx, cy] = pointStringToInts(data_row[8+i])
@@ -146,9 +156,6 @@ function updateShipBuildImage(){
     ctx.lineTo(cx,cy);
     ctx.fill();
   }
-
-  
-
 }
 
 function updateRangeVis(){
@@ -162,76 +169,154 @@ function updateRangeVis(){
     // Map canvas
     let rangeCanvas = document.getElementById("rangeCanvas");
     let ctx = rangeCanvas.getContext("2d");
-    //ctx.clearRect(0, 0, rangeCanvas.width, rangeCanvas.height);
+    ctx.clearRect(0, 0, rangeCanvas.width, rangeCanvas.height);
     
     // TODO wrong image
     let map_image = document.querySelector("#mapImage");
-    let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth);
-    
-
+    let map_scale = parseFloat(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth));
 
     let ship_data = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
     let n_guns = parseInt(ship_data[1]);
 
-    // for (let i=0; i < ship_builder_guns.length; i++){
-    //   let gun_type = ship_builder_guns[i];
-    //   let ammo_type = "Charged";
-
-    // }
-
-
-    let gun_type = "Lumberjack";
-    let ammo_type = "Charged";
-    
-
-    let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
-    let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
-
-
-    let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
-    let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
-    
-    console.log("Speeds", proj_speed_mod, ", ", proj_speed, ", ", arming_range);
-    let range_px = range/map_scale;
-    let arming_range_px = arming_range/map_scale;
-    let side_angle = gun_dataset.getCellByString("Gatling", "Alias", "Side angle");
-
-    let cy = 300;
+    let cy = 250;
     let cx = 200;
 
-    let initial_angle = -Math.PI/2
+    for (let i=0; i < ship_builder_guns.length; i++){
+      let gun_type = ship_builder_guns[i];
+      if (gun_type == "None") continue;
+      let ammo_type = "Normal";
+
+      let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
+      let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
+
+      let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
+      let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
+
+      let range_px = range/map_scale;
+      let arming_range_px = arming_range/map_scale;
+      let side_angle = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Side angle"));
+      
+      let initial_angle = -Math.PI/2 + degToRad(parseFloat(ship_data[2+i]));
+
+      let offscreen = document.querySelector("#rangeCanvasOffscreen");
+      let off_ctx = offscreen.getContext('2d');
+      off_ctx.clearRect(0, 0, offscreen.width, offscreen.height);
+
+      off_ctx.fillStyle = "rgb(128, 128, 128)";
+      // off_ctx.fillStyle = "rgb(30, 255, 100)";
+      off_ctx.globalAlpha = 1;
+
+      //Draw arc
+      off_ctx.beginPath();
+      off_ctx.globalCompositeOperation = "source-over";
+      off_ctx.moveTo(cx,cy);
+      off_ctx.arc(cx, cy, range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
+      off_ctx.lineTo(cx,cy);
+      off_ctx.fill();
+
+      //Draw arc
+      off_ctx.globalAlpha = 1;
+      off_ctx.beginPath();
+      off_ctx.globalCompositeOperation = "destination-out";
+      off_ctx.moveTo(cx,cy);
+      off_ctx.arc(cx, cy, arming_range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
+      off_ctx.lineTo(cx,cy);
+      off_ctx.fill();
+
+      let image_data_off = off_ctx.getImageData(0, 0, 400, 400);
+      for (j=0; j<image_data_off.data.length; j+=4){
+        // if (image_data_off.data[j] == 127){
+        //   console.log("WEOWOE")
+        //   image_data_off.data[j]=128;
+        // }
+        // if (image_data_off.data[j] != 128) image_data_off[j] = 0;
+        // if (image_data_off.data[j+1] != 128) image_data_off[j+1] = 255;
+        // if (image_data_off.data[j+2] != 128) image_data_off[j+2] = 0;
+        if (image_data_off.data[j+3] != 255){
+          image_data_off.data[j+0] = 0;
+          image_data_off.data[j+1] = 0;
+          image_data_off.data[j+2] = 0;
+          image_data_off.data[j+3] = 0;
+        } 
+      }
+      off_ctx.putImageData(image_data_off, 0, 0);
+
+
+      console.log("donezo");
+      
+      
+      ctx.globalCompositeOperation = "multiply";
+      ctx.drawImage(offscreen, 0, 0);
+    }
+
+    
+    let image_data = ctx.getImageData(0, 0, 400, 400);
+
+    for (i=0; i<image_data.data.length; i+=4){
+      let color_val = image_data.data[i];
+      if (color_val == 128) {
+        image_data.data[i] = 0;
+        image_data.data[i+1] = 100;
+        image_data.data[i+2] = 255;
+      }
+      else if (color_val == 64){
+        image_data.data[i] = 0;
+        image_data.data[i+1] = 255;
+        image_data.data[i+2] = 255;
+
+      }
+      else if (color_val == 32){
+        image_data.data[i] = 200;
+        image_data.data[i+1] = 255;
+        image_data.data[i+2] = 50;
+
+      }
+      else if (color_val == 16){
+        image_data.data[i] = 255;
+        image_data.data[i+1] = 100;
+        image_data.data[i+2] = 0;
+
+      }
+      else if (color_val == 8){
+        image_data.data[i] = 150;
+        image_data.data[i+1] = 0;
+        image_data.data[i+2] = 0;
+
+      }
+      else if (color_val == 4){
+        image_data.data[i] = 0;
+        image_data.data[i+1] = 0;
+        image_data.data[i+2] = 0;
+
+      }
+      else{
+        image_data.data[i] = 0;
+        image_data.data[i+1] = 0;
+        image_data.data[i+2] = 0;
+      }
+      if (color_val != 0){
+        image_data.data[i+3] = 200
+      }
+    }
+    ctx.putImageData(image_data, 0, 0);
+
+    // Draw ship image
+    // ctx.globalCompositeOperation = "source-over";
+    // let image = document.getElementById("shipBuilderImage");
+    // let ship_w = 400 * 0.128 / map_scale;
+    // let ship_h = 427 * 0.128 / map_scale;
+    // ctx.drawImage(image, cx - ship_w/2, cy - ship_h/2, ship_w, ship_h);
     
     
-    //ctx.stroke(); // or context.fill()
+    // Draw position
+    // ctx.fillStyle = "blue";
+    // ctx.globalAlpha = 1;
+    // ctx.beginPath();      
+    // ctx.arc(cx, cy, 10, 0, 2*Math.PI);
+    // ctx.fill();
+    // ctx.stroke();
+
     
-    ctx.fillStyle = "red";
-    ctx.globalAlpha = 0.5;
-
-    //Draw arc
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx, cy, range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
-    ctx.lineTo(cx,cy);
-    ctx.fill();
-
-    //Draw arc
-    ctx.globalAlpha =1;
-    ctx.beginPath();
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx, cy, arming_range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
-    ctx.lineTo(cx,cy);
-    ctx.fill();
-
-
-    //Draw position
-    ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "blue";
-    ctx.globalAlpha = 1;
-    ctx.beginPath();      
-    ctx.arc(cx, cy, 10, 0, 2*Math.PI);
-    ctx.fill();
-    ctx.stroke();
-    console.log("GUNARC", arming_range, ", ", range);
+    
 
   }

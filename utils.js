@@ -18,6 +18,10 @@ function degToRad(deg){
     return deg * Math.PI / 180;
 }
 
+function radToDeg(rad){
+    return rad / Math.PI * 180;
+}
+
 function pointStringToInts(input){
     return input.split(", ").map(function(item){return parseInt(item)});
     
