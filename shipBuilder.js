@@ -3,6 +3,11 @@
 var ship_builder_guns = ["None", "None", "None", "None", "None", "None"];
 var ship_builder_ship = "Mobula";
 
+
+var build_last_pos_x = undefined;
+var build_last_pos_y = undefined;
+
+
 function initializeShipBuilder(){
   shipBuilderReloadGuns();
 
@@ -10,7 +15,64 @@ function initializeShipBuilder(){
   updateRangeVis();
   console.log("GUNS INITIALZIED");
 
-  $('#shipBuilderCanvas').mousedown(shipCanvasClicked);
+  // $('#shipBuilderCanvas').mousedown(shipCanvasClicked);
+
+  $("#shipBuilderCanvas").mousemove(function(e){
+    if (e.originalEvent.buttons == 0){
+      build_last_pos_x = undefined;
+      build_last_pos_y = undefined;
+      return;
+    }
+
+    let canvas = document.getElementById("shipBuilderCanvas");
+    let ctx = canvas.getContext("2d");
+    
+    // let pos_x = e.originalEvent.layerX;
+    // let pos_y = e.originalEvent.layerY;
+
+    let [pos_x, pos_y] = [e.originalEvent.layerX, e.originalEvent.layerY];
+    if (!build_last_pos_x || !build_last_pos_y){
+      build_last_pos_x = pos_x;
+      build_last_pos_y = pos_y;
+    }
+
+    // console.log(pos_x, ", ", build_last_pos_x);
+    let dx = pos_x - build_last_pos_x;
+    let dy = pos_y - build_last_pos_y;
+
+    dx /= ctx.getTransform().a;
+    dy /= ctx.getTransform().d;
+
+    // console.log(ctx.getTransform().a);
+
+    // let [dx, dy] = translatePoint()
+    ctx.translate(dx, dy);
+    // build_offset_x -= build_last_pos_x - pos_x;
+    // build_offset_y -= build_last_pos_y - pos_y;
+    updateShipBuildImage();
+    
+    build_last_pos_x = pos_x;
+    build_last_pos_y = pos_y;
+  });
+
+  $("#shipBuilderCanvas").on("wheel", function(e){
+    let canvas = document.getElementById("shipBuilderCanvas");
+    let ctx = canvas.getContext("2d");
+
+    let factor = (e.originalEvent.deltaY < 0) ? 1.1 : 0.9;
+    // console.log(factor);
+
+
+    let [pos_x, pos_y] = [e.originalEvent.layerX, e.originalEvent.layerY];
+    let [x, y] = transformPoint(pos_x, pos_y, ctx.getTransform());
+    ctx.translate(x, y);
+    ctx.scale(factor,factor);
+    ctx.translate(-x, -y);
+    
+    updateShipBuildImage();
+    return false;
+  })
+
   // $('#rangeCanvas').mousemove(function(event){
   //   // var x = event.layerX;
   //   // var y = event.layerY;
@@ -108,53 +170,52 @@ function shipBuilderReloadGuns(){
   
 }
 
-function shipCanvasClicked(event){
-  if(!event) event = window.event;  
-  
-  let click_pos = [event.pageX - $(this).offset().left, event.pageY - $(this).offset().top];
-  var x = event.pageX - $(this).offset().left;  
-  var y = event.pageY - $(this).offset().top;   
-  console.log(x, ", ", y, " : ", click_pos);
-  var styles = {
-          "left" : x, 
-          "top" : y
-  };
-
-
-  let data_row = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
-  let n_guns = parseInt(data_row[1]);
-  let gun_i = -1;
-  for (let i=0; i < n_guns; i++){
-    if (dist2D([x, y], pointStringToInts(data_row[8+i])) < 10) gun_i = i; 
-  }
-  console.log("N guns: ", gun_i);
-
-
-  let available_guns = gun_dataset.filterByString(data_row[14+gun_i], "Weapon slot");
-  $("#shipBuildGunSelector").empty();
-  for (let i=0; i < available_guns.getNOfRows(); i++){
-    console.log(available_guns.getDatasetCell(i, 1));
-    let btn = $('<button type="button" class="btn btn-secondary text-left">'+available_guns.getDatasetCell(i, 1)+'</button>')
-    $("#shipBuildGunSelector").append(btn)
-  }
-
-
-  if (gun_i == -1){
-    $("#shipBuildGunSelector").hide();
-    return;
-  }
-
-  $("#shipBuildGunSelector").show();
-  $("#shipBuildGunSelector").css("left", x);
-  $("#shipBuildGunSelector").css("top", y);
-  // $("#shipBuildGunSelector").hide();
-  // var template = $("#shipBuildGunSelector");
-  // $(template).css( styles ) 
-  // .show();  
-  // $(template).remove(); 
-  // $(this).append(template); 
-}
-
+// function shipCanvasClicked(event){
+//   if(!event) event = window.event;  
+//
+//   let click_pos = [event.pageX - $(this).offset().left, event.pageY - $(this).offset().top];
+//   var x = event.pageX - $(this).offset().left;  
+//   var y = event.pageY - $(this).offset().top;   
+//   console.log(x, ", ", y, " : ", click_pos);
+//   var styles = {
+//           "left" : x, 
+//           "top" : y
+//   };
+// 
+// 
+//   let data_row = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
+//   let n_guns = parseInt(data_row[1]);
+//   let gun_i = -1;
+//   for (let i=0; i < n_guns; i++){
+//     if (dist2D([x, y], pointStringToInts(data_row[8+i])) < 10) gun_i = i; 
+//   }
+//   console.log("N guns: ", gun_i);
+// 
+// 
+//   let available_guns = gun_dataset.filterByString(data_row[14+gun_i], "Weapon slot");
+//   $("#shipBuildGunSelector").empty();
+//   for (let i=0; i < available_guns.getNOfRows(); i++){
+//     console.log(available_guns.getDatasetCell(i, 1));
+//     let btn = $('<button type="button" class="btn btn-secondary text-left">'+available_guns.getDatasetCell(i, 1)+'</button>')
+//     $("#shipBuildGunSelector").append(btn)
+//   }
+// 
+// 
+//   if (gun_i == -1){
+//     $("#shipBuildGunSelector").hide();
+//     return;
+//   }
+// 
+//   $("#shipBuildGunSelector").show();
+//   $("#shipBuildGunSelector").css("left", x);
+//   $("#shipBuildGunSelector").css("top", y);
+//   // $("#shipBuildGunSelector").hide();
+//   // var template = $("#shipBuildGunSelector");
+//   // $(template).css( styles ) 
+//   // .show();  
+//   // $(template).remove(); 
+//   // $(this).append(template); 
+// }
 
 
 function updateShipBuildImage(){
@@ -163,12 +224,20 @@ function updateShipBuildImage(){
     setTimeout(function(){ updateShipBuildImage(); }, 1000);
     return;
   }
-  console.log("DRAWING STYUFF")
 
+
+  
   let canvas = document.getElementById("shipBuilderCanvas");
   let ctx = canvas.getContext("2d");
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+  ctx.restore();
+
+  let img = document.getElementById("shipBuilderImage");
+  ctx.globalAlpha = 1;
+  ctx.drawImage(img, 0, 0);
+
   let data_row = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
 
   let n_guns = parseInt(data_row[1]);
@@ -182,8 +251,12 @@ function updateShipBuildImage(){
     let right_angle = angle + degToRad(gun_angle);
     let left_angle = angle - degToRad(gun_angle);
 
+    
+    let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range"));
 
     let [cx, cy] = pointStringToInts(data_row[8+i])
+    // cx += build_offset_x;
+    // cy += build_offset_y;
     //Draw position
     ctx.globalCompositeOperation = "source-over";
     ctx.fillStyle = "rgb(30, 255, 100)";
@@ -198,7 +271,7 @@ function updateShipBuildImage(){
     ctx.beginPath();
     ctx.globalAlpha = 0.3;
     ctx.moveTo(cx,cy);
-    ctx.arc(cx, cy, 1000, left_angle, right_angle);
+    ctx.arc(cx, cy, range, left_angle, right_angle);
     ctx.lineTo(cx,cy);
     ctx.fill();
   }

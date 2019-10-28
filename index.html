@@ -355,9 +355,12 @@
         </div>
         <br>
         <br>
+
         <div class="my-col img-canvas-container" id="shipContainer">
-          <img id="shipBuilderImage" class='img' src="ship-images/mobula_small.png" width="400" height="427" />
-          <canvas id="shipBuilderCanvas" width="400" height="427">Your browser does not support the HTML5 canvas tag.</canvas>
+          <b>Drag or scroll to pan or zoom image</b>
+          <br>
+          <img id="shipBuilderImage" class='img' src="ship-images/mobula_small.png" width="400" height="427" style="display:none" />
+          <canvas id="shipBuilderCanvas" width="400" height="427" style="border-style:solid;">Your browser does not support the HTML5 canvas tag.</canvas>
       
           <div id="shipBuildGunSelector" class="btn-group-vertical" role="group">
             <button type="button" class="btn btn-secondary">Left</button>
@@ -370,6 +373,8 @@
         
 
         <div class="my-col">
+          <br>
+          <!-- <br> -->
             <div id="rangeMapContainer" class=" img-canvas-container">
                 <img id="rangeImage" class='img' src="map-images/dunes.png" width="400" height="400" />
                 <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>

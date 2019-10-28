@@ -36,6 +36,15 @@ function radToDeg(rad){
 //     return btoa(utf8Bytes);
 // }
 
+function transformPoint(x, y, matrix){
+    return [matrix.a*x + matrix.c*y + matrix.e, matrix.b*x + matrix.d*y + matrix.f];
+}
+
+function getXScale(matrix){
+    return matrix.a;
+}
+
+
 function pointStringToInts(input){
     return input.split(", ").map(function(item){return parseInt(item)});
     
