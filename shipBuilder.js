@@ -26,7 +26,7 @@ function initializeShipBuilder(){
   //   console.log(rgba)
   // });
 
-  $("#weaponSelections select").on("change", function(e){
+  $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
     ship_builder_guns[$(this).parent().index()/2] = $(this).val();
     console.log(ship_builder_guns);
     updateShipBuildImage();
@@ -51,7 +51,7 @@ function shipBuilderImport(){
 
   ship_builder_guns = build_code.slice(1,7);
   for (let i=0; i < ship_builder_guns.length; i++){
-    let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select");
+    let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
     select.val(ship_builder_guns[i]);
   }
   updateShipBuildImage();
@@ -84,16 +84,29 @@ function shipBuilderReloadGuns(){
     
     console.log(i);
     let available_guns = gun_dataset.filterByString(ship_data[14+i], "Weapon slot");
-    let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select");
+    let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
     select.empty();
     for (let j=0; j < available_guns.getNOfRows(); j++){
       select.append($("<option>"+available_guns.getDatasetCell(j, 1)+"</option>"));      
     }
     ship_builder_guns[i] = select.val();
   }
-  console.log(ship_builder_guns)
-}
 
+  for (let i=0; i < 6; i++){
+    let div = $("#weaponSelections > div:nth-of-type("+(i+1)+")");
+    if (i+1 > n_guns){
+      div.hide();
+    }
+    else
+      div.show();
+  } 
+
+
+  for (let i=0; i < ammo_dataset.getNOfRows(); i++){
+    $("#weaponSelections > div > select:nth-of-type(2)").append($("<option>"+ammo_dataset.getDatasetCell(i, 1)+"</option>"));
+  }
+  
+}
 
 function shipCanvasClicked(event){
   if(!event) event = window.event;  
@@ -258,13 +271,6 @@ function updateRangeVis(){
 
       let image_data_off = off_ctx.getImageData(0, 0, 400, 400);
       for (j=0; j<image_data_off.data.length; j+=4){
-        // if (image_data_off.data[j] == 127){
-        //   console.log("WEOWOE")
-        //   image_data_off.data[j]=128;
-        // }
-        // if (image_data_off.data[j] != 128) image_data_off[j] = 0;
-        // if (image_data_off.data[j+1] != 128) image_data_off[j+1] = 255;
-        // if (image_data_off.data[j+2] != 128) image_data_off[j+2] = 0;
         if (image_data_off.data[j+3] != 255){
           image_data_off.data[j+0] = 0;
           image_data_off.data[j+1] = 0;
@@ -311,7 +317,7 @@ function updateRangeVis(){
 
       }
       else if (color_val == 8){
-        image_data.data[i] = 150;
+        image_data.data[i] = 200;
         image_data.data[i+1] = 0;
         image_data.data[i+2] = 0;
 
