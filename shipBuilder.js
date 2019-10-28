@@ -73,29 +73,17 @@ function initializeShipBuilder(){
     return false;
   })
 
-  // $('#rangeCanvas').mousemove(function(event){
-  //   // var x = event.layerX;
-  //   // var y = event.layerY;
-    
-  //   let [x, y] = [event.pageX - $(this).offset().left, event.pageY - $(this).offset().top];
-  //   let rangeCanvas = document.getElementById("rangeCanvas");
-  //   let ctx = rangeCanvas.getContext("2d");
-  //   // console.log(x, ", ", y)
-  //   var pixel = ctx.getImageData(x, y, 1, 1);
-  //   var data = pixel.data;
-  //   var rgba = 'rgba(' + data[0] + ', ' + data[1] +
-  //              ', ' + data[2] + ', ' + data[3] + ')';
-  //   console.log(rgba)
-  // });
-
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
     ship_builder_guns[$(this).parent().index()/2] = $(this).val();
     console.log(ship_builder_guns);
     updateShipBuildImage();
     updateRangeVis();
-
-
     // shipBuilderLoad("Mobula,Artemis,Mercury,Mercury,Mercury,Mercury,Mercury")
+  });
+
+  $("#weaponSelections select:nth-of-type(2)").on("change", function(e){
+    updateShipBuildImage();
+    updateRangeVis();
   });
 
   $("#shipBuildExportButton").on("click", shipBuilderExport);
@@ -111,17 +99,29 @@ function shipBuilderImport(){
 
   shipBuilderReloadGuns();
 
-  ship_builder_guns = build_code.slice(1,7);
+  ship_builder_guns = build_code.slice(1, 7);
   for (let i=0; i < ship_builder_guns.length; i++){
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
     select.val(ship_builder_guns[i]);
   }
+  ammo_types = build_code.slice(7, 13);
+  for (let i=0; i < ammo_types.length; i++){
+    let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)");
+    select.val(ammo_types[i]);
+  }
+
   updateShipBuildImage();
   updateRangeVis();
 }
 
 function shipBuilderExport(){
-  let export_string = ship_builder_ship + "," + ship_builder_guns.join();
+  
+  
+  let ammo_types = [];
+  for (let i=1; i <= 6; i++){
+    ammo_types.push($("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val());
+  }
+  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join();
   console.log(export_string);
   export_string = btoa(export_string);
   console.log(export_string);
@@ -245,8 +245,8 @@ function updateShipBuildImage(){
   for (let i=0; i < n_guns; i++){
 
     let gun_type = ship_builder_guns[i];
-
-    let gun_numbers = getGunNumbers(gun_type, "Normal", false);
+    let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
+    let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
 
 
     let gun_angle = gun_numbers.info.angle;
@@ -344,17 +344,24 @@ function updateRangeVis(){
     for (let i=0; i < ship_builder_guns.length; i++){
       let gun_type = ship_builder_guns[i];
       if (gun_type == "None") continue;
-      let ammo_type = "Normal";
 
-      let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
-      let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
+      let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
+      let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
+      
+      // let ammo_type = "Normal";
 
-      let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
-      let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
+      // let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
+      // let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
+
+      // let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
+      // let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
+
+      let range = gun_numbers.info.range;
+      let arming_range = gun_numbers.info["arming distance"];
 
       let range_px = range/map_scale;
       let arming_range_px = arming_range/map_scale;
-      let side_angle = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Side angle"));
+      let side_angle = gun_numbers.info.angle;
       
       let initial_angle = -Math.PI/2 + degToRad(parseFloat(ship_data[2+i]));
 
