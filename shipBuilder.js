@@ -1,12 +1,10 @@
 
 
 var ship_builder_guns = ["None", "None", "None", "None", "None", "None"];
+var ship_builder_ship = "Mobula";
 
 function initializeShipBuilder(){
-
-
-
-  shipBuilderShipChanged();
+  shipBuilderReloadGuns();
 
   updateShipBuildImage();
   updateRangeVis();
@@ -33,21 +31,55 @@ function initializeShipBuilder(){
     console.log(ship_builder_guns);
     updateShipBuildImage();
     updateRangeVis();
+
+
+    // shipBuilderLoad("Mobula,Artemis,Mercury,Mercury,Mercury,Mercury,Mercury")
   });
+
+  $("#shipBuildExportButton").on("click", shipBuilderExport);
+  $("#shipBuildImportButton").on("click", shipBuilderImport);
 }
 
 
-function shipBuilderShipChanged(){
+function shipBuilderImport(){
+  let build_code = $("#shipBuildImportText").val();
+  build_code = atob(build_code);
+  build_code = build_code.split(",");
+  ship_builder_ship = build_code[0];
+
+  shipBuilderReloadGuns();
+
+  ship_builder_guns = build_code.slice(1,7);
+  for (let i=0; i < ship_builder_guns.length; i++){
+    let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select");
+    select.val(ship_builder_guns[i]);
+  }
+  updateShipBuildImage();
+  updateRangeVis();
+}
+
+function shipBuilderExport(){
+  let export_string = ship_builder_ship + "," + ship_builder_guns.join();
+  console.log(export_string);
+  export_string = btoa(export_string);
+  console.log(export_string);
+  // export_string = en(export_string);
+  // console.log(export_string);
+  // export_string = base64EncodeUnicode(export_string);
+  
+  $("#shipBuildImportText").val(export_string);
+}
+
+function shipBuilderReloadGuns(){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
     console.log("Still loading");
-    setTimeout(function(){ shipBuilderShipChanged(); }, 1000);
+    setTimeout(function(){ shipBuilderReloadGuns(); }, 1000);
     return;
   }
   ship_builder_guns.fill("None");
   
   let ship_data = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
   let n_guns = parseInt(ship_data[1]);
-  console.log(n_guns);
   for (let i=0; i < n_guns; i++){
     
     console.log(i);
@@ -109,6 +141,7 @@ function shipCanvasClicked(event){
   // $(template).remove(); 
   // $(this).append(template); 
 }
+
 
 
 function updateShipBuildImage(){

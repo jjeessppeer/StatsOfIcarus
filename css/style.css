@@ -63,13 +63,13 @@
   
   /* original demo styles */
   /* notice no width defined on flex items, but they wrap anyway */
-  .btn {
+  /* .btn {
     font-family: "Arial", sans-serif;
     border-bottom: 4px solid #77aaee;
     color: #77aaee;
     padding: .6rem;
     text-decoration: none;
-  }
+  } */
 
 
 /* Image with canvas overlay */
