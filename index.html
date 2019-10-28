@@ -283,98 +283,98 @@
 
 
 
-        <div class="row">
-          <div class="col-3">
-              <div class="input-group">
-                  <div class="input-group-prepend">
-                    <div class="input-group-text">Ship</div>
-                  </div>
-                  <select class="form-control" id="shipBuildShipSelection" autocomplete="off">
-                  </select>
-                </div>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Ship</div>
           </div>
-
-
-          <div class="col-3">
-            
-          </div>
-
-
-
+          <select class="form-control" id="shipBuildShipSelection" autocomplete="off">
+          </select>
         </div>
+
+
+        <br>
+
+        <div class="my-col img-canvas-container" id="shipContainer">
+          <img id="shipBuilderImage" class='img' src="ship-images/mobula.jpg" width="400" height="429" />
+          <canvas id="shipBuilderCanvas" width="400" height="429">Your browser does not support the HTML5 canvas tag.</canvas>
+      
+          <div id="shipBuildGunSelector" class="btn-group-vertical" role="group">
+            <button type="button" class="btn btn-secondary">Left</button>
+            <button type="button" class="btn btn-secondary">Middle</button>
+            <button type="button" class="btn btn-secondary">Right</button>
+          </div>
+      
+        </div>
+      
+      
+        <div class="my-col" id="weaponSelections">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Weapon 1</div>
+            </div>
+            <select class="form-control" id="shipBuildGun1" autocomplete="off">
+            </select>
+          </div>
+          <br>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Weapon 2</div>
+            </div>
+            <select class="form-control" id="shipBuildGun2" autocomplete="off">
+            </select>
+          </div>
+          <br>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Weapon 3</div>
+            </div>
+            <select class="form-control" id="shipBuildGun3" autocomplete="off">
+            </select>
+          </div>
+          <br>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Weapon 4</div>
+            </div>
+            <select class="form-control" id="shipBuildGun4" autocomplete="off">
+            </select>
+          </div>
+          <br>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Weapon 5</div>
+            </div>
+            <select class="form-control" id="shipBuildGun5" autocomplete="off">
+            </select>
+          </div>
+          <br>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Weapon 6</div>
+            </div>
+            <select class="form-control" id="shipBuildGun6" autocomplete="off">
+            </select>
+          </div>
+
+
+          
+        </div>
+        
+
+        <div class="my-col">
+            <div id="rangeMapContainer" class=" img-canvas-container">
+                <img id="rangeImage" class='img' src="map-images/dunes.png" width="400" height="400" />
+                <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
+              </div>
+        </div>
+        
+        
 
         
         <br> 
-        <div class="sbs-container">
-          <div class="sbs-column img-canvas-container" id="shipContainer">
-            <img id="shipBuilderImage" class='img' src="ship-images/mobula.jpg" width="400" height="429" />
-            <canvas id="shipBuilderCanvas" width="400" height="429">Your browser does not support the HTML5 canvas tag.</canvas>
-          
-            <div id ="shipBuildGunSelector" class="btn-group-vertical" role="group">
-                    <button type="button" class="btn btn-secondary">Left</button>
-                    <button type="button" class="btn btn-secondary">Middle</button>
-                    <button type="button" class="btn btn-secondary">Right</button>
-            </div>
-            
-          </div>
-          <div class="sbs-column">
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Weapon 1</div>
-              </div>
-              <select class="form-control" id="shipBuildGun1" autocomplete="off">
-              </select>
-            </div>
-            <br>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Weapon 2</div>
-              </div>
-              <select class="form-control" id="shipBuildGun2" autocomplete="off">
-              </select>
-            </div>
-            <br>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Weapon 3</div>
-              </div>
-              <select class="form-control" id="shipBuildGun3" autocomplete="off">
-              </select>
-            </div>
-            <br>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Weapon 4</div>
-              </div>
-              <select class="form-control" id="shipBuildGun4" autocomplete="off">
-              </select>
-            </div>
-            <br>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Weapon 5</div>
-              </div>
-              <select class="form-control" id="shipBuildGun5" autocomplete="off">
-              </select>
-            </div>
-            <br>
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Weapon 6</div>
-              </div>
-              <select class="form-control" id="shipBuildGun6" autocomplete="off">
-              </select>
-            </div>
-          </div>
-        </div>
         
         <br>
-        Ship ranges
-        <br>
-          <div id="rangeMapContainer" class=" img-canvas-container">
-            <img id="rangeImage" class='img' src="map-images/dunes.png" width="400" height="400" />
-            <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
-          </div>
+          
           
         </div>
         
