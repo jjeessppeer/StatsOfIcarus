@@ -182,6 +182,7 @@ function shipBuilderImport(e, build_code){
   crewRoleChanged();
   updateShipBuildImage();
   updateRangeVis();
+  shipBuilderUpdateUrl();
 }
 
 function shipBuilderExport(){
