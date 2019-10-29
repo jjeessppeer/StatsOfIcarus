@@ -58,7 +58,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let rate_of_fire = gun_data[6] * ammo_data[9];
 
     let range = gun_data[10] * ammo_data[10];
-    let arming_distance = gun_data[15] * gun_data[9] * ammo_data[5] * ammo_data[10];
+    let arming_distance = gun_data[15] * gun_data[9] * ammo_data[8] * ammo_data[10];
     let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
     let aoe = gun_data[13] * ammo_data[5];
 
