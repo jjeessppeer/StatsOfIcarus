@@ -360,7 +360,7 @@ function updateShipBuildImage(){
     let right_angle = angle + degToRad(gun_angle);
     let left_angle = angle - degToRad(gun_angle);
 
-    let range = gun_numbers.info.range;
+    // let range = gun_numbers.info.range;
 
     let [cx, cy] = pointStringToInts(data_row[8+i])
 
@@ -414,7 +414,6 @@ function updateShipBuildImage(){
     off_ctx.arc(cx, cy, gun_numbers.info["arming distance"]/0.128, left_angle, right_angle);
     off_ctx.lineTo(cx,cy);
     off_ctx.fill();
-
 
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);

@@ -62,6 +62,8 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
     let aoe = gun_data[13] * ammo_data[5];
 
+    
+
     //TODO ammo changes
     let angle = parseFloat(gun_data[16]);
 
@@ -113,6 +115,11 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
         let laser_damage_modifier = laserAvgDamage(gun_data, ammo_data, target_distance, seconds_clip);
         damage_hit_primary *= laser_damage_modifier;
         damage_hit_secondary *= laser_damage_modifier;
+    }
+
+    if (gun_type == "Mine"){
+        range = arming_distance + 50;
+        info_dict["range"] = range;
     }
     // TODO tempest special case
 
