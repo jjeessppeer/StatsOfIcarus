@@ -64,10 +64,12 @@ function initializeShipBuilder(){
 
 
     let [pos_x, pos_y] = [e.originalEvent.layerX, e.originalEvent.layerY];
-    let [x, y] = transformPoint(pos_x, pos_y, ctx.getTransform());
+    let [x, y] = transformPoint(pos_x, pos_y, ctx.getTransform().invertSelf());
     ctx.translate(x, y);
     ctx.scale(factor,factor);
     ctx.translate(-x, -y);
+
+    console.log(x, y);
     
     updateShipBuildImage();
     return false;
