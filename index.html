@@ -281,7 +281,7 @@
       <div id="shipBuilder" class="content-panel" style="display:none">
         <h3>Ship builder</h3>
 
-        
+        <p>Build can be shared via the current URL or by copying and pasting in the textfield below and pressing import/export.</p>
         <div class="input-group">
           <div class="input-group-prepend">
             <div class="input-group-text">Import build</div>
@@ -302,7 +302,7 @@
             <div class="input-group-text">Ship</div>
           </div>
           <select class="form-control" id="shipBuildShipSelection" autocomplete="off">
-            <option>Mobula</option>      
+            <!-- <option>Mobula</option>       -->
           </select>
         </div>
         
@@ -543,7 +543,9 @@
         <br>
         <h3>Ship preview</h3>
         <div class="my-col img-canvas-container" id="shipContainer">
-          <b>Drag or scroll to pan or zoom image</b>
+          <b>Drag or scroll to pan or zoom image.</b>
+          <br>
+          <b>Note: Only mobula works here so far.</b>
           <br>
           <img id="shipBuilderImage" class='img' src="ship-images/mobula_small.png" width="400" height="427" style="display:none" />
           <canvas id="shipBuilderCanvas" width="400" height="427" style="border-style:solid;">Your browser does not support the HTML5 canvas tag.</canvas>
@@ -1024,7 +1026,7 @@
       initializeSpawns();
       
       
-      $("[data-show='#" + window.location.hash.substr(1) + "']").trigger("click");
+      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "']").trigger("click");
 
 
     });

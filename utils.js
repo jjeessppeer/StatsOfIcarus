@@ -14,6 +14,19 @@ var SHIP_LIST = [
     'Stormbreaker'
 ]
 
+
+function setUrlParam(url, param){
+    let split_url = url.split("?");
+    return split_url[0] + "?" + param;
+}
+
+function getUrlParam(url){
+    let split_url = url.split("?");
+    if (split_url.length > 0)
+        return split_url[1];
+    return false;
+}
+
 function degToRad(deg){
     return deg * Math.PI / 180;
 }

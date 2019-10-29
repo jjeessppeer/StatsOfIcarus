@@ -9,13 +9,33 @@ var build_last_pos_y = undefined;
 
 
 function initializeShipBuilder(){
-  shipBuilderReloadGuns();
+  if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
+    console.log("Still loading");
+    setTimeout(function(){ initializeShipBuilder(); }, 1000);
+    return;
+  }
 
+  // Fill ship list
+  for (let i=0; i < ship_guns_dataset.getNOfRows(); i++){
+    let ship_name = ship_guns_dataset.getDatasetCell(i, 0);
+    if (ship_name == "Mobula")
+      $("#shipBuildShipSelection").append($("<option selected>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
+    else
+      $("#shipBuildShipSelection").append($("<option>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
+  }
+  
+  // Ship change event
+  $("#shipBuildShipSelection").on("change", function(e){
+    ship_builder_ship = $(this).val();
+    shipBuilderReloadGuns();
+    updateShipBuildImage();
+    updateRangeVis();
+    shipBuilderUpdateUrl()
+  });
+
+  shipBuilderReloadGuns();
   updateShipBuildImage();
   updateRangeVis();
-  console.log("GUNS INITIALZIED");
-
-  // $('#shipBuilderCanvas').mousedown(shipCanvasClicked);
 
   let loadout_menu = $("#crewLoadouts > div");
   $("#crewLoadouts").append(loadout_menu.clone());
@@ -28,11 +48,13 @@ function initializeShipBuilder(){
     // console.log($(this)[0].childNodes[0].src);
     // console.log($(this).parent().siblings()[0].childNodes[1].src);
     $(this).parent().siblings()[0].childNodes[1].src = $(this)[0].childNodes[0].src;
+    shipBuilderUpdateUrl()
   });
 
   $("#crewLoadouts > div > div:nth-of-type(2)").on("click", function(e){
     console.log("Crew role changed");
     crewRoleChanged();
+    shipBuilderUpdateUrl()
   });
   crewRoleChanged();
   
@@ -98,32 +120,46 @@ function initializeShipBuilder(){
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
     ship_builder_guns[($(this).parent().index()-1)/2] = $(this).val();
     
-    console.log($(this).parent().index());
     // ship_builder_guns[0] = "Gatling";
     // console.log(ship_builder_guns);
     updateShipBuildImage();
     updateRangeVis();
     // shipBuilderLoad("Mobula,Artemis,Mercury,Mercury,Mercury,Mercury,Mercury")
+    shipBuilderUpdateUrl()
   });
 
   $("#weaponSelections select:nth-of-type(2)").on("change", function(e){
     updateShipBuildImage();
     updateRangeVis();
+    shipBuilderUpdateUrl();
   });
 
   $("#shipBuildExportButton").on("click", shipBuilderExport);
   $("#shipBuildImportButton").on("click", shipBuilderImport);
+
+
+
+
+  if (getUrlParam(window.location.href)){
+    shipBuilderImport(null, getUrlParam(window.location.href));
+  }
 }
 
+function shipBuilderUpdateUrl(){
+  window.location.href = setUrlParam(window.location.href, shipBuilderGetExportCode());
+}
 
-function shipBuilderImport(){
-  let build_code = $("#shipBuildImportText").val();
+function shipBuilderImport(e, build_code){
+  if (!build_code)
+    build_code = $("#shipBuildImportText").val();
   build_code = atob(build_code);
   build_code = build_code.split(",");
+
   ship_builder_ship = build_code[0];
+  $("#shipBuildShipSelection").val(ship_builder_ship);
+
 
   shipBuilderReloadGuns();
-
   ship_builder_guns = build_code.slice(1, 7);
   for (let i=0; i < ship_builder_guns.length; i++){
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
@@ -142,6 +178,7 @@ function shipBuilderImport(){
     imgs[i].src = "loadout-images/"+crew_selections[i] + ".jpg";
     // console.log(crew_selections[i]);
   }
+
   crewRoleChanged();
   updateShipBuildImage();
   updateRangeVis();
@@ -164,15 +201,32 @@ function shipBuilderExport(){
   }
 
 
-  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join();
+  // let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join();
+  let export_string = shipBuilderGetExportCode();
   // console.log(export_string);
-  export_string = btoa(export_string);
+  // export_string = btoa(export_string);
   // console.log(export_string);
   // export_string = en(export_string);
   // console.log(export_string);
   // export_string = base64EncodeUnicode(export_string);
   
   $("#shipBuildImportText").val(export_string);
+}
+
+function shipBuilderGetExportCode(){
+  let ammo_types = [];
+  for (let i=1; i <= 6; i++){
+    ammo_types.push($("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val());
+  }
+  let imgs = $("#crewLoadouts button img");
+  let crew_selections = [];
+  for (let i=0; i < imgs.length; i++){
+    let selection = imgs[i].src;
+    selection = selection.substring(selection.lastIndexOf('/') + 1);
+    selection = selection.split(".")[0];
+    crew_selections.push(selection);
+  }
+  return btoa(ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join());
 }
 
 function crewRoleChanged(){
@@ -239,11 +293,9 @@ function shipBuilderReloadGuns(){
   }
   ship_builder_guns.fill("None");
   
-  let ship_data = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
+  let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
   let n_guns = parseInt(ship_data[1]);
   for (let i=0; i < n_guns; i++){
-    
-    console.log(i);
     let available_guns = gun_dataset.filterByString(ship_data[14+i], "Weapon slot");
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
     select.empty();
@@ -269,53 +321,6 @@ function shipBuilderReloadGuns(){
   
 }
 
-// function shipCanvasClicked(event){
-//   if(!event) event = window.event;  
-//
-//   let click_pos = [event.pageX - $(this).offset().left, event.pageY - $(this).offset().top];
-//   var x = event.pageX - $(this).offset().left;  
-//   var y = event.pageY - $(this).offset().top;   
-//   console.log(x, ", ", y, " : ", click_pos);
-//   var styles = {
-//           "left" : x, 
-//           "top" : y
-//   };
-// 
-// 
-//   let data_row = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
-//   let n_guns = parseInt(data_row[1]);
-//   let gun_i = -1;
-//   for (let i=0; i < n_guns; i++){
-//     if (dist2D([x, y], pointStringToInts(data_row[8+i])) < 10) gun_i = i; 
-//   }
-//   console.log("N guns: ", gun_i);
-// 
-// 
-//   let available_guns = gun_dataset.filterByString(data_row[14+gun_i], "Weapon slot");
-//   $("#shipBuildGunSelector").empty();
-//   for (let i=0; i < available_guns.getNOfRows(); i++){
-//     console.log(available_guns.getDatasetCell(i, 1));
-//     let btn = $('<button type="button" class="btn btn-secondary text-left">'+available_guns.getDatasetCell(i, 1)+'</button>')
-//     $("#shipBuildGunSelector").append(btn)
-//   }
-// 
-// 
-//   if (gun_i == -1){
-//     $("#shipBuildGunSelector").hide();
-//     return;
-//   }
-// 
-//   $("#shipBuildGunSelector").show();
-//   $("#shipBuildGunSelector").css("left", x);
-//   $("#shipBuildGunSelector").css("top", y);
-//   // $("#shipBuildGunSelector").hide();
-//   // var template = $("#shipBuildGunSelector");
-//   // $(template).css( styles ) 
-//   // .show();  
-//   // $(template).remove(); 
-//   // $(this).append(template); 
-// }
-
 
 function updateShipBuildImage(){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset)) {
@@ -337,7 +342,7 @@ function updateShipBuildImage(){
   ctx.globalAlpha = 1;
   ctx.drawImage(img, 0, 0);
 
-  let data_row = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
+  let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
 
   let n_guns = parseInt(data_row[1]);
 
@@ -434,7 +439,7 @@ function updateRangeVis(){
     let map_image = document.querySelector("#mapImage");
     let map_scale = parseFloat(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth));
 
-    let ship_data = ship_guns_dataset.filterByString("Mobula", "Ship").getDatasetRow(0);
+    let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
     let n_guns = parseInt(ship_data[1]);
 
     let cy = 250;
@@ -499,11 +504,6 @@ function updateRangeVis(){
         } 
       }
       off_ctx.putImageData(image_data_off, 0, 0);
-
-
-      console.log("donezo");
-      
-      
       ctx.globalCompositeOperation = "multiply";
       ctx.drawImage(offscreen, 0, 0);
     }
@@ -578,4 +578,4 @@ function updateRangeVis(){
     
     
 
-  }
+}
