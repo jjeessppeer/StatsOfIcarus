@@ -57,7 +57,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let clip_size = Math.max(1, Math.round(gun_data[8] * ammo_data[4]));
     let rate_of_fire = gun_data[6] * ammo_data[9];
 
-    let range = gun_data[10] * ammo_data[10];
+    let range = gun_data[10] * ammo_data[10] * ammo_data[15];
     let arming_distance = gun_data[15] * gun_data[9] * ammo_data[8] * ammo_data[10];
     let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
     let aoe = gun_data[13] * ammo_data[5];
@@ -65,7 +65,6 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     //TODO ammo changes
     let angle = parseFloat(gun_data[16]);
 
-    let special_info = null;
     let damage_dict = {};
     let info_dict = {
         "range": range, 
@@ -79,8 +78,8 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let damage_type_primary = gun_data[2];
     let damage_type_secondary = gun_data[4];
 
-    let damage_hit_primary = gun_data[3] * ammo_data[7] * (buffed ? 1.2 : 1);
-    let damage_hit_secondary = gun_data[5] * ammo_data[7] * ammo_data[6] * (buffed ? 1.2 : 1);
+    let damage_hit_primary = gun_data[3] * ammo_data[7] * ammo_data[14] * (buffed ? 1.1 : 1);
+    let damage_hit_secondary = gun_data[5] * ammo_data[7] * ammo_data[6] * (buffed ? 1.1 : 1);
     
     // Aten Lens special case
     if (gun_type == "Aten Lens Array"){
@@ -123,8 +122,8 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let damage_second_1_primary = damage_clip_primary / seconds_clip;
     let damage_second_1_secondary = damage_clip_secondary / seconds_clip;
 
-    let damage_second_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
-    let damage_second_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]));
+    let damage_second_2_primary = damage_clip_primary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]) * (buffed ? 0.9 : 1));
+    let damage_second_2_secondary = damage_clip_secondary / (parseFloat(seconds_clip) + parseFloat(gun_data[7]) * (buffed ? 0.9 : 1));
 
     // Calculate damages
 
