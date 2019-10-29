@@ -17,6 +17,28 @@ function initializeShipBuilder(){
 
   // $('#shipBuilderCanvas').mousedown(shipCanvasClicked);
 
+  let loadout_menu = $("#crewLoadouts > div");
+  $("#crewLoadouts").append(loadout_menu.clone());
+  $("#crewLoadouts").append(loadout_menu.clone());
+  $("#crewLoadouts").append(loadout_menu.clone());
+
+  // Initialize crew loadout menu
+  $("#crewLoadouts a").on("click", function(e){
+    
+    // console.log($(this)[0].childNodes[0].src);
+    // console.log($(this).parent().siblings()[0].childNodes[1].src);
+    $(this).parent().siblings()[0].childNodes[1].src = $(this)[0].childNodes[0].src;
+  });
+
+  $("#crewLoadouts > div > div:nth-of-type(2)").on("click", function(e){
+    console.log("Crew role changed");
+    crewRoleChanged();
+  });
+  crewRoleChanged();
+  
+
+  // Canvas events
+
   $("#shipBuilderCanvas").mousemove(function(e){
     if (e.originalEvent.buttons == 0){
       build_last_pos_x = undefined;
@@ -68,16 +90,17 @@ function initializeShipBuilder(){
     ctx.translate(x, y);
     ctx.scale(factor,factor);
     ctx.translate(-x, -y);
-
-    console.log(x, y);
     
     updateShipBuildImage();
     return false;
-  })
+  });
 
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
-    ship_builder_guns[$(this).parent().index()/2] = $(this).val();
-    console.log(ship_builder_guns);
+    ship_builder_guns[($(this).parent().index()-1)/2] = $(this).val();
+    
+    console.log($(this).parent().index());
+    // ship_builder_guns[0] = "Gatling";
+    // console.log(ship_builder_guns);
     updateShipBuildImage();
     updateRangeVis();
     // shipBuilderLoad("Mobula,Artemis,Mercury,Mercury,Mercury,Mercury,Mercury")
@@ -112,27 +135,101 @@ function shipBuilderImport(){
     select.val(ammo_types[i]);
   }
 
+
+  crew_selections = build_code.slice(13, 53);
+  let imgs = $("#crewLoadouts button img");
+  for (let i=0; i < crew_selections.length; i++){
+    imgs[i].src = "loadout-images/"+crew_selections[i] + ".jpg";
+    // console.log(crew_selections[i]);
+  }
+  crewRoleChanged();
   updateShipBuildImage();
   updateRangeVis();
 }
 
 function shipBuilderExport(){
   
-  
   let ammo_types = [];
   for (let i=1; i <= 6; i++){
     ammo_types.push($("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val());
   }
-  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join();
-  console.log(export_string);
+
+  let imgs = $("#crewLoadouts button img");
+  let crew_selections = [];
+  for (let i=0; i < imgs.length; i++){
+    let selection = imgs[i].src;
+    selection = selection.substring(selection.lastIndexOf('/') + 1);
+    selection = selection.split(".")[0];
+    crew_selections.push(selection);
+  }
+
+
+  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join();
+  // console.log(export_string);
   export_string = btoa(export_string);
-  console.log(export_string);
+  // console.log(export_string);
   // export_string = en(export_string);
   // console.log(export_string);
   // export_string = base64EncodeUnicode(export_string);
   
   $("#shipBuildImportText").val(export_string);
 }
+
+function crewRoleChanged(){
+
+  let imgs = $("#crewLoadouts > div > div:nth-of-type(2) > button > img");
+  // console.log($(imgs[0]).parent().parent().parent().find("> div"));
+  for (let i=0; i < imgs.length; i++){
+    let role = imgs[i].src;
+    role = role.substring(role.lastIndexOf('/') + 1);
+    role = role.split(".")[0];
+
+
+    let siblings = $(imgs[i]).parent().parent().parent().find("> div");
+    if (role == "Pilot"){
+      $(siblings[2]).show();
+      $(siblings[3]).show();
+      $(siblings[4]).show();
+
+      $(siblings[5]).show();
+      $(siblings[6]).hide();
+      $(siblings[7]).hide();
+
+      $(siblings[8]).show();
+      $(siblings[9]).hide();
+      $(siblings[10]).hide();
+
+    }
+    else if (role == "Gunner"){
+      $(siblings[2]).show();
+      $(siblings[3]).hide();
+      $(siblings[4]).hide();
+
+      $(siblings[5]).show();
+      $(siblings[6]).show();
+      $(siblings[7]).hide();
+
+      $(siblings[8]).show();
+      $(siblings[9]).show();
+      $(siblings[10]).show();
+
+    }
+    else if (role == "Engineer"){
+      $(siblings[2]).show();
+      $(siblings[3]).hide();
+      $(siblings[4]).hide();
+
+      $(siblings[5]).show();
+      $(siblings[6]).show();
+      $(siblings[7]).show();
+
+      $(siblings[8]).show();
+      $(siblings[9]).hide();
+      $(siblings[10]).hide();
+    }
+  }
+}
+
 
 function shipBuilderReloadGuns(){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
