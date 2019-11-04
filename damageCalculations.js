@@ -88,7 +88,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
         special_info = "laser";
 
         // Laser dont shoot for first 1.75 seconds
-        seconds_clip += 1.75;
+        seconds_clip += 1;
 
         // Calculate damage done in X seconds
 
