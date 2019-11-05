@@ -15,9 +15,10 @@ var SHIP_LIST = [
 ]
 
 
-function setUrlParam(url, param){
-    let split_url = url.split("?");
-    return split_url[0] + "?" + param;
+function setUrlParam(param){
+    let split_url = window.location.href.split("?");
+    window.location.href = split_url[0] + "?" + param;
+    // return split_url[0] + "?" + param;
 }
 
 function getUrlParam(url){

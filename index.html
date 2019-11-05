@@ -618,7 +618,8 @@
             </div>
           </div>
         </div>
-        <div class="row row-margin">
+
+        <div class="row row-margin" id="damageCalcAmmoInput">
           <div class="col-sm-4">
             <div class="input-group">
               <div class="input-group-prepend small">
@@ -639,8 +640,118 @@
             </div>
           </div>
         </div>
+
+
+        <div id="damageCalcCustomAmmoInput" style="display:none">
+          <h5>Custom ammo</h5>
+          <p>Enter values as multipliers, ie. 1.1 is +10%, 0.9 is -10%.</p>
+
+          <div class="my-col">
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Damage</div>
+              </div>
+              <input type="text" id="customAmmoInputDamage" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Rate of Fire</div>
+              </div>
+              <input type="text" id="customAmmoInputROF" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Clip size</div>
+              </div>
+              <input type="text" id="customAmmoInputClipSize" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Direct damage</div>
+              </div>
+              <input type="text" id="customAmmoInputDirectDmg" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">AoE damage</div>
+              </div>
+              <input type="text" id="customAmmoInputAoEDamage" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+
+          </div>
+          <!-- <br> -->
+          <div class="my-col">
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Projectile speed</div>
+              </div>
+              <input type="text" id="customAmmoInputSpeed" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Arming time</div>
+              </div>
+              <input type="text" id="customAmmoInputArmingTime" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Range</div>
+              </div>
+              <input type="text" id="customAmmoInputRange" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Jitter</div>
+              </div>
+              <input type="text" id="customAmmoInputArmingJitter" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">AoE radius</div>
+              </div>
+              <input type="text" id="customAmmoInputAoERadius" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+          </div>
+
+          <div class="my-col">
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Rotation speed</div>
+              </div>
+              <input type="text" id="customAmmoInputArmingRotationSpeed" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Rotational arcs</div>
+              </div>
+              <input type="text" id="customAmmoInputArmingRotationalArcs" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+
+            <br>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Fire modifier</div>
+              </div>
+              <input type="text" id="customAmmoInputArmingRotationalFireChance" class="form-control" placeholder="" autocomplete="off" value="1">
+            </div>
+            <div class="input-group" style="width:200px;">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Fire damage</div>
+              </div>
+              <input type="text" id="customAmmoInputArmingRotationalFireDamage" class="form-control" placeholder="" autocomplete="off" value="0">
+            </div>
+          </div>
+
+          
+        </div>
+
         <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="buffedCheckbox">
+          <input type="checkbox" class="form-check-input" id="damageCalcCustomAmmoCheck" autocomplete="off">
+          <label class="form-check-label" for="damageCalcCustomAmmoCheck">Use testing ammo</label>
+        </div>
+
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="buffedCheckbox" autocomplete="off">
           <label class="form-check-label" for="buffedCheckbox">Buffed</label>
         </div>
 

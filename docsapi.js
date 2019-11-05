@@ -98,6 +98,13 @@ class Dataset {
         return this.content[y][x];
     }
 
+    getFirstCellByTitle(return_title){
+        let col_index = this.titles.indexOf(return_title);
+        if (col_index == -1)
+            return false;
+        return this.getDatasetCell(0, col_index);
+    }
+
     getEmptyContent() {
         return new Dataset(this.titles, []);
     }

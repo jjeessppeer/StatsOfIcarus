@@ -8,14 +8,84 @@ function initializeDamageCalculator() {
 
 
     $("#distanceRange,#timeRange").on("input", updateGunInfoTable);
+
+
+    $("#damageCalcCustomAmmoInput input").on("input", updateGunInfoTable);
+    $("#damageCalcCustomAmmoInput input").on("input", exportCustomAmmo);
+
+    $("#damageCalcCustomAmmoCheck").on("change", function(e){
+        if ($("#damageCalcCustomAmmoCheck").is(":checked")){
+            $("#damageCalcCustomAmmoInput").show();
+            $("#damageCalcAmmoInput").hide();
+            importSelectedAmmo();
+            exportCustomAmmo();
+        }
+        else {
+            $("#damageCalcCustomAmmoInput").hide();
+            $("#damageCalcAmmoInput").show();
+        }
+    })
+
     // $("#distanceText").inputFilter(function (value) {
     //     console.log(this);
     //     return /^[\d]*?$/.test(value) && (!parseInt(value) || parseInt(value) < 100) //allow float in range 0 to 1, or nothing.
     //   });
     // Update table
     updateGunInfoTable();
+    // exportCustomAmmo();
+    // importCustomAmmo(btoa("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"));
+    if (window.location.hash.substr(1).split("?")[0] == "damageCalculator" && getUrlParam(window.location.href)){
+        importCustomAmmo(getUrlParam(window.location.href));
+        $("#damageCalcCustomAmmoCheck").prop('checked', true);
+        $("#damageCalcCustomAmmoInput").show();
+        $("#damageCalcAmmoInput").hide();
+    }
 }
 
+function exportCustomAmmo(){
+    let inputs = $("#damageCalcCustomAmmoInput input");
+    let export_string = "";
+    for (let i=0; i < inputs.length; i++) {
+        export_string += inputs[i].value + ",";
+    }
+    export_string = btoa(export_string);
+
+    if (window.location.hash.substr(1).split("?")[0] == "damageCalculator"){
+        setUrlParam(export_string);
+    }
+    // return export_string;
+}
+
+function importCustomAmmo(import_string){
+    import_string = atob(import_string);
+    let data = import_string.split(",");
+    let inputs = $("#damageCalcCustomAmmoInput input");
+    for (let i=0; i < inputs.length; i++) {
+        $(inputs[i]).val(data[i]);
+    }
+    updateGunInfoTable();
+}
+
+function importSelectedAmmo(){
+    let dataset = ammo_dataset.filterByString($("#ammoSelect").val(), "Alias");
+    let import_string = dataset.getFirstCellByTitle("Damage") + "," +
+                        dataset.getFirstCellByTitle("Rate of fire") + "," +
+                        dataset.getFirstCellByTitle("Clip size") + "," +
+                        dataset.getFirstCellByTitle("Direct damage") + "," +
+                        dataset.getFirstCellByTitle("AOE damage") + "," +
+                        dataset.getFirstCellByTitle("Projectile speed") + "," +
+                        dataset.getFirstCellByTitle("Arming time") + "," +
+                        dataset.getFirstCellByTitle("Range") + "," +
+                        dataset.getFirstCellByTitle("Jitter") + "," +
+                        dataset.getFirstCellByTitle("AOE radius") + "," +
+                        dataset.getFirstCellByTitle("Rotation speed") + "," +
+                        dataset.getFirstCellByTitle("Rotational arcs") + "," +
+                        dataset.getFirstCellByTitle("Fire modifier") + "," +
+                        dataset.getFirstCellByTitle("Fire damage");
+    import_string = btoa(import_string);
+    importCustomAmmo(import_string);
+    
+}
 
 
 function getGunNumbers(gun_type, ammo_type, buffed) {
@@ -28,7 +98,32 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
         ammo_type = $("#ammoSelect").val();
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
-    let ammo_data = ammo_dataset.filterByString(ammo_type, "Alias").getDatasetRow(0);
+
+
+    let ammo_data;
+    if ($("#damageCalcCustomAmmoCheck").is(':checked')){
+        ammo_data = [
+            "Custom",
+            "Custom",
+            $("#customAmmoInputArmingRotationSpeed").val(),
+            $("#customAmmoInputArmingJitter").val(),
+            $("#customAmmoInputClipSize").val(),
+            $("#customAmmoInputAoERadius").val(),
+            $("#customAmmoInputAoEDamage").val(),
+            $("#customAmmoInputDamage").val(),
+            $("#customAmmoInputArmingTime").val(),
+            $("#customAmmoInputROF").val(),
+            $("#customAmmoInputSpeed").val(),
+            $("#customAmmoInputArmingRotationalFireChance").val(),
+            $("#customAmmoInputArmingRotationalFireDamage").val(),
+            1,
+            $("#customAmmoInputDirectDmg").val(),
+            $("#customAmmoInputRange").val(),
+            $("#customAmmoInputArmingRotationalArcs").val()
+        ];
+    }
+    else
+        ammo_data = ammo_dataset.filterByString(ammo_type, "Alias").getDatasetRow(0);
 
     // Damage unit scales
     let unit_dict = {

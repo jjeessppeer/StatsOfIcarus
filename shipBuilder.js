@@ -139,14 +139,16 @@ function initializeShipBuilder(){
 
 
 
-
-  if (getUrlParam(window.location.href)){
+  // $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "']").trigger("click");
+  console.log("THING HERE: ", window.location.hash.substr(1).split("?")[0]);
+  if (window.location.hash.substr(1).split("?")[0] == "shipBuilder" && getUrlParam(window.location.href)){
     shipBuilderImport(null, getUrlParam(window.location.href));
   }
 }
 
 function shipBuilderUpdateUrl(){
-  window.location.href = setUrlParam(window.location.href, shipBuilderGetExportCode());
+  // window.location.href = setUrlParam(window.location.href, shipBuilderGetExportCode());
+  setUrlParam(shipBuilderGetExportCode());
 }
 
 function shipBuilderImport(e, build_code){
