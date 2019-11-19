@@ -140,7 +140,6 @@ function initializeShipBuilder(){
 
 
   // $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "']").trigger("click");
-  console.log("THING HERE: ", window.location.hash.substr(1).split("?")[0]);
   if (window.location.hash.substr(1).split("?")[0] == "shipBuilder" && getUrlParam(window.location.href)){
     shipBuilderImport(null, getUrlParam(window.location.href));
   }

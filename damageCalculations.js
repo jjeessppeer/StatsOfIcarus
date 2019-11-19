@@ -277,7 +277,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
 
 function updateGunInfoTable() {
     if (!(gun_dataset && ammo_dataset && damage_dataset && tool_dataset && component_dataset && ship_dataset)) {
-        console.log("Damage calculator still loading");
+        console.log("Still loading");
         setTimeout(function(){ updateGunInfoTable(); }, 1000);
         return;
     }
