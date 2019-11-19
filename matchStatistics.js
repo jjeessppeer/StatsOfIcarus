@@ -13,10 +13,10 @@ var scatterChart;
 var totalMatches = 1;
 
 function initializeMatchStatistics(){
-    $("#statsShipSelect").on("change", function(){
-        updateStatsPanel($(this).val());
-    });
-    updateStatsPanel($("#statsShipSelect").val());
+    $("#statsShipSelect").on("change", updateStatsPanel);
+
+    $("#graphDateFilterStartText,#graphDateFilterEndText").on("input", updateStatsPanel);
+    updateStatsPanel();
 }
 
 
@@ -92,16 +92,38 @@ function pickRateTeam(data_rows, active_ship) {
     return [count, total];
 }
 
-function updateStatsPanel(active_ship) {
+function updateStatsPanel() {
     if (!(match_dataset)) {
         console.log("Still loading");
-        setTimeout(function () { updateStatsPanel(active_ship); }, 1000);
+        setTimeout(function () { updateStatsPanel(); }, 1000);
+        return;
+    }
+    
+    let active_ship = $("#statsShipSelect").val();
+
+    // let filtered_match_dataset = match_dataset.
+    let filter_date_start = $("#graphDateFilterStartText").val();
+    let filter_date_end = $("#graphDateFilterEndText").val();
+    if (filter_date_start == "")
+        filter_date_start = "2019-01-01";
+    if (!Date.parse(filter_date_start))
+        return;
+
+    let filtered_match_dataset = match_dataset.filterByDate(filter_date_start, "Date of match", false, true);
+    if (filter_date_end == "" || filter_date_end.toLowerCase() == "today"){
+
+    }
+    if (Date.parse(filter_date_end)){
+        filtered_match_dataset = filtered_match_dataset.filterByDate(filter_date_end, "Date of match", false, false);
+    }
+    else if (filter_date_end != "" && filter_date_end != "today"){
         return;
     }
 
-    let data_rows = match_dataset.filterByStringMultiCol(active_ship, ["T1 Ship 1", "T1 Ship 2", "T2 Ship 1", "T2 Ship 2"]).getDatasetRows();
+
+    let data_rows = filtered_match_dataset.filterByStringMultiCol(active_ship, ["T1 Ship 1", "T1 Ship 2", "T2 Ship 1", "T2 Ship 2"]).getDatasetRows();
     //let n_matches = data_rows.getNOfRows();
-    totalMatches = match_dataset.getNOfRows();
+    totalMatches = filtered_match_dataset.getNOfRows();
 
     let [wins, losses] = calcWins(data_rows, active_ship);
 
@@ -117,7 +139,7 @@ function updateStatsPanel(active_ship) {
         if (total == 0) data.y = 0; 
         else data.y = w/total;
         
-        let [p, t] = pickRateShip(match_dataset.getDatasetRows(), SHIP_LIST[i]);
+        let [p, t] = pickRateShip(filtered_match_dataset.getDatasetRows(), SHIP_LIST[i]);
         data.x = p/t;
         data.r = 12;
 
@@ -158,7 +180,7 @@ function updateStatsPanel(active_ship) {
     // Get pick rate data.
     let pick_data=[];
     for (var i = 0; i < SHIP_LIST.length; i++) {
-        let [picks, total] = pickRateShip(match_dataset.getDatasetRows(), SHIP_LIST[i]);
+        let [picks, total] = pickRateShip(filtered_match_dataset.getDatasetRows(), SHIP_LIST[i]);
         if (picks == 0) continue;
         pick_data.push({label: SHIP_LIST[i], data: picks, color: SHIP_LIST[i] == active_ship ? "rgb(100, 100, 250)" : "rgb(100, 100, 100)"});
     }

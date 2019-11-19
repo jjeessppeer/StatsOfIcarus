@@ -179,6 +179,18 @@
       <!-- Match history analysis -->
       <div id="matchAnalysis" class="content-panel" style="display:none">
         <h1>Match history statistics</h1>
+        <div class="input-group" style="width:440px">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Include matches from</div>
+          </div>
+          <input type="text" class="form-control" id="graphDateFilterStartText" placeholder="2019-01-01" autocomplete="off">
+          <div class="input-group-text">to</div>
+          <input type="text" class="form-control" id="graphDateFilterEndText" placeholder="today" autocomplete="off">
+          
+
+        </div>
+        <br>
+
         <div class="row row-margin">
           <div class="col-sm-4">
             <div class="input-group">
@@ -191,11 +203,11 @@
                 <option>Squid</option>
                 <option>Galleon</option>
                 <option>Spire</option>
-                <option>Pyramidion</option>
+                <option selected>Pyramidion</option>
                 <option>Mobula</option>
                 <option>Magnate</option>
                 <option>Crusader</option>
-                <option selected>Judgement</option>
+                <option>Judgement</option>
                 <option>Corsair</option>
                 <option>Shrike</option>
                 <option>Stormbreaker</option>
@@ -1005,9 +1017,7 @@
 
   <script>
 
-    var match_sheet;
-    var match_dataset;
-
+    var match_dataset = null;
     var gun_dataset = null;
     var ammo_dataset = null;
     var damage_dataset = null;
