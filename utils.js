@@ -98,20 +98,21 @@ function textToNumber(text){
     return text.charCodeAt(0) - 65
 }
 
-function parseDate(text){
-    if (text.length < 2) return false;
-    if (text.substring(0, 2) == "20")
-        text = text.substring(2, text.length);
-    if (text.length < 4) return false;
+// function parseDate(text){
+//     if (text.length < 2) return false;
+//     if (text.substring(0, 2) == "20")
+//         text = text.substring(2, text.length);
+//     if (text.length < 4) return false;
 
-    let year = parseInt("20" + text.substring(0, 2))
-    let month = parseInt(text.substring(2, 4)) - 1;
-    if(text.length == 6){
-        let day = parseInt(text.substring(4, 6))
-        return new Date(year, month, day);
-    }
-    return new Date(year, month);
-}
+//     let year = parseInt("20" + text.substring(0, 2))
+//     let month = parseInt(text.substring(2, 4)) - 1;
+//     if(text.length == 6){
+//         let day = parseInt(text.substring(4, 6))
+//         return new Date(year, month, day);
+//     }
+//     return new Date(year, month);
+// }
+
 
 function precise(x, digits){
     // return Number.parseFloat(x).toPrecision(digits);

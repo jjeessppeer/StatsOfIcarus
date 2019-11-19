@@ -1032,6 +1032,7 @@
 
       // Load datasets
       loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, function (dataset) {
+        dataset.sortDatasetContent("Date of match", Date.parse);
         match_dataset = dataset;
         setMatchTableItems(match_dataset.getDatasetRows());
         matchFilterSubmitted();

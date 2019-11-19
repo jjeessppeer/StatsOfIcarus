@@ -49,7 +49,8 @@ class Dataset {
     }
 
     filterByDate(query, dataset_title, exclude, after) {
-        let query_date = parseDate(query);
+        // let query_date = parseDate(query);
+        let query_date = new Date(Date.parse(query));
         if (!query_date) {
             return new Dataset(this.titles, this.content);
         }
@@ -72,6 +73,21 @@ class Dataset {
             result_rows.push(this.content[i]);
         }
         return new Dataset(this.titles, result_rows);
+    }
+
+    sortDatasetContent(sort_title, valueFunction){
+        let col_index = this.titles.indexOf(sort_title);
+        if (col_index == -1)
+            return false;
+        this.content.sort(function(x, y){
+            if (valueFunction(x[col_index]) < valueFunction(y[col_index])){
+                return 1;
+            }
+            if (valueFunction(x[col_index]) > valueFunction(y[col_index])){
+                return -1;
+            }
+            return 0;
+        });
     }
 
     getCellByString(query_string, search_title, return_title){
