@@ -228,12 +228,12 @@ function tAtHit(speed, angle, target_x){
 function laserAvgDamage(gun_data, ammo_data, distance, time) {
     // Hardcoded numbers, very sad :(
     let chargeup_time = 1;
-    let damage_falloff_start = 300 * ammo_data[10];
+    let damage_falloff_start = 300 * ammo_data["projectile speed"];
     let damage_falloff_per_second = 1.65;    
 
     // Damage falloff starts at 300m scales linearly
     let distance_modifier = distance > damage_falloff_start ? 
-        1 - damage_falloff_per_second * (distance - damage_falloff_start) / (gun_data[9] * ammo_data[10]) : 
+        1 - damage_falloff_per_second * (distance - damage_falloff_start) / (gun_data["proectile speed"] * ammo_data["projectile speed"]) : 
         1;
 
     // Laser chargeup damage modifier
