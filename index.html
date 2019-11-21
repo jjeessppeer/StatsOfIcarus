@@ -33,7 +33,6 @@
   <script src="docsapi.js"></script>
   <script src="damageCalculations.js"></script>
   <script src="matchStatistics.js"></script>
-  <script src="randomMap.js"></script>
   <script src="mapSpawns.js"></script>
   <script src="shipBuilder.js"></script>
   <link rel="stylesheet" href="css/style.css">
@@ -108,18 +107,11 @@
             Projectile arcs
           </a>
         </li>
-        <li id="randomMapLink" data-show="#randomMap">
-          <a href="#randomMap">
-            <!-- <i class="fas fa-map"></i> -->
-            <i class="fas fa-random"></i>
-            Random map
-          </a>
-        </li>
         <li id="mapSpawnsLink" data-show="#spawns">
           <a href="#spawns">
             <i class="fas fa-map"></i>
             <!-- <i class="fas fa-random"></i> -->
-            Spawn positions
+            Maps
           </a>
         </li>
         <li id="aboutLink" data-show="#about">
@@ -959,38 +951,22 @@
               </table>
           </div>
         </div>
-
-
-      </div>
-
-      
-      <div id="randomMap" class="content-panel" style="display:none">
-        <button id="randomMapButton" class="btn btn-primary">Randomize map</button>
-            <!-- <div class="container"> -->
-              <h1 id="randomMapTitle">Click button to get a random map</h1>
-              <p id="randomMapModes"></p>
-              <p id="randomMapPreviewText" style="display:none">Map preview not available.</p>
-              <img id="randomMapPreview" class='img' src="" width="500" height="500" style="display:none" />
-            <!-- </div> -->
       </div>
 
       <div id="spawns" class="content-panel" style="display:none">
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Map</div>
-              </div>
-              <select class="form-control" id="spawnMapSelect" autocomplete="off">
-                <!-- <option>Include</option> -->
-                <!-- <option>Exclude</option> -->
-              </select>
-            </div>
+        <div class="input-group" style="width:400px;">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Map</div>
+          </div>
+          <select class="form-control" id="spawnMapSelect" autocomplete="off">
+          </select>
+          <div class="input-group-append">
+            <button id="randomMapButton" class="btn btn-primary">Randomize map</button>
           </div>
         </div>
-        
+      
         <img id="spawnImage" src="" width="700" height="700">
-        <p>Credit to Nerdhector for creating images.</p>
+        <p>Credit to Nerdhector for creating spawn position images.</p>
         <!-- <img id="spawnImage" class='img' src="" width="700" height="700" /> -->
       </div>
 
@@ -1147,7 +1123,6 @@
       //--- Match statistics ---
       initializeMatchStatistics();
 
-      initializeRandomMap();
       initializeSpawns();
       
       
