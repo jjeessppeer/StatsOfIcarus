@@ -374,7 +374,15 @@ function updateGunInfoTable() {
           <td>` + precise(gun_numbers.damage["per shot"]["hull"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per shot"]["balloon"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per shot"]["component"], 3) + `</td>
-        </tr><tr>
+        </tr>
+        <tr>
+          <th>Damage / clip</th>
+          <td>` + precise(gun_numbers.damage["per clip"]["armor"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per clip"]["hull"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per clip"]["balloon"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["per clip"]["component"], 3) + `</td>
+        </tr>
+        <tr>
           <th>Damage / second (one clip)</th>
           <td>` + precise(gun_numbers.damage["per second"]["armor"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["per second"]["hull"], 3) + `</td>
@@ -389,17 +397,10 @@ function updateGunInfoTable() {
           <td>` + precise(gun_numbers.damage["per second reload"]["component"], 3) + `</td>
         </tr>
         <tr>
-          <th>Damage / clip</th>
-          <td>` + precise(gun_numbers.damage["per clip"]["armor"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per clip"]["hull"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per clip"]["balloon"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per clip"]["component"], 3) + `</td>
-        </tr>
-        <tr>
           <th>Fire / clip (avg.)</th>
           <td>` + precise(gun_numbers.damage["fire"]["armor"], 3) + `</td>
           <td>` + "-" + `</td>
-          <td>` + precise(gun_numbers.damage["fire"]["armor"], 3) + `</td>
+          <td>` + precise(gun_numbers.damage["fire"]["balloon"], 3) + `</td>
           <td>` + precise(gun_numbers.damage["fire"]["component"], 3) + `</td>
         </tr>
     `);
