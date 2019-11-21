@@ -160,7 +160,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     
 
     //TODO ammo changes
-    let angle = parseFloat(gun_data[16]);
+    let angle = parseFloat(gun_data[16]) * parseFloat(ammo_data[16]);
 
     let damage_dict = {};
     let info_dict = {

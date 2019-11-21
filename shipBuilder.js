@@ -24,9 +24,25 @@ function initializeShipBuilder(){
       $("#shipBuildShipSelection").append($("<option>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
   }
   
+
+  $('#shipBuilderImage').bind('load', function(){ // image ready
+    console.log("IMAGE LOADED");
+    // shipBuilderReloadGuns();
+    updateShipBuildImage();
+    // updateRangeVis();
+    // shipBuilderUpdateUrl()
+  }); 
   // Ship change event
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
+
+    if (ship_builder_ship == "Mobula"){
+      let a = $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
+      console.log("who");
+      console.log(a);
+    }
+    if (ship_builder_ship == "Corsair")
+      $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
     shipBuilderReloadGuns();
     updateShipBuildImage();
     updateRangeVis();
@@ -283,6 +299,19 @@ function crewRoleChanged(){
       $(siblings[9]).hide();
       $(siblings[10]).hide();
     }
+    else if (role == "Noclass"){
+      $(siblings[2]).hide();
+      $(siblings[3]).hide();
+      $(siblings[4]).hide();
+
+      $(siblings[5]).hide();
+      $(siblings[6]).hide();
+      $(siblings[7]).hide();
+
+      $(siblings[8]).hide();
+      $(siblings[9]).hide();
+      $(siblings[10]).hide();
+    }
   }
 }
 
@@ -370,9 +399,14 @@ function updateShipBuildImage(){
     ctx.fillStyle = "rgb(30, 150, 30)";
     ctx.globalAlpha = 1;
     ctx.beginPath();      
-    ctx.arc(cx, cy, 7, 0, 2*Math.PI);
+    // ctx.arc(cx, cy, 12, 0, 2*Math.PI);
+    ctx.rect(cx-10, cy-10, 20, 20); 
     ctx.fill();
     ctx.stroke();
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    ctx.font = "20px Arial";
+    ctx.textAlign = "center"; 
+    ctx.fillText(i+1, cx, cy+8);
 
     // //Draw arc
     // ctx.fillStyle = "rgb(30, 50, 30)";
@@ -382,9 +416,6 @@ function updateShipBuildImage(){
     // ctx.arc(cx, cy, range/0.128, left_angle, right_angle);
     // ctx.lineTo(cx,cy);
     // ctx.fill();
-
-
-
 
     let offscreen = document.querySelector("#shipBuilderCanvasOffscreen");
     let off_ctx = offscreen.getContext('2d');
