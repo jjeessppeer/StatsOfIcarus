@@ -154,24 +154,25 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     // Calculate gun stats
 
     let gun_d = {
-        "primary dmg type": gun_data[2],
-        "primary dmg": parseFloat(gun_data[3]),
-        "secondary dmg type": gun_data[4],
-        "secondary dmg": parseFloat(gun_data[5]),
-        "RoF": parseFloat(gun_data[6]),
-        "reload time": parseFloat(gun_data[7]),
-        "clip size": parseFloat(gun_data[8]),
-        "proectile speed": parseFloat(gun_data[9]),
-        "range": parseFloat(gun_data[10]),
-        "shell drop": parseFloat(gun_data[11]),
-        "fire ignition": parseFloat(gun_data[12]),
-        "AoE radius": parseFloat(gun_data[13]),
-        "buckshot": parseFloat(gun_data[14]),
-        "arming time": parseFloat(gun_data[15]),
-        "side angle": parseFloat(gun_data[16]),
-        "up angle": parseFloat(gun_data[17]),
-        "down angle": parseFloat(gun_data[18]),
-        "weapon slot": gun_data[19]
+        "weapon slot": gun_data[2],
+        "primary dmg type": gun_data[3],
+        "primary dmg": parseFloat(gun_data[4]),
+        "secondary dmg type": gun_data[5],
+        "secondary dmg": parseFloat(gun_data[6]),
+        "RoF": parseFloat(gun_data[7]),
+        "reload time": parseFloat(gun_data[8]),
+        "clip size": parseFloat(gun_data[9]),
+        "fire primary": parseFloat(gun_data[10]),
+        "fire secondary": parseFloat(gun_data[11]),
+        "proectile speed": parseFloat(gun_data[12]),
+        "range": parseFloat(gun_data[13]),
+        "shell drop": parseFloat(gun_data[14]),
+        "AoE radius": parseFloat(gun_data[15]),
+        "buckshot": parseFloat(gun_data[16]),
+        "arming time": parseFloat(gun_data[17]),
+        "side angle": parseFloat(gun_data[18]),
+        "up angle": parseFloat(gun_data[19]),
+        "down angle": parseFloat(gun_data[20]),
     };
 
 
@@ -300,19 +301,21 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     damage_dict["per second reload"]["component"] = component_unit_scale * (damage_second_2_primary * getDamageMod(damage_type_primary, "Components") + damage_second_2_secondary * getDamageMod(damage_type_secondary, "Components"));
 
     // Fire / clip
-    let fire_clip_base = parseFloat(gun_data[12] * ammo_data[11] * clip_size)
-    let fire_clip_armor_primary = ammo_data[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
-    let fire_clip_armor_secondary = fire_clip_base + ammo_data[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
-    let fire_clip_balloon_primary = ammo_data[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Balloon");
-    let fire_clip_balloon_secondary = fire_clip_base + ammo_data[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
-    let fire_clip_component_primary = ammo_data[12] * damage_clip_primary * getDamageMod(damage_type_primary, "Components");
-    let fire_clip_component_secondary = fire_clip_base + ammo_data[12] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
+    let fire_clip_primary = gun_d["fire primary"] * clip_size * ammo_d["fire mod"];
+    let fire_clip_secondary = gun_d["fire secondary"] * clip_size * ammo_d["fire mod"];
+
+    let fire_clip_armor_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
+    let fire_clip_armor_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
+    let fire_clip_balloon_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Balloon");
+    let fire_clip_balloon_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
+    let fire_clip_component_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Components");
+    let fire_clip_component_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
+
     damage_dict["fire"] = {};
     damage_dict["fire"]["armor"] = fire_clip_armor_primary + fire_clip_armor_secondary;
     damage_dict["fire"]["hull"] = 0;
     damage_dict["fire"]["balloon"] = fire_clip_balloon_primary + fire_clip_balloon_secondary;
     damage_dict["fire"]["component"] = fire_clip_component_primary + fire_clip_component_secondary;
-
 
     return {"damage": damage_dict, "info": info_dict};
 }
