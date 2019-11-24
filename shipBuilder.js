@@ -52,6 +52,8 @@ function initializeShipBuilder(){
     updateShipBuildImage();
   }); 
 
+  $("#shipBuildName").on("input", shipBuilderUpdateUrl);
+
   // Ship change event
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
@@ -205,6 +207,8 @@ function shipBuilderImport(e, build_code){
     // console.log(crew_selections[i]);
   }
 
+  $("#shipBuildName").val(build_code[53]);
+
   crewRoleChanged();
   updateShipBuildImage();
   updateRangeVis();
@@ -253,7 +257,7 @@ function shipBuilderGetExportCode(){
     selection = selection.split(".")[0];
     crew_selections.push(selection);
   }
-  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join();
+  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join() + "," + $("#shipBuildName").val();
   export_string = LZString.compressToEncodedURIComponent(export_string);
 
   return export_string;
