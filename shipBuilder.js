@@ -8,6 +8,22 @@ var build_last_pos_x = undefined;
 var build_last_pos_y = undefined;
 
 
+var ship_image_srcs = {
+  "Corsair": "ship-images/corsair-gundeck-small.png",
+  "Crusader": "ship-images/crusader_gundeck_small.png",
+  "Galleon": "ship-images/galleon_gundeck_small.png",
+  "Goldfish": "ship-images/goldfish_gundeck_small.png",
+  "Judgement": "ship-images/judge_gundeck_small.png",
+  "Junker": "ship-images/junker_gundeck_small.png",
+  "Magnate": "ship-images/magnate_gundeck_small.png",
+  "Mobula": "ship-images/mob_gundeck_small.png",
+  "Pyramidion": "ship-images/pyra_gundeck_small.png",
+  "Shrike": "ship-images/shrike_gundeck_small.png",
+  "Spire": "ship-images/spire_gundeck_small.png",
+  "Squid": "ship-images/squid_gundeck_small.png",
+  "Stormbreaker": "ship-images/storm_gundeck_small.png" 
+}
+
 function initializeShipBuilder(){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
     console.log("Still loading");
@@ -36,16 +52,18 @@ function initializeShipBuilder(){
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
 
-    if (ship_builder_ship == "Mobula")
-      $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
-    else if (ship_builder_ship == "Corsair")
-      $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
-    else if (ship_builder_ship == "Shrike")
-      $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
-    else if (ship_builder_ship == "Stormbreaker")
-      $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
-    else if (ship_builder_ship == "Judgement")
-      $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+    // if (ship_builder_ship == "Mobula")
+    //   $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
+    // else if (ship_builder_ship == "Corsair")
+    //   $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
+    // else if (ship_builder_ship == "Shrike")
+    //   $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
+    // else if (ship_builder_ship == "Stormbreaker")
+    //   $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
+    // else if (ship_builder_ship == "Judgement")
+    //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+    $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
+
 
     shipBuilderReloadGuns();
     updateShipBuildImage();
@@ -175,16 +193,26 @@ function shipBuilderImport(e, build_code){
   ship_builder_ship = build_code[0];
   $("#shipBuildShipSelection").val(ship_builder_ship);
 
-  if (ship_builder_ship == "Mobula")
-      $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
-  else if (ship_builder_ship == "Corsair")
-    $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
-  else if (ship_builder_ship == "Shrike")
-    $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
-  else if (ship_builder_ship == "Stormbreaker")
-    $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
-  else if (ship_builder_ship == "Judgement")
-    $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+  // if (ship_builder_ship == "Corsair")
+  //   $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
+  // else if (ship_builder_ship == "Shrike")
+  //   $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
+  // else if (ship_builder_ship == "Stormbreaker")
+  //   $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
+  // else if (ship_builder_ship == "Judgement")
+  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+  // else if (ship_builder_ship == "Judgement")
+  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+  // else if (ship_builder_ship == "Judgement")
+  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+  // else if (ship_builder_ship == "Judgement")
+  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+  // else if (ship_builder_ship == "Judgement")
+  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+
+  $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
+
+
 
   shipBuilderReloadGuns();
   ship_builder_guns = build_code.slice(1, 7);
