@@ -8,6 +8,7 @@ var build_last_pos_x = undefined;
 var build_last_pos_y = undefined;
 
 
+
 var ship_image_srcs = {
   "Corsair": "ship-images/corsair_gundeck_small.png",
   "Crusader": "ship-images/crusader_gundeck_small.png",
@@ -74,15 +75,11 @@ function initializeShipBuilder(){
 
   // Initialize crew loadout menu
   $("#crewLoadouts a").on("click", function(e){
-    
-    // console.log($(this)[0].childNodes[0].src);
-    // console.log($(this).parent().siblings()[0].childNodes[1].src);
     $(this).parent().siblings()[0].childNodes[1].src = $(this)[0].childNodes[0].src;
     shipBuilderUpdateUrl()
   });
 
   $("#crewLoadouts > div > div:nth-of-type(2)").on("click", function(e){
-    console.log("Crew role changed");
     crewRoleChanged();
     shipBuilderUpdateUrl()
   });
@@ -134,14 +131,8 @@ function initializeShipBuilder(){
     let ctx = canvas.getContext("2d");
 
     let factor = (e.originalEvent.deltaY < 0) ? 1.1 : 0.9;
-    // console.log(factor);
-
 
     let [pos_x, pos_y] = [e.originalEvent.layerX, e.originalEvent.layerY];
-    // let [x, y] = transformPoint(pos_x, pos_y, ctx.getTransform().invertSelf());
-    // ctx.translate(x, y);
-    // ctx.scale(factor,factor);
-    // ctx.translate(-x, -y);
     ctx.zoomAround(pos_x, pos_y, factor);
     
     updateShipBuildImage();
@@ -183,28 +174,32 @@ function shipBuilderImport(e, build_code){
   build_code = LZString.decompressFromEncodedURIComponent(build_code);
   build_code = build_code.split(",");
 
-  ship_builder_ship = build_code[0];
+  ship_builder_ship = ship_builder_translations["Ship"][build_code[0]];
   $("#shipBuildShipSelection").val(ship_builder_ship);
 
   shipBuilderReloadShip();
   
-  ship_builder_guns = build_code.slice(1, 7);
+  let gun_codes = build_code.slice(1, 7);
   for (let i=0; i < ship_builder_guns.length; i++){
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
+    ship_builder_guns[i] = ship_builder_translations["Weapon"][gun_codes[i]];
     select.val(ship_builder_guns[i]);
   }
-  ammo_types = build_code.slice(7, 13);
-  for (let i=0; i < ammo_types.length; i++){
+
+  let ammo_codes = build_code.slice(7, 13);
+  for (let i=0; i < ammo_codes.length; i++){
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)");
-    select.val(ammo_types[i]);
+    select.val(ship_builder_translations["Ammo"][ammo_codes[i]]);
   }
 
-
-  crew_selections = build_code.slice(13, 53);
+  let crew_codes = build_code.slice(13, 53);
   let imgs = $("#crewLoadouts button img");
-  for (let i=0; i < crew_selections.length; i++){
-    imgs[i].src = "loadout-images/"+crew_selections[i] + ".jpg";
-    // console.log(crew_selections[i]);
+  for (let i=0; i < crew_codes.length; i+=10){
+    let selector = "Crew";
+    if (i%10 >= 7) selector = "Ammo";
+    else if (i%10 >= 4) selector = "EngiTool";
+    else if (i%10 >= 1) selector = "PilotTool";
+    imgs[i].src = "loadout-images/" + ship_builder_translations[selector][crew_codes[i]] + ".jpg";
   }
 
   $("#shipBuildName").val(build_code[53]);
@@ -231,33 +226,53 @@ function shipBuilderExport(){
     crew_selections.push(selection);
   }
 
-
-  // let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join();
   let export_string = shipBuilderGetExportCode();
-  // console.log(export_string);
-  // export_string = btoa(export_string);
-  // console.log(export_string);
-  // export_string = en(export_string);
-  // console.log(export_string);
-  // export_string = base64EncodeUnicode(export_string);
   
   $("#shipBuildImportText").val(export_string);
 }
 
 function shipBuilderGetExportCode(){
+
+
+  let guns = [];
+  for (let i=1; i <= 6; i++){
+    let weapon_type = $("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(1)").val();
+    guns.push(ship_builder_translations["Weapon"].indexOf(weapon_type));
+  }
+
   let ammo_types = [];
   for (let i=1; i <= 6; i++){
-    ammo_types.push($("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val());
+    // ammo_types.push($("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val());
+    let ammo_type = $("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val();
+    ammo_types.push(ship_builder_translations["Ammo"].indexOf(ammo_type));
   }
   let imgs = $("#crewLoadouts button img");
   let crew_selections = [];
-  for (let i=0; i < imgs.length; i++){
+  for (let i=0; i < imgs.length; i+=10){
     let selection = imgs[i].src;
-    selection = selection.substring(selection.lastIndexOf('/') + 1);
-    selection = selection.split(".")[0];
-    crew_selections.push(selection);
+    crew_selections.push(ship_builder_translations["Crew"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+1].src;
+    crew_selections.push(ship_builder_translations["PilotTool"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+2].src;
+    crew_selections.push(ship_builder_translations["PilotTool"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+3].src;
+    crew_selections.push(ship_builder_translations["PilotTool"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+4].src;
+    crew_selections.push(ship_builder_translations["EngiTool"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+5].src;
+    crew_selections.push(ship_builder_translations["EngiTool"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+6].src;
+    crew_selections.push(ship_builder_translations["EngiTool"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+7].src;
+    crew_selections.push(ship_builder_translations["Ammo"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+8].src;
+    crew_selections.push(ship_builder_translations["Ammo"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+9].src;
+    crew_selections.push(ship_builder_translations["Ammo"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
   }
-  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join() + "," + $("#shipBuildName").val();
+  
+  let export_string = ship_builder_translations["Ship"].indexOf(ship_builder_ship) + "," + guns.join() + "," + ammo_types.join() + "," + crew_selections.join() + "," + $("#shipBuildName").val();
+
   export_string = LZString.compressToEncodedURIComponent(export_string);
 
   return export_string;
