@@ -36,13 +36,17 @@ function initializeShipBuilder(){
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
 
-    if (ship_builder_ship == "Mobula"){
-      let a = $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
-      console.log("who");
-      console.log(a);
-    }
-    if (ship_builder_ship == "Corsair")
+    if (ship_builder_ship == "Mobula")
+      $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
+    else if (ship_builder_ship == "Corsair")
       $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
+    else if (ship_builder_ship == "Shrike")
+      $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
+    else if (ship_builder_ship == "Stormbreaker")
+      $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
+    else if (ship_builder_ship == "Judgement")
+      $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
+
     shipBuilderReloadGuns();
     updateShipBuildImage();
     updateRangeVis();
@@ -134,13 +138,9 @@ function initializeShipBuilder(){
   });
 
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
-    ship_builder_guns[($(this).parent().index()-1)/2] = $(this).val();
-    
-    // ship_builder_guns[0] = "Gatling";
-    // console.log(ship_builder_guns);
+    ship_builder_guns[($(this).parent().index()-1)] = $(this).val();
     updateShipBuildImage();
     updateRangeVis();
-    // shipBuilderLoad("Mobula,Artemis,Mercury,Mercury,Mercury,Mercury,Mercury")
     shipBuilderUpdateUrl()
   });
 
@@ -175,6 +175,16 @@ function shipBuilderImport(e, build_code){
   ship_builder_ship = build_code[0];
   $("#shipBuildShipSelection").val(ship_builder_ship);
 
+  if (ship_builder_ship == "Mobula")
+      $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
+  else if (ship_builder_ship == "Corsair")
+    $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
+  else if (ship_builder_ship == "Shrike")
+    $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
+  else if (ship_builder_ship == "Stormbreaker")
+    $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
+  else if (ship_builder_ship == "Judgement")
+    $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
 
   shipBuilderReloadGuns();
   ship_builder_guns = build_code.slice(1, 7);
@@ -438,13 +448,17 @@ function updateShipBuildImage(){
     off_ctx.lineTo(cx,cy);
     off_ctx.fill();
 
-    //Clear arc
+
+    //Clear arc inside arming range, leave a bit at the edges
     off_ctx.globalAlpha = 1;
     off_ctx.globalCompositeOperation = "destination-out";
     off_ctx.beginPath();
-    off_ctx.moveTo(cx,cy);
-    off_ctx.arc(cx, cy, gun_numbers.info["arming distance"]/0.128, left_angle, right_angle);
-    off_ctx.lineTo(cx,cy);
+    let cx2 = cx + Math.cos(left_angle/2+right_angle/2)*5;
+    let cy2 = cy + Math.sin(left_angle/2+right_angle/2)*5;
+
+    off_ctx.moveTo(cx2, cy2);
+    off_ctx.arc(cx2, cy2, gun_numbers.info["arming distance"]/0.128, left_angle, right_angle);
+    off_ctx.lineTo(cx2, cy2);
     off_ctx.fill();
 
     ctx.save();
