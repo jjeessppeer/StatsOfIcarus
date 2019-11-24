@@ -9,7 +9,7 @@ var build_last_pos_y = undefined;
 
 
 var ship_image_srcs = {
-  "Corsair": "ship-images/corsair-gundeck-small.png",
+  "Corsair": "ship-images/corsair_gundeck_small.png",
   "Crusader": "ship-images/crusader_gundeck_small.png",
   "Galleon": "ship-images/galleon_gundeck_small.png",
   "Goldfish": "ship-images/goldfish_gundeck_small.png",
