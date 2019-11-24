@@ -42,26 +42,26 @@ function initializeShipBuilder(){
   
 
   $('#shipBuilderImage').bind("load", function(){
+    console.log("IMAGE LOADED")
     let canvas = document.getElementById("shipBuilderCanvas");
     let ctx = canvas.getContext("2d");
     ctx.resetTransform();
     ctx.translate(canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
+    ctx.zoomAround(canvas.width/2, canvas.height/2, 0.8);
+    // ctx.scale(0.5,0.5);
     updateShipBuildImage();
   }); 
-  
+
   // Ship change event
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
-
-    $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
-
-    shipBuilderReloadGuns();
+    shipBuilderReloadShip();
     updateShipBuildImage();
     updateRangeVis();
     shipBuilderUpdateUrl()
   });
 
-  shipBuilderReloadGuns();
+  shipBuilderReloadShip();
   updateShipBuildImage();
   updateRangeVis();
 
@@ -136,10 +136,11 @@ function initializeShipBuilder(){
 
 
     let [pos_x, pos_y] = [e.originalEvent.layerX, e.originalEvent.layerY];
-    let [x, y] = transformPoint(pos_x, pos_y, ctx.getTransform().invertSelf());
-    ctx.translate(x, y);
-    ctx.scale(factor,factor);
-    ctx.translate(-x, -y);
+    // let [x, y] = transformPoint(pos_x, pos_y, ctx.getTransform().invertSelf());
+    // ctx.translate(x, y);
+    // ctx.scale(factor,factor);
+    // ctx.translate(-x, -y);
+    ctx.zoomAround(pos_x, pos_y, factor);
     
     updateShipBuildImage();
     return false;
@@ -183,28 +184,8 @@ function shipBuilderImport(e, build_code){
   ship_builder_ship = build_code[0];
   $("#shipBuildShipSelection").val(ship_builder_ship);
 
-  // if (ship_builder_ship == "Corsair")
-  //   $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
-  // else if (ship_builder_ship == "Shrike")
-  //   $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
-  // else if (ship_builder_ship == "Stormbreaker")
-  //   $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
-  // else if (ship_builder_ship == "Judgement")
-  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
-  // else if (ship_builder_ship == "Judgement")
-  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
-  // else if (ship_builder_ship == "Judgement")
-  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
-  // else if (ship_builder_ship == "Judgement")
-  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
-  // else if (ship_builder_ship == "Judgement")
-  //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
-
-  $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
-
-
-
-  shipBuilderReloadGuns();
+  shipBuilderReloadShip();
+  
   ship_builder_guns = build_code.slice(1, 7);
   for (let i=0; i < ship_builder_guns.length; i++){
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
@@ -347,12 +328,11 @@ function crewRoleChanged(){
 }
 
 
-function shipBuilderReloadGuns(){
-  if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
-    console.log("Still loading");
-    setTimeout(function(){ shipBuilderReloadGuns(); }, 1000);
-    return;
-  }
+function shipBuilderReloadShip(){
+
+  $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
+
+
   ship_builder_guns.fill("None");
   
   let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);

@@ -259,6 +259,13 @@ function laserAvgDamage(gun_data, ammo_data, distance, time) {
    
 }
 
+CanvasRenderingContext2D.prototype.zoomAround = function(x, y, factor){
+    [x, y] = transformPoint(x, y, this.getTransform().invertSelf());
+    this.translate(x, y);
+    this.scale(factor,factor);
+    this.translate(-x, -y);
+}
+
 $.fn.inputFilter = function (inputFilter) {
     return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function () {
       if (inputFilter(this.value)) {
