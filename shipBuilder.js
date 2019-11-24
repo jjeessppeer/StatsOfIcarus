@@ -194,11 +194,12 @@ function shipBuilderImport(e, build_code){
 
   let crew_codes = build_code.slice(13, 53);
   let imgs = $("#crewLoadouts button img");
-  for (let i=0; i < crew_codes.length; i+=10){
+  for (let i=0; i < crew_codes.length; i+=1){
     let selector = "Crew";
     if (i%10 >= 7) selector = "Ammo";
     else if (i%10 >= 4) selector = "EngiTool";
     else if (i%10 >= 1) selector = "PilotTool";
+    console.log(ship_builder_translations[selector][crew_codes[i]]);
     imgs[i].src = "loadout-images/" + ship_builder_translations[selector][crew_codes[i]] + ".jpg";
   }
 
