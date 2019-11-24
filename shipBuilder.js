@@ -41,29 +41,19 @@ function initializeShipBuilder(){
   }
   
 
-  $('#shipBuilderImage').bind('load', function(){ // image ready
-    console.log("IMAGE LOADED");
-    // shipBuilderReloadGuns();
+  $('#shipBuilderImage').bind("load", function(){
+    let canvas = document.getElementById("shipBuilderCanvas");
+    let ctx = canvas.getContext("2d");
+    ctx.resetTransform();
+    ctx.translate(canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
     updateShipBuildImage();
-    // updateRangeVis();
-    // shipBuilderUpdateUrl()
   }); 
+  
   // Ship change event
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
 
-    // if (ship_builder_ship == "Mobula")
-    //   $("#shipBuilderImage")[0].src = "ship-images/mobula_small.png";
-    // else if (ship_builder_ship == "Corsair")
-    //   $("#shipBuilderImage")[0].src = "ship-images/corsair-gundeck-small.png";
-    // else if (ship_builder_ship == "Shrike")
-    //   $("#shipBuilderImage")[0].src = "ship-images/shrike_gundeck_small.png";
-    // else if (ship_builder_ship == "Stormbreaker")
-    //   $("#shipBuilderImage")[0].src = "ship-images/storm_gundeck_small.png";
-    // else if (ship_builder_ship == "Judgement")
-    //   $("#shipBuilderImage")[0].src = "ship-images/judge_gundeck_small.png";
     $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
-
 
     shipBuilderReloadGuns();
     updateShipBuildImage();
@@ -180,14 +170,14 @@ function initializeShipBuilder(){
 }
 
 function shipBuilderUpdateUrl(){
-  // window.location.href = setUrlParam(window.location.href, shipBuilderGetExportCode());
   setUrlParam(shipBuilderGetExportCode());
 }
 
 function shipBuilderImport(e, build_code){
   if (!build_code)
     build_code = $("#shipBuildImportText").val();
-  build_code = atob(build_code);
+  // build_code = atob(build_code);
+  build_code = LZString.decompressFromEncodedURIComponent(build_code);
   build_code = build_code.split(",");
 
   ship_builder_ship = build_code[0];
@@ -282,7 +272,10 @@ function shipBuilderGetExportCode(){
     selection = selection.split(".")[0];
     crew_selections.push(selection);
   }
-  return btoa(ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join());
+  let export_string = ship_builder_ship + "," + ship_builder_guns.join() + "," + ammo_types.join() + "," + crew_selections.join();
+  export_string = LZString.compressToEncodedURIComponent(export_string);
+
+  return export_string;
 }
 
 function crewRoleChanged(){
