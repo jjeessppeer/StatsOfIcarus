@@ -1000,41 +1000,43 @@
     var map_dataset = null;
     var ship_guns_dataset = null;
 
+
+    var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     $(document).ready(function () {
 
       $("li").on("click", sidebarLinkClicked);
       
 
       // Load datasets
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 2, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
         dataset.sortDatasetContent("Date of match", Date.parse);
         match_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 4, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 4, function (dataset) {
         gun_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 5, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 5, function (dataset) {
         ammo_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 6, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 6, function (dataset) {
         damage_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 7, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 7, function (dataset) {
         tool_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 8, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 8, function (dataset) {
         component_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 9, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 9, function (dataset) {
         ship_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 10, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 10, function (dataset) {
         map_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 11, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 11, function (dataset) {
         crosshair_dataset = dataset;
       });
-      loadDatasetFromSheet("1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g", 12, function (dataset) {
+      loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
         ship_guns_dataset = dataset;
       });
 
