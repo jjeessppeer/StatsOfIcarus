@@ -212,8 +212,10 @@ function shipBuilderImport(e, build_code){
   for (let i=0; i < imgs.length; i+=1){
     let selector = "Crew";
     if (i%13 >= 10){
-      selector="Ability";
-      imgs[i].src = "loadout-images/" + ship_builder_translations[selector][ability_codes[ability_count]] + ".jpg";
+      if (build_code.length >= 55){
+        selector="Ability";
+        imgs[i].src = "loadout-images/" + ship_builder_translations[selector][ability_codes[ability_count]] + ".jpg";
+      }
       ability_count++;
       continue;
     }
