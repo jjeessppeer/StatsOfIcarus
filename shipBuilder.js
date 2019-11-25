@@ -463,7 +463,7 @@ function updateShipBuildImage(){
 
     off_ctx.beginPath();
     off_ctx.moveTo(cx,cy);
-    off_ctx.arc(cx, cy, gun_numbers.info.range/0.128, left_angle, right_angle);
+    off_ctx.arc(cx, cy, gun_numbers.info.range/0.09375, left_angle, right_angle);
     off_ctx.lineTo(cx,cy);
     off_ctx.fill();
 
