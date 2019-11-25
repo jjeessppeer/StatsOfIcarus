@@ -1,7 +1,7 @@
 
 
 var ship_builder_guns = ["None", "None", "None", "None", "None", "None"];
-var ship_builder_ship = "Corsair";
+var ship_builder_ship = "Mobula";
 
 
 var build_last_pos_x = undefined;
@@ -35,7 +35,7 @@ function initializeShipBuilder(){
   // Fill ship list
   for (let i=0; i < ship_guns_dataset.getNOfRows(); i++){
     let ship_name = ship_guns_dataset.getDatasetCell(i, 0);
-    if (ship_name == "Corsair")
+    if (ship_name == "Mobula")
       $("#shipBuildShipSelection").append($("<option selected>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
     else
       $("#shipBuildShipSelection").append($("<option>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
