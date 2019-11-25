@@ -300,8 +300,17 @@
               </select>
             </div>
 
+
+
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="shipBuilderPvECheck" autocomplete="off">
+              <label class="form-check-label" for="shipBuilderPvECheck">Use PvE equipment</label>
+            </div>
+            
             <div id="weaponSelections">
-              <b>Ship Loadout</b>
+                <b>Ship Loadout</b>
+              
+
               <div class="input-group" style="width:420px;">
                 <div class="input-group-prepend">
                   <div class="input-group-text">Weapon 1</div>
@@ -595,7 +604,7 @@
                 <option>Banshee</option>
                 <option>Mine</option>
                 <option>Hades</option>
-                <option>Aten Lens Array</option>
+                <option>Aten Lens Array [Mk. S]</option>
                 <option>Heavy Flak Mk. I</option>
                 <option>Heavy Flak Mk. II</option>
                 <option>Hwatcha</option>
@@ -1002,6 +1011,7 @@
 
 
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
+    // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
 
       $("li").on("click", sidebarLinkClicked);

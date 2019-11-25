@@ -154,25 +154,25 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     // Calculate gun stats
 
     let gun_d = {
-        "weapon slot": gun_data[2],
-        "primary dmg type": gun_data[3],
-        "primary dmg": parseFloat(gun_data[4]),
-        "secondary dmg type": gun_data[5],
-        "secondary dmg": parseFloat(gun_data[6]),
-        "RoF": parseFloat(gun_data[7]),
-        "reload time": parseFloat(gun_data[8]),
-        "clip size": parseFloat(gun_data[9]),
-        "fire primary": parseFloat(gun_data[10]),
-        "fire secondary": parseFloat(gun_data[11]),
-        "proectile speed": parseFloat(gun_data[12]),
-        "range": parseFloat(gun_data[13]),
-        "shell drop": parseFloat(gun_data[14]),
-        "AoE radius": parseFloat(gun_data[15]),
-        "buckshot": parseFloat(gun_data[16]),
-        "arming time": parseFloat(gun_data[17]),
-        "side angle": parseFloat(gun_data[18]),
-        "up angle": parseFloat(gun_data[19]),
-        "down angle": parseFloat(gun_data[20]),
+        "weapon slot": gun_data[3],
+        "primary dmg type": gun_data[4],
+        "primary dmg": parseFloat(gun_data[5]),
+        "secondary dmg type": gun_data[6],
+        "secondary dmg": parseFloat(gun_data[7]),
+        "RoF": parseFloat(gun_data[8]),
+        "reload time": parseFloat(gun_data[9]),
+        "clip size": parseFloat(gun_data[10]),
+        "fire primary": parseFloat(gun_data[11]),
+        "fire secondary": parseFloat(gun_data[12]),
+        "proectile speed": parseFloat(gun_data[13]),
+        "range": parseFloat(gun_data[14]),
+        "shell drop": parseFloat(gun_data[15]),
+        "AoE radius": parseFloat(gun_data[16]),
+        "buckshot": parseFloat(gun_data[17]),
+        "arming time": parseFloat(gun_data[18]),
+        "side angle": parseFloat(gun_data[19]),
+        "up angle": parseFloat(gun_data[20]),
+        "down angle": parseFloat(gun_data[21]),
     };
 
 
@@ -222,7 +222,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let damage_hit_secondary = gun_d["secondary dmg"] * ammo_d["damage"] * ammo_d["AoE damage"] * (buffed ? 1.1 : 1);
     
     // Aten Lens special case
-    if (gun_type == "Aten Lens Array"){
+    if (gun_type == "Aten Lens Array [Mk. S]"){
         special_info = "laser";
 
         // Laser dont shoot for first 1.75 seconds
@@ -332,8 +332,8 @@ function updateGunInfoTable() {
 
     // Hide/show laser ui
     let laser_div = $("#laserExtras");
-    $("#gunSelect").val() == "Aten Lens Array" ? laser_div.show() : laser_div.hide();
-    if ($("#gunSelect").val() == "Aten Lens Array"){
+    $("#gunSelect").val() == "Aten Lens Array [Mk. S]" ? laser_div.show() : laser_div.hide();
+    if ($("#gunSelect").val() == "Aten Lens Array [Mk. S]"){
         let dist_range = $("#distanceRange");
         let time_range = $("#timeRange");
 

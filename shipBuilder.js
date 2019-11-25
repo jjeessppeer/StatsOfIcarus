@@ -52,6 +52,11 @@ function initializeShipBuilder(){
     updateShipBuildImage();
   }); 
 
+  $("#shipBuilderPvECheck").on("change", function(){
+    shipBuilderReloadShip();
+    updateShipBuildImage();
+  });
+
   $("#shipBuildName").on("input", shipBuilderUpdateUrl);
 
   // Ship change event
@@ -140,6 +145,7 @@ function initializeShipBuilder(){
 
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
     ship_builder_guns[($(this).parent().index()-1)] = $(this).val();
+    console.log("GUN CHANGED")
     updateShipBuildImage();
     updateRangeVis();
     shipBuilderUpdateUrl()
@@ -175,6 +181,11 @@ function shipBuilderImport(e, build_code){
 
   ship_builder_ship = ship_builder_translations["Ship"][build_code[0]];
   $("#shipBuildShipSelection").val(ship_builder_ship);
+
+  // Enable PvE guns
+  if (build_code.length >= 54){
+    $("#shipBuilderPvECheck").prop('checked', build_code[54]=="1");
+  }
 
   shipBuilderReloadShip();
   
@@ -270,7 +281,14 @@ function shipBuilderGetExportCode(){
     crew_selections.push(ship_builder_translations["Ammo"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
   }
   
-  let export_string = ship_builder_translations["Ship"].indexOf(ship_builder_ship) + "," + guns.join() + "," + ammo_types.join() + "," + crew_selections.join() + "," + $("#shipBuildName").val();
+  let export_string = "";
+  export_string += ship_builder_translations["Ship"].indexOf(ship_builder_ship) // Ship
+  export_string += "," + guns.join() //Guns
+  export_string += "," + ammo_types.join() //Ammo
+  export_string += "," + crew_selections.join()  //Crew
+  export_string += "," + $("#shipBuildName").val(); //Name
+  export_string += "," + ($("#shipBuilderPvECheck").is(":checked") ? "1" : "0"); // PvE
+  
 
   export_string = LZString.compressToEncodedURIComponent(export_string);
 
@@ -356,7 +374,10 @@ function shipBuilderReloadShip(){
   let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
   let n_guns = parseInt(ship_data[1]);
   for (let i=0; i < n_guns; i++){
+    // console.log(gun_dataset.filterByString("PvE", "Mode"));
     let available_guns = gun_dataset.filterByString(ship_data[14+i], "Weapon slot");
+    if (!$("#shipBuilderPvECheck").is(":checked"))
+      available_guns = available_guns.filterByString("PvP", "Mode");
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
     select.empty();
     for (let j=0; j < available_guns.getNOfRows(); j++){
