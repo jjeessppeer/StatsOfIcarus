@@ -53,6 +53,7 @@ function initializeShipBuilder(){
   }); 
 
   $("#shipBuilderPvECheck").on("change", function(){
+    crewRoleChanged();
     shipBuilderReloadShip();
     updateShipBuildImage();
   });
@@ -68,9 +69,7 @@ function initializeShipBuilder(){
     shipBuilderUpdateUrl()
   });
 
-  shipBuilderReloadShip();
-  updateShipBuildImage();
-  updateRangeVis();
+  
 
   let loadout_menu = $("#crewLoadouts > div");
   $("#crewLoadouts").append(loadout_menu.clone());
@@ -87,6 +86,10 @@ function initializeShipBuilder(){
     crewRoleChanged();
     shipBuilderUpdateUrl()
   });
+
+  shipBuilderReloadShip();
+  updateShipBuildImage();
+  updateRangeVis();
   crewRoleChanged();
   
 
@@ -145,7 +148,6 @@ function initializeShipBuilder(){
 
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
     ship_builder_guns[($(this).parent().index()-1)] = $(this).val();
-    console.log("GUN CHANGED")
     updateShipBuildImage();
     updateRangeVis();
     shipBuilderUpdateUrl()
@@ -202,14 +204,24 @@ function shipBuilderImport(e, build_code){
     select.val(ship_builder_translations["Ammo"][ammo_codes[i]]);
   }
 
-  let crew_codes = build_code.slice(13, 53);
+  let crew_codes = build_code.slice(13, 53)
+  let ability_codes = build_code.slice(55, 67);
   let imgs = $("#crewLoadouts button img");
-  for (let i=0; i < crew_codes.length; i+=1){
+  let loadout_count = 0;
+  let ability_count = 0;
+  for (let i=0; i < imgs.length; i+=1){
     let selector = "Crew";
-    if (i%10 >= 7) selector = "Ammo";
-    else if (i%10 >= 4) selector = "EngiTool";
-    else if (i%10 >= 1) selector = "PilotTool";
-    imgs[i].src = "loadout-images/" + ship_builder_translations[selector][crew_codes[i]] + ".jpg";
+    if (i%13 >= 10){
+      selector="Ability";
+      imgs[i].src = "loadout-images/" + ship_builder_translations[selector][ability_codes[ability_count]] + ".jpg";
+      ability_count++;
+      continue;
+    }
+    if (i%13 >= 7) selector = "Ammo";
+    else if (i%13 >= 4) selector = "EngiTool";
+    else if (i%13 >= 1) selector = "PilotTool";
+    imgs[i].src = "loadout-images/" + ship_builder_translations[selector][crew_codes[loadout_count]] + ".jpg";
+    loadout_count++;
   }
 
   $("#shipBuildName").val(build_code[53]);
@@ -256,9 +268,11 @@ function shipBuilderGetExportCode(){
     let ammo_type = $("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(2)").val();
     ammo_types.push(ship_builder_translations["Ammo"].indexOf(ammo_type));
   }
+
   let imgs = $("#crewLoadouts button img");
   let crew_selections = [];
-  for (let i=0; i < imgs.length; i+=10){
+  let PvE_abilities = [];
+  for (let i=0; i < imgs.length; i+=13){
     let selection = imgs[i].src;
     crew_selections.push(ship_builder_translations["Crew"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
     selection = imgs[i+1].src;
@@ -279,7 +293,17 @@ function shipBuilderGetExportCode(){
     crew_selections.push(ship_builder_translations["Ammo"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
     selection = imgs[i+9].src;
     crew_selections.push(ship_builder_translations["Ammo"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    
+    selection = imgs[i+10].src;
+    PvE_abilities.push(ship_builder_translations["Ability"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+11].src;
+    PvE_abilities.push(ship_builder_translations["Ability"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    selection = imgs[i+12].src;
+    PvE_abilities.push(ship_builder_translations["Ability"].indexOf(selection.substring(selection.lastIndexOf('/') + 1).split(".")[0]));
+    
   }
+
+  // console.log(PvE_abilities)
   
   let export_string = "";
   export_string += ship_builder_translations["Ship"].indexOf(ship_builder_ship) // Ship
@@ -288,7 +312,7 @@ function shipBuilderGetExportCode(){
   export_string += "," + crew_selections.join()  //Crew
   export_string += "," + $("#shipBuildName").val(); //Name
   export_string += "," + ($("#shipBuilderPvECheck").is(":checked") ? "1" : "0"); // PvE
-  
+  export_string += "," + PvE_abilities.join();
 
   export_string = LZString.compressToEncodedURIComponent(export_string);
 
@@ -306,6 +330,7 @@ function crewRoleChanged(){
 
 
     let siblings = $(imgs[i]).parent().parent().parent().find("> div");
+
     if (role == "Pilot"){
       $(siblings[2]).show();
       $(siblings[3]).show();
@@ -318,6 +343,10 @@ function crewRoleChanged(){
       $(siblings[8]).show();
       $(siblings[9]).hide();
       $(siblings[10]).hide();
+
+      $(siblings[11]).hide();
+      $(siblings[12]).hide();
+      $(siblings[13]).show();
 
     }
     else if (role == "Gunner"){
@@ -333,6 +362,10 @@ function crewRoleChanged(){
       $(siblings[9]).show();
       $(siblings[10]).show();
 
+      $(siblings[11]).hide();
+      $(siblings[12]).show();
+      $(siblings[13]).hide();
+
     }
     else if (role == "Engineer"){
       $(siblings[2]).show();
@@ -346,6 +379,10 @@ function crewRoleChanged(){
       $(siblings[8]).show();
       $(siblings[9]).hide();
       $(siblings[10]).hide();
+
+      $(siblings[11]).show();
+      $(siblings[12]).hide();
+      $(siblings[13]).hide();
     }
     else if (role == "Noclass"){
       $(siblings[2]).hide();
@@ -359,6 +396,15 @@ function crewRoleChanged(){
       $(siblings[8]).hide();
       $(siblings[9]).hide();
       $(siblings[10]).hide();
+
+      $(siblings[11]).hide();
+      $(siblings[12]).hide();
+      $(siblings[13]).hide();
+    }
+    if(!$("#shipBuilderPvECheck").is(":checked")){
+      $(siblings[11]).hide();
+      $(siblings[12]).hide();
+      $(siblings[13]).hide();
     }
   }
 }
@@ -530,7 +576,6 @@ function updateRangeVis(){
 
     let cx = rangeCanvas.width/2;
     let cy = rangeCanvas.height/2 + 500/map_scale;
-    console.log("MAP SCALE: ", map_scale, ", ", 500/map_scale);
 
     for (let i=0; i < ship_builder_guns.length; i++){
       let gun_type = ship_builder_guns[i];

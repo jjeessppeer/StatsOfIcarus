@@ -83,6 +83,24 @@ var ship_builder_translations = {
       "Chute",
       "Bumpers",
       "Tar",
-      "Sail"
-    ]
+      "Sail"],
+    "Ability": [
+      "MechanizedRebuild",
+      "SalvoNeutralizer",
+      "CombustionDampener",
+      "AdvancedDynaBuff",
+      "StaticTurret",
+      "ComponentDisruption",
+      "LightningDraw",
+      "ConcussiveBlast",
+      "MineEjection",
+      "GigatonBlast",
+      "ProximalDetonation",
+      "CataclysmRounds",
+      "EngineStabilization",
+      "RushingDrift",
+      "OversurgeRam",
+      "AirHorn",
+      "EnhancedEnvelope",
+      "TarBomb"]
   };
