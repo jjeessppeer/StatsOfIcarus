@@ -43,7 +43,6 @@ function initializeShipBuilder(){
   
 
   $('#shipBuilderImage').bind("load", function(){
-    console.log("IMAGE LOADED")
     let canvas = document.getElementById("shipBuilderCanvas");
     let ctx = canvas.getContext("2d");
     ctx.resetTransform();
@@ -199,7 +198,6 @@ function shipBuilderImport(e, build_code){
     if (i%10 >= 7) selector = "Ammo";
     else if (i%10 >= 4) selector = "EngiTool";
     else if (i%10 >= 1) selector = "PilotTool";
-    console.log(ship_builder_translations[selector][crew_codes[i]]);
     imgs[i].src = "loadout-images/" + ship_builder_translations[selector][crew_codes[i]] + ".jpg";
   }
 
@@ -504,13 +502,14 @@ function updateRangeVis(){
     
     // TODO wrong image
     let map_image = document.querySelector("#mapImage");
-    let map_scale = parseFloat(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth));
+    let map_scale = parseFloat(map_dataset.getCellByString("Dunes", "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth));
 
     let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
     let n_guns = parseInt(ship_data[1]);
 
-    let cy = 250;
-    let cx = 200;
+    let cx = rangeCanvas.width/2;
+    let cy = rangeCanvas.height/2 + 500/map_scale;
+    console.log("MAP SCALE: ", map_scale, ", ", 500/map_scale);
 
     for (let i=0; i < ship_builder_guns.length; i++){
       let gun_type = ship_builder_guns[i];
@@ -575,8 +574,7 @@ function updateRangeVis(){
       ctx.drawImage(offscreen, 0, 0);
     }
 
-    
-    let image_data = ctx.getImageData(0, 0, 400, 400);
+    let image_data = ctx.getImageData(0, 0, rangeCanvas.width, rangeCanvas.height);
 
     for (i=0; i<image_data.data.length; i+=4){
       let color_val = image_data.data[i];
