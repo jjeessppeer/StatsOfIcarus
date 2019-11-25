@@ -7,7 +7,10 @@ var ship_builder_ship = "Mobula";
 var build_last_pos_x = undefined;
 var build_last_pos_y = undefined;
 
-
+var builder_matrix = [
+  1, 0, 0, 
+  0, 1, 0,
+  0, 0, 1];
 
 var ship_image_srcs = {
   "Corsair": "ship-images/corsair_gundeck_small.png",
@@ -45,9 +48,13 @@ function initializeShipBuilder(){
   $('#shipBuilderImage').bind("load", function(){
     let canvas = document.getElementById("shipBuilderCanvas");
     let ctx = canvas.getContext("2d");
-    ctx.resetTransform();
-    ctx.translate(canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
-    ctx.zoomAround(canvas.width/2, canvas.height/2, 0.8);
+    // ctx.resetTransform();
+    // ctx.translate(canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
+    // ctx.zoomAround(canvas.width/2, canvas.height/2, 0.8);
+    resetMatrix(builder_matrix);
+    translateMatrix(builder_matrix, canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
+    zoomMatrixAround(builder_matrix, canvas.width/2, canvas.height/2, 0.8);
+    applyMatrix(ctx, builder_matrix);
     // ctx.scale(0.5,0.5);
     updateShipBuildImage();
   }); 
@@ -118,13 +125,18 @@ function initializeShipBuilder(){
     let dx = pos_x - build_last_pos_x;
     let dy = pos_y - build_last_pos_y;
 
-    dx /= ctx.getTransform().a;
-    dy /= ctx.getTransform().d;
+    // dx /= ctx.getTransform().a;
+    // dy /= ctx.getTransform().d;
+    dx /= builder_matrix[0];
+    dy /= builder_matrix[4];
 
     // console.log(ctx.getTransform().a);
 
     // let [dx, dy] = translatePoint()
-    ctx.translate(dx, dy);
+    // ctx.translate(dx, dy);
+    translateMatrix(builder_matrix, dx, dy);
+
+    applyMatrix(ctx, builder_matrix);
     // build_offset_x -= build_last_pos_x - pos_x;
     // build_offset_y -= build_last_pos_y - pos_y;
     updateShipBuildImage();
@@ -140,7 +152,9 @@ function initializeShipBuilder(){
     let factor = (e.originalEvent.deltaY < 0) ? 1.1 : 0.9;
 
     let [pos_x, pos_y] = [e.originalEvent.layerX, e.originalEvent.layerY];
-    ctx.zoomAround(pos_x, pos_y, factor);
+    // ctx.zoomAround(pos_x, pos_y, factor);
+    zoomMatrixAround(builder_matrix, pos_x, pos_y, factor);
+    applyMatrix(ctx, builder_matrix);
     
     updateShipBuildImage();
     return false;
@@ -524,7 +538,10 @@ function updateShipBuildImage(){
     off_ctx.clearRect(0, 0, canvas.width, canvas.height);
     off_ctx.restore();
 
-    off_ctx.setTransform(ctx.getTransform());
+    // off_ctx.setTransform(ctx.getTransform());
+    applyMatrix(off_ctx, builder_matrix);
+
+
     //Draw arc
     off_ctx.fillStyle = "rgb(30, 50, 30)";
     off_ctx.globalAlpha = 0.3;
