@@ -88,10 +88,17 @@ function getInvertedMatrix(m){
 }
 
 function resetMatrix(matrix){
-    matrix = [
-        1, 0, 0, 
-        0, 1, 0, 
-        0, 0, 1];
+    matrix[0] = 1;
+    matrix[1] = 0;
+    matrix[2] = 0;
+
+    matrix[3] = 0;
+    matrix[4] = 1;
+    matrix[5] = 0;
+    
+    matrix[6] = 0;
+    matrix[7] = 0;
+    matrix[8] = 1;
 }
 
 function applyMatrix(ctx, matrix){
