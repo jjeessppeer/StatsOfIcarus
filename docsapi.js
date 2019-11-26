@@ -4,6 +4,20 @@ class Dataset {
     constructor(title_array, content_array) {
         this.titles = title_array;
         this.content = content_array;
+        this.sanitizeDataset();
+    }
+
+    sanitizeDataset(){
+        for (let i=0; i<this.titles.length; i++){
+            this.titles[i] = this.titles[i].replace(/</g, "");
+            this.titles[i] = this.titles[i].replace(/>/g, "");
+        }
+        for (let i=0; i<this.content.length; i++){
+            for (let j=0; j<this.content[i].length; j++){
+                this.content[i][j] = this.content[i][j].replace(/</g, "");
+                this.content[i][j] = this.content[i][j].replace(/>/g, "");
+            }
+        }
     }
 
     filterByStringMultiCol(query_string, dataset_titles, exclude, case_sensitive) {
