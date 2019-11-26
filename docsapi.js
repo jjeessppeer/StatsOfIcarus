@@ -9,13 +9,11 @@ class Dataset {
 
     sanitizeDataset(){
         for (let i=0; i<this.titles.length; i++){
-            this.titles[i] = this.titles[i].replace(/</g, "");
-            this.titles[i] = this.titles[i].replace(/>/g, "");
+            this.titles[i] = sanitizeHtml(this.titles[i])
         }
         for (let i=0; i<this.content.length; i++){
             for (let j=0; j<this.content[i].length; j++){
-                this.content[i][j] = this.content[i][j].replace(/</g, "");
-                this.content[i][j] = this.content[i][j].replace(/>/g, "");
+                this.content[i][j] = sanitizeHtml(this.content[i][j])
             }
         }
     }
