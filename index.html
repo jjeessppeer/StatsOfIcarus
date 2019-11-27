@@ -17,6 +17,7 @@
 
   <script src="utils.js"></script>
   <script src="docsapi.js"></script>
+  <script src="shipBuildList.js"></script>
   <script src="damageCalculations.js"></script>
   <script src="aimCalculator.js"></script>
   <script src="matchList.js"></script>
@@ -113,8 +114,6 @@
     </div>
     <!-- Page Content  -->
     <div id="content" class="container-fluid">
-
-
 
       <!-- Match history analysis -->
       <div id="matchAnalysis" class="content-panel" style="display:none">
@@ -232,7 +231,19 @@
 
       <!-- Build Database  -->
       <div id="buildDatabase" class="content-panel" style="display:none">
-        yoho
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Score</th>
+              <th scope="col">Name</th>
+              <th scope="col" colspan="2">Ship info</th>
+              <th scope="col">Description</th>
+            </tr>
+          </thead>
+          <tbody id="buildDatabaseTable">
+            
+          </tbody>
+        </table>
       
       </div>
 
@@ -1021,8 +1032,7 @@
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
 
-      $("li").on("click", sidebarLinkClicked);
-      
+      $("#sidebar a").on("click", openPageFromUrl)
 
       // Load datasets
       loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
@@ -1057,9 +1067,11 @@
         ship_guns_dataset = dataset;
       });
 
+
+      initializeBuildList();
       initializeStuff();
 
-      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "']").trigger("click");
+      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
 
 
     });
@@ -1084,18 +1096,12 @@
       $("#loadalert").slideUp(1000);
     }
 
-    function sidebarLinkClicked() {
-      console.log("Sidebar link clicked")
-      if ($(this).hasClass("subLink")) {
-        $("#sidebar a").not($(this).parent().parent().find("> li > a")).removeClass("active");
-        $(this).parent().parent().find("> li > a").addClass("active")
-      }
-      else {
-        $("#sidebar a").removeClass("active");
-      }
-      $(this).find("> a").addClass("active");
 
-      var div = $($(this).data("show")).show();
+    function openPageFromUrl(){
+      window.location.hash = $(this).attr('href');
+      $("#sidebar a").removeClass("active");
+      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").addClass("active");
+      var div = $("#"+window.location.hash.substr(1).split("?")[0]).show();
       div.siblings("div").hide();
     }
 
