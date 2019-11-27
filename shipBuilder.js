@@ -188,10 +188,59 @@ function shipBuilderUpdateUrl(){
   setUrlParam(shipBuilderGetExportCode());
 }
 
+
+function parseBuildCode(build_code){
+  build_code = LZString.decompressFromEncodedURIComponent(build_code);
+  build_code = build_code.split(",");
+
+  build_data = {};
+
+  build_data.ship = ship_builder_translations["Ship"][build_code[0]];
+
+  build_data.pve = (build_code.length >= 54 && build_code[54]=="1");
+
+
+  build_data.guns = [];
+  let gun_codes = build_code.slice(1, 7);
+  for (let i=0; i < gun_codes.length; i++){
+    build_data.guns.push(ship_builder_translations["Weapon"][gun_codes[i]]);
+  }
+
+  build_data.ammo = [];
+  let ammo_codes = build_code.slice(7, 13);
+  for (let i=0; i < ammo_codes.length; i++){
+    build_data.ammo.push(ship_builder_translations["Ammo"][ammo_codes[i]]);
+  }
+
+
+  build_data.crew = [];
+  let crew_codes = build_code.slice(13, 53);
+  let ability_codes = build_code.slice(55, 67);
+  for (let i=0; i<4; i++){
+    let loadout = {};
+    loadout.role = ship_builder_translations["Crew"][crew_codes[i*10]];
+    loadout.pilotTools = [];
+    loadout.engiTools = [];
+    loadout.ammo = [];
+    loadout.abilities = [];
+    for (let j=1; j<=3; j++){
+      loadout.pilotTools.push(ship_builder_translations["PilotTool"][crew_codes[i*10+j]]);
+      loadout.engiTools.push(ship_builder_translations["EngiTool"][crew_codes[i*10+j+3]]);
+      loadout.ammo.push(ship_builder_translations["Ammo"][crew_codes[i*10+j+6]]);
+      if (ability_codes.length == 12)
+        loadout.abilities.push(ship_builder_translations["Ability"][ability_codes[3*i+j-1]]);
+      else
+        loadout.abilities = ["MechanizedRebuild", "LightningDraw", "EngineStabilization"];
+    }
+    build_data.crew.push(loadout);
+  }
+}
+
 function shipBuilderImport(e, build_code){
   if (!build_code)
     build_code = $("#shipBuildImportText").val();
   // build_code = atob(build_code);
+  parseBuildCode(build_code);
   build_code = LZString.decompressFromEncodedURIComponent(build_code);
   build_code = build_code.split(",");
 
