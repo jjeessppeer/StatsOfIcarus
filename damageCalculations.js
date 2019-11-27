@@ -15,14 +15,14 @@ function initializeDamageCalculator() {
 
     $("#damageCalcCustomAmmoCheck").on("change", function(e){
         if ($("#damageCalcCustomAmmoCheck").is(":checked")){
-            $("#damageCalcCustomAmmoInput").show();
-            $("#damageCalcAmmoInput").hide();
+            $("#damageCalcCustomAmmoInput").slideDown();
+            $("#damageCalcAmmoInput").slideUp();
             importSelectedAmmo();
             exportCustomAmmo();
         }
         else {
-            $("#damageCalcCustomAmmoInput").hide();
-            $("#damageCalcAmmoInput").show();
+            $("#damageCalcCustomAmmoInput").slideUp();
+            $("#damageCalcAmmoInput").slideDown();
         }
     })
 
@@ -96,11 +96,6 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
         gun_type = $("#gunSelect").val();
     if (!ammo_type)
         ammo_type = $("#ammoSelect").val();
-
-
-    
-
-
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
 
@@ -332,7 +327,7 @@ function updateGunInfoTable() {
 
     // Hide/show laser ui
     let laser_div = $("#laserExtras");
-    $("#gunSelect").val() == "Aten Lens Array [Mk. S]" ? laser_div.show() : laser_div.hide();
+    $("#gunSelect").val() == "Aten Lens Array [Mk. S]" ? laser_div.slideDown() : laser_div.slideUp();
     if ($("#gunSelect").val() == "Aten Lens Array [Mk. S]"){
         let dist_range = $("#distanceRange");
         let time_range = $("#timeRange");
