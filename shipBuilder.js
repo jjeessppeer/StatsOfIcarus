@@ -194,7 +194,7 @@ function parseBuildCode(build_code){
   build_code = build_code.split(",");
 
   build_data = {};
-
+  build_data.name = build_code[53];
   build_data.ship = ship_builder_translations["Ship"][build_code[0]];
 
   build_data.pve = (build_code.length >= 54 && build_code[54]=="1");
@@ -234,6 +234,7 @@ function parseBuildCode(build_code){
     }
     build_data.crew.push(loadout);
   }
+  return build_data;
 }
 
 function shipBuilderImport(e, build_code){

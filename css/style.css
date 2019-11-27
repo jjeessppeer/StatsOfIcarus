@@ -1,5 +1,12 @@
 
 
+.fa-chevron-up{
+    color: #6d7fcc;
+}
+.fa-chevron-down{
+    color: #6d7fcc;
+}
+
 #shipBuildGunSelector {
     width: 100px;
     /* height: 30px; */
