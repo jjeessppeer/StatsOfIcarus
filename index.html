@@ -45,14 +45,6 @@
 
       <ul class="list-unstyled components">
 
-        <!-- <li id="shipBuildsLink" data-show="#shipBuilds">
-          <a href="#" class="active">
-            <i class="fas fa-ship"></i>
-            Ship builds
-          </a>
-        </li> -->
-
-
         <li id="matchAnalysisLink" data-show="#matchAnalysis">
           <a href="#matchAnalysis">
             <i class="fas fa-glasses"></i>
@@ -72,6 +64,12 @@
           </a>
         </li>
 
+        <li id="buildDatabaseLink" data-show="#buildDatabase">
+          <a href="#buildDatabase">
+            <i class="fas fa-journal-whills"></i>
+            Ship database
+          </a>
+        </li>
         <li id="shipBuilderLink" data-show="#shipBuilder">
           <a href="#shipBuilder">
             <i class="fas fa-hammer"></i>
@@ -116,46 +114,7 @@
     <!-- Page Content  -->
     <div id="content" class="container-fluid">
 
-      <!-- Ship database -->
-      <div id="shipBuilds" class="content-panel" style="display:none">
 
-        <div class="row row-margin">
-          <div class="col-sm-6">
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Filter</div>
-              </div>
-              <select class="form-control" id="shipFilterModeSelect" autocomplete="off">
-                <option>Include</option>
-                <option>Exclude</option>
-              </select>
-              <select class="form-control" id="shipFilterSelect" autocomplete="off">
-                <option>All</option>
-                <option selected>Ship</option>
-                <option>Build name</option>
-                <option>Guns</option>
-                <option>Strong VS</option>
-                <option>Weak VS</option>
-              </select>
-              <input type="text" class="form-control" id="shipFilterText" placeholder="filter substring">
-              <!-- <div class="input-group-append">
-                  <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
-                </div> -->
-            </div>
-          </div>
-
-        </div>
-
-        <div class="row">
-          <!-- <div class="col"></div> -->
-          <div class="col">
-            <table id="shipsTable" class="table table-bordered">
-            </table>
-          </div>
-
-        </div>
-
-      </div>
 
       <!-- Match history analysis -->
       <div id="matchAnalysis" class="content-panel" style="display:none">
@@ -268,6 +227,13 @@
         <p>Here you can submit a match to the database.</p>
         <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8Fyrz4MRAJ8MoDke7it8zB_ihARWv12TBQMtIKstVY3cGXw/viewform?embedded=true"
           width="640" height="2317" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+      </div>
+
+
+      <!-- Build Database  -->
+      <div id="buildDatabase" class="content-panel" style="display:none">
+        yoho
+      
       </div>
 
       <!-- Ship builder -->
@@ -1090,7 +1056,6 @@
       loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
         ship_guns_dataset = dataset;
       });
-
 
       initializeStuff();
 
