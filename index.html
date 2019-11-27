@@ -6,6 +6,8 @@
   <link rel="shortcut icon" href="blimp-icon.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  
 
   <link rel="stylesheet" href="deps/bootstrap.min.css">
   <!-- <script src="deps/jquery-3.4.1.slim.min.js"></script> -->
@@ -29,6 +31,8 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
     crossorigin="anonymous">
 
+  <script src="jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="jquery-ui.min.css">
 </head>
 
 <body>
@@ -283,7 +287,22 @@
               <input type="checkbox" class="form-check-input" id="shipBuilderPvECheck" autocomplete="off">
               <label class="form-check-label" for="shipBuilderPvECheck">Use PvE equipment</label>
             </div>
-            
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="shipBuilderDesCheck" autocomplete="off">
+              <label class="form-check-label" for="shipBuilderDesCheck">Show description</label>
+            </div>
+
+
+            <div class="my-col" id="buildDescriptionCol" style="width:320px;height:410px;display:none;">
+              <!-- <div class="form-group"> -->
+                <b>Description</b>
+                <!-- <label for="exampleFormControlTextarea1">Example textarea</label> -->
+                <textarea class="form-control" id="buildDescriptionArea" style="height:100%" autocomplete="off"></textarea>
+              <!-- </div> -->
+            </div>
+            <div class="my-col">
+              
+
             <div id="weaponSelections">
                 <b>Ship Loadout</b>
               
@@ -553,8 +572,12 @@
 
               </div>
             </div>
-
+            
+            </div>
+            
         </div>
+
+        
 
         <div class="my-col img-canvas-container" id="shipContainer">
           <b>Drag or scroll to pan or zoom image.</b>
@@ -571,9 +594,10 @@
             <button type="button" class="btn btn-secondary">Right</button>
           </div> -->
 
-
-
         </div>
+
+        
+
         <br>
         <h3>Long range</h3>
         <div class="my-col">
@@ -1068,7 +1092,6 @@
       });
 
 
-      initializeBuildList();
       initializeStuff();
 
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
@@ -1085,7 +1108,7 @@
         setTimeout(function(){ initializeStuff(); }, 200);
         return;
       }
-      console.log("LOADING DONE");
+      initializeBuildList();
       initializeDamageCalculator();
       initializeAimCalculator();
       initializeShipBuilder();
