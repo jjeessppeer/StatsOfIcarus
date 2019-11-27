@@ -33,7 +33,8 @@ var ship_builder_translations = {
       "Immortal Gaze Heavy Accelerator",
       "Immortal Gaze Heavy Accelerator [Mk. II]",
       "Roaring Tiger Heavy Detonator",
-      "Roaring Tiger Heavy Detonator [Mk. II]"],
+      "Roaring Tiger Heavy Detonator [Mk. II]",
+      "None"],
     "Ship": [
       "Goldfish",
       "Junker",
