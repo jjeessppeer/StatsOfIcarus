@@ -6,8 +6,8 @@
   <link rel="shortcut icon" href="blimp-icon.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  
+
+
 
   <link rel="stylesheet" href="deps/bootstrap.min.css">
   <!-- <script src="deps/jquery-3.4.1.slim.min.js"></script> -->
@@ -235,6 +235,17 @@
 
       <!-- Build Database  -->
       <div id="buildDatabase" class="content-panel" style="display:none">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Request builds</div>
+          </div>
+          <input type="text" id="requestBuildText" class="form-control" placeholder="id" autocomplete="off">
+          <div class="input-group-append">
+            <button id="requestBuildButton" class="btn btn-primary" type="button">Request</button>
+          </div>
+        </div>
+
+
         <table class="table table-bordered">
           <thead>
             <tr>
@@ -245,10 +256,10 @@
             </tr>
           </thead>
           <tbody id="buildDatabaseTable">
-            
+
           </tbody>
         </table>
-      
+
       </div>
 
       <!-- Ship builder -->
@@ -268,44 +279,54 @@
           </div>
         </div>
 
+
+
         <br>
 
         <div class="my-col" id="shipLoadoutGroup">
-            <input type="text" id="shipBuildName" class="form-control" placeholder="Build Name" autocomplete="off" style="width:200px;margin-bottom:5px;font-weight:bold;">
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Ship</div>
+          <div>
+            <div class="my-col">
+              <input type="text" id="shipBuildName" class="form-control" placeholder="Build Name" autocomplete="off"
+                style="width:200px;margin-bottom:5px;font-weight:bold;">
+              <div class="input-group" style="width:200px;">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">Ship</div>
+                </div>
+                <select class="form-control" id="shipBuildShipSelection" autocomplete="off">
+                  <!-- <option>Mobula</option>       -->
+                </select>
               </div>
-              <select class="form-control" id="shipBuildShipSelection" autocomplete="off">
-                <!-- <option>Mobula</option>       -->
-              </select>
-            </div>
-
-
-
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="shipBuilderPvECheck" autocomplete="off">
-              <label class="form-check-label" for="shipBuilderPvECheck">Use PvE equipment</label>
-            </div>
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="shipBuilderDesCheck" autocomplete="off">
-              <label class="form-check-label" for="shipBuilderDesCheck">Show description</label>
-            </div>
-
-
-            <div class="my-col" id="buildDescriptionCol" style="width:320px;height:410px;display:none;">
-              <!-- <div class="form-group"> -->
-                <b>Description</b>
-                <!-- <label for="exampleFormControlTextarea1">Example textarea</label> -->
-                <textarea class="form-control" id="buildDescriptionArea" style="height:100%" autocomplete="off"></textarea>
-              <!-- </div> -->
             </div>
             <div class="my-col">
-              
+              <button id="buildSubmitButton" class="btn btn-primary" type="button">Submit to database</button>
+            </div>
+
+          </div>
+
+
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="shipBuilderPvECheck" autocomplete="off">
+            <label class="form-check-label" for="shipBuilderPvECheck">Use PvE equipment</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="shipBuilderDesCheck" autocomplete="off">
+            <label class="form-check-label" for="shipBuilderDesCheck">Show description</label>
+          </div>
+
+
+          <div class="my-col" id="buildDescriptionCol" style="width:320px;height:410px;display:none;">
+            <!-- <div class="form-group"> -->
+            <b>Description</b>
+            <textarea class="form-control" id="buildDescriptionArea" style="height:75%" autocomplete="off"></textarea>
+            <p>Share link will get large if you use description. To share consider uploading build to database instead.</p>
+            <!-- </div> -->
+          </div>
+          <div class="my-col">
+
 
             <div id="weaponSelections">
-                <b>Ship Loadout</b>
-              
+              <b>Ship Loadout</b>
+
 
               <div class="input-group" style="width:420px;">
                 <div class="input-group-prepend">
@@ -361,7 +382,7 @@
               <div class="input-group">
                 <div class="input-group-prepend">
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Noclass.jpg" width="35" height="35" class="rounded">
@@ -373,7 +394,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Noclass.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Spyglass.jpg" width="35" height="35" class="rounded">
@@ -392,7 +413,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Sail.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Kerosene.jpg" width="35" height="35" class="rounded">
@@ -411,7 +432,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Sail.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Hydrogen.jpg" width="35" height="35" class="rounded">
@@ -430,7 +451,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Sail.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Mallet.jpg" width="35" height="35" class="rounded">
@@ -445,7 +466,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Buff.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Spanner.jpg" width="35" height="35" class="rounded">
@@ -460,7 +481,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Buff.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Extinguisher.jpg" width="35" height="35" class="rounded">
@@ -475,7 +496,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Buff.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Charged.jpg" width="35" height="35" class="rounded">
@@ -493,7 +514,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Extended.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Greased.jpg" width="35" height="35" class="rounded">
@@ -511,7 +532,7 @@
                     <a class="dropdown-item"><img src="loadout-images/Extended.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
-    
+
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
                     <img src="loadout-images/Lesmok.jpg" width="35" height="35" class="rounded">
@@ -572,12 +593,12 @@
 
               </div>
             </div>
-            
-            </div>
-            
+
+          </div>
+
         </div>
 
-        
+
 
         <div class="my-col img-canvas-container" id="shipContainer">
           <b>Drag or scroll to pan or zoom image.</b>
@@ -596,7 +617,7 @@
 
         </div>
 
-        
+
 
         <br>
         <h3>Long range</h3>
@@ -1099,13 +1120,13 @@
 
     });
 
-    function initializeStuff(){
-      if (!(match_dataset && gun_dataset && ammo_dataset && 
-            damage_dataset && tool_dataset && component_dataset && 
-            ship_dataset && map_dataset && crosshair_dataset && 
-            ship_guns_dataset)) {
+    function initializeStuff() {
+      if (!(match_dataset && gun_dataset && ammo_dataset &&
+        damage_dataset && tool_dataset && component_dataset &&
+        ship_dataset && map_dataset && crosshair_dataset &&
+        ship_guns_dataset)) {
         console.log("LOADING");
-        setTimeout(function(){ initializeStuff(); }, 200);
+        setTimeout(function () { initializeStuff(); }, 200);
         return;
       }
       initializeBuildList();
@@ -1120,11 +1141,11 @@
     }
 
 
-    function openPageFromUrl(){
+    function openPageFromUrl() {
       window.location.hash = $(this).attr('href');
       $("#sidebar a").removeClass("active");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").addClass("active");
-      var div = $("#"+window.location.hash.substr(1).split("?")[0]).show();
+      var div = $("#" + window.location.hash.substr(1).split("?")[0]).show();
       div.siblings("div").hide();
     }
 

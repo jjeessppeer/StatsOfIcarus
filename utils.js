@@ -352,7 +352,23 @@ $.fn.inputFilter = function (inputFilter) {
 
 
 function sanitizeHtml(str){
+    str = String(str);
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function httpxPostRequest(url, data, callback){
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("POST", url)
+    // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.onreadystatechange = callback;
+    // xhttp.send(data);
+    xhttp.send(JSON.stringify(data));
 
+
+//     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+// var theUrl = "/json-handler";
+// xmlhttp.open("POST", theUrl);
+// xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+// xmlhttp.send(JSON.stringify({ "email": "hello@user.com", "response": { "name": "Tester" } }));
+}

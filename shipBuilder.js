@@ -76,6 +76,7 @@ function initializeShipBuilder(){
   });
 
   $("#shipBuildName,#buildDescriptionArea").on("input", shipBuilderUpdateUrl);
+  $("#shipBuilderDesCheck,#shipBuilderPvECheck").on("change", shipBuilderUpdateUrl);
 
   // Ship change event
   $("#shipBuildShipSelection").on("change", function(e){
@@ -323,9 +324,7 @@ function shipBuilderExport(){
   $("#shipBuildImportText").val(export_string);
 }
 
-function shipBuilderGetExportCode(){
-
-
+function shipBuilderGetExportCode(include_description=true){
   let guns = [];
   for (let i=1; i <= 6; i++){
     let weapon_type = $("#weaponSelections > div:nth-of-type("+i+") > select:nth-of-type(1)").val();
@@ -373,8 +372,8 @@ function shipBuilderGetExportCode(){
     
   }
 
-  let description = ($("#shipBuilderDesCheck").is(":checked") ? $("#buildDescriptionArea").val() : "");
-  description = description.replace(/,/g, '&#44;');
+  let description = ($("#shipBuilderDesCheck").is(":checked") && include_description ? $("#buildDescriptionArea").val() : "");
+  description = description.replace(/,/g, ' ');
   // console.log(PvE_abilities)
   
   let export_string = "";

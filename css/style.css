@@ -1,10 +1,30 @@
 
 
-.fa-chevron-up{
-    color: #6d7fcc;
+.upvote.voted > .fa-chevron-up{
+    color: rgb(64, 223, 64);
 }
-.fa-chevron-down{
-    color: #6d7fcc;
+.downvote.voted > .fa-chevron-down{
+    color: red;
+}
+.upvote.voted{
+    color: rgb(64, 223, 64);
+}
+
+.downvote.voted{
+    color: red;
+}
+
+.upvote{
+    cursor:pointer;
+}
+.downvote{
+    cursor:pointer;
+}
+
+a.build-name{
+    cursor:pointer;
+    color:blue;
+    text-decoration:underline;
 }
 
 #shipBuildGunSelector {
@@ -38,7 +58,7 @@
     /* background: #39759c; */
     display: inline-block;
     vertical-align: top;
-    padding-right: 30px;
+    /* padding-right: 30px; */
 }
 
 .sbs-container{
