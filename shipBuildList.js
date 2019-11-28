@@ -19,7 +19,7 @@ function requestBuild(){
   console.log("Requesting build");
   let [start, end] = $("#requestBuildText").val().split(",");
   console.log([start, end])
-  httpxPostRequest("http://192.168.1.111:3231/request_build", [start, end], function(){
+  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
     if (this.readyState == 4 && this.status == 200){
@@ -48,7 +48,7 @@ function submitBuild(){
   console.log(build_code);
   let description = $("#buildDescriptionArea").val();
 
-  httpxPostRequest("http://192.168.1.111:3231/submit_build", [name, build_code, description], function(){
+  httpxPostRequest("http://79.136.70.98:3231/submit_build", [name, build_code, description], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
   });
@@ -60,7 +60,7 @@ function toggleUpvote(){
   let enable = !$(this).hasClass("voted");
 
   console.log("voting: ", id, ", ", enable);
-  httpxPostRequest("http://192.168.1.111:3231/upvote_build", [id, enable], function(){
+  httpxPostRequest("http://79.136.70.98:3231/upvote_build", [id, enable], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     if (this.readyState == 4 && this.status == 200){
       let json = JSON.parse(this.response);
