@@ -3,21 +3,23 @@
 
 
 function initializeBuildList(){
-    addToBuildTable(0, 5, 0, "A Metajunker that gets a more forward trifecta than the traditional one, which I would have loved to see used more often", "IwGmoJhAGEA4aNsxA2JiDMICsZEAs8uI6K2eosRCeZWJVINJ9sF+1xdIA6gK4A7ACYBnAIYAbAF4ByUQAIAsgFMALuIBSQgNYqATkA");
-    addToBuildTable(0, 5, 0, "", "IwGmoJhAGEA4aNsxA2JiDMICsZEAs8uI6K2eosRCeZWJVINJ9sF+1xdIA6gK4A7ACYBnAIYAbAF4ByUQAIAsgFMALuIBSQgNYqATkA");
-    addToBuildTable(0, 5, 0, "Drift is cool", "CwGgjArCBM4yAGEBaM8AcIpSUtYkBmeWJUbEANnjWKjTPimOKKzkcymtZDo5Dl21ACIBLgFYADgAQA3AK5A");
-    addToBuildTable(0, 1, 4, "i think this will be good for crewcible.", "IwJgNMAsbgHDYAMYC0wIYKxm855kBmHMY8adbANg2WnGLpOtKVe3SfhcfdfOZgaACQCmAQwBOAFwBCkiQGtRkoA");
+    // addToBuildTable(0, 5, 0, "A Metajunker that gets a more forward trifecta than the traditional one, which I would have loved to see used more often", "IwGmoJhAGEA4aNsxA2JiDMICsZEAs8uI6K2eosRCeZWJVINJ9sF+1xdIA6gK4A7ACYBnAIYAbAF4ByUQAIAsgFMALuIBSQgNYqATkA");
+    // addToBuildTable(0, 5, 0, "", "IwGmoJhAGEA4aNsxA2JiDMICsZEAs8uI6K2eosRCeZWJVINJ9sF+1xdIA6gK4A7ACYBnAIYAbAF4ByUQAIAsgFMALuIBSQgNYqATkA");
+    // addToBuildTable(0, 5, 0, "Drift is cool", "CwGgjArCBM4yAGEBaM8AcIpSUtYkBmeWJUbEANnjWKjTPimOKKzkcymtZDo5Dl21ACIBLgFYADgAQA3AK5A");
+    // addToBuildTable(0, 1, 4, "i think this will be good for crewcible.", "IwJgNMAsbgHDYAMYC0wIYKxm855kBmHMY8adbANg2WnGLpOtKVe3SfhcfdfOZgaACQCmAQwBOAFwBCkiQGtRkoA");
 
     $("#buildSubmitButton").on("click", submitBuild);
-    $("#requestBuildButton").on("click", requestBuild);
+    // $("#requestBuildButton").on("click", requestBuild);
     getNBuilds();
+    // requestBuilds(0, 10);
 }
 
-function requestBuild(){
+function requestBuilds(start, end){
   console.log("Requesting build");
-  let [start, end] = $("#requestBuildText").val().split(",");
+
+  // let [start, end] = $("#requestBuildText").val().split(",");
   console.log([start, end])
-  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end], function(){
+  httpxPostRequest("http://79.136.70.98:3231/request_build", [0, 5], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
     if (this.readyState == 4 && this.status == 200){
@@ -53,6 +55,7 @@ function getNBuilds(){
     console.log("Request status ", this.readyState, ", ", this.status);
     if (this.readyState == 4 && this.status == 200){
       console.log("NBUILDS: ", this.response);
+      requestBuilds(0, parseInt(this.response));
     }
   });
 }
