@@ -24,12 +24,12 @@ function requestBuild(){
       let json = JSON.parse(this.response);
       console.log(json)
       for (i=0; i<json.length; i++){
-        let id = sanitizeHtml(json[i].id);
+        let build_id = sanitizeHtml(json[i].build_id);
         let upvotes = sanitizeHtml(json[i].upvotes);
-        let downvotes = sanitizeHtml(json[i].downvotes);
         let description = sanitizeHtml(json[i].description);
         let build_code = sanitizeHtml(json[i].build_code);
-        addToBuildTable(id, upvotes, downvotes, description, build_code);
+        let voted = sanitizeHtml(json[i].voted) == "true";
+        addToBuildTable(build_id, upvotes, 0, description, build_code, voted);
       }
     }
   });
@@ -85,7 +85,7 @@ function toggleUpvote(){
 }
 
 
-function addToBuildTable(id, upvotes, downvotes, description, build_code){
+function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=false){
   console.log("adding to table");
   let build_data = parseBuildCode(build_code);
   // console.log(build_data)
@@ -94,7 +94,7 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code){
   let table_obj = $(`
     <tr>
       <td rowspan="2">
-        <div class="upvote" data-id="`+id+`" data-votes="`+upvotes+`"><i class="fas fa-chevron-up"></i></div>
+        <div class="upvote`+(voted ? " voted" : "")+`" data-id="`+id+`" data-votes="`+upvotes+`"><i class="fas fa-chevron-up"></i></div>
       <td rowspan="2"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
       <td colspan="2">`+build_data.ship+`</td>
       <td rowspan="2">`+description+`</td>
