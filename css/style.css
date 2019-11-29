@@ -10,6 +10,10 @@
     color: rgb(64, 223, 64);
 }
 
+.upvote:after {
+    content: attr(data-votes);
+}
+
 .downvote.voted{
     color: red;
 }

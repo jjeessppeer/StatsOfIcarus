@@ -10,10 +10,8 @@ function initializeBuildList(){
 
     $("#buildSubmitButton").on("click", submitBuild);
     $("#requestBuildButton").on("click", requestBuild);
+    getNBuilds();
 }
-// function submitCurrentBuild
-
-
 
 function requestBuild(){
   console.log("Requesting build");
@@ -37,10 +35,6 @@ function requestBuild(){
   });
 }
 
-
-
-
-
 function submitBuild(){
   console.log("Submitting build");
   let name = $("#shipBuildName").val();
@@ -52,7 +46,15 @@ function submitBuild(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
   });
+}
 
+function getNBuilds(){
+  httpxGetRequest("http://79.136.70.98:3231/n_pages", function(){
+    console.log("Request status ", this.readyState, ", ", this.status);
+    if (this.readyState == 4 && this.status == 200){
+      console.log("NBUILDS: ", this.response);
+    }
+  });
 }
 
 function toggleUpvote(){
@@ -63,7 +65,20 @@ function toggleUpvote(){
   httpxPostRequest("http://79.136.70.98:3231/upvote_build", [id, enable], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     if (this.readyState == 4 && this.status == 200){
-      let json = JSON.parse(this.response);
+      let res = JSON.parse(this.response);
+      let div = $("[data-id='"+res.id+"']")
+      console.log(div.data("votes"));
+      if (res.voted){
+        div.addClass("voted");
+        // $(div).attr('data-votes','hello');
+        $(div).attr('data-votes', parseInt($(div).attr('data-votes')) + 1);
+        // div.data("votes", 2123);
+      }
+      else{
+        div.removeClass("voted");
+        $(div).attr('data-votes', parseInt($(div).attr('data-votes')) - 1);
+        // div.data("votes", 2);
+      }
        
     }
   });
@@ -74,11 +89,12 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code){
   console.log("adding to table");
   let build_data = parseBuildCode(build_code);
   // console.log(build_data)
+  
+  // <div class="downvote" data-id="`+id+`" style="display:none"><i class="fas fa-chevron-down"></i>-`+downvotes+`</div></td>
   let table_obj = $(`
     <tr>
       <td rowspan="2">
-        <div class="upvote" data-id="`+id+`"><i class="fas fa-chevron-up"></i>`+upvotes+`</div>
-        <div class="downvote" data-id="`+id+`" style="display:none"><i class="fas fa-chevron-down"></i>-`+downvotes+`</div></td>
+        <div class="upvote" data-id="`+id+`" data-votes="`+upvotes+`"><i class="fas fa-chevron-up"></i></div>
       <td rowspan="2"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
       <td colspan="2">`+build_data.ship+`</td>
       <td rowspan="2">`+description+`</td>

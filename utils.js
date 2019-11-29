@@ -358,17 +358,18 @@ function sanitizeHtml(str){
 
 function httpxPostRequest(url, data, callback){
     let xhttp = new XMLHttpRequest();
-    xhttp.open("POST", url)
-    // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.open("POST", url);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onreadystatechange = callback;
-    // xhttp.send(data);
     xhttp.send(JSON.stringify(data));
-
-
-//     var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-// var theUrl = "/json-handler";
-// xmlhttp.open("POST", theUrl);
-// xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-// xmlhttp.send(JSON.stringify({ "email": "hello@user.com", "response": { "name": "Tester" } }));
 }
+
+function httpxGetRequest(url, callback){
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("GET", url);
+    // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.onreadystatechange = callback;
+    // xhttp.send(JSON.stringify(data));
+    xhttp.send();
+}
+
