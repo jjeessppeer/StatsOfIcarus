@@ -3,13 +3,7 @@
 
 
 function initializeBuildList(){
-    // addToBuildTable(0, 5, 0, "A Metajunker that gets a more forward trifecta than the traditional one, which I would have loved to see used more often", "IwGmoJhAGEA4aNsxA2JiDMICsZEAs8uI6K2eosRCeZWJVINJ9sF+1xdIA6gK4A7ACYBnAIYAbAF4ByUQAIAsgFMALuIBSQgNYqATkA");
-    // addToBuildTable(0, 5, 0, "", "IwGmoJhAGEA4aNsxA2JiDMICsZEAs8uI6K2eosRCeZWJVINJ9sF+1xdIA6gK4A7ACYBnAIYAbAF4ByUQAIAsgFMALuIBSQgNYqATkA");
-    // addToBuildTable(0, 5, 0, "Drift is cool", "CwGgjArCBM4yAGEBaM8AcIpSUtYkBmeWJUbEANnjWKjTPimOKKzkcymtZDo5Dl21ACIBLgFYADgAQA3AK5A");
-    // addToBuildTable(0, 1, 4, "i think this will be good for crewcible.", "IwJgNMAsbgHDYAMYC0wIYKxm855kBmHMY8adbANg2WnGLpOtKVe3SfhcfdfOZgaACQCmAQwBOAFwBCkiQGtRkoA");
-
-    $("#buildSubmitButton").on("click", submitBuild);
-    // $("#requestBuildButton").on("click", requestBuild);
+    $("#buildSubmitButton").on("click", submitBuild)
     getNBuilds();
     // requestBuilds(0, 10);
 }
@@ -19,7 +13,7 @@ function requestBuilds(start, end){
 
   // let [start, end] = $("#requestBuildText").val().split(",");
   console.log([start, end])
-  httpxPostRequest("http://79.136.70.98:3231/request_build", [0, 5], function(){
+  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
     if (this.readyState == 4 && this.status == 200){
@@ -39,6 +33,11 @@ function requestBuilds(start, end){
 
 function submitBuild(){
   console.log("Submitting build");
+  // $(this).attr("disabled", true);
+  // $(this).removeClass("btn-primary");
+  // $(this).addClass("btn-secondary");
+  // $(this).prepend('<i class="fa fa-spinner fa-spin"></i>');
+  // $("#buildSubmitButton").attr("disabled", true);
   let name = $("#shipBuildName").val();
   let build_code = shipBuilderGetExportCode(false);
   console.log(build_code);
@@ -55,7 +54,8 @@ function getNBuilds(){
     console.log("Request status ", this.readyState, ", ", this.status);
     if (this.readyState == 4 && this.status == 200){
       console.log("NBUILDS: ", this.response);
-      requestBuilds(0, parseInt(this.response));
+      requestBuilds(1, parseInt(this.response));
+      // requestBuilds(1, 3);
     }
   });
 }
@@ -95,6 +95,7 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=
   
   // <div class="downvote" data-id="`+id+`" style="display:none"><i class="fas fa-chevron-down"></i>-`+downvotes+`</div></td>
   let table_obj = $(`
+    <tbody class="ship-build-table-item">
     <tr>
       <td rowspan="2">
         <div class="upvote`+(voted ? " voted" : "")+`" data-id="`+id+`" data-votes="`+upvotes+`"><i class="fas fa-chevron-up"></i></div>
@@ -103,9 +104,10 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=
       <td rowspan="2">`+description+`</td>
     </tr>
     <tr>
-      <td style="white-space:nowrap;">1: `+build_data.guns[0]+`<br>2: `+build_data.guns[1]+`<br>3: `+build_data.guns[2]+`</td>
-      <td style="white-space:nowrap;">4: `+build_data.guns[3]+`<br>5: `+build_data.guns[4]+`<br>6: `+build_data.guns[5]+`</td>
-    </tr>`);
+      <td style="width:100px">1:&nbsp;`+build_data.guns[0]+`<br>2:&nbsp;`+build_data.guns[1]+`<br>3:&nbsp;`+build_data.guns[2]+`</td>
+      <td style="width:100px">4:&nbsp;`+build_data.guns[3]+`<br>5:&nbsp;`+build_data.guns[4]+`<br>6:&nbsp;`+build_data.guns[5]+`</td>
+    </tr>
+    </tbody>`);
   $("#buildDatabaseTable").append(table_obj);
   
   table_obj.find("a").on("click", function(){

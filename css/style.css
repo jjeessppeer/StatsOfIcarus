@@ -1,10 +1,25 @@
 
 
+/* .page-item > a:after {
+    content: attr(data-pagename);
+} */
+
+.ship-build-table-item {
+    border-left: 3px solid rgb(222, 226, 230);
+    border-bottom: 3px solid rgb(222, 226, 230);
+    border-right: 3px solid rgb(222, 226, 230);
+    border-top: 3px solid rgb(222, 226, 230);
+}
+
+.page-item:not(.active){
+    cursor:pointer;
+}
+.page-item.active{
+    cursor:default;
+}
+
 .upvote.voted > .fa-chevron-up{
     color: rgb(64, 223, 64);
-}
-.downvote.voted > .fa-chevron-down{
-    color: red;
 }
 .upvote.voted{
     color: rgb(64, 223, 64);
@@ -14,14 +29,7 @@
     content: attr(data-votes);
 }
 
-.downvote.voted{
-    color: red;
-}
-
 .upvote{
-    cursor:pointer;
-}
-.downvote{
     cursor:pointer;
 }
 

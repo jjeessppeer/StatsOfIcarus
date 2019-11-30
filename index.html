@@ -235,29 +235,80 @@
 
       <!-- Build Database  -->
       <div id="buildDatabase" class="content-panel" style="display:none">
-        <div class="input-group">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Request builds</div>
+        <div>
+          <div class="my-col">
+            <div class="input-group" style="width:200px">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Name</div>
+              </div>
+              <input type="text" class="form-control" id="buildFilterName" placeholder="">
+            </div>
+            <div class="input-group" style="width:200px">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Ship</div>
+              </div>
+              <select class="form-control" id="buildFilterShip" autocomplete="off">
+                <option selected>Any</option>
+                <option>Goldfish</option>
+                <option>Junker</option>
+                <option>Squid</option>
+                <option>Galleon</option>
+                <option>Spire</option>
+                <option>Pyramidion</option>
+                <option>Mobula</option>
+                <option>Magnate</option>
+                <option>Crusader</option>
+                <option>Judgement</option>
+                <option>Corsair</option>
+                <option>Shrike</option>
+                <option>Stormbreaker</option>
+              </select>
+            </div>
           </div>
-          <input type="text" id="requestBuildText" class="form-control" placeholder="id" autocomplete="off">
-          <div class="input-group-append">
-            <button id="requestBuildButton" class="btn btn-primary" type="button">Request</button>
+          <div class="my-col">
+            <div class="input-group" style="width:250px">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">PvE builds</div>
+              </div>
+              <select class="form-control" id="buildFilterPvE" autocomplete="off">
+                <option selected>Exclude</option>
+                <option>Include</option>
+                <option>Only</option>
+              </select>
+            </div>
+            <div class="input-group" style="width:250px">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Submitted by</div>
+              </div>
+              <select class="form-control" id="buildFilterAuthor" autocomplete="off">
+                <option selected>Anyone</option>
+                <option>Me</option>
+                <option>Others</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="my-col">
+            <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter</button>
           </div>
         </div>
+        
+        
 
 
-        <table class="table table-bordered">
+        <table class="table" style="max-width:1000px" id="buildDatabaseTable">
           <thead>
             <tr>
-              <th scope="col">Score</th>
-              <th scope="col">Name</th>
-              <th scope="col" colspan="2">Ship info</th>
+              <th scope="col" style="width:85px">Votes</th>
+              <th scope="col" style="width:130px">Name</th>
+              <th scope="col" colspan="2" style="width:200px">Ship info</th>
               <th scope="col">Description</th>
             </tr>
           </thead>
-          <tbody id="buildDatabaseTable">
+          
+          <!-- <tbody >
 
-          </tbody>
+          </tbody> -->
         </table>
 
       </div>
@@ -1113,6 +1164,8 @@
       });
 
 
+      initializeBuildList();
+      $("#loadalert").hide();
       initializeStuff();
 
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
@@ -1129,7 +1182,6 @@
         setTimeout(function () { initializeStuff(); }, 200);
         return;
       }
-      initializeBuildList();
       initializeDamageCalculator();
       initializeAimCalculator();
       initializeShipBuilder();
