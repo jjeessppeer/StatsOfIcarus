@@ -13,6 +13,13 @@ function requestBuilds(start, end){
 
   // let [start, end] = $("#requestBuildText").val().split(",");
   console.log([start, end])
+
+  let name_filter = $("#buildFilterName").val();
+  let ship_filter = $("#buildFilterShip").val();
+  let pve_filter = $("#buildFilterPvE").val();
+  let submitter_filter = $("#buildFilterAuthor").val();
+
+
   httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
@@ -38,12 +45,11 @@ function submitBuild(){
   // $(this).addClass("btn-secondary");
   // $(this).prepend('<i class="fa fa-spinner fa-spin"></i>');
   // $("#buildSubmitButton").attr("disabled", true);
-  let name = $("#shipBuildName").val();
+  
   let build_code = shipBuilderGetExportCode(false);
-  console.log(build_code);
   let description = $("#buildDescriptionArea").val();
 
-  httpxPostRequest("http://79.136.70.98:3231/submit_build", [name, build_code, description], function(){
+  httpxPostRequest("http://79.136.70.98:3231/submit_build", [build_code, description], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
   });
