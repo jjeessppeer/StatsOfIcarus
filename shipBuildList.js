@@ -3,12 +3,15 @@
 
 
 function initializeBuildList(){
-    $("#buildSubmitButton").on("click", submitBuild)
+    $("#buildSubmitButton").on("click", submitBuild);
+    $("#buildFilterSubmit").on("click", getNBuilds);
     getNBuilds();
     // requestBuilds(0, 10);
 }
 
-function requestBuilds(start, end){
+function requestBuilds(start=1, end=100){
+  // $("#buildDatabaseTable").remove(".ship-build-table-item");
+  $(".ship-build-table-item").remove();
   console.log("Requesting build");
 
   // let [start, end] = $("#requestBuildText").val().split(",");
@@ -20,7 +23,7 @@ function requestBuilds(start, end){
   let submitter_filter = $("#buildFilterAuthor").val();
 
 
-  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end], function(){
+  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
     if (this.readyState == 4 && this.status == 200){
