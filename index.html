@@ -287,6 +287,21 @@
               </select>
             </div>
           </div>
+
+          <div class="my-col">
+            <div class="input-group" style="width:250px">
+              <div class="input-group-prepend small">
+                <div class="input-group-text">Sorting</div>
+              </div>
+              <select class="form-control" id="buildFilterOrder" autocomplete="off">
+                <option selected>Votes (Desc.)</option>
+                <option>Votes (Asc.)</option>
+                <option>Date (new)</option>
+                <option>Date (old)</option>
+                <option>Alphabetical</option>
+              </select>
+            </div>
+          </div>
           
           <div class="my-col">
             <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter</button>
@@ -303,12 +318,9 @@
               <th scope="col" style="width:130px">Name</th>
               <th scope="col" colspan="2" style="width:200px">Ship info</th>
               <th scope="col">Description</th>
+              <th scope="col" style="width:80px">Options</th>
             </tr>
-          </thead>
-          
-          <tbody >
-
-          </tbody>
+          </thead>  
         </table>
 
       </div>

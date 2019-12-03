@@ -9,6 +9,17 @@ function initializeBuildList(){
     // requestBuilds(0, 10);
 }
 
+
+function requestBuildRemoval(build_id){
+  console.log("Delete build: ", build_id);
+  httpxPostRequest("http://79.136.70.98:3231/remove_build", [build_id], function(){
+    console.log("WAWAWA", this.status)
+    if (this.readyState == 4 && this.status == 200){
+      getNBuilds();
+    }
+  });
+}
+
 function requestBuilds(start=1, end=100){
   // $("#buildDatabaseTable").remove(".ship-build-table-item");
   $(".ship-build-table-item").remove();
@@ -22,7 +33,9 @@ function requestBuilds(start=1, end=100){
   let pve_filter = $("#buildFilterPvE").val();
   let submitter_filter = $("#buildFilterAuthor").val();
 
-
+  // http://79.136.70.98:3231/request_build
+  // http://localhost:3231/request_build
+  // http://192.168.1.1:3231/request_build
   httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     console.log(this.response);
@@ -35,7 +48,8 @@ function requestBuilds(start=1, end=100){
         let description = sanitizeHtml(json[i].description);
         let build_code = sanitizeHtml(json[i].build_code);
         let voted = sanitizeHtml(json[i].voted) == "true";
-        addToBuildTable(build_id, upvotes, 0, description, build_code, voted);
+        let mine = sanitizeHtml(json[i].mine) == "true";
+        addToBuildTable(build_id, upvotes, 0, description, build_code, voted, mine);
       }
     }
   });
@@ -97,7 +111,7 @@ function toggleUpvote(){
 }
 
 
-function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=false){
+function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=false, mine=false){
   console.log("adding to table");
   let build_data = parseBuildCode(build_code);
   // console.log(build_data)
@@ -111,6 +125,9 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=
       <td rowspan="2"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
       <td colspan="2">`+build_data.ship+`</td>
       <td rowspan="2">`+description+`</td>
+      <td rowspan="2" style="border-left: 1px solid rgb(222, 226, 230);">
+        <button class="btn btn-danger" type="button">Delete</button>
+      </td>
     </tr>
     <tr>
       <td style="width:100px">1:&nbsp;`+build_data.guns[0]+`<br>2:&nbsp;`+build_data.guns[1]+`<br>3:&nbsp;`+build_data.guns[2]+`</td>
@@ -119,6 +136,14 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=
     </tbody>`);
   $("#buildDatabaseTable").append(table_obj);
   
+
+  let del_btn = table_obj.find(".btn");
+  if (!mine) del_btn.hide();
+  del_btn.on("click", function(){
+    let build_id = $(this).parent().parent().find(".upvote").data("id");
+    requestBuildRemoval(build_id);
+  })
+
   table_obj.find("a").on("click", function(){
     // console.log( $(this).attr('href'));
     openPageFromUrl.call(this);
