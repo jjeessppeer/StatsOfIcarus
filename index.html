@@ -113,7 +113,7 @@
     </nav>
     <div class="sticky">
       <div id="loadalert" class="alert alert-info" style="display:block;">
-        <strong>Loading datasets... </strong> Please wait.
+        <strong>Loading... </strong><span></span>
       </div>
     </div>
     <!-- Page Content  -->
@@ -271,8 +271,8 @@
                 <div class="input-group-text">PvE builds</div>
               </div>
               <select class="form-control" id="buildFilterPvE" autocomplete="off">
-                <option selected>Exclude</option>
-                <option>Include</option>
+                <option>Exclude</option>
+                <option selected>Include</option>
                 <option>Only</option>
               </select>
             </div>
@@ -1123,7 +1123,8 @@
 
 
   <script>
-    var loading_datasets = true;
+    var datasets_loaded = false;
+
     var match_dataset = null;
     var gun_dataset = null;
     var ammo_dataset = null;
@@ -1143,6 +1144,16 @@
       $("#sidebar a").on("click", openPageFromUrl)
 
       // Load datasets
+      loadDatasetsFromServer();
+
+      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
+
+
+    });
+
+    function loadDatasetsFromGoogleSheets(){
+      $("#loadalert span").text("Server timeout, loading from google instead");
+      console.log("Loading datasets from google.")
       loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
         dataset.sortDatasetContent("Date of match", Date.parse);
         match_dataset = dataset;
@@ -1174,36 +1185,101 @@
       loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
         ship_guns_dataset = dataset;
       });
+      datasetLoadCheck();
+    }
 
-
-      $("#loadalert").hide();
-      initializeStuff();
-
-      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
-
-
-    });
-
-    function initializeStuff() {
+    function datasetLoadCheck(){
       if (!(match_dataset && gun_dataset && ammo_dataset &&
-        damage_dataset && tool_dataset && component_dataset &&
-        ship_dataset && map_dataset && crosshair_dataset &&
-        ship_guns_dataset)) {
-        console.log("LOADING");
-        setTimeout(function () { initializeStuff(); }, 200);
-        return;
+          damage_dataset && tool_dataset && component_dataset &&
+          ship_dataset && map_dataset && crosshair_dataset &&
+          ship_guns_dataset)) {
+          setTimeout(datasetLoadCheck, 200);
+          return;
       }
+      console.log("Datasets loaded from google.");
+      datasetsLoaded();
+    }
+
+    function loadDatasetsFromServer(){
+      $("#loadalert span").text("Getting datasets");
+
+      // Load datasets from server. On timeout load from google.
+      httpxGetRequest("http://79.136.70.98:3231/get_datasets", function(){
+        if(datasets_loaded) return;
+        if (this.status == 200)
+        if (this.readyState == 4 && this.status == 200){
+          datasets_loaded = true;
+          console.log("Datasets loaded from server");
+          let datasets = JSON.parse(this.response);
+          console.log(datasets);
+
+          match_dataset = jsonToDataset(datasets.history, 
+              ["Timestamp","Date of match","Event",
+              "Team scores [Team 1 score]","Team scores [Team 2 score]",
+              "T1 Ship 1","T1 Ship 2","T2 Ship 1","T2 Ship 2",
+              "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot",
+              "VOD link (optional)","Map"]);
+          match_dataset.sortDatasetContent("Date of match", Date.parse);
+          
+          ammo_dataset = jsonToDataset(datasets.ammo_stats,
+              ["Name","Alias","Rotation speed","Jitter","Clip size",
+              "AOE radius","AOE damage","Damage","Arming time","Rate of fire",
+              "Projectile speed","Fire modifier","Fire damage","Lift","Direct damage",
+              "Range","Rotational arcs"]);
+          
+          gun_dataset = jsonToDataset(datasets.gun_stats,
+              ["Name","Alias","Mode","Weapon slot","Damage type primary",
+              "Damage primary","Damage type secondary","Damage secondary",
+              "Rate of fire","Reload time","Magazine size","Fire primary",
+              "Fire secondary","Projectile speed","Range","Shell drop","AOE radius",
+              "Buckshot","Arming time","Side angle","Up angle","Down angle"]);
+          
+          ship_dataset = jsonToDataset(datasets.ship_stats, 
+              ["Ship Type","Armor","Armor Rebuild Value","Hull Health",
+              "Light Weapons","Heavy Weapons","Longitudinal Speed, (m/s)",
+              "Longitudinal Acceleration, (m/s²)","Turn Speed, (deg/s)",
+              "Turn Acceleration,(deg/s²)","Vertical Speed, (m/s)",
+              "Vertical Acceleration, (m/s²)","Mass, (t)"]);
+
+          damage_dataset = jsonToDataset(datasets.damage_stats, 
+              ["Name", "Balloon", "Hull", "Armor", "Components"]);
+          
+          component_dataset = jsonToDataset(datasets.component_stats, 
+              ["Name", "HP"]);
+
+          tool_dataset = jsonToDataset(datasets.tool_stats, 
+              ["Name", "Repair", "Rebuild", "Extinguish", "Fire immunity", "Cooldown"]);
+
+          crosshair_dataset = jsonToDataset(datasets.crosshair_data, 
+              ["Name", "Deg per pixel", "Start y", "Start x", "End x", "Image"]);
+
+          ship_guns_dataset = jsonToDataset(datasets.ships_gun_angles, 
+              ["Ship","N guns",
+              "Angle 1","Angle 2","Angle 3","Angle 4","Angle 5","Angle 6",
+              "Position 1","Position 2","Position 3","Position 4","Position 5","Position 6",
+              "Slot 1","Slot 2","Slot 3","Slot 4","Slot 5","Slot 6"]);
+
+          map_dataset = jsonToDataset(datasets.map_data, 
+              ["Name", "Full name", "Game mode", 
+              "Map image", "Image src", "Spawn image src", "Map scale (m/px)"]);
+          
+          console.log("Datasets loaded from server.");
+          datasetsLoaded();
+        }
+      }, loadDatasetsFromGoogleSheets);
+    }
+
+    function datasetsLoaded() {
+      datasets_loaded = true;
+      $("#loadalert").slideUp();
       initializeDamageCalculator();
       initializeAimCalculator();
       initializeShipBuilder();
       initializeMatchStatistics();
       initializeSpawns();
       initializeMatchList();
-      loading_datasets = false;
-      $("#loadalert").slideUp(1000);
       initializeBuildList();
     }
-
 
     function openPageFromUrl() {
       window.location.hash = $(this).attr('href');
