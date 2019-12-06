@@ -116,6 +116,9 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=
   let build_data = parseBuildCode(build_code);
   // console.log(build_data)
   
+  let n_guns = parseInt(ship_guns_dataset.getCellByString(build_data.ship, "Ship", "N guns"));
+  console.log("NGUNS: ", n_guns);
+
   // <div class="downvote" data-id="`+id+`" style="display:none"><i class="fas fa-chevron-down"></i>-`+downvotes+`</div></td>
   let table_obj = $(`
     <tbody class="ship-build-table-item">
@@ -130,8 +133,16 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted=
       </td>
     </tr>
     <tr>
-      <td style="width:100px">1:&nbsp;`+build_data.guns[0]+`<br>2:&nbsp;`+build_data.guns[1]+`<br>3:&nbsp;`+build_data.guns[2]+`</td>
-      <td style="width:100px">4:&nbsp;`+build_data.guns[3]+`<br>5:&nbsp;`+build_data.guns[4]+`<br>6:&nbsp;`+build_data.guns[5]+`</td>
+      <td style="width:100px">
+        `+(n_guns>=1 ? "1:&nbsp;"+build_data.guns[0]+"<br>" : "")+`
+        `+(n_guns>=2 ? "2:&nbsp;"+build_data.guns[1]+"<br>" : "")+`
+        `+(n_guns>=3 ? "3:&nbsp;"+build_data.guns[2]+"<br>" : "")+`
+      </td>
+      <td style="width:100px">
+        `+(n_guns>=4 ? "4:&nbsp;"+build_data.guns[3]+"<br>" : "")+`
+        `+(n_guns>=5 ? "5:&nbsp;"+build_data.guns[4]+"<br>" : "")+`
+        `+(n_guns>=6 ? "6:&nbsp;"+build_data.guns[5]+"<br>" : "")+`
+      </td>
     </tr>
     </tbody>`);
   $("#buildDatabaseTable").append(table_obj);
