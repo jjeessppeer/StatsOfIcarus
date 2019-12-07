@@ -44,6 +44,10 @@
     <nav id="sidebar">
       <div class="sidebar-header">
         <h3>Guns of Icarus Info</h3>
+        <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+          <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
+        </div>
       </div>
       <div class="sidebar-header collapsed">
         <h3><i class="fas fa-atom"></i></h3>
@@ -1150,13 +1154,15 @@
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
-      DarkReader.enable({
-        brightness: 50,
-        contrast: 50
-        // sepia: 100
-      });
-      // DarkReader.disable();
+      
       $("#sidebar a").on("click", openPageFromUrl)
+      $("#darkModeSwitch").on("change", function() {
+        if (this.checked) {
+          DarkReader.enable({brightness: 100, contrast: 100});
+        }
+        DarkReader.disable();
+      });
+      $("#darkModeSwitch").trigger("change");
 
       // Load datasets
       loadDatasetsFromServer();
