@@ -4,9 +4,8 @@
 
 function initializeBuildList(){
     $("#buildSubmitButton").on("click", submitBuild);
-    $("#buildFilterSubmit").on("click", getNBuilds);
-    getNBuilds();
-    // requestBuilds(0, 10);
+    $("#buildFilterSubmit").on("click", () => (requestBuilds()));
+    requestBuilds();
 }
 
 
@@ -25,7 +24,7 @@ function requestBuildRemoval(build_id){
     });
 }
 
-function requestBuilds(start=1, end=100){
+function requestBuilds(start=1, end=8){
   // $("#buildDatabaseTable").remove(".ship-build-table-item");
   $(".ship-build-table-item").remove();
   console.log("Requesting build");
@@ -37,11 +36,12 @@ function requestBuilds(start=1, end=100){
   let ship_filter = $("#buildFilterShip").val();
   let pve_filter = $("#buildFilterPvE").val();
   let submitter_filter = $("#buildFilterAuthor").val();
+  let sorting = $("#buildFilterOrder").val();
 
   // http://79.136.70.98:3231/request_build
   // http://localhost:3231/request_build
   // http://192.168.1.1:3231/request_build
-  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter], function(){
+  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
     if (this.readyState == 4 && this.status == 200){
       let json = JSON.parse(this.response);
       console.log("Builds recieved")
@@ -77,6 +77,14 @@ function submitBuild(){
         let btn = $("#buildSubmitButton");
         btn.attr("disabled", false);
         btn.text("Submit to database");
+        $("#buildFilterPvE").val("Include");
+        $("#buildFilterAuthor").val("Me");
+        $("#buildFilterOrder").val("Date (new)");
+
+        $("[data-show='#buildDatabase'] > a").trigger("click");
+        window.location.hash = "buildDatabase";
+        requestBuilds();
+
       }
       else if (this.readyState == 4 && this.status == 400){
         let btn = $("#buildSubmitButton");
@@ -91,16 +99,15 @@ function submitBuild(){
     });
 }
 
-function getNBuilds(){
-  httpxGetRequest("http://79.136.70.98:3231/n_pages", function(){
-    console.log("Request status ", this.readyState, ", ", this.status);
-    if (this.readyState == 4 && this.status == 200){
-      console.log("NBUILDS: ", this.response);
-      requestBuilds(1, parseInt(this.response));
-      // requestBuilds(1, 3);
-    }
-  });
-}
+// function refreshBuilds(){
+//   httpxGetRequest("http://79.136.70.98:3231/n_pages", function(){
+//     console.log("Request status ", this.readyState, ", ", this.status);
+//     if (this.readyState == 4 && this.status == 200){
+//       console.log("NBUILDS: ", this.response);
+//       // requestBuilds(1, parseInt(this.response));
+//     }
+//   });
+// }
 
 function toggleUpvote(){
   let id = $(this).data("id");
@@ -144,14 +151,11 @@ function makeBuildPublic(build_id, make_public){
   });
 }
 
-
 function addToBuildTable(id, upvotes, downvotes, description, build_code, voted, mine, public){
   let build_data = parseBuildCode(build_code);
   // console.log(build_data)
   
   let n_guns = parseInt(ship_guns_dataset.getCellByString(build_data.ship, "Ship", "N guns"));
-
-  console.log("AAAAA: ", public)
   let table_obj = $(`
     <tbody class="ship-build-table-item" id="build-`+id+`">
     <tr>
@@ -161,8 +165,8 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted,
       <td colspan="2">`+build_data.ship+`</td>
       <td rowspan="2">`+description+`</td>
       <td rowspan="2" style="border-left: 1px solid rgb(222, 226, 230); margin:0; padding:0;">
-        <button class="btn btn-info tablebtn" type="button" style="display:`+(public ? "none" : "block")+`">Make&nbsppublic</button>
-        <button class="btn btn-secondary tablebtn" type="button" style="display:`+(!public ? "none" : "block")+`">Make&nbspprivate</button>
+        <button class="btn btn-info tablebtn" type="button" style="display:`+(public&&mine ? "none" : "block")+`">Make&nbsppublic</button>
+        <button class="btn btn-secondary tablebtn" type="button" style="display:`+(!public&&mine ? "none" : "block")+`">Make&nbspprivate</button>
         <button class="btn btn-danger tablebtn" type="button">Delete</button>
       </td>
     </tr>
@@ -205,7 +209,7 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted,
   table_obj.find("a").on("click", function(){
     // console.log( $(this).attr('href'));
     openPageFromUrl.call(this);
-    shipBuilderImport(null, getUrlParam(window.location.href));
+    shipBuilderImport(null, getUrlParam($(this).attr('href')));
     if (description!="") $("#buildDescriptionCol").show();
     else $("#buildDescriptionCol").hide();
     

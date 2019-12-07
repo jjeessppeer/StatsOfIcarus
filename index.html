@@ -16,6 +16,7 @@
   <script src="deps/bootstrap.min.js"></script>
   <script src="deps/lz-string.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+  <script src="https://unpkg.com/darkreader"></script>
 
   <script src="utils.js"></script>
   <script src="docsapi.js"></script>
@@ -289,7 +290,7 @@
           </div>
 
           <div class="my-col">
-            <div class="input-group" style="width:250px">
+            <div class="input-group" style="width:210px">
               <div class="input-group-prepend small">
                 <div class="input-group-text">Sorting</div>
               </div>
@@ -301,15 +302,24 @@
                 <option>Alphabetical</option>
               </select>
             </div>
+            <!-- <br> -->
+            <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter/list</button>
           </div>
           
-          <div class="my-col">
-            <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter</button>
-          </div>
+          <!-- <div class="my-col">
+          </div> -->
         </div>
         
-        
-
+        <br>
+        <nav aria-label="Page navigation example" style="margin:auto; width:50%;">
+          <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+          </ul>
+        </nav>
 
         <table class="table" style="max-width:1000px" id="buildDatabaseTable">
           <thead>
@@ -318,7 +328,7 @@
               <th scope="col" style="width:130px">Name</th>
               <th scope="col" colspan="2" style="width:200px">Ship info</th>
               <th scope="col">Description</th>
-              <th scope="col" style="width:80px">Options</th>
+              <th scope="col" style="width:85px">Options</th>
             </tr>
           </thead>  
         </table>
@@ -1140,13 +1150,19 @@
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
-
+      DarkReader.enable({
+        brightness: 50,
+        contrast: 50,
+        sepia: 50
+      });
+      // DarkReader.disable();
       $("#sidebar a").on("click", openPageFromUrl)
 
       // Load datasets
       loadDatasetsFromServer();
 
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
+      // $("[data-show='#" + "buildDatabase" + "'] > a").trigger("click");
 
 
     });
@@ -1282,10 +1298,10 @@
     }
 
     function openPageFromUrl() {
-      window.location.hash = $(this).attr('href');
+      let tab_href = $(this).attr('href').split("?")[0];
       $("#sidebar a").removeClass("active");
-      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").addClass("active");
-      var div = $("#" + window.location.hash.substr(1).split("?")[0]).show();
+      $("#sidebar [data-show='"+tab_href+"'] > a").addClass("active");
+      var div = $(tab_href).show();
       div.siblings("div").hide();
     }
 
