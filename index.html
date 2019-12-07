@@ -1157,10 +1157,10 @@
       
       $("#sidebar a").on("click", openPageFromUrl)
       $("#darkModeSwitch").on("change", function() {
-        if (this.checked) {
+        if (this.checked)
           DarkReader.enable({brightness: 100, contrast: 100});
-        }
-        DarkReader.disable();
+        else
+          DarkReader.disable();
       });
       $("#darkModeSwitch").trigger("change");
 
