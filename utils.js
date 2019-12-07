@@ -356,12 +356,13 @@ function sanitizeHtml(str){
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function httpxPostRequest(url, data, callback){
+function httpxPostRequest(url, data, callback, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.timeout = 3000;
     xhttp.open("POST", url);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onreadystatechange = callback;
+    xhttp.ontimeout = timeout_callback;
     xhttp.send(JSON.stringify(data));
 }
 
