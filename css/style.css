@@ -1,3 +1,23 @@
+.blink-div {
+    /* float: right; */
+    /* font-size: 10px; */
+    /* color: #666; */
+    /* background: white; */
+    /* padding-left: 10px; */
+    /* display: block; */
+    /* position: relative; */
+    /* width: 200px; */
+    /* height: 200px; */
+    /* background-color: red; */
+    animation: blinker 1.5s linear 3;
+}
+
+@keyframes blinker {
+    50% {
+        background-color: rgb(0, 255, 21);
+    }
+}
+
 /* .dot-loading:after {
     content: '.';
     animation: dots 3s steps(5, end) infinite;
@@ -45,6 +65,7 @@
     padding-left: 5px;
     padding-right: 5px;
     margin: 0;
+    margin-bottom: 2px;
     width: 100%;
 }
 

@@ -307,27 +307,20 @@
               </select>
             </div>
             <!-- <br> -->
-            <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter/list</button>
+            <!-- <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter/list</button> -->
           </div>
           
           <!-- <div class="my-col">
           </div> -->
         </div>
-        
         <br>
-        <nav aria-label="Page navigation example" style="margin:auto; width:50%;">
-          <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">Next</a></li>
-          </ul>
-        </nav>
+        
+        
 
         <table class="table" style="max-width:1000px" id="buildDatabaseTable">
           <thead>
             <tr>
+              <th scope="col" style="width:15px">#</th>
               <th scope="col" style="width:85px">Votes</th>
               <th scope="col" style="width:130px">Name</th>
               <th scope="col" colspan="2" style="width:200px">Ship info</th>
@@ -336,6 +329,15 @@
             </tr>
           </thead>  
         </table>
+        <nav style="margin:auto; width:50%;" id="buildPageNav">
+          <ul class="pagination">
+            <li class="page-item" id="buildPageNavPrev"><a class="page-link">Previous</a></li>
+            <li class="page-item" id="buildPageNavFirst"><a class="page-link">1</a></li>
+            <li class="page-item active" id="buildPageNavCurr"><a id="currentBuildPage" class="page-link">[current]</a></li>
+            <li class="page-item" id="buildPageNavLast"><a class="page-link">[last]</a></li>
+            <li class="page-item" id="buildPageNavNext"><a class="page-link">Next</a></li>
+          </ul>
+        </nav>
 
       </div>
 
@@ -1163,13 +1165,12 @@
           DarkReader.disable();
       });
       $("#darkModeSwitch").trigger("change");
-
+      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
+      
+      
+      httpxGetRequest("http://79.136.70.98:3231/ping");
       // Load datasets
       loadDatasetsFromServer();
-
-      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
-      // $("[data-show='#" + "buildDatabase" + "'] > a").trigger("click");
-
 
     });
 
@@ -1233,7 +1234,7 @@
           datasets_loaded = true;
           console.log("Datasets loaded from server");
           let datasets = JSON.parse(this.response);
-          console.log(datasets);
+          // console.log(datasets);
 
           match_dataset = jsonToDataset(datasets.history, 
               ["Timestamp","Date of match","Event",

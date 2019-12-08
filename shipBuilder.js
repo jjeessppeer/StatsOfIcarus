@@ -191,12 +191,17 @@ function initializeShipBuilder(){
 
   // $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "']").trigger("click");
   if (window.location.hash.substr(1).split("?")[0] == "shipBuilder" && getUrlParam(window.location.href)){
-    shipBuilderImport(null, getUrlParam(window.location.href));
+    let url_parameters = getUrlParameterList();
+    if (url_parameters.build_code)
+      shipBuilderImport(null, url_parameters.build_code);
+    else if (url_parameters.id){
+      shipBuilderImportFromDatabase(url_parameters.id);
+    }
   }
 }
 
 function shipBuilderUpdateUrl(){
-  setUrlParam(shipBuilderGetExportCode());
+  setUrlParam("build_code="+shipBuilderGetExportCode());
 }
 
 
@@ -252,17 +257,35 @@ function parseBuildCode(build_code){
   return build_data;
 }
 
-function shipBuilderImport(e, build_code){
+function shipBuilderImportFromDatabase(build_id){
+  console.log("Requesting single build ", build_id);
+  httpxPostRequest("http://79.136.70.98:3231/request_single_build", [build_id], function(){
+    if (this.readyState == 4 && this.status == 200){
+      let response = JSON.parse(this.response);
+      let build_code = sanitizeHtml(response[0]);
+      let description = sanitizeHtml(response[1]);
+      let build_data = parseBuildCode(build_code);
+      build_data.description = description;
+      shipBuilderImport(null, build_data, false);
+    }
+  });
+}
+
+function shipBuilderImport(e, build_code, encoded=true){
   if (!build_code)
     build_code = $("#shipBuildImportText").val();
   // build_code = atob(build_code);
-  let build_data = parseBuildCode(build_code);
+  let build_data;
+  if (encoded)
+    build_data = parseBuildCode(build_code);
+  else
+    build_data = build_code
 
   ship_builder_ship = build_data.ship;
   $("#shipBuildShipSelection").val(ship_builder_ship);
-  shipBuilderReloadShip();
-
   $("#shipBuilderPvECheck").prop('checked', build_data.pve);
+  
+  shipBuilderReloadShip();
 
   ship_builder_guns = build_data.guns;
   for (let i=0; i < ship_builder_guns.length; i++){
@@ -486,7 +509,6 @@ function shipBuilderReloadShip(){
 
   $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
 
-
   ship_builder_guns.fill("None");
   
   let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
@@ -635,8 +657,28 @@ function updateRangeVis(){
       setTimeout(function(){ updateRangeVis(); }, 1000);
       return;
     }
-    //TODO burst arc change
 
+
+    // // Range canvas
+    // let canvas = document.getElementById("rangeCanvas");
+    // let ctx = canvas.getContext("2d");
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // let [bw, bh] = [100, 100];
+    // for (var x = 0; x <= bw; x += 40) {
+    //   ctx.moveTo(0.5 + x + p, p);
+    //   ctx.lineTo(0.5 + x + p, bh + p);
+    // }
+
+    // for (var x = 0; x <= bh; x += 40) {
+    //   ctx.moveTo(p, 0.5 + x + p);
+    //   ctx.lineTo(bw + p, 0.5 + x + p);
+    // }
+    // ctx.strokeStyle = "black";
+    // ctx.stroke();
+
+
+    // return;
     // Map canvas
     let rangeCanvas = document.getElementById("rangeCanvas");
     let ctx = rangeCanvas.getContext("2d");

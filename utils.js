@@ -28,12 +28,36 @@ function getUrlParam(url){
     return false;
 }
 
+function getUrlParameterList(url){
+    if (!url) url = window.location.hash;
+    url = url.split("?");
+    if (url.length <= 1) return false;
+    let result = {};
+    url[1].split("&").forEach((part) => {
+        let item = part.split("=");
+        result[item[0]] = item[1]
+    });
+    return result;
+
+}
+
 function degToRad(deg){
     return deg * Math.PI / 180;
 }
 
 function radToDeg(rad){
     return rad / Math.PI * 180;
+}
+
+function copyToClipboard(str){
+   let el = document.createElement('textarea');
+   el.value = str;
+   el.setAttribute('readonly', '');
+   el.style = {position: 'absolute', left: '-9999px'};
+   document.body.appendChild(el);
+   el.select();
+   document.execCommand('copy');
+   document.body.removeChild(el);
 }
 
 // function en(c){var x='charCodeAt',b,e={},f=c.split(""),d=[],a=f[0],g=256;for(b=1;b<f.length;b++)c=f[b],null!=e[a+c]?a+=c:(d.push(1<a.length?e[a]:a[x](0)),e[a+c]=g,g++,a=c);d.push(1<a.length?e[a]:a[x](0));for(b=0;b<d.length;b++)d[b]=String.fromCharCode(d[b]);return d.join("")}
@@ -356,7 +380,7 @@ function sanitizeHtml(str){
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function httpxPostRequest(url, data, callback, timeout_callback=null){
+function httpxPostRequest(url, data, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.timeout = 3000;
     xhttp.open("POST", url);
@@ -366,7 +390,7 @@ function httpxPostRequest(url, data, callback, timeout_callback=null){
     xhttp.send(JSON.stringify(data));
 }
 
-function httpxGetRequest(url, callback, timeout_callback=null){
+function httpxGetRequest(url, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.open("GET", url);
     xhttp.timeout = 5000;
