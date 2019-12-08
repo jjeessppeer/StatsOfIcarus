@@ -3,6 +3,8 @@
 var ship_builder_guns = ["None", "None", "None", "None", "None", "None"];
 var ship_builder_ship = "Mobula";
 
+var gun_colors = ["#e6194B", "#f58231", "#3cb44b", "#4363d8", "#911eb4", "#808000"];
+
 
 var build_last_pos_x = undefined;
 var build_last_pos_y = undefined;
@@ -659,169 +661,167 @@ function updateRangeVis(){
     }
 
 
-    // // Range canvas
-    // let canvas = document.getElementById("rangeCanvas");
-    // let ctx = canvas.getContext("2d");
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Range canvas
+    let canvas = document.getElementById("rangeCanvas");
+    let ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // let [bw, bh] = [100, 100];
-    // for (var x = 0; x <= bw; x += 40) {
-    //   ctx.moveTo(0.5 + x + p, p);
-    //   ctx.lineTo(0.5 + x + p, bh + p);
-    // }
-
-    // for (var x = 0; x <= bh; x += 40) {
-    //   ctx.moveTo(p, 0.5 + x + p);
-    //   ctx.lineTo(bw + p, 0.5 + x + p);
-    // }
-    // ctx.strokeStyle = "black";
-    // ctx.stroke();
-
-
-    // return;
-    // Map canvas
-    let rangeCanvas = document.getElementById("rangeCanvas");
-    let ctx = rangeCanvas.getContext("2d");
-    ctx.clearRect(0, 0, rangeCanvas.width, rangeCanvas.height);
-    
-    // TODO wrong image
-    let map_image = document.querySelector("#mapImage");
-    let map_scale = parseFloat(map_dataset.getCellByString("Dunes", "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth));
+    var pad_left = 250.5;
+    var pad_top = 80.5;
+    let [bw, bh] = [500, 500]//[canvas.width-pad_left-pad_right, canvas.height-pad_bot-pad_top];
 
     let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
     let n_guns = parseInt(ship_data[1]);
 
-    let cx = rangeCanvas.width/2;
-    let cy = rangeCanvas.height/2 + 500/map_scale;
+    // Find longest range in different directions
+    let front_range = 500;
+    let back_range = 500;
+    let side_range = 500;
 
-    for (let i=0; i < ship_builder_guns.length; i++){
+    for (let i=0; i < n_guns; i++){
+        let gun_type = ship_builder_guns[i];
+        if (gun_type == "None") continue;
+        let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
+        let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
+        let range = gun_numbers.info.range;
+        let side_angle = degToRad(gun_numbers.info.angle);
+        let initial_angle = degToRad(parseFloat(ship_data[2+i]));
+
+
+        let diff_front = angleDifference(initial_angle, 0);
+        let diff_back = angleDifference(initial_angle, Math.PI);
+        let diff_side = Math.min(angleDifference(initial_angle, Math.PI/2), angleDifference(initial_angle, -Math.PI/2));
+
+        if (diff_front < side_angle) front_range = Math.max(front_range, range);
+        else{
+          let angle_diff = Math.min(angleDifference(initial_angle-side_angle, 0), angleDifference(initial_angle+side_angle, 0))
+          front_range = Math.max(Math.cos(angle_diff)*range, front_range);
+        }
+        if (diff_back < side_angle) back_range = Math.max(back_range, range);
+        else{
+          let angle_diff = Math.min(angleDifference(initial_angle-side_angle, Math.PI), angleDifference(initial_angle+side_angle, Math.PI))
+          back_range = Math.max(Math.cos(angle_diff)*range, back_range);
+        }
+        if (diff_side < side_angle) side_range = Math.max(side_range, range);
+        else{
+          let angle_diff = Math.min(angleDifference(initial_angle-side_angle, Math.PI/2), angleDifference(initial_angle+side_angle, -Math.PI/2))
+          side_range = Math.max(Math.cos(angle_diff)*range, side_range);
+        }
+    }
+
+    front_range = Math.ceil(front_range/500)*500;
+    back_range = Math.ceil(back_range/500)*500;
+    side_range = Math.ceil(side_range/500)*500;
+    let added_front = false;
+    while(front_range+back_range < side_range*2){
+      if (added_front) front_range += 500;
+      else back_range += 500;
+      added_front = !added_front;
+    }
+    if ((front_range+back_range)%1000 != 0) front_range+=500;
+
+    let scale = bh / (front_range + back_range);
+    let size = front_range+back_range;
+
+
+    // Draw background graph
+    ctx.fillStyle = "#000000";
+    ctx.beginPath();
+    ctx.font = "15px Arial"; 
+    ctx.textAlign = "center";
+    for (var x = 0; x <= size; x += 500) {
+      ctx.moveTo(x*scale + pad_left, pad_top);
+      ctx.lineTo(x*scale + pad_left, bh + pad_top);
+      ctx.fillText(precise(x-size/2, 2), x*scale + pad_left, bh + pad_top + 16); 
+    }
+
+    ctx.textAlign = "end";
+    for (var x = 0; x <= size; x += 500) {
+      ctx.moveTo(pad_left, x*scale + pad_top);
+      ctx.lineTo(bw + pad_left, x*scale + pad_top);
+      console.log((front_range+back_range)/front_range);
+      ctx.fillText(precise(size-x-size*(back_range/(front_range+back_range)), 2), pad_left - 2, x*scale + pad_top + 5); 
+    }
+    ctx.setLineDash([1, 4]);
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+
+    // Draw box around
+    ctx.strokeStyle = "#000000";
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.rect(pad_left, pad_top, bw, bh);
+    ctx.stroke();
+
+    // Draw title
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px Arial"; 
+    ctx.textAlign = "center"; 
+    ctx.fillText(ship_builder_ship, canvas.width/2, 20); 
+    // ctx.fillText(ship_builder_ship, canvas.width/2, 20);
+
+    // Draw gun descriptions
+    let gun_descriptions = [];
+    for (let i=0; i < n_guns; i++){
+      if (ship_builder_guns[i] == "None") continue;
+      let gun_type = ship_builder_guns[i];
+      let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
+      gun_descriptions.push(gun_type+"("+ammo_type+")");
+    }
+    ctx.textAlign = "left";
+    let text_width_1 = ctx.measureText(gun_descriptions.slice(0, 3).join(" ")).width;
+    let text_width_2 = ctx.measureText(gun_descriptions.slice(3, 6).join(" ")).width;
+    let left_x_1 = canvas.width/2 - text_width_1/2;
+    let left_x_2 = canvas.width/2 - text_width_2/2;
+    
+    for (let i=0; i < gun_descriptions.length; i++){
+      ctx.fillStyle = gun_colors[i];
+      if (i>=3){
+        ctx.fillText(gun_descriptions[i], left_x_2, 62);
+        left_x_2 += ctx.measureText(gun_descriptions[i]+" ").width;
+      }
+      else {
+        ctx.fillText(gun_descriptions[i], left_x_1, 40);
+        left_x_1 += ctx.measureText(gun_descriptions[i]+" ").width;
+      }
+    }
+
+
+    // Draw gun arcs
+    let cx = pad_left + scale*size/2;
+    let cy = pad_top + scale*(size-size*(back_range/(front_range+back_range)));
+
+    for (let i=0; i < n_guns; i++){
       let gun_type = ship_builder_guns[i];
       if (gun_type == "None") continue;
-
       let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
       let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
-      
-      // let ammo_type = "Normal";
-
-      // let proj_speed_mod = parseFloat(ammo_dataset.getCellByString(ammo_type, "Alias", "Projectile speed"));
-      // let proj_speed = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Projectile speed")) * proj_speed_mod;
-
-      // let range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Range")) * proj_speed_mod;
-      // let arming_range = parseFloat(gun_dataset.getCellByString(gun_type, "Alias", "Arming time")) * proj_speed;
-
       let range = gun_numbers.info.range;
-      let arming_range = gun_numbers.info["arming distance"];
-
-      let range_px = range/map_scale;
-      let arming_range_px = arming_range/map_scale;
-      let side_angle = gun_numbers.info.angle;
-      
+      let side_angle = degToRad(gun_numbers.info.angle);
       let initial_angle = -Math.PI/2 + degToRad(parseFloat(ship_data[2+i]));
 
-      let offscreen = document.querySelector("#rangeCanvasOffscreen");
-      let off_ctx = offscreen.getContext('2d');
-      off_ctx.clearRect(0, 0, offscreen.width, offscreen.height);
+      // let [gx, gy] = pointStringToInts(ship_data[8+i])
+      // gx = cx + gx*scale;
+      // gy = cy + gy*scale;
+      let [gx, gy] = [cx, cy];
 
-      off_ctx.fillStyle = "rgb(128, 128, 128)";
-      // off_ctx.fillStyle = "rgb(30, 255, 100)";
-      off_ctx.globalAlpha = 1;
+      ctx.strokeStyle = gun_colors[i];
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(gx,gy);
+      ctx.arc(gx, gy, range*scale, initial_angle-side_angle, initial_angle+side_angle);
+      ctx.lineTo(gx,gy);
+      ctx.stroke();
 
-      //Draw arc
-      off_ctx.beginPath();
-      off_ctx.globalCompositeOperation = "source-over";
-      off_ctx.moveTo(cx,cy);
-      off_ctx.arc(cx, cy, range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
-      off_ctx.lineTo(cx,cy);
-      off_ctx.fill();
+      ctx.setLineDash([10, 4, 1, 4]);
+      ctx.beginPath();
+      ctx.moveTo(gx,gy);
+      ctx.lineTo(gx+range*scale*Math.cos(initial_angle),gy+range*scale*Math.sin(initial_angle));
+      ctx.stroke();
 
-      //Draw arc
-      off_ctx.globalAlpha = 1;
-      off_ctx.beginPath();
-      off_ctx.globalCompositeOperation = "destination-out";
-      off_ctx.moveTo(cx,cy);
-      off_ctx.arc(cx, cy, arming_range_px, -Math.PI / 180.0 * side_angle + initial_angle, Math.PI / 180.0 * side_angle + initial_angle);
-      off_ctx.lineTo(cx,cy);
-      off_ctx.fill();
-
-      let image_data_off = off_ctx.getImageData(0, 0, 400, 400);
-      for (j=0; j<image_data_off.data.length; j+=4){
-        if (image_data_off.data[j+3] != 255){
-          image_data_off.data[j+0] = 0;
-          image_data_off.data[j+1] = 0;
-          image_data_off.data[j+2] = 0;
-          image_data_off.data[j+3] = 0;
-        } 
-      }
-      off_ctx.putImageData(image_data_off, 0, 0);
-      ctx.globalCompositeOperation = "multiply";
-      ctx.drawImage(offscreen, 0, 0);
     }
-
-    let image_data = ctx.getImageData(0, 0, rangeCanvas.width, rangeCanvas.height);
-
-    for (i=0; i<image_data.data.length; i+=4){
-      let color_val = image_data.data[i];
-      if (color_val == 128) {
-        image_data.data[i] = 0;
-        image_data.data[i+1] = 100;
-        image_data.data[i+2] = 255;
-      }
-      else if (color_val == 64){
-        image_data.data[i] = 0;
-        image_data.data[i+1] = 255;
-        image_data.data[i+2] = 255;
-
-      }
-      else if (color_val == 32){
-        image_data.data[i] = 200;
-        image_data.data[i+1] = 255;
-        image_data.data[i+2] = 50;
-
-      }
-      else if (color_val == 16){
-        image_data.data[i] = 255;
-        image_data.data[i+1] = 100;
-        image_data.data[i+2] = 0;
-
-      }
-      else if (color_val == 8){
-        image_data.data[i] = 200;
-        image_data.data[i+1] = 0;
-        image_data.data[i+2] = 0;
-
-      }
-      else if (color_val == 4){
-        image_data.data[i] = 0;
-        image_data.data[i+1] = 0;
-        image_data.data[i+2] = 0;
-
-      }
-      else{
-        image_data.data[i] = 0;
-        image_data.data[i+1] = 0;
-        image_data.data[i+2] = 0;
-      }
-      if (color_val != 0){
-        image_data.data[i+3] = 200
-      }
-    }
-    ctx.putImageData(image_data, 0, 0);
-
-    // Draw ship image
-    // ctx.globalCompositeOperation = "source-over";
-    // let image = document.getElementById("shipBuilderImage");
-    // let ship_w = 400 * 0.128 / map_scale;
-    // let ship_h = 427 * 0.128 / map_scale;
-    // ctx.drawImage(image, cx - ship_w/2, cy - ship_h/2, ship_w, ship_h);
     
-    
-    // Draw position
-    // ctx.fillStyle = "blue";
-    // ctx.globalAlpha = 1;
-    // ctx.beginPath();      
-    // ctx.arc(cx, cy, 10, 0, 2*Math.PI);
-    // ctx.fill();
-    // ctx.stroke();
+
 
     
     

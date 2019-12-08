@@ -225,6 +225,18 @@ function getDamageMod(damageType, target){
 }
 
 
+function angleDifference(angle1, angle2){
+    angle1 %= Math.PI*2;
+    angle2 %= Math.PI*2;
+    if (angle1 < 0) angle1 += 2*Math.PI;
+    if (angle2 < 0) angle2 += 2*Math.PI;
+
+    let diff = Math.abs(angle1 - angle2);
+    if (diff > Math.PI) return 2*Math.PI - diff;
+    return diff;
+}
+
+
 // Projectile arcs
 
 
