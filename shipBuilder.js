@@ -704,19 +704,20 @@ function updateRangeVis(){
         }
         if (diff_side < side_angle) side_range = Math.max(side_range, range);
         else{
-          let angle_diff = Math.min(angleDifference(initial_angle-side_angle, Math.PI/2), angleDifference(initial_angle+side_angle, -Math.PI/2))
-          side_range = Math.max(Math.cos(angle_diff)*range, side_range);
+          let angle_diff = Math.min(angleDifference(initial_angle+side_angle, Math.PI/2), angleDifference(initial_angle-side_angle, -Math.PI/2));
+          side_range = Math.max(Math.abs(Math.cos(angle_diff)*range), side_range);
         }
     }
 
     front_range = Math.ceil(front_range/500)*500;
     back_range = Math.ceil(back_range/500)*500;
     side_range = Math.ceil(side_range/500)*500;
-    let added_front = false;
+    // let added_front = false;
     while(front_range+back_range < side_range*2){
-      if (added_front) front_range += 500;
-      else back_range += 500;
-      added_front = !added_front;
+      front_range += 500;
+      // if (added_front) front_range += 500;
+      // else back_range += 500;
+      // added_front = !added_front;
     }
     if ((front_range+back_range)%1000 != 0) front_range+=500;
 
@@ -739,7 +740,6 @@ function updateRangeVis(){
     for (var x = 0; x <= size; x += 500) {
       ctx.moveTo(pad_left, x*scale + pad_top);
       ctx.lineTo(bw + pad_left, x*scale + pad_top);
-      console.log((front_range+back_range)/front_range);
       ctx.fillText(precise(size-x-size*(back_range/(front_range+back_range)), 2), pad_left - 2, x*scale + pad_top + 5); 
     }
     ctx.setLineDash([1, 4]);
