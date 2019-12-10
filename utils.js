@@ -407,7 +407,7 @@ function httpxGetRequest(url, callback=null, timeout_callback=null){
     xhttp.open("GET", url);
     xhttp.timeout = 5000;
     // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhttp.onreadystatechange = callback;
+    xhttp.onload = callback;
     xhttp.ontimeout = timeout_callback;
     // xhttp.send(JSON.stringify(data));
     xhttp.send();

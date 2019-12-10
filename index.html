@@ -48,6 +48,12 @@
           <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
         </div>
+        <div>
+          Server status
+          <i id="connectingIcon" class="fas fa-minus-square" style="color:yellow;"></i>
+          <i id="connectedIcon" class="fas fa-check-square" style="color:green;display:none;"></i>
+          <i id="noconnectionIcon" class="fas fa-times-circle" style="color:red;display:none;"></i>
+        </div>
       </div>
       <div class="sidebar-header collapsed">
         <h3><i class="fas fa-atom"></i></h3>
@@ -1158,18 +1164,32 @@
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
       
-      $("#sidebar a").on("click", openPageFromUrl)
-      $("#darkModeSwitch").on("change", function() {
-        if (this.checked)
+      $("#sidebar a").on("click", openPageFromUrl);
+      let dark_mode_switch = $("#darkModeSwitch");
+      dark_mode_switch.on("change", function() {
+        if (this.checked){
           DarkReader.enable({brightness: 100, contrast: 100});
-        else
+          document.cookie = "dark_mode=true;";
+        }
+        else{
           DarkReader.disable();
+          document.cookie = "dark_mode=false;";
+        }
       });
-      $("#darkModeSwitch").trigger("change");
+      dark_mode_switch.prop("checked", true);
+      dark_mode_switch.trigger("change");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
       
       
-      httpxGetRequest("http://79.136.70.98:3231/ping");
+      httpxGetRequest("http://79.136.70.98:3231/ping",
+        () => {
+          $("#connectingIcon").hide();
+          $("#connectedIcon").show();
+        },
+        () => {
+          $("#connectingIcon").hide();
+          $("#noconnectionIcon").show();
+        });
       // Load datasets
       loadDatasetsFromServer();
 
@@ -1235,7 +1255,8 @@
           datasets_loaded = true;
           console.log("Datasets loaded from server");
           let datasets = JSON.parse(this.response);
-          // console.log(datasets);
+          // console.log(this.response);
+          console.log(datasets);
 
           match_dataset = jsonToDataset(datasets.history, 
               ["Timestamp","Date of match","Event",
