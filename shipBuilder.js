@@ -659,7 +659,7 @@ function updateRangeVis(){
     let canvas = document.getElementById("rangeCanvas");
     let ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     let dark_mode = $("#darkModeSwitch")[0].checked;
 
     var pad_left = 250.5;
@@ -744,7 +744,6 @@ function updateRangeVis(){
       ctx.fillText(precise(size-x-size*(back_range/(front_range+back_range)), 2), pad_left - 2, x*scale + pad_top + 5); 
     }
     ctx.setLineDash([1, 4]);
-    ctx.strokeStyle = "black";
     ctx.stroke();
 
     // Draw box around
