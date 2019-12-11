@@ -659,6 +659,7 @@ function updateRangeVis(){
     let canvas = document.getElementById("rangeCanvas");
     let ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let dark_mode = $("#darkModeSwitch")[0].checked;
 
     var pad_left = 250.5;
     var pad_top = 80.5;
@@ -672,6 +673,8 @@ function updateRangeVis(){
     let back_range = 500;
     let side_range = 500;
 
+    ctx.fillStyle = "#000000";
+    if (dark_mode) ctx.fillStyle = "#ffffff";;
     for (let i=0; i < n_guns; i++){
         let gun_type = ship_builder_guns[i];
         if (gun_type == "None") continue;
@@ -718,7 +721,6 @@ function updateRangeVis(){
     let scale = bh / (front_range + back_range);
     let size = front_range+back_range;
 
-    let dark_mode = $("#darkModeSwitch")[0].checked;
     // Draw background graph
     ctx.fillStyle = "#000000";
     if (dark_mode) ctx.fillStyle = "#ffffff";;
