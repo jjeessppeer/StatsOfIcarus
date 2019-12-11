@@ -9,7 +9,11 @@ function initializeBuildList(){
 
     
     $("#buildFilterShip,#buildFilterPvE,#buildFilterAuthor,#buildFilterOrder").on("change", () => requestBuilds());
-    $("#buildFilterName").on("input", () => requestBuilds());
+    // $("#buildFilterName").on("input", () => requestBuilds());
+    $("#buildFilterName").on("keydown", (ev) => {
+      if (ev.keyCode != 13) return;
+      requestBuilds()
+    });
 
     $("#buildPageNavPrev").on("click", () => {
       current_build_page-=1;
