@@ -600,15 +600,6 @@ function updateShipBuildImage(){
     ctx.textAlign = "center"; 
     ctx.fillText(i+1, cx, cy+8);
 
-    // //Draw arc
-    // ctx.fillStyle = "rgb(30, 50, 30)";
-    // ctx.beginPath();
-    // ctx.globalAlpha = 0.3;
-    // ctx.moveTo(cx,cy);
-    // ctx.arc(cx, cy, range/0.128, left_angle, right_angle);
-    // ctx.lineTo(cx,cy);
-    // ctx.fill();
-
     let offscreen = document.querySelector("#shipBuilderCanvasOffscreen");
     let off_ctx = offscreen.getContext('2d');
     // off_ctx.clearRect(0, 0, offscreen.width, offscreen.height);
@@ -623,7 +614,8 @@ function updateShipBuildImage(){
 
 
     //Draw arc
-    off_ctx.fillStyle = "rgb(30, 50, 30)";
+    off_ctx.fillStyle = "rgb(50, 50, 50)";
+    if ($("#darkModeSwitch")[0].checked) off_ctx.fillStyle = "rgb(200, 200, 200)";
     off_ctx.globalAlpha = 0.3;
     off_ctx.globalCompositeOperation = "source-over";
 
@@ -646,10 +638,12 @@ function updateShipBuildImage(){
     off_ctx.lineTo(cx2, cy2);
     off_ctx.fill();
 
+    ctx.globalCompositeOperation = "lighter";
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.drawImage(offscreen, 0, 0);
     ctx.restore();
+    ctx.globalCompositeOperation = "source-over";
   }
 }
 

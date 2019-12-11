@@ -1177,6 +1177,7 @@
           DarkReader.disable();
           document.cookie = "dark_mode=false;";
         }
+        updateShipBuildImage();
       });
       dark_mode_switch.prop("checked", false);
       dark_mode_switch.trigger("change");
