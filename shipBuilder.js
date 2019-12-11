@@ -718,9 +718,10 @@ function updateRangeVis(){
     let scale = bh / (front_range + back_range);
     let size = front_range+back_range;
 
-
+    let dark_mode = $("#darkModeSwitch")[0].checked;
     // Draw background graph
     ctx.fillStyle = "#000000";
+    if (dark_mode) ctx.fillStyle = "#ffffff";;
     ctx.beginPath();
     ctx.font = "15px Arial"; 
     ctx.textAlign = "center";
@@ -742,6 +743,7 @@ function updateRangeVis(){
 
     // Draw box around
     ctx.strokeStyle = "#000000";
+    if (dark_mode) ctx.strokeStyle = "#ffffff";;
     ctx.setLineDash([]);
     ctx.beginPath();
     ctx.rect(pad_left, pad_top, bw, bh);
@@ -749,6 +751,7 @@ function updateRangeVis(){
 
     // Draw title
     ctx.fillStyle = "#000000";
+    if (dark_mode) ctx.fillStyle = "#ffffff";;
     ctx.font = "20px Arial"; 
     ctx.textAlign = "center"; 
     ctx.fillText(ship_builder_ship, canvas.width/2, 20); 

@@ -1180,6 +1180,7 @@
           document.cookie = "dark_mode=false";
         }
         updateShipBuildImage();
+        updateRangeVis();
       });
       // console.log("COOKIE: ", getCookie("dark_mode")=="true")
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
