@@ -659,6 +659,7 @@ function updateRangeVis(){
     let canvas = document.getElementById("rangeCanvas");
     let ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     let dark_mode = $("#darkModeSwitch")[0].checked;
 
     var pad_left = 250.5;
@@ -673,8 +674,7 @@ function updateRangeVis(){
     let back_range = 500;
     let side_range = 500;
 
-    ctx.fillStyle = "#000000";
-    if (dark_mode) ctx.fillStyle = "#ffffff";;
+    
     for (let i=0; i < n_guns; i++){
         let gun_type = ship_builder_guns[i];
         if (gun_type == "None") continue;
@@ -723,7 +723,11 @@ function updateRangeVis(){
 
     // Draw background graph
     ctx.fillStyle = "#000000";
-    if (dark_mode) ctx.fillStyle = "#ffffff";;
+    ctx.strokeStyle = "#000000";
+    if (dark_mode) {
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#ffffff";
+    }
     ctx.beginPath();
     ctx.font = "15px Arial"; 
     ctx.textAlign = "center";
@@ -744,16 +748,12 @@ function updateRangeVis(){
     ctx.stroke();
 
     // Draw box around
-    ctx.strokeStyle = "#000000";
-    if (dark_mode) ctx.strokeStyle = "#ffffff";;
     ctx.setLineDash([]);
     ctx.beginPath();
     ctx.rect(pad_left, pad_top, bw, bh);
     ctx.stroke();
 
     // Draw title
-    ctx.fillStyle = "#000000";
-    if (dark_mode) ctx.fillStyle = "#ffffff";;
     ctx.font = "20px Arial"; 
     ctx.textAlign = "center"; 
     ctx.fillText(ship_builder_ship, canvas.width/2, 20); 
