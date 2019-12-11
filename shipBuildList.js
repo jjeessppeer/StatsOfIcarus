@@ -39,7 +39,7 @@ function initializeBuildList(){
 
 function requestBuildRemoval(build_id){
   console.log("Delete build: ", build_id);
-  httpxPostRequest("http://79.136.70.98:3231/remove_build", [build_id], 
+  httpxPostRequest(server_adress+"/remove_build", [build_id], 
     function(){
       if (this.readyState == 4 && this.status == 200){
         // $("#build-"+build_id+"").remove();
@@ -65,7 +65,7 @@ function requestBuilds(flash_top=false){
   let submitter_filter = $("#buildFilterAuthor").val();
   let sorting = $("#buildFilterOrder").val();
 
-  httpxPostRequest("http://79.136.70.98:3231/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
+  httpxPostRequest(server_adress+"/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
     if (this.readyState == 4 && this.status == 200){
       let json = JSON.parse(this.response);
       let builds = json[0];
@@ -99,7 +99,7 @@ function submitBuild(){
   let build_code = shipBuilderGetExportCode(false);
   let description = $("#buildDescriptionArea").val();
 
-  httpxPostRequest("http://79.136.70.98:3231/submit_build", [build_code, description], 
+  httpxPostRequest(server_adress+"/submit_build", [build_code, description], 
     function(){
       if (this.readyState == 4 && this.status == 200){
         let btn = $("#buildSubmitButton");
@@ -136,7 +136,7 @@ function toggleUpvote(){
   let enable = !$(this).hasClass("voted");
 
   console.log("voting: ", id, ", ", enable);
-  httpxPostRequest("http://79.136.70.98:3231/upvote_build", [id, enable], function(){
+  httpxPostRequest(server_adress+"/upvote_build", [id, enable], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     if (this.readyState == 4 && this.status == 200){
       let res = JSON.parse(this.response);
@@ -157,7 +157,7 @@ function toggleUpvote(){
 }
 
 function makeBuildPublic(build_id, make_public){
-  httpxPostRequest("http://79.136.70.98:3231/publicice_build", [build_id, make_public], function(){
+  httpxPostRequest(server_adress+"/publicice_build", [build_id, make_public], function(){
     if (this.readyState == 4 && this.status == 200){
       let res = JSON.parse(this.response);
       let made_public = Boolean(res[0]);

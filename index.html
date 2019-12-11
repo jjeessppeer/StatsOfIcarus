@@ -1159,6 +1159,8 @@
     var map_dataset = null;
     var ship_guns_dataset = null;
 
+    var server_adress = "http://79.136.70.98:3231";
+
 
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
@@ -1176,12 +1178,12 @@
           document.cookie = "dark_mode=false;";
         }
       });
-      dark_mode_switch.prop("checked", true);
+      dark_mode_switch.prop("checked", false);
       dark_mode_switch.trigger("change");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
       
       
-      httpxGetRequest("http://79.136.70.98:3231/ping",
+      httpxGetRequest(server_adress+"/ping",
         () => {
           $("#connectingIcon").hide();
           $("#connectedIcon").show();
@@ -1248,7 +1250,7 @@
       $("#loadalert span").text("Getting datasets");
 
       // Load datasets from server. On timeout load from google.
-      httpxGetRequest("http://79.136.70.98:3231/get_datasets", function(){
+      httpxGetRequest(server_adress+"/get_datasets", function(){
         if(datasets_loaded) return;
         if (this.status == 200)
         if (this.readyState == 4 && this.status == 200){

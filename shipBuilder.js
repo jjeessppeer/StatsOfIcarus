@@ -261,7 +261,7 @@ function parseBuildCode(build_code){
 
 function shipBuilderImportFromDatabase(build_id){
   console.log("Requesting single build ", build_id);
-  httpxPostRequest("http://79.136.70.98:3231/request_single_build", [build_id], function(){
+  httpxPostRequest(server_adress+"/request_single_build", [build_id], function(){
     if (this.readyState == 4 && this.status == 200){
       let response = JSON.parse(this.response);
       let build_code = sanitizeHtml(response[0]);
