@@ -688,7 +688,7 @@
         <div class="my-col img-canvas-container" id="shipContainer">
           <b>Drag or scroll to pan or zoom image.</b>
           <br>
-          <img id="shipBuilderImage" class="img" src="ship-images/mobula_gundeck_small.png" style="display:none" />
+          <img id="shipBuilderImage" class="img" src="ship-images/mob_gundeck_small.png" style="display:none" />
           <canvas id="shipBuilderCanvas" width="600" height="600" style="border-style:solid;">Your browser does not
             support the HTML5 canvas tag.</canvas>
           <canvas id="shipBuilderCanvasOffscreen" width="600" height="600" style="display:none">Your browser does not
@@ -1167,23 +1167,26 @@
     $(document).ready(function () {
       
       $("#sidebar a").on("click", openPageFromUrl);
+
+      // Setup dark mode
       let dark_mode_switch = $("#darkModeSwitch");
       dark_mode_switch.on("change", function() {
         if (this.checked){
           DarkReader.enable({brightness: 100, contrast: 100});
-          document.cookie = "dark_mode=true;";
+          document.cookie = "dark_mode=true";
         }
         else{
           DarkReader.disable();
-          document.cookie = "dark_mode=false;";
+          document.cookie = "dark_mode=false";
         }
         updateShipBuildImage();
       });
-      dark_mode_switch.prop("checked", false);
+      // console.log("COOKIE: ", getCookie("dark_mode")=="true")
+      dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
       dark_mode_switch.trigger("change");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
       
-      
+      // Check server status
       httpxGetRequest(server_adress+"/ping",
         () => {
           $("#connectingIcon").hide();

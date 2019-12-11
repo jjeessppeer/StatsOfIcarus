@@ -41,6 +41,11 @@ function getUrlParameterList(url){
 
 }
 
+function getCookie(cookiename){
+    var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
+    return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+}
+
 function degToRad(deg){
     return deg * Math.PI / 180;
 }
@@ -405,11 +410,10 @@ function httpxPostRequest(url, data, callback=null, timeout_callback=null){
 function httpxGetRequest(url, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.open("GET", url);
-    xhttp.timeout = 5000;
+    xhttp.timeout = 3000;
     // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.onload = callback;
     xhttp.ontimeout = timeout_callback;
-    // xhttp.send(JSON.stringify(data));
     xhttp.send();
 }
 
