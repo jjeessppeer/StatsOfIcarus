@@ -32,7 +32,6 @@ var ship_image_srcs = {
 
 function initializeShipBuilder(){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
-    console.log("Still loading");
     setTimeout(function(){ initializeShipBuilder(); }, 1000);
     return;
   }
