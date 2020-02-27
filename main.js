@@ -248,9 +248,10 @@ app.post('/publicice_build', function(req, res) {
 var httpServer = http.createServer(app);
 httpServer.listen(80);
 
-// var httpsServer = https.createServer(app);
-// var privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
-// var certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
-// var credentials = {key: privateKey, cert: certificate};
-// httpsServer.listen(credentials, 443);
+var privateKey  = fs.readFileSync('certs/privkey.pem', 'utf8');
+var certificate = fs.readFileSync('certs/cert.pem', 'utf8');
+var ca = fs.readFileSync('certs/chain.pem');
+var credentials = {key: privateKey, cert: certificate, ca: ca};
+var httpsServer = https.createServer(credentials, app);
+httpsServer.listen(443);
 
