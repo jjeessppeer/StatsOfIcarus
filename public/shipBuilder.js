@@ -540,6 +540,19 @@ function shipBuilderReloadShip(){
   for (let i=0; i < ammo_dataset.getNOfRows(); i++){
     $("#weaponSelections > div > select:nth-of-type(2)").append($("<option>"+ammo_dataset.getDatasetCell(i, 1)+"</option>"));
   }
+
+
+  // Update ship stats
+  let ship_stats = ship_dataset.filterByString(ship_builder_ship, "Ship Type");
+  $("#shipStatArmor").text(ship_stats.getFirstCellByTitle("Armor") + " hp");
+  $("#shipStatHull").text(ship_stats.getFirstCellByTitle("Hull Health") + " hp");
+  $("#shipStatSpeed").text(ship_stats.getFirstCellByTitle("Longitudinal Speed, (m/s)") + " m/s");
+  $("#shipStatAccel").text(ship_stats.getFirstCellByTitle("Longitudinal Acceleration, (m/s²)") + " m/s²");
+  $("#shipStatVertSpeed").text(ship_stats.getFirstCellByTitle("Vertical Speed, (m/s)") + " m/s");
+  $("#shipStatVertAccel").text(ship_stats.getFirstCellByTitle("Vertical Acceleration, (m/s²)") + " m/s²");
+  $("#shipStatTurnSpeed").text(ship_stats.getFirstCellByTitle("Turn Speed, (deg/s)") + " deg/s");
+  $("#shipStatTurnAccel").text(ship_stats.getFirstCellByTitle("Turn Acceleration,(deg/s²)") + " deg/s²");
+  $("#shipStatMass").text(ship_stats.getFirstCellByTitle("Mass, (t)") + " t");
   
 }
 
