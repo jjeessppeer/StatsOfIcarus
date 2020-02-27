@@ -1,12 +1,14 @@
 // var path = require('path');
 var express = require('express');
+var http = require('http');
+var https = require('https');
+
 var bodyParser = require("body-parser");
-//var cors = require('cors');
 var requestIp = require('request-ip');
 const sqlite = require('better-sqlite3');
 var buildParser = require('./buildParser.js');
 
-const port = 3233
+
 
 
 const logOpts = {
@@ -243,5 +245,12 @@ app.post('/publicice_build', function(req, res) {
 });
 
 
+var httpServer = http.createServer(app);
+httpServer.listen(80);
 
-app.listen(port, () => log.info(`Server started. Listening on ${port}!`))
+// var httpsServer = https.createServer(app);
+// var privateKey  = fs.readFileSync('sslcert/server.key', 'utf8');
+// var certificate = fs.readFileSync('sslcert/server.crt', 'utf8');
+// var credentials = {key: privateKey, cert: certificate};
+// httpsServer.listen(credentials, 443);
+
