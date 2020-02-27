@@ -20,7 +20,7 @@ function initializeAimCalculator(){
           start_point[0] = click_pos[0];
           start_point[1] = click_pos[1];
         }
-        updateArcPanel(start_point, target_point);
+        updateArcPanel();
     });
 
     $("#arcCanvas").on("mousemove mousedown", function (e) {
@@ -35,10 +35,10 @@ function initializeAimCalculator(){
         else {
           start_point[2] = click_pos[1];
         }
-        updateArcPanel(start_point, target_point);
+        updateArcPanel();
     });
 
-    $("#arcAmmoSelect").on("change", function () { updateArcPanel(start_point, target_point); });
+    $("#arcAmmoSelect").on("change", function () { updateArcPanel(); });
 
     $("#arcGunSelect").on("change", function () {
         let gun_srcs = { "Lumberjack": "gun-images/lumberjack.jpg", "Heavy Flak Mk. II": "gun-images/flak.jpg", "Hades": "gun-images/lumberjack.jpg" };
@@ -52,22 +52,22 @@ function initializeAimCalculator(){
           gun_canvas.height = image_height;
           gun_image.width = gun_image.naturalWidth * image_scale;
           gun_canvas.width = gun_image.naturalWidth * image_scale;
-          updateArcPanel(start_point, target_point);
+          updateArcPanel();
         })
       });
 
     $("#arcMapSelect").on("change", function () {
         let map_srcs = { "Dunes": "map-images/Dunes.jpg", "Fjords": "map-images/Fjords.jpg" };
         $("#mapImage").attr("src", map_srcs[$(this).val()]);
-        updateArcPanel(start_point, target_point);
+        updateArcPanel();
     });
 
-    updateArcPanel(start_point, target_point);
+    updateArcPanel();
 }
 
-function updateArcPanel(start_point, target_point) {
+function updateArcPanel() {
     if (!(gun_dataset && ammo_dataset && ship_dataset && crosshair_dataset && map_dataset)) {
-      setTimeout(function () { updateArcPanel(start_point, target_point); }, 1000);
+      setTimeout(function () { updateArcPanel(); }, 1000);
       return;
     }
 
@@ -116,13 +116,21 @@ function updateArcPanel(start_point, target_point) {
     arcCtx.clearRect(0, 0, arcCanvas.width, arcCanvas.height);
 
     let data = getProjectileArc(speed, angle, world_start[2], drop, 0, tAtHit(speed, angle, target_dist), 100);
+    arcCtx.strokeStyle = "white";
+    
+    if ($("#darkModeSwitch")[0].checked) arcCtx.strokeStyle = "white";
+    else arcCtx.strokeStyle = "black";
+
+    arcCtx.lineWidth = 3;
     for (let i = 0; i < data.length - 1; i++) {
       arcCtx.beginPath();
       arcCtx.moveTo(20 + data[i][0] / arc_scale, arcCanvas.height - data[i][1] / arc_scale);
       arcCtx.lineTo(20 + data[i + 1][0] / arc_scale, arcCanvas.height - data[i + 1][1] / arc_scale);
       arcCtx.stroke();
     }
+    
 
+    arcCtx.lineWidth = 1;
     arcCtx.beginPath();
     arcCtx.arc(20 + target_dist / arc_scale, arcCanvas.height - target_point[2], 4, 0, 2 * Math.PI, false);
     arcCtx.fillStyle = "red";
