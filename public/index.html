@@ -15,7 +15,7 @@
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap.min.js"></script>
   <script src="deps/lz-string.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script> -->
   <script src="https://unpkg.com/darkreader"></script>
 
   <script src="utils.js"></script>
@@ -61,7 +61,7 @@
 
       <ul class="list-unstyled components">
 
-        <li id="matchAnalysisLink" data-show="#matchAnalysis">
+        <!-- <li id="matchAnalysisLink" data-show="#matchAnalysis">
           <a href="#matchAnalysis">
             <i class="fas fa-glasses"></i>
             Match history analysis
@@ -78,7 +78,7 @@
             <i class="fas fa-pen-nib"></i>
             Submit match to history
           </a>
-        </li>
+        </li> -->
 
         <li id="buildDatabaseLink" data-show="#buildDatabase">
           <a href="#buildDatabase">
@@ -131,7 +131,7 @@
     <div id="content" class="container-fluid">
 
       <!-- Match history analysis -->
-      <div id="matchAnalysis" class="content-panel" style="display:none">
+      <!-- <div id="matchAnalysis" class="content-panel" style="display:none">
         <h1>Match history statistics</h1>
         <div class="input-group" style="width:440px">
           <div class="input-group-prepend">
@@ -196,10 +196,10 @@
             <canvas id="winRatioAllyChart" width="400" height="400"></canvas>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Match Database -->
-      <div id="matchDatabase" class="content-panel" style="display:none">
+      <!-- <div id="matchDatabase" class="content-panel" style="display:none">
         <div class="row row-margin">
           <div class="col-sm-6">
             <div class="input-group">
@@ -219,29 +219,24 @@
                 <option>Pilot</option>
               </select>
               <input type="text" class="form-control" id="matchFilterText" placeholder="filter substring">
-              <!-- <div class="input-group-append">
-                  <button id="shipFilterBtn" class="btn btn-primary">Filter</button>
-                </div> -->
             </div>
           </div>
         </div>
 
-        <!-- <button id="matchAddFilterBtn" class="btn btn-primary">Add another filter</button> -->
         <div class="row">
-          <!-- <div class="col"></div> -->
           <div class="col">
             <table id="matchTable" class="table table-bordered">
             </table>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Match Submissions -->
-      <div id="matchSubmission" class="content-panel" style="display:none">
+      <!-- <div id="matchSubmission" class="content-panel" style="display:none">
         <p>Here you can submit a match to the database.</p>
         <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8Fyrz4MRAJ8MoDke7it8zB_ihARWv12TBQMtIKstVY3cGXw/viewform?embedded=true"
           width="640" height="2317" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-      </div>
+      </div> -->
 
 
       <!-- Build Database  -->
@@ -1250,10 +1245,10 @@
     function loadDatasetsFromGoogleSheets(){
       $("#loadalert span").text("Server timeout, loading from google instead");
       console.log("Loading datasets from google.")
-      loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
+      /*loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
         dataset.sortDatasetContent("Date of match", Date.parse);
         match_dataset = dataset;
-      });
+      });*/
       loadDatasetFromSheet(google_sheet_id, 4, function (dataset) {
         gun_dataset = dataset;
       });
@@ -1370,9 +1365,9 @@
       initializeDamageCalculator();
       initializeAimCalculator();
       initializeShipBuilder();
-      initializeMatchStatistics();
       initializeSpawns();
-      initializeMatchList();
+      //initializeMatchStatistics();
+      //initializeMatchList();
       initializeBuildList();
     }
 
