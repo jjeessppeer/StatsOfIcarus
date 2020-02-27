@@ -1305,7 +1305,6 @@
         if (this.status == 200)
         if (this.readyState == 4 && this.status == 200){
           datasets_loaded = true;
-          console.log("Datasets loaded from server");
           let datasets = JSON.parse(this.response);
           // console.log(this.response);
           console.log(datasets);
@@ -1314,8 +1313,7 @@
               ["Timestamp","Date of match","Event",
               "Team scores [Team 1 score]","Team scores [Team 2 score]",
               "T1 Ship 1","T1 Ship 2","T2 Ship 1","T2 Ship 2",
-              "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot",
-              "VOD link (optional)","Map"]);
+              "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot"]);
           match_dataset.sortDatasetContent("Date of match", Date.parse);
           
           ammo_dataset = jsonToDataset(datasets.ammo_stats,

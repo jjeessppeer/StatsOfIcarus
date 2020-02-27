@@ -19,7 +19,6 @@ function initializeSpawns(){
 
 function updateSpawnMap(){
     if (!map_dataset) {
-        console.log("Still loading");
         setTimeout(function(){ updateSpawnMap(); }, 1000);
         return;
     }

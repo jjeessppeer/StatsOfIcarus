@@ -67,7 +67,6 @@ function initializeAimCalculator(){
 
 function updateArcPanel(start_point, target_point) {
     if (!(gun_dataset && ammo_dataset && ship_dataset && crosshair_dataset && map_dataset)) {
-      console.log("Still loading");
       setTimeout(function () { updateArcPanel(start_point, target_point); }, 1000);
       return;
     }

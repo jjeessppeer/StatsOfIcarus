@@ -559,7 +559,6 @@ function shipBuilderReloadShip(){
 
 function updateShipBuildImage(){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && component_dataset)) {
-    console.log("Still loading");
     setTimeout(function(){ updateShipBuildImage(); }, 1000);
     return;
   }
@@ -661,7 +660,6 @@ function updateShipBuildImage(){
 
 function updateRangeVis(){
     if (!(gun_dataset && ammo_dataset && ship_dataset && map_dataset && component_dataset)) {
-      console.log("Still loading");
       setTimeout(function(){ updateRangeVis(); }, 1000);
       return;
     }
