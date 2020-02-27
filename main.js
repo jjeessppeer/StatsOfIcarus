@@ -19,6 +19,7 @@ const logOpts = {
   dateFormat:'YYYY.MM.DD'
 }
 const log = require('simple-node-logger').createRollingFileLogger(logOpts);
+// const log = require('simple-node-logger').createSimpleLogger(logOpts);
 
 // TODO: 
 // - prevent adding duplicates
@@ -92,7 +93,7 @@ app.post('/request_build', function(req, res, next) {
     params.push(ship_filter);
   }
   if (pve_filter != 'Include'){
-    sql += " AND INSTR(pve, ?)>0";
+    sql += " AND pve=?";
     params.push(pve_filter!="Exclude" ? 1 : 0);
   }
   if (submitter_filter != "Anyone"){
