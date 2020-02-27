@@ -1159,9 +1159,6 @@
     var map_dataset = null;
     var ship_guns_dataset = null;
 
-    var server_adress = "";
-
-
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
@@ -1257,7 +1254,7 @@
       $("#loadalert span").text("Getting datasets");
 
       // Load datasets from server. On timeout load from google.
-      httpxGetRequest(server_adress+"/get_datasets", function(){
+      httpxGetRequest("/get_datasets", function(){
         if(datasets_loaded) return;
         if (this.status == 200)
         if (this.readyState == 4 && this.status == 200){
