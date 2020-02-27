@@ -1,5 +1,5 @@
 const sqlite = require('better-sqlite3');
-const data_db = new sqlite('data_db.db', { verbose: null });
+const data_db = new sqlite('databases/data_db.db', { verbose: null });
 
 //var docsapi = require('./public/docsapi.js');
 

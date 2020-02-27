@@ -8,18 +8,22 @@ var buildParser = require('./buildParser.js');
 
 const port = 3233
 
-const log = require('simple-node-logger').createSimpleLogger({
-  logFilePath:'serverlog.log',
-  timestampFormat:'YYYY-MM-DD HH:mm:ss.SSS'
-});
+
+const logOpts = {
+  fileNamePattern:'log-<DATE>.log',
+  logDirectory:'logs',
+  timestampFormat:'YYYY-MM-DD HH:mm:ss.SSS',
+  dateFormat:'YYYY.MM.DD'
+}
+const log = require('simple-node-logger').createRollingFileLogger(logOpts);
 
 // TODO: 
 // - prevent adding duplicates
 // - limit entries by ip
 
-const access_db = new sqlite('access_db.db', { verbose: null });
-const build_db = new sqlite('build_db.db', { verbose: null });
-const data_db = new sqlite('data_db.db', { verbose: null });
+const access_db = new sqlite('databases/access_db.db', { verbose: null });
+const build_db = new sqlite('databases/build_db.db', { verbose: null });
+const data_db = new sqlite('databases/data_db.db', { verbose: null });
 
 var app = express()
 
