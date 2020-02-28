@@ -9,9 +9,6 @@ var requestIp = require('request-ip');
 const sqlite = require('better-sqlite3');
 var buildParser = require('./buildParser.js');
 
-
-
-
 const logOpts = {
   fileNamePattern:'log-<DATE>.log',
   logDirectory:'logs',
@@ -27,6 +24,7 @@ const log = require('simple-node-logger').createRollingFileLogger(logOpts);
 
 const access_db = new sqlite('databases/access_db.db', { verbose: null });
 const build_db = new sqlite('databases/build_db.db', { verbose: null });
+const user_db = new sqlite('databases/user_db.db', { verbose: null });
 const data_db = new sqlite('databases/data_db.db', { verbose: null });
 
 var app = express()
@@ -39,11 +37,11 @@ app.get('/ping', function(req, res){
   let ip = requestIp.getClientIp(req);
   log.info(ip, " ping");
 
-  access_db.prepare(`
-    INSERT INTO visitors (ip, n_visits, first_visit, last_visit) 
-    SELECT ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-    WHERE NOT EXISTS(SELECT 1 FROM visitors WHERE ip=?);`).run(ip, ip);
-  access_db.prepare("UPDATE visitors SET n_visits=n_visits+1, last_visit=CURRENT_TIMESTAMP WHERE ip=?").run(ip);
+  // access_db.prepare(`
+  //   INSERT INTO visitors (ip, n_visits, first_visit, last_visit) 
+  //   SELECT ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+  //   WHERE NOT EXISTS(SELECT 1 FROM visitors WHERE ip=?);`).run(ip, ip);
+  // access_db.prepare("UPDATE visitors SET n_visits=n_visits+1, last_visit=CURRENT_TIMESTAMP WHERE ip=?").run(ip);
   access_db.prepare("INSERT INTO accesses (ip) VALUES (?)").run(ip);
   res.status(200).send("OK");
 });
@@ -67,6 +65,7 @@ app.get('/get_datasets', function(req, res) {
 
 app.post('/request_build', function(req, res, next) {
   let ip = requestIp.getClientIp(req);
+  let username = getUsername(ip);
   let start = req.body[0];
   let end = req.body[1];
   let name_filter = req.body[2];
@@ -129,7 +128,7 @@ app.post('/request_build', function(req, res, next) {
     });
   }
   
-  let voter = build_db.prepare("SELECT * FROM voters WHERE ip=?").get(ip);
+  let voter = user_db.prepare("SELECT upvoted_ids FROM users WHERE username=? LIMIT 1").get(username);
   if (voter){
     let votes = JSON.parse(voter.upvoted_ids);
     for (let i=0; i<responseData.length; i++){
@@ -184,6 +183,8 @@ app.post('/submit_build', function(req, res, next) {
 app.post('/upvote_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
   let build_id = parseInt(req.body[0]);
+  let username = getUsername(ip);
+
   let enabling_vote = Boolean(req.body[1]);
   if (!(typeof build_id == 'number' && typeof enabling_vote == 'boolean')){
     res.status(400).send("bad request");
@@ -197,12 +198,14 @@ app.post('/upvote_build', function(req, res) {
   }
 
   // Add new voter if not existing.
-  build_db.prepare(`
-    INSERT INTO voters (ip, upvoted_ids) 
-    SELECT ?, ?
-    WHERE NOT EXISTS(SELECT 1 FROM voters WHERE ip=?);`).run(ip, JSON.stringify([]), ip);
+  // build_db.prepare(`
+  //   INSERT INTO voters (ip, upvoted_ids) 
+  //   SELECT ?, ?
+  //   WHERE NOT EXISTS(SELECT 1 FROM voters WHERE ip=?);`).run(ip, JSON.stringify([]), ip);
 
-  let votes = build_db.prepare("SELECT upvoted_ids FROM voters WHERE ip=?").get(ip).upvoted_ids;
+  // let votes = build_db.prepare("SELECT upvoted_ids FROM voters WHERE ip=?").get(ip).upvoted_ids;
+  console.log(username);
+  let votes = user_db.prepare("SELECT upvoted_ids FROM users WHERE username=? LIMIT 1").get(username).upvoted_ids;
   votes = JSON.parse(votes);
   let vote_change = 0;
   let has_voted = votes.includes(build_id);
@@ -216,7 +219,7 @@ app.post('/upvote_build', function(req, res) {
     vote_change = -1;
   }
   
-  build_db.prepare("UPDATE voters SET upvoted_ids=? WHERE ip=?").run(JSON.stringify(votes), ip);
+  user_db.prepare("UPDATE users SET upvoted_ids=? WHERE username=?").run(JSON.stringify(votes), username);
   build_db.prepare("UPDATE ship_builds SET upvotes=upvotes+? WHERE id=?").run(vote_change, build_id);
   
   log.info(ip, " upvote_build \t id:", build_id, " change:"+vote_change, " votes: ", JSON.stringify(votes));
@@ -246,6 +249,37 @@ app.post('/publicice_build', function(req, res) {
   res.status(200).json([make_public, build_id]);
 });
 
+
+
+
+
+function getUsername(ip) {
+  let row = user_db.prepare("SELECT username FROM ip_name_map WHERE ip=? LIMIT 1").get(ip);
+  console.log(row);
+  if (!row) {
+    //Create new user
+    let username = makeID(10);
+    user_db.prepare("INSERT INTO ip_name_map (ip, username) VALUES (?, ?)").run(ip, username);
+    user_db.prepare("INSERT INTO users (username, ips) VALUES (?, ?)").run(username, '['+ip+']');
+    return username;
+  }
+  
+  return row.username;
+}
+
+
+function makeID(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+     result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  
+  // Check if exists
+
+  return result;
+}
 
 var httpServer = http.createServer(app);
 httpServer.listen(80);

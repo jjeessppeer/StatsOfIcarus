@@ -23,7 +23,7 @@ data_db.prepare('DELETE FROM Tool_stats;').run();
 data_db.prepare('DELETE FROM Crosshair_data;').run();
 
 
-docsapi.loadDatasetFromSheet(sheet_id, 2, (dataset) => {parseDataset(dataset, "Match_History")});
+//docsapi.loadDatasetFromSheet(sheet_id, 2, (dataset) => {parseDataset(dataset, "Match_History")});
 docsapi.loadDatasetFromSheet(sheet_id, 4, (dataset) => {parseDataset(dataset, "Gun_stats")});
 docsapi.loadDatasetFromSheet(sheet_id, 5, (dataset) => {parseDataset(dataset, "Ammo_stats")});
 docsapi.loadDatasetFromSheet(sheet_id, 6, (dataset) => {parseDataset(dataset, "Damage_types")});

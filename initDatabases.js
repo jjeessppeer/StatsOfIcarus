@@ -1,6 +1,7 @@
 
 const sqlite = require('better-sqlite3');
 const access_db = new sqlite('databases/access_db.db', { verbose: null });
+const user_db = new sqlite('databases/user_db.db', { verbose: null });
 const build_db = new sqlite('databases/build_db.db', { verbose: null });
 const data_db = new sqlite('databases/data_db.db', { verbose: null });
 
@@ -9,18 +10,28 @@ const data_db = new sqlite('databases/data_db.db', { verbose: null });
 
 // Initialize access database
 
+user_db.prepare(`
+    CREATE TABLE users (
+	  username TEXT PRIMARY KEY,
+	  ips TEXT,
+      n_visits INTEGER DEFAULT 1,
+      first_visit DATETIME DEFAULT CURRENT_TIMESTAMP,
+	  last_visit DATETIME DEFAULT CURRENT_TIMESTAMP,
+	  upvoted_ids TEXT DEFAULT '[]',
+	  banned BOOLEAN DEFAULT 0
+	);`).run();
+
+user_db.prepare(`
+	CREATE TABLE ip_name_map (
+		ip TEXT PRIMARY KEY,
+		username TEXT NOT NULL
+	);`).run(); 
+	
 access_db.prepare(`
-    CREATE TABLE visitors (
-      ip TEXT NOT NULL PRIMARY KEY,
-      n_visits INTEGER,
-      first_visit DATETIME,
-      last_visit DATETIME
-    );`).run();
-  access_db.prepare(`
-    CREATE TABLE accesses (
-      ip TEXT NOT NULL,
-      time DATETIME DEFAULT CURRENT_TIMESTAMP
-    );`).run();
+	CREATE TABLE accesses (
+		ip TEXT NOT NULL,
+		time DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`).run();
 
 // Initialize build database
 
