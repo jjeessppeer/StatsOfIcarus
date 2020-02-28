@@ -64,12 +64,6 @@ build_db.prepare(`
     public BOOLEAN NOT NULL
     );`).run();
 
-build_db.prepare(`
-    CREATE TABLE voters (
-    ip TEXT NOT NULL,
-    upvoted_ids TEXT NOT NULL
-    );`).run();
-
 // Initialize data db
 
 data_db.prepare(`CREATE TABLE "Ammo_stats" (

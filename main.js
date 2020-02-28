@@ -174,6 +174,7 @@ app.post('/submit_build', function(req, res, next) {
     (submitter_username, name, ship_type, pve, build_code, description, upvotes, public) 
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(username, name, ship_type, pve, build_code, description, 0, 0).lastInsertRowid;
   
+  // Add build to user list
   
   log.info(ip, " submit_build \t ", lastID, ", ", name, ", ", build_code);
   res.status(200).json([lastID]);
@@ -195,15 +196,6 @@ app.post('/upvote_build', function(req, res) {
     res.status(400).send("bad request: non existant build");
     return;
   }
-
-  // Add new voter if not existing.
-  // build_db.prepare(`
-  //   INSERT INTO voters (ip, upvoted_ids) 
-  //   SELECT ?, ?
-  //   WHERE NOT EXISTS(SELECT 1 FROM voters WHERE ip=?);`).run(ip, JSON.stringify([]), ip);
-
-  // let votes = build_db.prepare("SELECT upvoted_ids FROM voters WHERE ip=?").get(ip).upvoted_ids;
-  console.log(username);
   let votes = user_db.prepare("SELECT upvoted_ids FROM users WHERE username=? LIMIT 1").get(username).upvoted_ids;
   votes = JSON.parse(votes);
   let vote_change = 0;
