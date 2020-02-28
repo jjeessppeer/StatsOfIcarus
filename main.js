@@ -22,10 +22,10 @@ const log = require('simple-node-logger').createRollingFileLogger(logOpts);
 // - prevent adding duplicates
 // - limit entries by ip
 
-const access_db = new sqlite('databases/access_db.db', { verbose: null });
-const build_db = new sqlite('databases/build_db.db', { verbose: null });
-const user_db = new sqlite('databases/user_db.db', { verbose: null });
-const data_db = new sqlite('databases/data_db.db', { verbose: null });
+const access_db = new sqlite('databases/access_db.db', { fileMustExist: true });
+const build_db = new sqlite('databases/build_db.db', { fileMustExist: true });
+const user_db = new sqlite('databases/user_db.db', { fileMustExist: true });
+const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readonly: true });
 
 var app = express()
 
@@ -35,13 +35,10 @@ app.use(express.static('public'));
 
 app.get('/ping', function(req, res){
   let ip = requestIp.getClientIp(req);
-  log.info(ip, " ping");
+  let username = getUsername(ip);
+  log.info(username, " ", ip, " ping.");
 
-  // access_db.prepare(`
-  //   INSERT INTO visitors (ip, n_visits, first_visit, last_visit) 
-  //   SELECT ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-  //   WHERE NOT EXISTS(SELECT 1 FROM visitors WHERE ip=?);`).run(ip, ip);
-  // access_db.prepare("UPDATE visitors SET n_visits=n_visits+1, last_visit=CURRENT_TIMESTAMP WHERE ip=?").run(ip);
+  user_db.prepare("UPDATE users SET last_visit=CURRENT_TIMESTAMP WHERE username=? ").run(username);
   access_db.prepare("INSERT INTO accesses (ip) VALUES (?)").run(ip);
   res.status(200).send("OK");
 });
@@ -81,12 +78,12 @@ app.post('/request_build', function(req, res, next) {
     return;
   }
   
-  let params = ['%'+name_filter+'%', ip];
+  let params = ['%'+name_filter+'%', username];
   let sql = `
       SELECT * FROM ship_builds 
       WHERE 
       name LIKE ?
-      AND (public=true OR submitter_ip=?)`;
+      AND (public=true OR submitter_username=?)`;
   if (ship_filter != 'Any'){
     sql += " AND INSTR(ship_type, ?)>0";
     params.push(ship_filter);
@@ -96,8 +93,8 @@ app.post('/request_build', function(req, res, next) {
     params.push(pve_filter!="Exclude" ? 1 : 0);
   }
   if (submitter_filter != "Anyone"){
-    sql += " AND submitter_ip " + (submitter_filter=="Me" ? "=" : "!=") + " ?";
-    params.push(ip);
+    sql += " AND submitter_username " + (submitter_filter=="Me" ? "=" : "!=") + " ?";
+    params.push(username);
   }
   if (sorting == "Votes (Asc.)") 
     sql += " ORDER BY upvotes ASC";
@@ -123,7 +120,7 @@ app.post('/request_build', function(req, res, next) {
       upvotes: builds[i].upvotes,
       description: builds[i].description,
       voted: false,
-      mine: requestIp.getClientIp(req) == builds[i].submitter_ip,
+      mine: username == builds[i].submitter_username,
       public: Boolean(builds[i].public)
     });
   }
@@ -144,8 +141,9 @@ app.post('/request_build', function(req, res, next) {
 app.post('/request_single_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
   let build_id = req.body[0];
+  let username = getUsername(ip)
   log.info(ip, " request_single_build \t id:", build_id);
-  let build = build_db.prepare("SELECT * FROM ship_builds WHERE id=? AND (submitter_ip=? OR public=true)").get(build_id, ip);
+  let build = build_db.prepare("SELECT * FROM ship_builds WHERE id=? AND (submitter_username=? OR public=true)").get(build_id, username);
   if (!build){
     res.status(400).send("bad request");
     return;
@@ -155,6 +153,7 @@ app.post('/request_single_build', function(req, res) {
 
 app.post('/submit_build', function(req, res, next) {
   let ip = requestIp.getClientIp(req);
+  let username = getUsername(ip);
   let build_code = req.body[0];
   let description = req.body[1];
   if (!(typeof build_code == 'string'  && typeof description == 'string' )){
@@ -172,8 +171,8 @@ app.post('/submit_build', function(req, res, next) {
   let pve = build_data.pve ? 1 : 0;
 
   let lastID = build_db.prepare(`INSERT INTO ship_builds 
-    (submitter_ip, name, ship_type, pve, build_code, description, upvotes, public) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(ip, name, ship_type, pve, build_code, description, 0, 0).lastInsertRowid;
+    (submitter_username, name, ship_type, pve, build_code, description, upvotes, public) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(username, name, ship_type, pve, build_code, description, 0, 0).lastInsertRowid;
   
   
   log.info(ip, " submit_build \t ", lastID, ", ", name, ", ", build_code);
@@ -229,23 +228,25 @@ app.post('/upvote_build', function(req, res) {
 
 app.post('/remove_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
+  let username = getUsername(ip)
   let build_id = parseInt(req.body[0]);
   if (build_id == NaN){
     res.status(400).send("bad request");
     return;
   }
   log.info(ip, " remove_build \t id:", build_id);
-  build_db.prepare("INSERT INTO ship_builds_removals SELECT CURRENT_TIMESTAMP, * FROM ship_builds WHERE id=? AND submitter_ip=?;").run(build_id, ip);
-  build_db.prepare("DELETE FROM ship_builds WHERE id=? AND submitter_ip=?;").run(build_id, ip);
+  build_db.prepare("INSERT INTO ship_builds_removals SELECT CURRENT_TIMESTAMP, * FROM ship_builds WHERE id=? AND submitter_username=?;").run(build_id, username);
+  build_db.prepare("DELETE FROM ship_builds WHERE id=? AND submitter_username=?;").run(build_id, username);
   res.status(200).send("build removed");
 });
 
 app.post('/publicice_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
+  let username = getUsername(ip)
   let build_id = parseInt(req.body[0]);
   let make_public = Boolean(req.body[1]) ? 1 : 0;
   log.info(ip, " publicice_build \t id:", build_id, " public:", make_public);
-  build_db.prepare("UPDATE ship_builds SET public=? WHERE id=? AND submitter_ip=?").run(make_public, build_id, ip);
+  build_db.prepare("UPDATE ship_builds SET public=? WHERE id=? AND submitter_username=?").run(make_public, build_id, username);
   res.status(200).json([make_public, build_id]);
 });
 

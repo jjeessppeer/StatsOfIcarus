@@ -39,7 +39,7 @@ build_db.prepare(`
 CREATE TABLE ship_builds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     submission_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-    submitter_ip TEXT NOT NULL,
+    submitter_username TEXT NOT NULL,
     name TEXT NOT NULL,
     ship_type TEXT NOT NULL,
     pve BOOLEAN NOT NULL,
@@ -54,7 +54,7 @@ build_db.prepare(`
     removal_time DATETIME,
     id INTEGER PRIMARY KEY,
     submission_time DATETIME,
-    submitter_ip TEXT NOT NULL,
+    submitter_username TEXT NOT NULL,
     name TEXT NOT NULL,
     ship_type TEXT NOT NULL,
     pve BOOLEAN NOT NULL,
