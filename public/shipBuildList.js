@@ -43,7 +43,7 @@ function initializeBuildList(){
 
 function requestBuildRemoval(build_id){
   console.log("Delete build: ", build_id);
-  httpxPostRequest("/remove_build", [build_id], 
+  httpxPostRequest("/remove_build", [login_token, build_id], 
     function(){
       if (this.readyState == 4 && this.status == 200){
         // $("#build-"+build_id+"").remove();
@@ -103,7 +103,7 @@ function submitBuild(){
   let build_code = shipBuilderGetExportCode(false);
   let description = $("#buildDescriptionArea").val();
 
-  httpxPostRequest("/submit_build", [build_code, description], 
+  httpxPostRequest("/submit_build", [login_token, build_code, description], 
     function(){
       if (this.readyState == 4 && this.status == 200){
         let btn = $("#buildSubmitButton");
@@ -140,7 +140,7 @@ function toggleUpvote(){
   let enable = !$(this).hasClass("voted");
 
   console.log("voting: ", id, ", ", enable);
-  httpxPostRequest("/upvote_build", [id, enable], function(){
+  httpxPostRequest("/upvote_build", [login_token, id, enable], function(){
     console.log("Request status ", this.readyState, ", ", this.status);
     if (this.readyState == 4 && this.status == 200){
       let res = JSON.parse(this.response);
@@ -161,7 +161,7 @@ function toggleUpvote(){
 }
 
 function makeBuildPublic(build_id, make_public){
-  httpxPostRequest("/publicice_build", [build_id, make_public], function(){
+  httpxPostRequest("/publicice_build", [login_token, build_id, make_public], function(){
     if (this.readyState == 4 && this.status == 200){
       let res = JSON.parse(this.response);
       let made_public = Boolean(res[0]);

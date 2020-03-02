@@ -75,7 +75,7 @@ build_db.prepare(`
     removal_time DATETIME,
     id INTEGER PRIMARY KEY,
     submission_time DATETIME,
-    submitter_username TEXT NOT NULL,
+    submitter_token TEXT NOT NULL,
     name TEXT NOT NULL,
     ship_type TEXT NOT NULL,
     pve BOOLEAN NOT NULL,
