@@ -224,8 +224,6 @@
               <label class="form-check-label" for="keepLoginCheck">Stay logged in</label>
             </div>
             <p id="loginWarningText" style="color:red;"></p>
-            <br>
-            <p>Please don't register with a username-password combination that you use for any other service.</p>
           </div>
           <div class="modal-footer">
             <button id="registerButton" type="button" class="btn btn-info">Register</button>
@@ -1274,18 +1272,26 @@
 
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
-        <h3>About</h3>
-        <p>
-          Database can be found here: <br><a href="https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing">https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing</a>.
+        <h5>Data</h5>
+        <p>Raw stat database: <a href="https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing">https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing</a>.
         </p>
-        <p>
-          Contact: <br> jjeessppeer+GoI@gmail.com
+        
+        <h5>Contact</h5>
+        <p>Email: jjeessppeer+GoI@gmail.com | Discord: Jesper#8148</p>
+        <p>Please sent me a message if you have any questions relating to the website, or if you have an idea of something cool that could be added.</p>
+        <p>If you are interested in the source code feel free to ask for it.</p>
+        <h5>Data security</h5>
+        <p>All passwords are stored are salted and hashed with sha256.</p>
+        <h5>Privacy policy</h5>
+        <h6>Data collected on this website</h6>
+        <p>User infomation: Basic account information such as a username, a salted and hashed password, and what a posts user has voted are stored. <br>
+        Build submissions: Builds that are submitted by the user are stored in a database and are be publicly visible. <br>
+        Server requests: All requests made to the server, such as requesting build list or logging in, are logged with client ip and attempted action.
         </p>
-        <p>Please send an email or a discord message if you feel like you know something cool that could be added to
-          the site.</p>
-        <p>
-          If you for some reason wanna see the source i can send you a link.
-        </p>
+        <h6>Cookies</h6>
+        <p>Cookies are used for site functionality such as remembering login and rembembering selections between sessions.</p>
+        <h6>Removal of data</h6>
+        <p>If you wish to have all data related to you erased contact me as specified in Contact.</p>
       </div>
 
 
@@ -1336,16 +1342,15 @@
       dark_mode_switch.trigger("change");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
       
-      // Check server status
+      // Check in with server
       httpxPostRequest("/check_in", [login_token],
         function() {
           let res = JSON.parse(this.response);
           if (this.response == 0) logOut();
           else logIn(res[0], res[1]);
+          loadDatasetsFromServer();
         });
-      // // Load datasets
-      initializeAccount();
-      loadDatasetsFromServer();
+      
 
     });
 
@@ -1437,6 +1442,7 @@
       //initializeMatchStatistics();
       //initializeMatchList();
       initializeBuildList();
+      initializeAccount();
     }
 
     function openPageFromUrl() {

@@ -15,6 +15,7 @@ user_db.prepare(`
 	CREATE TABLE accounts (
 		username TEXT PRIMARY KEY,
 		password TEXT,
+		salt TEXT,
 		token TEXT
 	);`).run();
 

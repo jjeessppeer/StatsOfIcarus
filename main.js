@@ -3,6 +3,7 @@ var express = require('express');
 var fs = require('fs');
 var http = require('http');
 var https = require('https');
+var crypto = require('crypto');
 
 var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
@@ -21,8 +22,9 @@ const log = require('simple-node-logger').createSimpleLogger(logOpts);
 // TODO: 
 // - prevent adding duplicates
 // - limit entries by ip
+// - logs!
+// - update last visited in check_in!
 
-const access_db = new sqlite('databases/access_db.db', { fileMustExist: true });
 const build_db = new sqlite('databases/build_db.db', { fileMustExist: true });
 const user_db = new sqlite('databases/user_db.db', { fileMustExist: true });
 const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readonly: true });
@@ -36,10 +38,10 @@ app.use(express.static('public'));
 app.post('/check_in', function(req, res){
   let ip = requestIp.getClientIp(req);
   let req_token = req.body[0];
-  console.log("Check in: ", ip);
   let user_token = getUserToken(req_token, ip);
 
-  console.log(user_token, "\n", req_token, "\n");
+  userCheckIn(user_token, ip);
+
   if (user_token != req_token){
     res.status(200).send("0");
     return;
@@ -71,8 +73,14 @@ app.post('/register', function(req, res){
     return;
   }
 
+  let salt = makeID(8);
+  let hashedPwd = hashString(password, salt);
+
+  // let hashedPwd = hashString(password);
+  // console.log("HASHED: ", hashedPwd);
+
   // Create account details
-  user_db.prepare("INSERT INTO accounts (username, password, token) VALUES (?,?,?)").run(username, password, user_token);
+  user_db.prepare("INSERT INTO accounts (username, password, salt, token) VALUES (?,?,?,?)").run(username, hashedPwd, salt, user_token);
   user_db.prepare("UPDATE users SET display_name=?, registered=1 WHERE token=?").run(username, user_token);
   // Remove ip account
   user_db.prepare("DELETE FROM ip_accounts WHERE token=?").run(user_token);
@@ -92,7 +100,7 @@ app.post('/login', function(req, res){
     return;
   }
 
-  let tries = user_db.prepare("SELECT * FROM login_tries WHERE datetime(timestamp)>datetime('now', '-10 second') AND successful=0 AND ip=?").all(ip);
+  let tries = user_db.prepare("SELECT * FROM login_tries WHERE datetime(timestamp)>datetime('now', '-10 minute') AND successful=0 AND ip=?").all(ip);
   if (tries.length > 10) { // Too many failed tries
     res.status("200").send("-1");
     return;
@@ -104,8 +112,10 @@ app.post('/login', function(req, res){
     res.status("200").send("-2");
     return;
   }
+  
+  let hashedPwd = hashString(password, account.salt);
 
-  if (account.password != password){ // Wrong password
+  if (account.password != hashedPwd){ // Wrong password
     user_db.prepare("INSERT INTO login_tries (ip, username, successful) VALUES (?,?,?)").run(ip, username, 0);
     res.status("200").send("-2");
     return;
@@ -115,8 +125,6 @@ app.post('/login', function(req, res){
   let user = user_db.prepare("SELECT * FROM users WHERE token=?").get(account.token);
   res.status(200).json([user.token, user.display_name]);
 });
-
-
 
 app.get('/get_datasets', function(req, res) {
   let ip = requestIp.getClientIp(req);
@@ -134,8 +142,6 @@ app.get('/get_datasets', function(req, res) {
   datasets.ships_gun_angles = data_db.prepare("SELECT * FROM Ships_gun_angles").all();
   res.status("200").json(datasets);
 });
-
-
 
 app.post('/request_build', function(req, res, next) {
   let ip = requestIp.getClientIp(req);
@@ -190,6 +196,7 @@ app.post('/request_build', function(req, res, next) {
   let builds = build_db.prepare(sql).all(...params);
   let responseData = [];
   for (let i=0; i<builds.length; i++){
+    let submitter_name = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(builds[i].submitter_token).display_name;
     responseData.push({
       build_id: builds[i].id,
       build_code: builds[i].build_code,
@@ -197,7 +204,8 @@ app.post('/request_build', function(req, res, next) {
       description: builds[i].description,
       voted: false,
       mine: user_token == builds[i].submitter_token,
-      public: Boolean(builds[i].public)
+      public: Boolean(builds[i].public),
+      uploader: submitter_name
     });
   }
   
@@ -213,8 +221,6 @@ app.post('/request_build', function(req, res, next) {
 
   res.status(200).json([responseData, n_builds]);
 });
-
-
 
 app.post('/request_single_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
@@ -333,6 +339,12 @@ function generateToken(){
 }
 
 
+function hashString(str, salt){
+  str = salt + str + salt;
+  let hashed = crypto.createHash('sha256').update(str).digest('hex');
+  return hashed;
+}
+
 function getUserToken(req_token, ip){
   // Try to get user from token
   let user = user_db.prepare("SELECT token FROM users WHERE token=?").get(req_token);
@@ -372,6 +384,13 @@ function testSpecialString(str){
 function sanitizeHtml(str){
   str = String(str);
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function userCheckIn(user_token, ip){
+  let user = user_db.prepare("SELECT * FROM users WHERE token=?").get(user_token);
+  let ips = JSON.parse(user.ips);
+  if (ips.indexOf(ip) === -1) ips.push(ip);
+  user_db.prepare("UPDATE users SET last_visit=CURRENT_TIMESTAMP, n_visits=n_visits+1, ips=? WHERE token=?").run(JSON.stringify(ips), user_token);
 }
 
 

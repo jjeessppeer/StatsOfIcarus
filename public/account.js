@@ -9,7 +9,8 @@ function initializeAccount() {
         else if (this.response == -1) loginWarning("Too many failed logins.");
         else {
           let res = JSON.parse(this.response);
-          logIn(res[0], res[1])
+          logIn(res[0], res[1]);
+          requestBuilds();
         }
         $("#loginButton").prop('disabled', false);
 
@@ -26,7 +27,8 @@ function initializeAccount() {
         else if (this.response == -1) loginWarning("Username already registered.");
         else {
           let res = JSON.parse(this.response);
-          logIn(res[0], res[1])
+          logIn(res[0], res[1]);
+          requestBuilds();
         }
         $("#registerButton").prop('disabled', false);
       });
@@ -34,6 +36,7 @@ function initializeAccount() {
 
   $("#logoutButton").on("click", function () {
     logOut();
+    requestBuilds();
   });
 }
 
@@ -47,7 +50,6 @@ function logIn(token, name){
   $("#loginPassword").val("");
   loginWarning("");
   if ($("#keepLoginCheck").is(":checked")) setCookie("login_token", token);
-  requestBuilds();
 }
 
 function logOut(){
@@ -59,7 +61,6 @@ function logOut(){
   loginWarning("");
   setCookie("login_token", "");
   document.cookie = "login_token"+"="+"a";
-  requestBuilds();
 }
 
 function loginWarning(text){

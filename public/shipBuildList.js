@@ -85,9 +85,10 @@ function requestBuilds(flash_top=false){
         let voted = sanitizeHtml(builds[i].voted) == "true";
         let mine = sanitizeHtml(builds[i].mine) == "true";
         let public = sanitizeHtml(builds[i].public) == "true";
+        let submitter_name = sanitizeHtml(builds[i].uploader);
         let flash = i==0 && flash_top;
 
-        addToBuildTable(build_id, upvotes, 0, description, build_code, voted, mine, public, i+1, flash);
+        addToBuildTable(build_id, upvotes, 0, description, build_code, voted, mine, public, i+1, submitter_name, flash);
       }
     }
   });
@@ -190,7 +191,7 @@ function updatePageNav(){
   $("#buildPageNavLast").toggle(current_build_page != n_build_pages);
 }
 
-function addToBuildTable(id, upvotes, downvotes, description, build_code, voted, mine, public, index, flash=false){
+function addToBuildTable(id, upvotes, downvotes, description, build_code, voted, mine, public, index, submitter_name, flash=false){
   let build_data = parseBuildCode(build_code);
   // console.log(build_data)
   
