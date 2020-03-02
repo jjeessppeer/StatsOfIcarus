@@ -58,7 +58,6 @@ function requestBuildRemoval(build_id){
 }
 
 function requestBuilds(flash_top=false){
-  $(".ship-build-table-item").remove();
   
   let start = (current_build_page-1)*8 + 1;
   let end = start+7;
@@ -71,6 +70,7 @@ function requestBuilds(flash_top=false){
 
   httpxPostRequest("/request_build", [login_token, start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
     if (this.readyState == 4 && this.status == 200){
+      $(".ship-build-table-item").remove();
       let json = JSON.parse(this.response);
       let builds = json[0];
       let n_builds = json[1];

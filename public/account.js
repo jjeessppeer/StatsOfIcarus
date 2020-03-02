@@ -38,7 +38,6 @@ function initializeAccount() {
 }
 
 function logIn(token, name){
-  console.log("Logging in: ", name, ", ", token);
   login_token = token;
   $("#loginModal").modal('hide');
   $("#loginModalButton").hide();
@@ -47,16 +46,20 @@ function logIn(token, name){
   $("#loginUsername").val("");
   $("#loginPassword").val("");
   loginWarning("");
+  if ($("#keepLoginCheck").is(":checked")) setCookie("login_token", token);
+  requestBuilds();
 }
 
 function logOut(){
-  console.log("Logging out");
   $("#loginModalButton").show();
   $("#logoutSidebar").hide();
   login_token = "";
   $("#loginUsername").val("");
   $("#loginPassword").val("");
   loginWarning("");
+  setCookie("login_token", "");
+  document.cookie = "login_token"+"="+"a";
+  requestBuilds();
 }
 
 function loginWarning(text){

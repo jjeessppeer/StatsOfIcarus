@@ -7,8 +7,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
-
   <link rel="stylesheet" href="deps/bootstrap.min.css">
   <!-- <script src="deps/jquery-3.4.1.slim.min.js"></script> -->
   <script src="deps/jquery-3.4.1.min.js"></script>
@@ -44,7 +42,7 @@
     <!-- Sidebar  -->
     <nav id="sidebar">
       <div class="sidebar-header">
-        <h3>Guns of Icarus Info</h3>
+        <h3>Stats of Icarus</h3>
 
         <div class="custom-control custom-switch">
           
@@ -73,7 +71,7 @@
         
       </div>
       <div class="sidebar-header collapsed">
-        <h3><i class="fas fa-atom"></i></h3>
+        <!-- <h3><i class="fas fa-atom"></i></h3> -->
       </div>
 
       <ul class="list-unstyled components">
@@ -219,6 +217,11 @@
                 <div class="input-group-text">Password</div>
               </div>
               <input type="password" class="form-control" id="loginPassword" placeholder="" autocomplete="off">
+            </div>
+            <br>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="keepLoginCheck" autocomplete="off" checked>
+              <label class="form-check-label" for="keepLoginCheck">Stay logged in</label>
             </div>
             <p id="loginWarningText" style="color:red;"></p>
             <br>
@@ -1294,7 +1297,7 @@
 
   <script>
     // store in cookie.
-    var login_token = "";
+    var login_token = getCookie("login_token");
 
     var datasets_loaded = false;
 
@@ -1309,8 +1312,6 @@
     var map_dataset = null;
     var ship_guns_dataset = null;
 
-    var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
-    // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
       
       $("#sidebar a").on("click", openPageFromUrl);
@@ -1343,50 +1344,10 @@
           else logIn(res[0], res[1]);
         });
       // // Load datasets
-      loadDatasetsFromServer();
-      
-      
-
       initializeAccount();
+      loadDatasetsFromServer();
 
     });
-
-    function loadDatasetsFromGoogleSheets(){
-      $("#loadalert span").text("Server timeout, loading from google instead");
-      console.log("Loading datasets from google.")
-      /*loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
-        dataset.sortDatasetContent("Date of match", Date.parse);
-        match_dataset = dataset;
-      });*/
-      loadDatasetFromSheet(google_sheet_id, 4, function (dataset) {
-        gun_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 5, function (dataset) {
-        ammo_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 6, function (dataset) {
-        damage_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 7, function (dataset) {
-        tool_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 8, function (dataset) {
-        component_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 9, function (dataset) {
-        ship_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 10, function (dataset) {
-        map_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 11, function (dataset) {
-        crosshair_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
-        ship_guns_dataset = dataset;
-      });
-      datasetLoadCheck();
-    }
 
     function datasetLoadCheck(){
       if (!(match_dataset && gun_dataset && ammo_dataset &&
@@ -1410,8 +1371,6 @@
         if (this.readyState == 4 && this.status == 200){
           datasets_loaded = true;
           let datasets = JSON.parse(this.response);
-          // console.log(this.response);
-          console.log(datasets);
 
           /*match_dataset = jsonToDataset(datasets.history, 
               ["Timestamp","Date of match","Event",
@@ -1465,7 +1424,7 @@
           console.log("Datasets loaded from server.");
           datasetsLoaded();
         }
-      }, loadDatasetsFromGoogleSheets);
+      });
     }
 
     function datasetsLoaded() {
