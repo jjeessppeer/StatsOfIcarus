@@ -69,7 +69,7 @@ function requestBuilds(flash_top=false){
   let submitter_filter = $("#buildFilterAuthor").val();
   let sorting = $("#buildFilterOrder").val();
 
-  httpxPostRequest("/request_build", [start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
+  httpxPostRequest("/request_build", [login_token, start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
     if (this.readyState == 4 && this.status == 200){
       let json = JSON.parse(this.response);
       let builds = json[0];

@@ -28,6 +28,7 @@
   <script src="mapSpawns.js"></script>
   <script src="shipBuilder.js"></script>
   <script src="shipBuilderTranslations.js"></script>
+  <script src="account.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
     crossorigin="anonymous">
@@ -44,16 +45,32 @@
     <nav id="sidebar">
       <div class="sidebar-header">
         <h3>Guns of Icarus Info</h3>
+
         <div class="custom-control custom-switch">
+          
           <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
-          <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
+          <label class="custom-control-label" for="darkModeSwitch">Dark Mode</label>
         </div>
-        <div>
-          Server status
-          <i id="connectingIcon" class="fas fa-minus-square" style="color:yellow;"></i>
-          <i id="connectedIcon" class="fas fa-check-square" style="color:green;display:none;"></i>
-          <i id="noconnectionIcon" class="fas fa-times-circle" style="color:red;display:none;"></i>
+
+        <br>
+        <div id=logoutSidebar style="display:none;">
+          <label id="loginName">Logged in as: </label>
+          <br>
+          <button type="button" class="btn btn-primary" id="logoutButton">
+            Logout
+          </button>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#profileModal" id="profileButton">
+            Profile
+          </button>
         </div>
+        
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal" id="loginModalButton">
+          Login
+        </button>
+
+
+
+        
       </div>
       <div class="sidebar-header collapsed">
         <h3><i class="fas fa-atom"></i></h3>
@@ -127,6 +144,95 @@
         <strong>Loading... </strong><span></span>
       </div>
     </div>
+
+
+    <!-- Profile modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="profileModalLabel">Profile</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group" style="width:400px">
+              <div class="input-group-prepend large">
+                <div class="input-group-text">Change username</div>
+              </div>
+              <input type="text" id="changeUsernameText" class="form-control" placeholder="" autocomplete="off">
+              <div class="input-group-append">
+                <button id="changeUsernameButton" class="btn btn-primary" type="button">Update</button>
+              </div>
+            </div>
+            <br>
+            <div class="input-group" style="width:400px">
+              <div class="input-group-prepend large">
+                <div class="input-group-text">Change display name</div>
+              </div>
+              <input type="text" id="changeDisplayNameText" class="form-control" placeholder="" autocomplete="off">
+              <div class="input-group-append">
+                <button id="changeDisplayNameButton" class="btn btn-primary" type="button">Update</button>
+              </div>
+            </div>
+            <br>
+            <div class="input-group" style="width:400px">
+              <div class="input-group-prepend large">
+                <div class="input-group-text">Change password</div>
+              </div>
+              <input type="password" id="changePasswordText" class="form-control" placeholder="" autocomplete="off">
+              <div class="input-group-append">
+                <button id="changePasswordButton" class="btn btn-primary" type="button">Update</button>
+              </div>
+            </div>
+            <p style="color:green;">Username updated!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="loginModalLabel">Login/Register</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+             
+            <p>If you wish to create an account that can be reached from different ip adresses and to secure it with a password you can do so here.</p>
+            <p>By using the site without registering an anonymous account is automatically created and connected to your ip adress. This gives access to all the site features. The problem with it is that you will lose access to your submitted data in case your ip changes. </p>
+            <p>Username will be publicly displayed under your submitted builds.</p>
+            <div class="input-group" style="width:400px">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Username</div>
+              </div>
+              <input type="text" class="form-control" id="loginUsername" placeholder="" autocomplete="off">
+            </div>
+            <br>
+            <div class="input-group" style="width:400px">
+              <div class="input-group-prepend medium">
+                <div class="input-group-text">Password</div>
+              </div>
+              <input type="password" class="form-control" id="loginPassword" placeholder="" autocomplete="off">
+            </div>
+            <p id="loginWarningText" style="color:red;"></p>
+            <br>
+            <p>Please don't register with a username-password combination that you use for any other service.</p>
+          </div>
+          <div class="modal-footer">
+            <button id="registerButton" type="button" class="btn btn-info">Register</button>
+            <button id="loginButton" type="button" class="btn btn-primary">Login</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <!-- Page Content  -->
     <div id="content" class="container-fluid">
 
@@ -1187,6 +1293,9 @@
 
 
   <script>
+    // store in cookie.
+    var login_token = "9ZOkSftBeI6nUKnFno7J2EsguhFFU9YU";
+
     var datasets_loaded = false;
 
     var match_dataset = null;
@@ -1227,19 +1336,18 @@
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
       
       // Check server status
-      httpxGetRequest("/ping",
-        () => {
-          console.log("PING RESPONSE");
-          $("#connectingIcon").hide();
-          $("#connectedIcon").show();
-        },
-        () => {
-          console.log("PING TIMEOUT");
-          $("#connectingIcon").hide();
-          $("#noconnectionIcon").show();
+      httpxPostRequest("/check_in", [login_token],
+        function() {
+          let res = JSON.parse(this.response);
+          if (this.response == 0) logOut();
+          else logIn(res[0], res[1]);
         });
-      // Load datasets
+      // // Load datasets
       loadDatasetsFromServer();
+      
+      
+
+      initializeAccount();
 
     });
 
@@ -1380,7 +1488,7 @@
       div.siblings("div").hide();
     }
 
-
+    
   </script>
 
 
