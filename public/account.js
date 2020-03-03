@@ -21,17 +21,17 @@ function initializeAccount() {
     let username = $("#loginUsername").val();
     let password = $("#loginPassword").val();
     $("#registerButton").prop('disabled', true);
-    httpxPostRequest("/register", [username, password],
-      function () {
-        if (this.response == -2) loginWarning("No special characters allowed.");
-        else if (this.response == -1) loginWarning("Username already registered.");
-        else {
-          let res = JSON.parse(this.response);
-          logIn(res[0], res[1], res[2]);
-          requestBuilds();
-        }
-        $("#registerButton").prop('disabled', false);
-      });
+    httpxPostRequest("/register", [username, password], function () {
+      if (this.status == 200) {
+        // $("#loginWarningText").css('color', 'green');
+        // $("#loginWarningText").text("Account registered!");
+        let res = JSON.parse(this.response);
+        logIn(res[0], res[1], res[2]);
+        requestBuilds();
+      }
+      else if (this.status == 400) $("#loginWarningText").text(this.response);
+      $("#registerButton").prop('disabled', false);
+    });
   });
 
   $("#logoutButton").on("click", function () {
@@ -46,6 +46,13 @@ function initializeAccount() {
       checkIn();
     });
   });
+
+
+  $("#changeUsernameButton").on("click", () => changeProfile("set_username", $("#changeUsernameText").val()));
+  $("#changeDisplayNameButton").on("click", () => changeProfile("set_name", $("#changeDisplayNameText").val()));
+  $("#changePasswordButton").on("click", () => changeProfile("set_password", $("#changePasswordText").val()));
+
+
 }
 
 function logIn(token, name, ip_name){
@@ -99,3 +106,13 @@ function loginWarning(text){
   $("#loginWarningText").text(text);
 }
 
+function changeProfile(action, data){
+  httpxPostRequest("/change_profile", [login_token, action, data],
+    function() {
+      console.log("RES: ", this.status, ", ", this.response);
+      if (this.status == 200) $("#profileChangeText").css('color', 'green');
+      else $("#profileChangeText").css('color', 'red');
+      $("#profileChangeText").text(this.response);
+      console.log("PROFILE CHANGED ", this.response);
+  });
+}

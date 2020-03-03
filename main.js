@@ -63,19 +63,17 @@ app.post('/register', function(req, res){
   let username = req.body[0];
   let password = req.body[1];
   
-  if (typeof username != 'string' || typeof password != 'string'){
-    res.status(400).send("bad request");
+  log.info(ip, " ", ip_token, " register: ", username);
+
+  // Validate data.
+  let usernameValid = testUsername(username);
+  if (!usernameValid[0]){
+    res.status(400).send(usernameValid[1]);
     return;
   }
-
-  if (testSpecialString(username)){
-    res.status(200).send("-2");
-    return;
-  }
-
-  let account = user_db.prepare("SELECT * FROM accounts WHERE username=?").get(username);
-  if (account){ // Username exists
-    res.status("200").send("-1");
+  let passwordValid = testPassword(password);
+  if (!passwordValid[0]){
+    res.status(400).send(passwordValid[1]);
     return;
   }
 
@@ -83,17 +81,12 @@ app.post('/register', function(req, res){
   let hashedPwd = hashString(password, salt);
   let new_token = generateToken();
 
-  // let hashedPwd = hashString(password);
-  // console.log("HASHED: ", hashedPwd);
-
   // Create account details
   user_db.prepare("INSERT INTO accounts (username, password, salt, token) VALUES (?,?,?,?)").run(username, hashedPwd, salt, new_token);
-  
   user_db.prepare("INSERT INTO users (token, username, display_name, ips, registered) VALUES (?,?,?,?,1)").run(new_token, username, username, JSON.stringify([ip]));
 
   // Merge ip account
-  // user_db.prepare("UPDATE users SET display_name=?, registered=1 WHERE token=?").run(username, user_token);
-  // user_db.prepare("DELETE FROM ip_accounts WHERE token=?").run(user_token);
+  // mergeUser(new_token, ip_token);
  
   // Return login token
   let ip_username = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(ip_token).display_name;
@@ -148,6 +141,51 @@ app.post('/login', function(req, res){
   res.status(200).json([user.token, user.display_name, ip_user.display_name]);
 });
 
+app.post('/change_profile', function(req, res){
+  let ip = requestIp.getClientIp(req);
+  let user_token = req.body[0];
+  let action = req.body[1];
+  let data = req.body[2];
+  log.info(ip, " ", user_token, " change_profile: ", action, ", ", data);
+  if (!isAccount(user_token)){
+    log.error("Invalid user token supplied.");
+    res.status("400").send("Server error");
+    return;
+  }
+
+  // Test if request is valid
+  let valid;
+  if (action == "set_username") valid = testUsername(data, user_token);
+  else if (action == "set_password") valid = testPassword(data);
+  else if (action == "set_name") valid = testName(data, user_token);
+  else valid = [false, "Invalid request."];
+  if (!valid[0]){
+    res.status("400").send(valid[1]);
+    return;
+  }
+
+  // Execute request
+  if (action == "set_username"){
+    user_db.prepare("UPDATE accounts SET username=? WHERE token=?").run(data, user_token);
+    res.status("200").send("Username updated!");
+    return;
+  }
+  else if (action == "set_password"){
+    let salt = makeID(4);
+    let hashedPwd = hashString(data, salt);
+    user_db.prepare("UPDATE accounts SET password=?, salt=? WHERE token=?").run(hashedPwd, salt, user_token);
+    res.status("200").send("Password updated!");
+    return;
+  }
+  else if (action == "set_name"){
+    user_db.prepare("UPDATE users SET display_name=? WHERE token=?").run(data, user_token);
+    res.status("200").send("Display name updated!");
+    return;
+  }
+
+
+});
+
 app.get('/get_datasets', function(req, res) {
   let ip = requestIp.getClientIp(req);
   log.info(ip, " get_datasets \t Datasets requested.");
@@ -164,6 +202,8 @@ app.get('/get_datasets', function(req, res) {
   datasets.ships_gun_angles = data_db.prepare("SELECT * FROM Ships_gun_angles").all();
   res.status("200").json(datasets);
 });
+
+
 
 app.post('/request_build', function(req, res, next) {
   let ip = requestIp.getClientIp(req);
@@ -391,6 +431,12 @@ function hashString(str, salt){
   return hashed;
 }
 
+function isAccount(token){
+  let user = user_db.prepare("SELECT token FROM accounts WHERE token=?").get(token);
+  if (user) return true;
+  return false;
+}
+
 function getUserToken(req_token, ip){
   // Try to get user from token
   let user = user_db.prepare("SELECT token FROM users WHERE token=?").get(req_token);
@@ -422,6 +468,34 @@ function makeID(length) {
   return result;
 }
 
+function testPassword(str){
+  if (typeof str != 'string') return [false, "Invalid data."];
+  if (str.length > 128) return [false, "Password must be less than 128 characters."];
+  if (str.length <= 0) return [false, "Password cannot be empty."];
+  return [true, "OK"];
+}
+
+function testUsername(str, token=""){
+  if (typeof str != 'string') return [false, "Invalid data."];
+  if (str.length > 24) return [false, "Username must be less than 32 characters."];
+  if (str.length <= 0) return [false, "Username cannot be empty."];
+  if (testSpecialString(str)) return [false, "Username cannot contain special characters."];
+  let account = user_db.prepare("SELECT username FROM accounts WHERE username=? AND token!=?").get(str, token);
+  let user = user_db.prepare("SELECT display_name FROM users WHERE display_name=? AND token!=?").get(str, token);
+  if (account || user) return [false, "Username already exists."];
+  return [true, "OK"];
+}
+
+function testName(str, token=""){
+  if (typeof str != 'string') return [false, "Invalid data."];
+  if (str.length > 24) return [false, "Display name must be less than 32 characters."];
+  if (str.length <= 0) return [false, "Display name cannot be empty."];
+  if (testSpecialString(str)) return [false, "Display name cannot contain special characters."];
+  let account = user_db.prepare("SELECT username FROM accounts WHERE username=? AND token!=?").get(str, token);
+  let user = user_db.prepare("SELECT display_name FROM users WHERE display_name=? AND token!=?").get(str, token);
+  if (account || user) return [false, "Display name already in used."];
+  return [true, "OK"];
+}
 
 function testSpecialString(str){
   return /[^a-zA-Z0-9\.\!\?\_\-]/g.test(str); //Allow no weird characters

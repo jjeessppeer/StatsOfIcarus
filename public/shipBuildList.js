@@ -196,7 +196,7 @@ function addToBuildTable(id, votes, description, build_code, voted, mine, public
     </td>
   </tr>
   <tr>
-    <td class="border-right-0 border-top-0"><p>By:&nbsp`+submitter_name+`</p></td>
+    <td class="border-right-0 border-top-0"><p>By: `+submitter_name+`</p></td>
     <td style="width:100px">
       `+(n_guns>=1 ? "1:&nbsp;"+build_data.guns[0]+"<br>" : "")+`
       `+(n_guns>=2 ? "2:&nbsp;"+build_data.guns[1]+"<br>" : "")+`
