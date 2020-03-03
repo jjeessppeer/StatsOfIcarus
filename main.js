@@ -23,7 +23,7 @@ const log = require('simple-node-logger').createSimpleLogger(logOpts);
 // - prevent adding duplicates
 // - limit entries by ip
 // - logs!
-// - update last visited in check_in!
+// - sorting by total votes, fun_votes or comp_votes
 
 const build_db = new sqlite('databases/build_db.db', { fileMustExist: true });
 const user_db = new sqlite('databases/user_db.db', { fileMustExist: true });
@@ -35,11 +35,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+
+var vote_types = {0: "comp_votes", 1: "fun_votes"};
+var allowed_vote_types = [0, 1];
+
+
 app.post('/check_in', function(req, res){
   let ip = requestIp.getClientIp(req);
   let req_token = req.body[0];
   let user_token = getUserToken(req_token, ip);
-  console.log(user_token);
+  let ip_token = getUserToken("", ip);
   userCheckIn(user_token, ip);
 
   if (user_token != req_token){
@@ -48,16 +53,17 @@ app.post('/check_in', function(req, res){
   }
 
   let user = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(user_token);
-  res.status(200).json([user_token, user.display_name]);
+  let ip_user = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(ip_token);
+  res.status(200).json([user_token, user.display_name, ip_user.display_name]);
 });
 
 app.post('/register', function(req, res){
   let ip = requestIp.getClientIp(req);
-  let user_token = getUserToken("", ip);
+  let ip_token = getUserToken("", ip);
   let username = req.body[0];
   let password = req.body[1];
   
-  if (!(typeof username == 'string' && typeof password == 'string')){
+  if (typeof username != 'string' || typeof password != 'string'){
     res.status(400).send("bad request");
     return;
   }
@@ -75,23 +81,37 @@ app.post('/register', function(req, res){
 
   let salt = makeID(8);
   let hashedPwd = hashString(password, salt);
+  let new_token = generateToken();
 
   // let hashedPwd = hashString(password);
   // console.log("HASHED: ", hashedPwd);
 
   // Create account details
-  user_db.prepare("INSERT INTO accounts (username, password, salt, token) VALUES (?,?,?,?)").run(username, hashedPwd, salt, user_token);
-  user_db.prepare("UPDATE users SET display_name=?, registered=1 WHERE token=?").run(username, user_token);
-  // Remove ip account
-  user_db.prepare("DELETE FROM ip_accounts WHERE token=?").run(user_token);
+  user_db.prepare("INSERT INTO accounts (username, password, salt, token) VALUES (?,?,?,?)").run(username, hashedPwd, salt, new_token);
+  
+  user_db.prepare("INSERT INTO users (token, username, display_name, ips, registered) VALUES (?,?,?,?,1)").run(new_token, username, username, JSON.stringify([ip]));
+
+  // Merge ip account
+  // user_db.prepare("UPDATE users SET display_name=?, registered=1 WHERE token=?").run(username, user_token);
+  // user_db.prepare("DELETE FROM ip_accounts WHERE token=?").run(user_token);
  
   // Return login token
-  let user = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(user_token);
-  res.status(200).json([user_token, user.display_name]);
+  let ip_username = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(ip_token).display_name;
+  res.status(200).json([new_token, username, ip_username]);
+});
+
+app.post('/merge', function(req, res){
+  let ip = requestIp.getClientIp(req);
+  let user_token = getUserToken(req.body[0], ip);
+  let ip_token = getUserToken("", ip);
+
+  mergeUser(user_token, ip_token);
+  res.status("200").send("1");
 });
 
 app.post('/login', function(req, res){
   let ip = requestIp.getClientIp(req);
+  let ip_token = getUserToken("", ip);
   let username = req.body[0];
   let password = req.body[1];
 
@@ -123,8 +143,9 @@ app.post('/login', function(req, res){
 
   // Login OK, send account token.
   let user = user_db.prepare("SELECT * FROM users WHERE token=?").get(account.token);
+  let ip_user = user_db.prepare("SELECT * FROM users WHERE token=?").get(ip_token);
   userCheckIn(user.token, ip);
-  res.status(200).json([user.token, user.display_name]);
+  res.status(200).json([user.token, user.display_name, ip_user.display_name]);
 });
 
 app.get('/get_datasets', function(req, res) {
@@ -175,24 +196,46 @@ app.post('/request_build', function(req, res, next) {
     sql += " AND pve=?";
     params.push(pve_filter!="Exclude" ? 1 : 0);
   }
-  if (submitter_filter != "Anyone"){
-    sql += " AND submitter_token " + (submitter_filter=="Me" ? "=" : "!=") + " ?";
+  if (submitter_filter.toLocaleLowerCase() == "me"){
+    sql += " AND submitter_token=?";
     params.push(user_token);
   }
-  if (sorting == "Votes (Asc.)") 
-    sql += " ORDER BY upvotes ASC";
-  else if (sorting == "Date (new)")
-    sql += " ORDER BY submission_time DESC";
+  else if (submitter_filter != ""){
+    let possible_users = user_db.prepare("SELECT token FROM users WHERE display_name LIKE ?").all('%'+submitter_filter+'%');
+    if (possible_users.length == 0){
+      res.status(200).json([[], 0]);
+      return;
+    }
+    if (possible_users.length > 0) sql += " AND (";
+    for (let i=0; i<possible_users.length; i++){
+      sql += "submitter_token=?";
+      if (i != possible_users.length-1) sql += " OR ";
+      params.push(possible_users[i].token);
+    }
+    if (possible_users.length > 0) sql += ")";
+  }
+  if (sorting == "Total votes") 
+    sql += " ORDER BY (comp_votes+fun_votes) DESC";
+  else if (sorting == "Comp votes")
+    sql += " ORDER BY comp_votes DESC, fun_votes DESC";
+  else if (sorting == "Fun votes")
+    sql += " ORDER BY fun_votes DESC, comp_votes DESC";
   else if (sorting == "Date (old)")
     sql += " ORDER BY submission_time ASC";
+  else if (sorting == "Date (new)")
+    sql += " ORDER BY submission_time DESC";
   else if (sorting == "Alphabetical")
     sql += " ORDER BY name COLLATE NOCASE ASC";
-     
   else
-    sql += " ORDER BY upvotes DESC";
-
+    sql += " ORDER BY (comp_votes+fun_votes) DESC";
   params.push(start-1);
   sql += " LIMIT ?, 8";
+
+
+  let voter = user_db.prepare("SELECT upvoted_ids FROM users WHERE token=? LIMIT 1").get(user_token);
+  let votes = JSON.parse(voter.upvoted_ids);
+  if (!votes[0]) votes[0] = [];
+  if (!votes[1]) votes[1] = [];
 
   let builds = build_db.prepare(sql).all(...params);
   let responseData = [];
@@ -201,21 +244,13 @@ app.post('/request_build', function(req, res, next) {
     responseData.push({
       build_id: builds[i].id,
       build_code: builds[i].build_code,
-      upvotes: builds[i].upvotes,
+      upvotes: [builds[i].comp_votes, builds[i].fun_votes],
       description: builds[i].description,
-      voted: false,
+      voted: [votes[0].includes(builds[i].id), votes[1].includes(builds[i].id)],
       mine: user_token == builds[i].submitter_token,
       public: Boolean(builds[i].public),
       uploader: submitter_name
     });
-  }
-  
-  let voter = user_db.prepare("SELECT upvoted_ids FROM users WHERE token=? LIMIT 1").get(user_token);
-  if (voter){
-    let votes = JSON.parse(voter.upvoted_ids);
-    for (let i=0; i<responseData.length; i++){
-      responseData[i].voted = votes.indexOf(responseData[i].build_id) != -1;
-    }
   }
 
   let n_builds = build_db.prepare("SELECT COUNT(*) as rowCount FROM ship_builds;").get().rowCount;
@@ -258,8 +293,8 @@ app.post('/submit_build', function(req, res, next) {
   let pve = build_data.pve ? 1 : 0;
 
   let lastID = build_db.prepare(`INSERT INTO ship_builds 
-    (submitter_token, name, ship_type, pve, build_code, description, upvotes, public) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(user_token, name, ship_type, pve, build_code, description, 0, 0).lastInsertRowid;
+    (submitter_token, name, ship_type, pve, build_code, description) 
+    VALUES (?, ?, ?, ?, ?, ?)`).run(user_token, name, ship_type, pve, build_code, description).lastInsertRowid;
   
   let user_builds = user_db.prepare("SELECT submitted_builds FROM users WHERE token=?").get(user_token).submitted_builds;
   user_builds = JSON.parse(user_builds);
@@ -275,10 +310,14 @@ app.post('/upvote_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
   let user_token = getUserToken(req.body[0], ip);
   let build_id = parseInt(req.body[1]);
-  let vote_type = parseInt(req.body[2]);
-
   let enabling_vote = Boolean(req.body[2]);
-  if (!(typeof build_id == 'number' && typeof enabling_vote == 'boolean')){
+  let vote_type = parseInt(req.body[3]);
+
+
+  console.log("VOTING.");
+  console.log(vote_type);
+
+  if (typeof build_id != 'number' || typeof enabling_vote != 'boolean' || !allowed_vote_types.includes(vote_type)){
     res.status(400).send("bad request");
     return;
   }
@@ -290,23 +329,28 @@ app.post('/upvote_build', function(req, res) {
   }
   let votes = user_db.prepare("SELECT upvoted_ids FROM users WHERE token=? LIMIT 1").get(user_token).upvoted_ids;
   votes = JSON.parse(votes);
+
+  if (!votes[vote_type]) votes[vote_type] = [];
+
   let vote_change = 0;
-  let has_voted = votes.includes(build_id);
+  let has_voted = votes[vote_type].includes(build_id);
   if (!has_voted && enabling_vote){
-    votes.push(build_id);
+    votes[vote_type].push(build_id);
     vote_change = 1;
   }
   else if (has_voted && !enabling_vote){
-    let index = votes.indexOf(build_id);
-    if (index > -1) votes.splice(index, 1);
+    let index = votes[vote_type].indexOf(build_id);
+    if (index > -1) votes[vote_type].splice(index, 1);
     vote_change = -1;
   }
+
+  console.log("VOTES AFTER CHANGE: ", votes);
   
   user_db.prepare("UPDATE users SET upvoted_ids=? WHERE token=?").run(JSON.stringify(votes), user_token);
-  build_db.prepare("UPDATE ship_builds SET upvotes=upvotes+? WHERE id=?").run(vote_change, build_id);
+  build_db.prepare("UPDATE ship_builds SET "+vote_types[vote_type]+"="+vote_types[vote_type]+"+? WHERE id=?").run(vote_change, build_id);
   
   log.info(ip, " upvote_build \t id:", build_id, " change:"+vote_change, " votes: ", JSON.stringify(votes));
-  res.status(200).json({id: build_id, voted: enabling_vote});
+  res.status(200).send("Voted");
 
 });
 
@@ -357,7 +401,6 @@ function getUserToken(req_token, ip){
   if (ip_acc) return ip_acc.token;
 
   // No ip account, create one.
-  console.log("Generating token");
   let token = generateToken();
   let name = makeID(8);
   user_db.prepare("INSERT INTO ip_accounts (ip, token) VALUES (?,?)").run(ip, token);
@@ -391,11 +434,44 @@ function sanitizeHtml(str){
 
 function userCheckIn(user_token, ip){
   let user = user_db.prepare("SELECT * FROM users WHERE token=?").get(user_token);
-  console.log("User: ", user);
-  console.log("ips: ", user.ips);
   let ips = JSON.parse(user.ips);
   if (ips.indexOf(ip) === -1) ips.push(ip);
   user_db.prepare("UPDATE users SET last_visit=CURRENT_TIMESTAMP, n_visits=n_visits+1, ips=? WHERE token=?").run(JSON.stringify(ips), user_token);
+}
+
+function mergeUser(token_1, token_2){
+  // Change build owners
+  let builds_1 = user_db.prepare("SELECT submitted_builds FROM users WHERE token=?").get(token_1).submitted_builds;
+  let builds_2 = user_db.prepare("SELECT submitted_builds FROM users WHERE token=?").get(token_2).submitted_builds;
+  builds_1 = JSON.parse(builds_1);
+  builds_2 = JSON.parse(builds_2);
+  builds_1.concat(builds_2);
+  user_db.prepare("UPDATE users SET submitted_builds=? WHERE token=?").run(JSON.stringify(builds_1), token_1);
+  build_db.prepare("UPDATE ship_builds SET submitter_token=? WHERE submitter_token=?").run(token_1, token_2);
+
+  // Merge votes
+  let user_1_votes = user_db.prepare("SELECT upvoted_ids FROM users WHERE token=?").get(token_1).upvoted_ids;
+  let user_2_votes = user_db.prepare("SELECT upvoted_ids FROM users WHERE token=?").get(token_2).upvoted_ids;
+  user_1_votes = JSON.parse(user_1_votes);
+  user_2_votes = JSON.parse(user_2_votes);
+  let new_votes = {};
+  for (let [key, value] of Object.entries(vote_types)) {
+    if (!user_1_votes[key]) user_1_votes[key] = [];
+    if (!user_2_votes[key]) user_2_votes[key] = [];
+    let duplicates = user_1_votes[key].filter(elem => user_2_votes[key].includes(elem));
+    let merged = user_1_votes[key].filter(elem => !user_2_votes[key].includes(elem)).concat(user_2_votes[key]);
+
+    // Remove duplicate votes.
+    for (let i of duplicates){
+      build_db.prepare("UPDATE ship_builds SET "+value+"="+value+"-1 WHERE id=?").run(i);
+    }
+    new_votes[key] = merged;
+  }
+  user_db.prepare("UPDATE users SET upvoted_ids=? WHERE token=?").run(JSON.stringify(new_votes), token_1);
+
+  // Remove user 2.
+  user_db.prepare("DELETE FROM users WHERE token=?").run(token_2);
+  user_db.prepare("DELETE FROM ip_accounts WHERE token=?").run(token_2);
 }
 
 

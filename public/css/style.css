@@ -92,7 +92,8 @@
 }
 
 .votebtn.voted {
-    background: rgb(64, 180, 64);
+    /* background: rgb(64, 180, 64); */
+    background: rgb(230, 172, 48);
 }
 
 /* .page-item > a:after {

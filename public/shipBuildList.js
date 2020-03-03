@@ -1,16 +1,14 @@
 
 
 
-
+var latest_build_request_n = 0;
 function initializeBuildList(){
     $("#buildSubmitButton").on("click", submitBuild);
     $("#buildFilterSubmit").on("click", () => requestBuilds());
-
-
     
     $("#buildFilterShip,#buildFilterPvE,#buildFilterAuthor,#buildFilterOrder").on("change", () => requestBuilds());
-    // $("#buildFilterName").on("input", () => requestBuilds());
-    $("#buildFilterName").on("keydown", (ev) => {
+    $("#buildFilterName,#buildFilterUploader").on("focusout", () => requestBuilds());
+    $("#buildFilterName,#buildFilterUploader").on("keydown", (ev) => {
       if (ev.keyCode != 13) return;
       requestBuilds()
     });
@@ -35,8 +33,6 @@ function initializeBuildList(){
       updatePageNav();
       requestBuilds();
     });
-
-
     requestBuilds();
 }
 
@@ -60,7 +56,7 @@ function requestBuilds(flash_top=false){
   let name_filter = $("#buildFilterName").val();
   let ship_filter = $("#buildFilterShip").val();
   let pve_filter = $("#buildFilterPvE").val();
-  let submitter_filter = $("#buildFilterAuthor").val();
+  let submitter_filter = $("#buildFilterUploader").val();
   let sorting = $("#buildFilterOrder").val();
 
   httpxPostRequest("/request_build", [login_token, start, end, name_filter, ship_filter, pve_filter, submitter_filter, sorting], function(){
@@ -73,16 +69,15 @@ function requestBuilds(flash_top=false){
       n_build_pages = Math.max(1, Math.ceil(n_builds/8));
       updatePageNav();
       for (i=0; i<builds.length; i++){
-        let build_id = sanitizeHtml(builds[i].build_id);
-        let votes = sanitizeHtml(builds[i].upvotes);
+        let build_id = builds[i].build_id;
+        let votes = builds[i].upvotes;
         let description = sanitizeHtml(builds[i].description);
         let build_code = sanitizeHtml(builds[i].build_code);
-        let voted = (sanitizeHtml(builds[i].voted) == "true") ? "voted" : "";
-        let mine = sanitizeHtml(builds[i].mine) == "true";
-        let public = sanitizeHtml(builds[i].public) == "true";
+        let voted = builds[i].voted;
+        let mine = builds[i].mine;
+        let public = builds[i].public;
         let submitter_name = sanitizeHtml(builds[i].uploader);
         let flash = i==0 && flash_top;
-        console.log("VOTED: ", voted);
         addToBuildTable(build_id, votes, description, build_code, voted, mine, public, i+1, submitter_name, flash);
       }
     }
@@ -106,7 +101,7 @@ function submitBuild(){
         btn.attr("disabled", false);
         btn.text("Submit to database");
         $("#buildFilterPvE").val("Include");
-        $("#buildFilterAuthor").val("Me");
+        $("#buildFilterUploader").val("Me");
         $("#buildFilterOrder").val("Date (new)");
 
         $("[data-show='#buildDatabase'] > a").trigger("click");
@@ -134,43 +129,14 @@ function toggleUpvote(){
   let build_id = $(this).parent().parent().parent().data("id");
   let enable = !$(this).hasClass("voted");
   let vote_type = $(this).data("votetype");
-  let btns = $(this).parent().find(".votebtn > span");
 
-
-  // console.log(this.querySelector("span"));
-  // console.log(btns[0]);
-  // this.querySelector("span").dataset.votes = "10";
   let span = this.querySelector("span");
   span.dataset.votes = parseInt(span.dataset.votes) + (enable ? 1 : -1);
 
   if (enable) this.classList.add("voted");
   else this.classList.remove("voted");
 
-
-  // btns[0].dataset.votes = "4";
-  
-
-
-  console.log("voting: ", build_id, ", ", enable);
-  httpxPostRequest("/upvote_build", [login_token, build_id, enable, vote_type], function(){
-    // console.log("Request status ", this.readyState, ", ", this.status);
-    // if (this.readyState == 4 && this.status == 200){
-    //   let res = JSON.parse(this.response);
-    //   // let div = $("[data-id='"+res.id+"']");
-    //   let tbody = $("#build-"+res.id);
-    //   let votebtns = tbody.find(".votebtn");
-    //   if (res.voted){
-    //     votebtns.addClass("voted");
-    //     // $(div).attr('data-votes','hello');
-    //     // $(div).attr('data-votes', parseInt($(div).attr('data-votes')) + 1);
-    //     // div.data("votes", 2123);
-    //   }
-    //   else{
-    //     votebtns.removeClass("voted");
-    //     // $(div).attr('data-votes', parseInt($(div).attr('data-votes')) - 1);
-    //   }
-    // }
-  });
+  httpxPostRequest("/upvote_build", [login_token, build_id, enable, vote_type]);
 }
 
 function makeBuildPublic(build_id, make_public){
@@ -205,44 +171,46 @@ function updatePageNav(){
 
 function addToBuildTable(id, votes, description, build_code, voted, mine, public, index, submitter_name, flash=false){
   let build_data = parseBuildCode(build_code);
-  console.log("VOTES: ", votes);
-
   
   let n_guns = parseInt(ship_guns_dataset.getCellByString(build_data.ship, "Ship", "N guns"));
-
-    let table_obj = $(`
-    <tbody class="ship-build-table-item" id="build-`+id+`" data-id="`+id+`">
-    <tr>
-      <td rowspan="2" class="border-right" style="margin:0px;padding:0px">
-        #`+index+`<br>
-        <button class="btn votebtn `+voted+`" type="button" data-votetype="0"><span data-votes="`+votes+`">comp&nbsp;</span><i class="fas fa-chevron-up" style="display:inline;"></i></button>
-        <button class="btn votebtn `+voted+`" type="button" data-votetype="1"><span data-votes="`+votes+`">fun&nbsp;&nbsp;</span><i class="fas fa-chevron-up" style="display:inline;"></i></button>
-      </td>
-      <td class="border-right-0 border-bottom-0"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
-      <td colspan="2">`+build_data.ship+`</td>
-      <td rowspan="2" class="border-left">`+description+`</td>
-      <td rowspan="2" class="border-left" style="margin:0; padding:0;">
-        <button class="btn btn-info tablebtn copybtn" type="button">Copy&nbsplink</button>
-        <button class="btn btn-info tablebtn" type="button" style="display:`+(public&&mine ? "none" : "block")+`">Make&nbsppublic</button>
-        <button class="btn btn-secondary tablebtn" type="button" style="display:`+(!public&&mine ? "none" : "block")+`">Make&nbspprivate</button>
-        <button class="btn btn-danger tablebtn" type="button">Delete</button>
-      </td>
-    </tr>
-    <tr>
-      <td class="border-right-0 border-top-0"><p>By:&nbsp`+submitter_name+`</p></td>
-      <td style="width:100px">
-        `+(n_guns>=1 ? "1:&nbsp;"+build_data.guns[0]+"<br>" : "")+`
-        `+(n_guns>=2 ? "2:&nbsp;"+build_data.guns[1]+"<br>" : "")+`
-        `+(n_guns>=3 ? "3:&nbsp;"+build_data.guns[2]+"<br>" : "")+`
-      </td>
-      <td style="width:100px">
-        `+(n_guns>=4 ? "4:&nbsp;"+build_data.guns[3]+"<br>" : "")+`
-        `+(n_guns>=5 ? "5:&nbsp;"+build_data.guns[4]+"<br>" : "")+`
-        `+(n_guns>=6 ? "6:&nbsp;"+build_data.guns[5]+"<br>" : "")+`
-      </td>
-    </tr>
-    </tbody>`);
-
+  let table_obj = $(`
+  <tbody class="ship-build-table-item" id="build-`+id+`" data-id="`+id+`">
+  <tr>
+    <td rowspan="2" class="border-right" style="margin:0px;padding:0px">
+      #`+index+`<br>
+      <button class="btn votebtn`+(voted[0] ? " voted" : "")+`" type="button" data-votetype="0" data-toggle="tooltip" title="">
+        <span data-votes="`+votes[0]+`">comp&nbsp;</span><i class="fas fa-chevron-up" style="display:inline;"></i>
+      </button>
+      <button class="btn votebtn`+(voted[1] ? " voted" : "")+`" type="button" data-votetype="1" data-toggle="tooltip" title="">
+        <span data-votes="`+votes[1]+`">fun&nbsp;&nbsp;</span><i class="fas fa-chevron-up" style="display:inline;"></i>
+      </button>
+    </td>
+    <td class="border-right-0 border-bottom-0"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
+    <td colspan="2">`+build_data.ship+`</td>
+    <td rowspan="2" class="border-left">`+description+`</td>
+    <td rowspan="2" class="border-left" style="margin:0; padding:0;">
+      <button class="btn btn-info tablebtn copybtn" type="button">Copy&nbsplink</button>
+      <button class="btn btn-info tablebtn" type="button" style="display:`+(public&&mine ? "none" : "block")+`">Make&nbsppublic</button>
+      <button class="btn btn-secondary tablebtn" type="button" style="display:`+(!public&&mine ? "none" : "block")+`">Make&nbspprivate</button>
+      <button class="btn btn-danger tablebtn" type="button">Delete</button>
+    </td>
+  </tr>
+  <tr>
+    <td class="border-right-0 border-top-0"><p>By:&nbsp`+submitter_name+`</p></td>
+    <td style="width:100px">
+      `+(n_guns>=1 ? "1:&nbsp;"+build_data.guns[0]+"<br>" : "")+`
+      `+(n_guns>=2 ? "2:&nbsp;"+build_data.guns[1]+"<br>" : "")+`
+      `+(n_guns>=3 ? "3:&nbsp;"+build_data.guns[2]+"<br>" : "")+`
+    </td>
+    <td style="width:100px">
+      `+(n_guns>=4 ? "4:&nbsp;"+build_data.guns[3]+"<br>" : "")+`
+      `+(n_guns>=5 ? "5:&nbsp;"+build_data.guns[4]+"<br>" : "")+`
+      `+(n_guns>=6 ? "6:&nbsp;"+build_data.guns[5]+"<br>" : "")+`
+    </td>
+  </tr>
+  </tbody>`);
+  table_obj.find('[data-votetype="0"]').tooltip({content: "Vote if loadout is considered to competitively viable.", show: {delay: 350}});
+  table_obj.find('[data-votetype="1"]').tooltip({content: "Vote if loadout is fun to play.", show: {delay: 350}}); 
 
   if (flash){
     table_obj.addClass("blink-div");

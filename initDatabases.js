@@ -67,8 +67,9 @@ CREATE TABLE ship_builds (
     pve BOOLEAN NOT NULL,
     build_code TEXT NOT NULL,
     description TEXT NOT NULL,
-    upvotes INTEGER NOT NULL,
-    public BOOLEAN NOT NULL
+    comp_votes INTEGER DEFAULT 0,
+    fun_votes INTEGER DEFAULT 0,
+    public BOOLEAN DEFAULT 0
     );`).run();
 
 build_db.prepare(`
@@ -82,7 +83,8 @@ build_db.prepare(`
     pve BOOLEAN NOT NULL,
     build_code TEXT NOT NULL,
     description TEXT NOT NULL,
-    upvotes INTEGER NOT NULL,
+    comp_votes INTEGER NOT NULL,
+    fun_votes INTEGER NOT NULL,
     public BOOLEAN NOT NULL
     );`).run();
 
