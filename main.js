@@ -39,7 +39,7 @@ app.post('/check_in', function(req, res){
   let ip = requestIp.getClientIp(req);
   let req_token = req.body[0];
   let user_token = getUserToken(req_token, ip);
-
+  console.log(user_token);
   userCheckIn(user_token, ip);
 
   if (user_token != req_token){
@@ -123,6 +123,7 @@ app.post('/login', function(req, res){
 
   // Login OK, send account token.
   let user = user_db.prepare("SELECT * FROM users WHERE token=?").get(account.token);
+  userCheckIn(user.token, ip);
   res.status(200).json([user.token, user.display_name]);
 });
 
@@ -274,6 +275,7 @@ app.post('/upvote_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
   let user_token = getUserToken(req.body[0], ip);
   let build_id = parseInt(req.body[1]);
+  let vote_type = parseInt(req.body[2]);
 
   let enabling_vote = Boolean(req.body[2]);
   if (!(typeof build_id == 'number' && typeof enabling_vote == 'boolean')){
@@ -355,10 +357,11 @@ function getUserToken(req_token, ip){
   if (ip_acc) return ip_acc.token;
 
   // No ip account, create one.
+  console.log("Generating token");
   let token = generateToken();
-  let name = makeID(10);
+  let name = makeID(8);
   user_db.prepare("INSERT INTO ip_accounts (ip, token) VALUES (?,?)").run(ip, token);
-  user_db.prepare("INSERT INTO users (token, username, display_name, ips) VALUES (?,?,?,?)").run(token, name, name, "["+ip+"]");
+  user_db.prepare("INSERT INTO users (token, username, display_name, ips) VALUES (?,?,?,?)").run(token, name, name, JSON.stringify([ip]));
   return token;
 }
 
@@ -388,6 +391,8 @@ function sanitizeHtml(str){
 
 function userCheckIn(user_token, ip){
   let user = user_db.prepare("SELECT * FROM users WHERE token=?").get(user_token);
+  console.log("User: ", user);
+  console.log("ips: ", user.ips);
   let ips = JSON.parse(user.ips);
   if (ips.indexOf(ip) === -1) ips.push(ip);
   user_db.prepare("UPDATE users SET last_visit=CURRENT_TIMESTAMP, n_visits=n_visits+1, ips=? WHERE token=?").run(JSON.stringify(ips), user_token);

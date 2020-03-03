@@ -44,7 +44,7 @@ user_db.prepare(`
       n_visits INTEGER DEFAULT 1,
       first_visit DATETIME DEFAULT CURRENT_TIMESTAMP,
 	  last_visit DATETIME DEFAULT CURRENT_TIMESTAMP,
-	  upvoted_ids TEXT DEFAULT '[]',
+	  upvoted_ids TEXT DEFAULT '{}',
 	  submitted_builds TEXT DEFAULT '[]',
 	  banned BOOLEAN DEFAULT 0
 	);`).run();

@@ -49,11 +49,6 @@ function requestBuildRemoval(build_id){
         // $("#build-"+build_id+"").remove();
         requestBuilds();
       }
-    }, 
-    function(){
-      let btn = $("#build-"+build_id+" .btn:nth-of-type(4)")
-      btn.text("Delete failed");
-      btn.prop('disabled', false);
     });
 }
 
@@ -79,16 +74,16 @@ function requestBuilds(flash_top=false){
       updatePageNav();
       for (i=0; i<builds.length; i++){
         let build_id = sanitizeHtml(builds[i].build_id);
-        let upvotes = sanitizeHtml(builds[i].upvotes);
+        let votes = sanitizeHtml(builds[i].upvotes);
         let description = sanitizeHtml(builds[i].description);
         let build_code = sanitizeHtml(builds[i].build_code);
-        let voted = sanitizeHtml(builds[i].voted) == "true";
+        let voted = (sanitizeHtml(builds[i].voted) == "true") ? "voted" : "";
         let mine = sanitizeHtml(builds[i].mine) == "true";
         let public = sanitizeHtml(builds[i].public) == "true";
         let submitter_name = sanitizeHtml(builds[i].uploader);
         let flash = i==0 && flash_top;
-
-        addToBuildTable(build_id, upvotes, 0, description, build_code, voted, mine, public, i+1, submitter_name, flash);
+        console.log("VOTED: ", voted);
+        addToBuildTable(build_id, votes, description, build_code, voted, mine, public, i+1, submitter_name, flash);
       }
     }
   });
@@ -135,29 +130,46 @@ function submitBuild(){
     });
 }
 
-
 function toggleUpvote(){
-  let id = $(this).data("id");
+  let build_id = $(this).parent().parent().parent().data("id");
   let enable = !$(this).hasClass("voted");
+  let vote_type = $(this).data("votetype");
+  let btns = $(this).parent().find(".votebtn > span");
 
-  console.log("voting: ", id, ", ", enable);
-  httpxPostRequest("/upvote_build", [login_token, id, enable], function(){
-    console.log("Request status ", this.readyState, ", ", this.status);
-    if (this.readyState == 4 && this.status == 200){
-      let res = JSON.parse(this.response);
-      let div = $("[data-id='"+res.id+"']")
-      console.log(div.data("votes"));
-      if (res.voted){
-        div.addClass("voted");
-        // $(div).attr('data-votes','hello');
-        $(div).attr('data-votes', parseInt($(div).attr('data-votes')) + 1);
-        // div.data("votes", 2123);
-      }
-      else{
-        div.removeClass("voted");
-        $(div).attr('data-votes', parseInt($(div).attr('data-votes')) - 1);
-      }
-    }
+
+  // console.log(this.querySelector("span"));
+  // console.log(btns[0]);
+  // this.querySelector("span").dataset.votes = "10";
+  let span = this.querySelector("span");
+  span.dataset.votes = parseInt(span.dataset.votes) + (enable ? 1 : -1);
+
+  if (enable) this.classList.add("voted");
+  else this.classList.remove("voted");
+
+
+  // btns[0].dataset.votes = "4";
+  
+
+
+  console.log("voting: ", build_id, ", ", enable);
+  httpxPostRequest("/upvote_build", [login_token, build_id, enable, vote_type], function(){
+    // console.log("Request status ", this.readyState, ", ", this.status);
+    // if (this.readyState == 4 && this.status == 200){
+    //   let res = JSON.parse(this.response);
+    //   // let div = $("[data-id='"+res.id+"']");
+    //   let tbody = $("#build-"+res.id);
+    //   let votebtns = tbody.find(".votebtn");
+    //   if (res.voted){
+    //     votebtns.addClass("voted");
+    //     // $(div).attr('data-votes','hello');
+    //     // $(div).attr('data-votes', parseInt($(div).attr('data-votes')) + 1);
+    //     // div.data("votes", 2123);
+    //   }
+    //   else{
+    //     votebtns.removeClass("voted");
+    //     // $(div).attr('data-votes', parseInt($(div).attr('data-votes')) - 1);
+    //   }
+    // }
   });
 }
 
@@ -191,28 +203,33 @@ function updatePageNav(){
   $("#buildPageNavLast").toggle(current_build_page != n_build_pages);
 }
 
-function addToBuildTable(id, upvotes, downvotes, description, build_code, voted, mine, public, index, submitter_name, flash=false){
+function addToBuildTable(id, votes, description, build_code, voted, mine, public, index, submitter_name, flash=false){
   let build_data = parseBuildCode(build_code);
-  // console.log(build_data)
+  console.log("VOTES: ", votes);
+
   
   let n_guns = parseInt(ship_guns_dataset.getCellByString(build_data.ship, "Ship", "N guns"));
-  let table_obj = $(`
-    <tbody class="ship-build-table-item" id="build-`+id+`">
+
+    let table_obj = $(`
+    <tbody class="ship-build-table-item" id="build-`+id+`" data-id="`+id+`">
     <tr>
-      <td rowspan="2"><p>`+index+`</p></td>
-      <td rowspan="2">
-        <div class="upvote`+(voted ? " voted" : "")+`" data-id="`+id+`" data-votes="`+upvotes+`"><i class="fas fa-chevron-up"></i></div>
-      <td rowspan="2"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
+      <td rowspan="2" class="border-right" style="margin:0px;padding:0px">
+        #`+index+`<br>
+        <button class="btn votebtn `+voted+`" type="button" data-votetype="0"><span data-votes="`+votes+`">comp&nbsp;</span><i class="fas fa-chevron-up" style="display:inline;"></i></button>
+        <button class="btn votebtn `+voted+`" type="button" data-votetype="1"><span data-votes="`+votes+`">fun&nbsp;&nbsp;</span><i class="fas fa-chevron-up" style="display:inline;"></i></button>
+      </td>
+      <td class="border-right-0 border-bottom-0"><a class="build-name" href="#shipBuilder?`+build_code+`">`+build_data.name+`</a></td>
       <td colspan="2">`+build_data.ship+`</td>
-      <td rowspan="2">`+description+`</td>
-      <td rowspan="2" style="border-left: 1px solid rgb(222, 226, 230); margin:0; padding:0;">
-      <button class="btn btn-info tablebtn copybtn" type="button">Copy&nbsplink</button>
+      <td rowspan="2" class="border-left">`+description+`</td>
+      <td rowspan="2" class="border-left" style="margin:0; padding:0;">
+        <button class="btn btn-info tablebtn copybtn" type="button">Copy&nbsplink</button>
         <button class="btn btn-info tablebtn" type="button" style="display:`+(public&&mine ? "none" : "block")+`">Make&nbsppublic</button>
         <button class="btn btn-secondary tablebtn" type="button" style="display:`+(!public&&mine ? "none" : "block")+`">Make&nbspprivate</button>
         <button class="btn btn-danger tablebtn" type="button">Delete</button>
       </td>
     </tr>
     <tr>
+      <td class="border-right-0 border-top-0"><p>By:&nbsp`+submitter_name+`</p></td>
       <td style="width:100px">
         `+(n_guns>=1 ? "1:&nbsp;"+build_data.guns[0]+"<br>" : "")+`
         `+(n_guns>=2 ? "2:&nbsp;"+build_data.guns[1]+"<br>" : "")+`
@@ -225,6 +242,8 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted,
       </td>
     </tr>
     </tbody>`);
+
+
   if (flash){
     table_obj.addClass("blink-div");
     setTimeout(function() {
@@ -232,18 +251,22 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted,
   }
   $("#buildDatabaseTable").append(table_obj);
   
-
-  let copy_btn = table_obj.find(".btn:nth-of-type(1)");
-  let public_btn = table_obj.find(".btn:nth-of-type(2)");
-  let private_btn = table_obj.find(".btn:nth-of-type(3)");
-  let del_btn = table_obj.find(".btn:nth-of-type(4)");
+  let vote_btns = table_obj.find(".votebtn");
+  let copy_btn = table_obj.find(".tablebtn:nth-of-type(1)");
+  let public_btn = table_obj.find(".tablebtn:nth-of-type(2)");
+  let private_btn = table_obj.find(".tablebtn:nth-of-type(3)");
+  let del_btn = table_obj.find(".tablebtn:nth-of-type(4)");
   if (!mine) {
     del_btn.hide();
     private_btn.hide();
     public_btn.hide();
   }
+
+  vote_btns.on("click", function(){
+
+  });
   copy_btn.on("click", function(){
-    let build_id = $(this).parent().parent().find(".upvote").data("id");
+    let build_id = $(this).parent().parent().parent().data("id");
     let name = $(this).parent().parent().find(".build-name").text();
     let link = window.location.href.split("#")[0] + "#shipBuilder" + "?id=" + build_id + "&name=" + encodeURIComponent(name);
     copyToClipboard(link);
@@ -251,18 +274,18 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted,
     $(this).text("Link copied")
   });
   del_btn.on("click", function(){
-    let build_id = $(this).parent().parent().find(".upvote").data("id");
+    let build_id = $(this).parent().parent().parent().data("id");
     $(this).text("Deleteing...");
     $(this).prop('disabled', true);
     requestBuildRemoval(build_id);
   });
   public_btn.on("click", function(){
-    let build_id = $(this).parent().parent().find(".upvote").data("id");
+    let build_id = $(this).parent().parent().parent().data("id");
     $(this).prop('disabled', true);
     makeBuildPublic(build_id, true);
   });
   private_btn.on("click", function(){
-    let build_id = $(this).parent().parent().find(".upvote").data("id");
+    let build_id = $(this).parent().parent().parent().data("id");
     $(this).prop('disabled', true);
     makeBuildPublic(build_id, false);
   });
@@ -277,6 +300,6 @@ function addToBuildTable(id, upvotes, downvotes, description, build_code, voted,
     $("#shipBuilderDesCheck").prop('checked', description!="");
     $("#buildDescriptionArea").val(description);
   });
-  table_obj.find(".upvote").on("click", toggleUpvote);
+  table_obj.find(".votebtn").on("click", toggleUpvote);
 
 }

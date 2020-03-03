@@ -1,3 +1,5 @@
+.fas { display:inline; }
+
 .blink-div {
     /* float: right; */
     /* font-size: 10px; */
@@ -69,6 +71,30 @@
     width: 100%;
 }
 
+.votebtn {
+    padding: 0;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin: 0px;
+    background: grey;
+    color: white;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-left: 2px;
+    /* width: 100%; */
+    font-size: 16px;
+    text-align: left;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.votebtn > span::after {
+    content: attr(data-votes);
+}
+
+.votebtn.voted {
+    background: rgb(64, 180, 64);
+}
+
 /* .page-item > a:after {
     content: attr(data-pagename);
 } */
@@ -87,7 +113,7 @@
     cursor:default;
 }
 
-.upvote.voted > .fa-chevron-up{
+/* .upvote.voted > .fa-chevron-up{
     color: rgb(64, 223, 64);
 }
 .upvote.voted{
@@ -100,7 +126,7 @@
 
 .upvote{
     cursor:pointer;
-}
+} */
 
 a.build-name{
     cursor:pointer;
