@@ -45,6 +45,9 @@ app.post('/check_in', function(req, res){
   let req_token = req.body[0];
   let user_token = getUserToken(req_token, ip);
   let ip_token = getUserToken("", ip);
+
+  log.info(ip, " ", user_token, " check_in");
+
   userCheckIn(user_token, ip);
 
   if (user_token != req_token){
@@ -95,11 +98,20 @@ app.post('/register', function(req, res){
 
 app.post('/merge', function(req, res){
   let ip = requestIp.getClientIp(req);
-  let user_token = getUserToken(req.body[0], ip);
+  let user_token = req.body[0];
   let ip_token = getUserToken("", ip);
 
+  
+  log.info(ip, " ", ip_token, " merge: ", user_token, ", ", ip_token);
+
+  if (!isUser(user_token)){
+    log.error("Invalid user token.");
+    res.status("400").send("Server error.");
+    return;
+  }
+
   mergeUser(user_token, ip_token);
-  res.status("200").send("1");
+  res.status("200").send("Accounts merged!");
 });
 
 app.post('/login', function(req, res){
@@ -108,6 +120,9 @@ app.post('/login', function(req, res){
   let username = req.body[0];
   let password = req.body[1];
 
+  
+  log.info(ip, " ", ip_token, " login: ", username);
+
   if (!(typeof username == 'string' && typeof password == 'string')){
     res.status(400).send("bad request");
     return;
@@ -115,6 +130,7 @@ app.post('/login', function(req, res){
 
   let tries = user_db.prepare("SELECT * FROM login_tries WHERE datetime(timestamp)>datetime('now', '-10 minute') AND successful=0 AND ip=?").all(ip);
   if (tries.length > 10) { // Too many failed tries
+    log.error(ip, " Many failed tries.");
     res.status("200").send("-1");
     return;
   }
@@ -167,6 +183,7 @@ app.post('/change_profile', function(req, res){
   // Execute request
   if (action == "set_username"){
     user_db.prepare("UPDATE accounts SET username=? WHERE token=?").run(data, user_token);
+    user_db.prepare("UPDATE users SET username=? WHERE token=?").run(data, user_token);
     res.status("200").send("Username updated!");
     return;
   }
@@ -188,7 +205,8 @@ app.post('/change_profile', function(req, res){
 
 app.get('/get_datasets', function(req, res) {
   let ip = requestIp.getClientIp(req);
-  log.info(ip, " get_datasets \t Datasets requested.");
+  let ip_token = getUserToken("", ip);
+  log.info(ip, " ", ip_token, " get_datasets \t Datasets requested.");
   let datasets = {};
   //datasets.history = data_db.prepare("SELECT * FROM Match_History").all();
   datasets.gun_stats = data_db.prepare("SELECT * FROM Gun_stats").all();
@@ -203,8 +221,6 @@ app.get('/get_datasets', function(req, res) {
   res.status("200").json(datasets);
 });
 
-
-
 app.post('/request_build', function(req, res, next) {
   let ip = requestIp.getClientIp(req);
   let user_token = getUserToken(req.body[0], ip);
@@ -215,7 +231,7 @@ app.post('/request_build', function(req, res, next) {
   let pve_filter = req.body[5];
   let submitter_filter = req.body[6];
   let sorting = req.body[7];
-  log.info(ip, " request_build \t Builds [", start, ",", start+8, "]");
+  log.info(ip, " ", user_token, " request_build \t Builds [", start, ",", start+8, "]");
   if (!(typeof start == 'number' && typeof end == 'number' && typeof name_filter == 'string' &&
       typeof ship_filter == 'string' && typeof pve_filter == 'string' && typeof submitter_filter == 'string'
       && typeof sorting == 'string') || start<1){
@@ -302,7 +318,7 @@ app.post('/request_single_build', function(req, res) {
   let ip = requestIp.getClientIp(req);
   let user_token = getUserToken(req.body[0], ip);
   let build_id = req.body[1];
-  log.info(ip, " request_single_build \t id:", build_id);
+  log.info(ip, " ", user_token, " request_single_build \t id:", build_id);
   let build = build_db.prepare("SELECT * FROM ship_builds WHERE id=? AND (submitter_token=? OR public=true)").get(build_id, user_token);
   if (!build){
     res.status(400).send("bad request");
@@ -342,7 +358,7 @@ app.post('/submit_build', function(req, res, next) {
   user_db.prepare("UPDATE users SET submitted_builds=? WHERE token=?").run(JSON.stringify(user_builds), user_token);
 
   
-  log.info(ip, " submit_build \t ", lastID, ", ", name, ", ", build_code);
+  log.info(ip, " ", user_token, " submit_build \t ", lastID, ", ", name, ", ", build_code);
   res.status(200).json([lastID]);
 });
 
@@ -352,10 +368,6 @@ app.post('/upvote_build', function(req, res) {
   let build_id = parseInt(req.body[1]);
   let enabling_vote = Boolean(req.body[2]);
   let vote_type = parseInt(req.body[3]);
-
-
-  console.log("VOTING.");
-  console.log(vote_type);
 
   if (typeof build_id != 'number' || typeof enabling_vote != 'boolean' || !allowed_vote_types.includes(vote_type)){
     res.status(400).send("bad request");
@@ -384,12 +396,11 @@ app.post('/upvote_build', function(req, res) {
     vote_change = -1;
   }
 
-  console.log("VOTES AFTER CHANGE: ", votes);
   
   user_db.prepare("UPDATE users SET upvoted_ids=? WHERE token=?").run(JSON.stringify(votes), user_token);
   build_db.prepare("UPDATE ship_builds SET "+vote_types[vote_type]+"="+vote_types[vote_type]+"+? WHERE id=?").run(vote_change, build_id);
   
-  log.info(ip, " upvote_build \t id:", build_id, " change:"+vote_change, " votes: ", JSON.stringify(votes));
+  log.info(ip, " ", user_token, " upvote_build \t id:", build_id, " change:"+vote_change, " votes: ", JSON.stringify(votes));
   res.status(200).send("Voted");
 
 });
@@ -402,7 +413,7 @@ app.post('/remove_build', function(req, res) {
     res.status(400).send("bad request");
     return;
   }
-  log.info(ip, " remove_build \t id:", build_id);
+  log.info(ip, " ", user_token, " remove_build \t id:", build_id);
   build_db.prepare("INSERT INTO ship_builds_removals SELECT CURRENT_TIMESTAMP, * FROM ship_builds WHERE id=? AND submitter_token=?;").run(build_id, user_token);
   build_db.prepare("DELETE FROM ship_builds WHERE id=? AND submitter_token=?;").run(build_id, user_token);
   res.status(200).send("build removed");
@@ -413,11 +424,10 @@ app.post('/publicice_build', function(req, res) {
   let user_token = getUserToken(req.body[0], ip);
   let build_id = parseInt(req.body[1]);
   let make_public = Boolean(req.body[2]) ? 1 : 0;
-  log.info(ip, " publicice_build \t id:", build_id, " public:", make_public);
+  log.info(ip, " ", user_token, " publicice_build \t id:", build_id, " public:", make_public);
   build_db.prepare("UPDATE ship_builds SET public=? WHERE id=? AND submitter_token=?").run(make_public, build_id, user_token);
   res.status(200).json([make_public, build_id]);
 });
-
 
 
 function generateToken(){
@@ -477,6 +487,7 @@ function testPassword(str){
 
 function testUsername(str, token=""){
   if (typeof str != 'string') return [false, "Invalid data."];
+  if (str.toLowerCase() == 'me') return [false, "Username already in use."];
   if (str.length > 24) return [false, "Username must be less than 32 characters."];
   if (str.length <= 0) return [false, "Username cannot be empty."];
   if (testSpecialString(str)) return [false, "Username cannot contain special characters."];
@@ -488,12 +499,13 @@ function testUsername(str, token=""){
 
 function testName(str, token=""){
   if (typeof str != 'string') return [false, "Invalid data."];
+  if (str.toLowerCase() == 'me') return [false, "Display name already in use."];
   if (str.length > 24) return [false, "Display name must be less than 32 characters."];
   if (str.length <= 0) return [false, "Display name cannot be empty."];
   if (testSpecialString(str)) return [false, "Display name cannot contain special characters."];
   let account = user_db.prepare("SELECT username FROM accounts WHERE username=? AND token!=?").get(str, token);
   let user = user_db.prepare("SELECT display_name FROM users WHERE display_name=? AND token!=?").get(str, token);
-  if (account || user) return [false, "Display name already in used."];
+  if (account || user) return [false, "Display name already exists."];
   return [true, "OK"];
 }
 
@@ -546,6 +558,12 @@ function mergeUser(token_1, token_2){
   // Remove user 2.
   user_db.prepare("DELETE FROM users WHERE token=?").run(token_2);
   user_db.prepare("DELETE FROM ip_accounts WHERE token=?").run(token_2);
+}
+
+function isUser(token){
+  let user = user_db.prepare("SELECT username FROM accounts WHERE token=?").get(token);
+  if (user) return true;
+  return false;
 }
 
 

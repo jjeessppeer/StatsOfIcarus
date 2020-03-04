@@ -23,8 +23,6 @@ function initializeAccount() {
     $("#registerButton").prop('disabled', true);
     httpxPostRequest("/register", [username, password], function () {
       if (this.status == 200) {
-        // $("#loginWarningText").css('color', 'green');
-        // $("#loginWarningText").text("Account registered!");
         let res = JSON.parse(this.response);
         logIn(res[0], res[1], res[2]);
         requestBuilds();
@@ -41,8 +39,7 @@ function initializeAccount() {
 
   $("#mergeProfileButton").on("click", function () {
     httpxPostRequest("/merge", [login_token], function () {
-      let res = JSON.parse(this.response);
-      console.log(res);
+      $("#profileChangeText").text(this.response);
       checkIn();
     });
   });
