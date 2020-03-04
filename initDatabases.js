@@ -1,14 +1,9 @@
 
 const sqlite = require('better-sqlite3');
-const access_db = new sqlite('databases/access_db.db', { verbose: null });
+// const access_db = new sqlite('databases/access_db.db', { verbose: null });
 const user_db = new sqlite('databases/user_db.db', { verbose: null });
 const build_db = new sqlite('databases/build_db.db', { verbose: null });
 const data_db = new sqlite('databases/data_db.db', { verbose: null });
-// const account_db = new sqlite('databases/data_db.db', { verbose: null });
-
-
-
-
 
 
 user_db.prepare(`
@@ -47,12 +42,6 @@ user_db.prepare(`
 	  upvoted_ids TEXT DEFAULT '{}',
 	  submitted_builds TEXT DEFAULT '[]',
 	  banned BOOLEAN DEFAULT 0
-	);`).run();
-	
-access_db.prepare(`
-	CREATE TABLE accesses (
-		ip TEXT NOT NULL,
-		time DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`).run();
 
 // Initialize build database

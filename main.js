@@ -89,9 +89,10 @@ app.post('/register', function(req, res){
   user_db.prepare("INSERT INTO users (token, username, display_name, ips, registered) VALUES (?,?,?,?,1)").run(new_token, username, username, JSON.stringify([ip]));
 
   // Merge ip account
-  // mergeUser(new_token, ip_token);
+  mergeUser(new_token, ip_token);
  
   // Return login token
+  ip_token = getUserToken("", ip);
   let ip_username = user_db.prepare("SELECT display_name FROM users WHERE token=?").get(ip_token).display_name;
   res.status(200).json([new_token, username, ip_username]);
 });

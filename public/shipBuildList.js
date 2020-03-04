@@ -7,7 +7,7 @@ function initializeBuildList(){
     $("#buildFilterSubmit").on("click", () => requestBuilds());
     
     $("#buildFilterShip,#buildFilterPvE,#buildFilterAuthor,#buildFilterOrder").on("change", () => requestBuilds());
-    $("#buildFilterName,#buildFilterUploader").on("focusout", () => requestBuilds());
+    // $("#buildFilterName,#buildFilterUploader").on("focusout", () => requestBuilds());
     $("#buildFilterName,#buildFilterUploader").on("keydown", (ev) => {
       if (ev.keyCode != 13) return;
       requestBuilds()
@@ -147,8 +147,8 @@ function makeBuildPublic(build_id, make_public){
       let build_id = parseInt(res[1]);
 
       let table_row = $("#build-"+build_id);
-      let pub_btn = table_row.find(".btn:nth-of-type(2)");
-      let priv_btn = table_row.find(".btn:nth-of-type(3)");
+      let pub_btn = table_row.find(".tablebtn:nth-of-type(2)");
+      let priv_btn = table_row.find(".tablebtn:nth-of-type(3)");
 
       pub_btn.prop('disabled', false);
       priv_btn.prop('disabled', false);
@@ -257,9 +257,7 @@ function addToBuildTable(id, votes, description, build_code, voted, mine, public
     $(this).prop('disabled', true);
     makeBuildPublic(build_id, false);
   });
-
   table_obj.find("a").on("click", function(){
-    // console.log( $(this).attr('href'));
     openPageFromUrl.call(this);
     shipBuilderImport(null, getUrlParam($(this).attr('href')));
     if (description!="") $("#buildDescriptionCol").show();

@@ -355,6 +355,36 @@
 
       <!-- Build Database  -->
       <div id="buildDatabase" class="content-panel" style="display:none">
+        <!-- <div>
+          <table class="table" style="width:100%;max-width:1200px;">
+            <thead>
+              <tr>
+                <th class="border-left" scope="col" style="width:15px">#</th>
+                <th scope="col" style="width:170px;">Tags</th>
+                <th scope="col" colspan="2" style="width:200px">Ship info</th>
+                <th scope="col">Description</th>
+                <th scope="col" style="width:85px">Options</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>n</td>
+                <td style="margin:0px;padding:0px;">
+                  <button class="styled voted" data-votes="3">comp</button>
+                  <button class="styled" data-votes="3">fun&nbsp;</button>
+                  <br>
+                  <button class="styled" data-votes="3">meme</button>
+                  <button class="styled" data-votes="3">bad&nbsp;</button>
+                  <br>
+                  <button class="styled" data-votes="3">easy</button>
+                  <button class="styled" data-votes="3">hard</button>
+                </td>
+              </tr>
+            </tbody> 
+          </table>
+          
+        </div> -->
+        
         <div>
           <div class="my-col">
             <div class="input-group" style="width:200px">
@@ -1336,7 +1366,6 @@
         updateRangeVis();
         updateArcPanel();
       });
-      // console.log("COOKIE: ", getCookie("dark_mode")=="true")
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
       dark_mode_switch.trigger("change");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
@@ -1346,20 +1375,8 @@
 
     });
 
-    function datasetLoadCheck(){
-      if (!(match_dataset && gun_dataset && ammo_dataset &&
-          damage_dataset && tool_dataset && component_dataset &&
-          ship_dataset && map_dataset && crosshair_dataset &&
-          ship_guns_dataset)) {
-          setTimeout(datasetLoadCheck, 200);
-          return;
-      }
-      console.log("Datasets loaded from google.");
-      datasetsLoaded();
-    }
-
     function loadDatasetsFromServer(){
-      $("#loadalert span").text("Getting datasets");
+      $("#loadalert span").text("Getting data.");
 
       // Load datasets from server. On timeout load from google.
       httpxGetRequest("/get_datasets", function(){

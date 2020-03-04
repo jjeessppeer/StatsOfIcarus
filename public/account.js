@@ -60,7 +60,6 @@ function logIn(token, name, ip_name){
   $("#loginName").text("Logged in as: " + name);
   $("#loginUsername").val("");
   $("#loginPassword").val("");
-  console.log(ip_name)
   $("#profileIpName").text(ip_name);
   $("#profileAccName").text(name);
   loginWarning("");
@@ -106,10 +105,9 @@ function loginWarning(text){
 function changeProfile(action, data){
   httpxPostRequest("/change_profile", [login_token, action, data],
     function() {
-      console.log("RES: ", this.status, ", ", this.response);
       if (this.status == 200) $("#profileChangeText").css('color', 'green');
       else $("#profileChangeText").css('color', 'red');
       $("#profileChangeText").text(this.response);
-      console.log("PROFILE CHANGED ", this.response);
+      checkIn();
   });
 }
