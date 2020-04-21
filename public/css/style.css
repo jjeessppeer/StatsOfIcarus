@@ -1,5 +1,14 @@
 /* .fas { display:inline; } */
 
+.hide-overflow {
+  /* min-width:80px; */
+  /* max-width:80px; */
+  /* white-space: ; */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 button.styled{
   /* background-image: linear-gradient(-180deg, #00B48C 0%, rgb(0, 149, 117) 100%); */
   /* background-image: linear-gradient(-180deg, rgb(51, 94, 214) 0%, rgb(44, 81, 184) 100%); */
