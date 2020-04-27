@@ -92,14 +92,17 @@ function generateMapSet(){
             map_pool.push(selections[i].childNodes[3].innerText);
     }
 
+    full_pool = map_pool.slice();
+
     let n_maps = Number($("#mapSetSize").val());
     if (!n_maps) n_maps = 0;
-    if (n_maps > map_pool.length){
-        alert("Error: Set size larger than selected map pool.")
-        return;
-    }
+    // if (n_maps > map_pool.length){
+    //     alert("Error: Set size larger than selected map pool.")
+    //     return;
+    // }
     $("#tournamentMapSet").empty();
     for (let i=0; i<n_maps; i++){
+        if (map_pool.length == 0) map_pool = full_pool.slice();
         let r = Math.floor(Math.random() * (map_pool.length));
         $("#tournamentMapSet").append((i==0 ? "" : "<br>") + (i+1) + ". " + map_pool[r]);
         map_pool.splice(r, 1);
