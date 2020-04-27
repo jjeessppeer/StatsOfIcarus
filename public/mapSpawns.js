@@ -10,13 +10,11 @@ function initializeSpawns(){
     let pool_checks = getCookie("mapPoolChecks");
     if (pool_checks == "") pool_checks = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
     else pool_checks = JSON.parse(pool_checks);
-    console.log("COOKIE: ", pool_checks);
 
     let rows = map_dataset.filterByString("2v2", "Game mode").getDatasetRows();
     for (let i=0; i < rows.length; i++){
         $("#spawnMapSelect").append("<option>" + rows[i][1] + "</option>");
 
-        
         // Initialize tournament ranzomizer options
         $("#tournamentMapPool").append(`
             <div class="form-check" style="display: inline-block;width:180px;">
@@ -37,7 +35,6 @@ function initializeSpawns(){
         for (let i=0; i<checkboxes.length; i++){
             checks.push((checkboxes[i].checked ? 1 : 0));
         }
-        console.log(JSON.stringify(checks));
         setCookie("mapPoolChecks", JSON.stringify(checks));
     });
     $("#generateMapSetBtn").on("click", generateMapSet);
@@ -64,7 +61,6 @@ function generateMapSet(){
         let r = Math.floor(Math.random() * (map_pool.length));
         $("#tournamentMapSet").append((i==0 ? "" : "<br>") + (i+1) + ". " + map_pool[r]);
         map_pool.splice(r, 1);
-        console.log(map_pool.length);
     }
 }
 
