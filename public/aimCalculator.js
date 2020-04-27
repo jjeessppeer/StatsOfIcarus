@@ -4,8 +4,6 @@ var start_point = [100, 100, 100];
 var target_point = [200, 200, 100];
 
 function initializeAimCalculator(){
-
-    
     $('#mapImage').on('dragstart', function (event) { event.preventDefault(); });
     // Aim calculator events
     $("#mapCanvas").on("mousemove mousedown", function (e) {
@@ -57,7 +55,7 @@ function initializeAimCalculator(){
       });
 
     $("#arcMapSelect").on("change", function () {
-        let map_srcs = { "Dunes": "map-images/Dunes.jpg", "Fjords": "map-images/Fjords.jpg" };
+        let map_srcs = { "Battle on the Dunes": "map-images/Dunes.jpg", "Northern Fjords": "map-images/Fjords.jpg" };
         $("#mapImage").attr("src", map_srcs[$(this).val()]);
         updateArcPanel();
     });
@@ -75,7 +73,7 @@ function updateArcPanel() {
     // must be scaled to world coords
     // Get world coords
     let map_image = document.querySelector("#mapImage");
-    let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)") / (map_image.width / map_image.naturalWidth);
+    let map_scale = map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map Scale") / (map_image.width / map_image.naturalWidth);
     // console.log(map_dataset.getCellByString($("#arcMapSelect").val(), "Name", "Map scale (m/px)"))
     let arc_scale = 10;
 

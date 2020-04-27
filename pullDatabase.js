@@ -123,7 +123,7 @@ function initTables(){
     "Size"	TEXT,
     "MapImage"	TEXT,
     "SpawnImage"	TEXT,
-    "Mapscale"	TEXT
+    "MapScale"	TEXT
   )`).run();
   data_db.prepare(`CREATE TABLE "Match_history" (
     "Timestamp"	TEXT,
