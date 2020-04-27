@@ -106,8 +106,8 @@
             Projectile arcs
           </a>
         </li>
-        <li id="mapSpawnsLink" data-show="#spawns">
-          <a href="#spawns">
+        <li id="mapSpawnsLink" data-show="#maps">
+          <a href="#maps">
             <i class="fas fa-map"></i>
             Maps
           </a>
@@ -774,7 +774,7 @@
 
       <!-- Gunnery calculator -->
       <div id="damageCalculator" class="content-panel" style="display:block">
-        <h1>Damage numbers</h1>
+        <h2>Damage numbers</h2>
         <div class="row row-margin">
           <div class="col-sm-4">
             <div class="input-group">
@@ -946,7 +946,7 @@
 
         <div class="form-check">
           <input type="checkbox" class="form-check-input" id="damageCalcCustomAmmoCheck" autocomplete="off">
-          <label class="form-check-label" for="damageCalcCustomAmmoCheck">Use testing ammo</label>
+          <label class="form-check-label" for="damageCalcCustomAmmoCheck">Use custom ammo</label>
         </div>
 
         <div class="form-check">
@@ -1147,20 +1147,36 @@
         </div>
       </div>
 
-      <div id="spawns" class="content-panel" style="display:none">
-        <div class="input-group" style="width:400px;">
+      <div id="maps" class="content-panel" style="display:none">
+        <h2>Maps</h2>
+        <div class="input-group" style="width:250px;">
           <div class="input-group-prepend">
             <div class="input-group-text">Map</div>
           </div>
           <select class="form-control" id="spawnMapSelect" autocomplete="off">
           </select>
-          <div class="input-group-append">
-            <button id="randomMapButton" class="btn btn-primary">Randomize map</button>
-          </div>
         </div>
 
         <img id="spawnImage" src="" width="700" height="700">
         <p>Credit to Nerdhector for creating spawn position images.</p>
+        <br>
+        <h3>Tournament randomizer</h3>
+        <div id="tournamentMapPool" style="max-width:600px;border:solid;padding:10px;">
+          <b>Map Pool</b><br>
+        </div>
+        <div class="input-group" style="width:160px;">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Map set size</div>
+          </div>
+          <input type="text" id="mapSetSize" class="form-control" placeholder="" autocomplete="off" value="5">
+        </div>
+
+        <button id="generateMapSetBtn" class="btn btn-primary" style="width:160px;">Generate map set</button>
+        <br><br>
+        <div id="tournamentMapSet" style="border:solid;padding:10px;max-width:200px;min-height:300px">
+          1. Battle on the Dunes
+        </div>
+
       </div>
 
       <!-- About -->
