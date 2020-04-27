@@ -46,6 +46,10 @@ function getCookie(cookiename){
     return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
 }
 
+function setCookie(name, value){
+    document.cookie = name + "=" + value;
+}
+
 function degToRad(deg){
     return deg * Math.PI / 180;
 }

@@ -6,6 +6,12 @@ function initializeSpawns(){
         setTimeout(function(){ initializeSpawns(); }, 1000);
         return;
     }
+
+    let pool_checks = getCookie("mapPoolChecks");
+    if (pool_checks == "") pool_checks = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+    else pool_checks = JSON.parse(pool_checks);
+    console.log("COOKIE: ", pool_checks);
+
     let rows = map_dataset.filterByString("2v2", "Game mode").getDatasetRows();
     for (let i=0; i < rows.length; i++){
         $("#spawnMapSelect").append("<option>" + rows[i][1] + "</option>");
@@ -14,8 +20,8 @@ function initializeSpawns(){
         // Initialize tournament ranzomizer options
         $("#tournamentMapPool").append(`
             <div class="form-check" style="display: inline-block;width:180px;">
-            <input type="checkbox" class="form-check-input" id="pool-`+i+`" autocomplete="off" checked>
-            <label class="form-check-label" for="pool-`+i+`">`+rows[i][1]+`</label>
+            <input type="checkbox" class="form-check-input" id="map-pool-`+i+`" autocomplete="off" `+(pool_checks[i] ? "checked" : "")+`>
+            <label class="form-check-label" for="map-pool-`+i+`">`+rows[i][1]+`</label>
             </div>`);
     }
 
@@ -23,7 +29,17 @@ function initializeSpawns(){
     $("#randomMapButton").on("click", randomizeMap);
     updateSpawnMap();
 
-
+    $("#tournamentMapPool > div > input").on("change", function(){
+        console.log("HELLOTHERE");
+        console.log(this.id);
+        let checkboxes = $("#tournamentMapPool > div > input");
+        let checks = [];
+        for (let i=0; i<checkboxes.length; i++){
+            checks.push((checkboxes[i].checked ? 1 : 0));
+        }
+        console.log(JSON.stringify(checks));
+        setCookie("mapPoolChecks", JSON.stringify(checks));
+    });
     $("#generateMapSetBtn").on("click", generateMapSet);
 
 }
