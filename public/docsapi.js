@@ -60,6 +60,19 @@ class Dataset {
         return new Dataset(this.titles, result_rows);
     }
 
+    filterByStringArray(query_strings, dataset_title, exclude=false, case_sensitive=false, exact_match=false){
+        let col_index = this.titles.indexOf(dataset_title);if (col_index == -1)
+        return new Dataset(this.titles, []);
+        let result_rows = []
+        for (let i = 0; i < this.content.length; i++) {
+            if (case_sensitive && exclude != contains(this.content[i][col_index], query_strings, true, exact_match))
+                result_rows.push(this.content[i]);
+            else if (!case_sensitive && exclude != contains(this.content[i][col_index], query_strings, false, exact_match))
+                result_rows.push(this.content[i]);
+        }
+        return new Dataset(this.titles, result_rows);
+    }
+
     filterByDate(query, dataset_title, exclude, after) {
         // let query_date = parseDate(query);
         let query_date = new Date(Date.parse(query));

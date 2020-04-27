@@ -1158,11 +1158,61 @@
         </div>
 
         <img id="spawnImage" src="" width="700" height="700">
-        <p>Credit to Nerdhector for creating spawn position images.</p>
+        <p>Credit to Nerdhector and Richard for creating spawn position images.</p>
         <br>
         <h3>Tournament randomizer</h3>
-        <div id="tournamentMapPool" style="max-width:600px;border:solid;padding:10px;">
+        <div style="max-width:650px;border:solid;padding:10px;">
+          <b>Game Modes</b><br>
+          <div id="mapModes">
+            <div class="form-check" style="display: inline-block;width:180px;">
+              <input type="checkbox" class="form-check-input" id="mapModeDeathmatch" autocomplete="off" checked>
+              <label class="form-check-label" for="mapModeDeathmatch">Deathmatch</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:180px;">
+              <input type="checkbox" class="form-check-input" id="mapModeBrawl" autocomplete="off">
+              <label class="form-check-label" for="mapModeBrawl">Brawl</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:180px;">
+              <input type="checkbox" class="form-check-input" id="mapModeVIP" autocomplete="off">
+              <label class="form-check-label" for="mapModeVIP">VIP Deathmatch</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:180px;">
+              <input type="checkbox" class="form-check-input" id="mapModeKotH" autocomplete="off">
+              <label class="form-check-label" for="mapModeKotH">King of the Hill</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:180px;">
+              <input type="checkbox" class="form-check-input" id="mapModeCK" autocomplete="off">
+              <label class="form-check-label" for="mapModeCK">Crazy King</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:180px;">
+              <input type="checkbox" class="form-check-input" id="mapModeCB" autocomplete="off">
+              <label class="form-check-label" for="mapModeCB">Crazy Brawl</label>
+            </div>
+          </div>
+          <br>
+          <b>Lobby size (ships per side)</b><br>
+          <div id="mapSizes">
+            <div class="form-check" style="display: inline-block;width:90px;">
+              <input type="radio" name="mapSizeRadios" class="form-check-input" id="mapSize1Check" autocomplete="off">
+              <label class="form-check-label" for="mapSize1Check">1</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:90px;">
+              <input type="radio" name="mapSizeRadios" class="form-check-input" id="mapSize2Check" autocomplete="off" checked>
+              <label class="form-check-label" for="mapSize2Check">2</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:90px;">
+              <input type="radio" name="mapSizeRadios"  class="form-check-input" id="mapSize3Check" autocomplete="off">
+              <label class="form-check-label" for="mapSize3Check">3</label>
+            </div>
+            <div class="form-check" style="display: inline-block;width:90px;">
+              <input type="radio" name="mapSizeRadios"  class="form-check-input" id="mapSize4Check" autocomplete="off">
+              <label class="form-check-label" for="mapSize4Check">4</label>
+            </div>
+          </div>
+          
+          <br>
           <b>Map Pool</b><br>
+          <div id="tournamentMapPool"></div>
         </div>
         <div class="input-group" style="width:160px;">
           <div class="input-group-prepend">
@@ -1173,7 +1223,7 @@
 
         <button id="generateMapSetBtn" class="btn btn-primary" style="width:160px;">Generate map set</button>
         <br><br>
-        <div id="tournamentMapSet" style="border:solid;padding:10px;max-width:200px;min-height:300px">
+        <div id="tournamentMapSet" style="border:solid;padding:10px;max-width:220px;min-height:300px">
           1. 
         </div>
 
@@ -1367,8 +1417,8 @@
               "Slot 1","Slot 2","Slot 3","Slot 4","Slot 5","Slot 6"]);
 
           map_dataset = jsonToDataset(datasets.map_data, 
-              ["Name", "Full name", "Game mode", 
-              "Map image", "Image src", "Spawn image src", "Map scale (m/px)"]);
+              ["ID", "Name", "Mode", "Size", 
+              "Map Image", "Spawn Image", "Map Scale"]);
           
           console.log("Datasets loaded from server.");
           datasetsLoaded();
@@ -1380,7 +1430,7 @@
       datasets_loaded = true;
       $("#loadalert").slideUp();
       initializeDamageCalculator();
-      initializeAimCalculator();
+      // initializeAimCalculator();
       initializeShipBuilder();
       initializeSpawns();
       //initializeMatchStatistics();

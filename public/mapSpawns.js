@@ -6,30 +6,21 @@ function initializeSpawns(){
         setTimeout(function(){ initializeSpawns(); }, 1000);
         return;
     }
-
-    let pool_checks = getCookie("mapPoolChecks");
-    if (pool_checks == "") pool_checks = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1];
-    else pool_checks = JSON.parse(pool_checks);
-
-    let rows = map_dataset.filterByString("2v2", "Game mode").getDatasetRows();
+    let rows = map_dataset.filterByString("Deathmatch", "Mode").filterByString("2", "Size").getDatasetRows();
     for (let i=0; i < rows.length; i++){
         $("#spawnMapSelect").append("<option>" + rows[i][1] + "</option>");
-
-        // Initialize tournament ranzomizer options
-        $("#tournamentMapPool").append(`
-            <div class="form-check" style="display: inline-block;width:180px;">
-            <input type="checkbox" class="form-check-input" id="map-pool-`+i+`" autocomplete="off" `+(pool_checks[i] ? "checked" : "")+`>
-            <label class="form-check-label" for="map-pool-`+i+`">`+rows[i][1]+`</label>
-            </div>`);
     }
 
     $("#spawnMapSelect").on("change", updateSpawnMap);
     $("#randomMapButton").on("click", randomizeMap);
     updateSpawnMap();
+    initializeTournamentRandomizer();
 
+}
+
+function initializeTournamentRandomizer(){
+    
     $("#tournamentMapPool > div > input").on("change", function(){
-        console.log("HELLOTHERE");
-        console.log(this.id);
         let checkboxes = $("#tournamentMapPool > div > input");
         let checks = [];
         for (let i=0; i<checkboxes.length; i++){
@@ -38,7 +29,58 @@ function initializeSpawns(){
         setCookie("mapPoolChecks", JSON.stringify(checks));
     });
     $("#generateMapSetBtn").on("click", generateMapSet);
+    $("#mapModes > div > input, #mapSizes > div > input").on("change", loadMapPool);
 
+    // // Initialize checkboxes.
+    // let pool_config = getCookie("poolConfig");
+    // if (!pool_config){
+    //     pool_config = []
+    //     pool_config.length = 6 + 4 + 47;
+    //     pool_config.fill(1);
+    //     pool_config[6] = 0;
+    //     pool_config[7] = 1;
+    //     pool_config[8] = 0;
+    //     pool_config[9] = 0;
+    //     setCookie("poolConfig", JSON.stringify(pool_config));
+    // }
+
+    loadMapPool();
+}
+
+function loadMapPool(){
+    // let size = ;
+    // let pool_config = []
+    // pool_config.length = 6 + 4 + 47;
+    // pool_config.fill(1);
+    // console.log(pool_config);
+    // console.log(JSON.stringify(pool_config));
+
+
+    let modes = [];
+    let modeChecks = $("#mapModes > div");
+    for (let i=0; i<modeChecks.length; i++){
+        if (modeChecks[i].childNodes[1].checked) modes.push(modeChecks[i].childNodes[3].innerText);
+    }
+
+    let size;
+    let sizeChecks = $("#mapSizes > div");
+    for (let i=0; i<sizeChecks.length; i++){
+        if (sizeChecks[i].childNodes[1].checked) size = sizeChecks[i].childNodes[3].innerText;
+    }
+    
+
+
+    let maps = map_dataset.filterByString(size, "Size").filterByStringArray(modes, "Mode", false, false, true).getDatasetRows();
+    $("#tournamentMapPool").empty();
+    if (maps.length == 0) $("#tournamentMapPool").append("No maps matching all filters.")
+    for (let i=0; i < maps.length; i++){
+        // Initialize tournament ranzomizer options
+        $("#tournamentMapPool").append(`
+            <div class="form-check" style="display: inline-block;width:190px;">
+            <input type="checkbox" class="form-check-input" id="map-pool-`+i+`" autocomplete="off" checked>
+            <label class="form-check-label" for="map-pool-`+i+`">`+maps[i][1]+`</label>
+            </div>`);
+    }
 }
 
 function generateMapSet(){
@@ -71,7 +113,7 @@ function updateSpawnMap(){
     }
 
     let map_name = $("#spawnMapSelect").val();
-    let image_src = map_dataset.getCellByString(map_name, "Full name", "Spawn image src");
+    let image_src = map_dataset.filterByString("Deathmatch", "Mode").getCellByString(map_name, "Name", "Spawn Image");
     if (image_src)
         $("#spawnImage").attr("src", image_src);
     else

@@ -246,6 +246,17 @@ function angleDifference(angle1, angle2){
 }
 
 
+function contains(str, query_arr, case_sensitive=false, exact_match=false){
+    var value = 0;
+    if (!case_sensitive){
+        str = str.toLowerCase();
+        for (i=0; i<query_arr.length; i++) query_arr[i] = query_arr[i].toLowerCase();
+    }
+    if(!exact_match) query_arr.forEach((query) => { value = value + str.includes(query) });
+    else query_arr.forEach((query) => { value = value + (str==query) });
+    return (value > 0);
+}
+
 // Projectile arcs
 
 
