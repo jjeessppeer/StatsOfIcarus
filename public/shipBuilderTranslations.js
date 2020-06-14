@@ -14,7 +14,7 @@ var ship_builder_translations = {
       "Hades",
       "Heavy Flak Mk. I",
       "Heavy Flak Mk. II",
-      "Hwatcha",
+      "Hwacha",
       "Heavy Carronade",
       "Lumberjack",
       "Minotaur",
