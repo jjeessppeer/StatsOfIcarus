@@ -354,8 +354,8 @@
           </div>
           <input type="text" id="shipBuildImportText" class="form-control" placeholder="" autocomplete="off">
           <div class="input-group-append">
-            <button id="shipBuildImportButton" class="btn btn-primary" type="button">Import</button>
-            <button id="shipBuildExportButton" class="btn btn-info" type="button">Export</button>
+            <button id="shipBuildImportButton" class="btn btn-info" type="button">Import</button>
+            <button id="shipBuildExportButton" class="btn btn-primary" type="button">Export</button>
           </div>
         </div>
 
@@ -378,9 +378,15 @@
               </div>
             </div>
             <div class="my-col">
-              <button id="buildSubmitButton" class="btn btn-primary" type="button">Submit to database</button>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <button id="copyBuildLinkBtn" class="btn btn-info" type="button">Copy build link</button>
+                </div>
+                <div class="input-group-append">
+                  <button id="buildSubmitButton" class="btn btn-primary" type="button">Submit to database</button>
+                </div>
+              </div>
             </div>
-
           </div>
 
 

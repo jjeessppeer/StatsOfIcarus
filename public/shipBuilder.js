@@ -46,6 +46,11 @@ function initializeShipBuilder(){
   }
   
 
+  $("#copyBuildLinkBtn").on("click", function(){
+    copyToClipboard(window.location.href);
+    this.innerHTML = "Copied to clipboard";
+  });
+
   $("#shipBuilderDesCheck").on("change", function(){
     console.log($("#shipBuilderDesCheck").is(":checked"))
     if ($("#shipBuilderDesCheck").is(":checked"))
@@ -202,6 +207,7 @@ function initializeShipBuilder(){
 }
 
 function shipBuilderUpdateUrl(){
+  $("#copyBuildLinkBtn").text("Copy build link");
   setUrlParam("build_code="+shipBuilderGetExportCode());
 }
 
