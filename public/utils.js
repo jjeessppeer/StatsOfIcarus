@@ -412,9 +412,22 @@ function sanitizeHtml(str){
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function loadImages(files, onAllLoaded){
+    var numLoading = files.length;
+    const onload = () => --numLoading === 0 && onAllLoaded();
+    const images = [];
+    for (let i = 0; i < files.length; ++i){
+        const img = new Image;
+        images.push(img);
+        img.src = files[i];
+        img.onload = onload;
+    }
+    return images;
+}
+
 function httpxPostRequest(url, data, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
-    xhttp.timeout = 3000;
+    xhttp.timeout = 10000;
     xhttp.open("POST", url);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onreadystatechange = callback;
@@ -425,7 +438,7 @@ function httpxPostRequest(url, data, callback=null, timeout_callback=null){
 function httpxGetRequest(url, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.open("GET", url);
-    xhttp.timeout = 3000;
+    xhttp.timeout = 10000;
     // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.onload = callback;
     xhttp.ontimeout = timeout_callback;

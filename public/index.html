@@ -689,18 +689,10 @@
         <div class="my-col img-canvas-container" id="shipContainer">
           <b>Drag or scroll to pan or zoom image.</b>
           <br>
-          <img id="shipBuilderImage" class="img" src="ship-images/mob_gundeck_small.png" style="display:none" />
           <canvas id="shipBuilderCanvas" width="600" height="600" style="border-style:solid;">Your browser does not
             support the HTML5 canvas tag.</canvas>
           <canvas id="shipBuilderCanvasOffscreen" width="600" height="600" style="display:none">Your browser does not
             support the HTML5 canvas tag.</canvas>
-
-          <!-- <div id="shipBuildGunSelector" class="btn-group-vertical" role="group">
-            <button type="button" class="btn btn-secondary">Left</button>
-            <button type="button" class="btn btn-secondary">Middle</button>
-            <button type="button" class="btn btn-secondary">Right</button>
-          </div> -->
-
         </div>
 
         <div class="my-col">
@@ -1316,54 +1308,53 @@
 
     });
 
-    function loadDatasetsFromGoogleSheets(){
-      $("#loadalert span").text("Server timeout, loading from google instead");
-      console.log("Loading datasets from google.")
-      /*loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
-        dataset.sortDatasetContent("Date of match", Date.parse);
-        match_dataset = dataset;
-      });*/
-      loadDatasetFromSheet(google_sheet_id, 4, function (dataset) {
-        gun_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 5, function (dataset) {
-        ammo_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 6, function (dataset) {
-        damage_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 7, function (dataset) {
-        tool_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 8, function (dataset) {
-        component_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 9, function (dataset) {
-        ship_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 10, function (dataset) {
-        map_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 11, function (dataset) {
-        crosshair_dataset = dataset;
-      });
-      loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
-        ship_guns_dataset = dataset;
-      });
-      datasetLoadCheck();
-    }
-
-    function datasetLoadCheck(){
-      if (!(match_dataset && gun_dataset && ammo_dataset &&
-          damage_dataset && tool_dataset && component_dataset &&
-          ship_dataset && map_dataset && crosshair_dataset &&
-          ship_guns_dataset)) {
-          setTimeout(datasetLoadCheck, 200);
-          return;
-      }
-      console.log("Datasets loaded from google.");
-      datasetsLoaded();
-    }
+    // function loadDatasetsFromGoogleSheets(){
+    //   $("#loadalert span").text("Server timeout, loading from google instead");
+    //   console.log("Loading datasets from google.")
+    //   /*loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
+    //     dataset.sortDatasetContent("Date of match", Date.parse);
+    //     match_dataset = dataset;
+    //   });*/
+    //   loadDatasetFromSheet(google_sheet_id, 4, function (dataset) {
+    //     gun_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 5, function (dataset) {
+    //     ammo_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 6, function (dataset) {
+    //     damage_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 7, function (dataset) {
+    //     tool_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 8, function (dataset) {
+    //     component_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 9, function (dataset) {
+    //     ship_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 10, function (dataset) {
+    //     map_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 11, function (dataset) {
+    //     crosshair_dataset = dataset;
+    //   });
+    //   loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
+    //     ship_guns_dataset = dataset;
+    //   });
+    //   datasetLoadCheck();
+    // }
+    // function datasetLoadCheck(){
+    //   if (!(match_dataset && gun_dataset && ammo_dataset &&
+    //       damage_dataset && tool_dataset && component_dataset &&
+    //       ship_dataset && map_dataset && crosshair_dataset &&
+    //       ship_guns_dataset)) {
+    //       setTimeout(datasetLoadCheck, 200);
+    //       return;
+    //   }
+    //   console.log("Datasets loaded from google.");
+    //   datasetsLoaded();
+    // }
 
     function loadDatasetsFromServer(){
       $("#loadalert span").text("Getting datasets");
@@ -1430,7 +1421,7 @@
           console.log("Datasets loaded from server.");
           datasetsLoaded();
         }
-      }, loadDatasetsFromGoogleSheets);
+      });
     }
 
     function datasetsLoaded() {

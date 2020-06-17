@@ -60,21 +60,6 @@ function initializeShipBuilder(){
 
   });
 
-
-  $('#shipBuilderImage').bind("load", function(){
-    let canvas = document.getElementById("shipBuilderCanvas");
-    let ctx = canvas.getContext("2d");
-    // ctx.resetTransform();
-    // ctx.translate(canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
-    // ctx.zoomAround(canvas.width/2, canvas.height/2, 0.8);
-    resetMatrix(builder_matrix);
-    translateMatrix(builder_matrix, canvas.width/2 - this.width/2, canvas.height/2 - this.height/2);
-    zoomMatrixAround(builder_matrix, canvas.width/2, canvas.height/2, 0.8);
-    applyMatrix(ctx, builder_matrix);
-    // ctx.scale(0.5,0.5);
-    updateShipBuildImage();
-  }); 
-
   $("#shipBuilderPvECheck").on("change", function(){
     crewRoleChanged();
     shipBuilderReloadShip();
@@ -88,7 +73,7 @@ function initializeShipBuilder(){
   $("#shipBuildShipSelection").on("change", function(e){
     ship_builder_ship = $(this).val();
     shipBuilderReloadShip();
-    updateShipBuildImage();
+    updateShipBuildImage(true);
     updateRangeVis();
     shipBuilderUpdateUrl()
   });
@@ -111,10 +96,7 @@ function initializeShipBuilder(){
     shipBuilderUpdateUrl()
   });
 
-  shipBuilderReloadShip();
-  updateShipBuildImage();
-  updateRangeVis();
-  crewRoleChanged();
+  
   
 
   // Canvas events
@@ -203,6 +185,12 @@ function initializeShipBuilder(){
     else if (url_parameters.id){
       shipBuilderImportFromDatabase(url_parameters.id);
     }
+  }
+  else {
+    shipBuilderReloadShip();
+    updateShipBuildImage();
+    updateRangeVis();
+    crewRoleChanged();
   }
 }
 
@@ -328,7 +316,7 @@ function shipBuilderImport(e, build_code, encoded=true){
   $("#buildDescriptionArea").val(build_data.description);
 
   crewRoleChanged();
-  updateShipBuildImage();
+  updateShipBuildImage(true, true);
   updateRangeVis();
   shipBuilderUpdateUrl();
 }
@@ -514,7 +502,7 @@ function crewRoleChanged(){
 
 function shipBuilderReloadShip(){
 
-  $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
+  // $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
 
   ship_builder_guns.fill("None");
   
@@ -562,26 +550,51 @@ function shipBuilderReloadShip(){
   
 }
 
-
-function updateShipBuildImage(){
+var updateShipBuildImageLock = false;
+var updateShipBuildQueued = false;
+function updateShipBuildImage(resetPos=false, important=false){
   if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && component_dataset)) {
     setTimeout(function(){ updateShipBuildImage(); }, 1000);
     return;
   }
+  if (updateShipBuildQueued) updateShipBuildQueued = true;
+  if (updateShipBuildImageLock) return;
+  updateShipBuildImageLock = true;
 
+  let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
+  let n_guns = parseInt(data_row[1]);
+  let img_srcs = [ship_image_srcs[ship_builder_ship]];
+  for (let i=0; i < n_guns; i++){
+    img_srcs.push("gun-images/icons/"+ship_builder_guns[i]+".jpg");
+  }
+  let images = loadImages(img_srcs, () => {
+    redrawShipBuildImage(images, data_row, resetPos);
+    if (updateShipBuildQueued){
+      updateShipBuildQueued = false;
+      updateShipBuildImage(true);
+    }});
+}
 
-  
+function redrawShipBuildImage(images, data_row, resetPos=false){
   let canvas = document.getElementById("shipBuilderCanvas");
   let ctx = canvas.getContext("2d");
+  if (resetPos){
+    resetMatrix(builder_matrix);
+    translateMatrix(builder_matrix, canvas.width/2 - images[0].width/2, canvas.height/2 - images[0].height/2);
+    zoomMatrixAround(builder_matrix, canvas.width/2, canvas.height/2, 0.8);
+    applyMatrix(ctx, builder_matrix);
+  }
+    
+
+
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.restore();
 
-  let img = document.getElementById("shipBuilderImage");
+  // let img = document.getElementById("shipBuilderImage");
   ctx.globalAlpha = 1;
-  ctx.drawImage(img, 0, 0);
-
+  ctx.drawImage(images[0], 0, 0);
 
   if ($("#darkModeSwitch")[0].checked) {
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -595,7 +608,7 @@ function updateShipBuildImage(){
   }
   
 
-  let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
+  // let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
 
   let n_guns = parseInt(data_row[1]);
 
@@ -618,14 +631,18 @@ function updateShipBuildImage(){
 
     //Draw position
     ctx.globalCompositeOperation = "source-over";
-    ctx.fillStyle = "rgb(30, 150, 30)";
-    ctx.globalAlpha = 1;
-    ctx.beginPath();      
-    // ctx.arc(cx, cy, 12, 0, 2*Math.PI);
-    ctx.rect(cx-10, cy-10, 20, 20); 
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = "rgb(0, 0, 0)";
+    // ctx.fillStyle = "rgb(30, 150, 30)";
+    // ctx.globalAlpha = 1;
+    // ctx.beginPath();
+    // ctx.rect(cx-10, cy-10, 20, 20); 
+    // ctx.fill();
+    // ctx.stroke();
+    // console.log(gun_img.src);
+    // gun_img.src = "gun-images/icons/"+gun_type+".jpg";
+    // if (gun_img.src == "http://localhost/gun-images/icons/Artemis.jpg") gun_img.src = "gun-images/icons/Light Flak.jpg"
+    // else if (gun_img.src == "http://localhost/gun-images/icons/Light%20Flak.jpg") gun_img.src = "gun-images/icons/Artemis.jpg"
+    ctx.drawImage(images[i+1], cx-30, cy-30, 60, 60);
+    ctx.fillStyle = "rgb(255, 255, 255)";
     ctx.font = "20px Arial";
     ctx.textAlign = "center"; 
     ctx.fillText(i+1, cx, cy+8);
@@ -675,6 +692,7 @@ function updateShipBuildImage(){
     ctx.restore();
     ctx.globalCompositeOperation = "source-over";
   }
+  updateShipBuildImageLock=false;
 }
 
 function updateRangeVis(){
