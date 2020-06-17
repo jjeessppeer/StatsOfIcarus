@@ -188,7 +188,7 @@ function initializeShipBuilder(){
   }
   else {
     shipBuilderReloadShip();
-    updateShipBuildImage();
+    updateShipBuildImage(true);
     updateRangeVis();
     crewRoleChanged();
   }
