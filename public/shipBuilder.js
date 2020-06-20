@@ -300,7 +300,7 @@ function shipBuilderImport(e, build_code, encoded=true){
   // let ability_count = 0;
   for (let i=0; i < 4; i+=1){
     imgs[i*13].src = "loadout-images/" + build_data.crew[i].role + ".jpg";
-    for (let j=1; j < 3; j++){
+    for (let j=1; j <= 3; j++){
       imgs[i*13 + j].src = "loadout-images/" + build_data.crew[i].pilotTools[j-1] + ".jpg";
       imgs[i*13 + j + 3].src = "loadout-images/" + build_data.crew[i].engiTools[j-1] + ".jpg";
       imgs[i*13 + j + 6].src = "loadout-images/" + build_data.crew[i].ammo[j-1] + ".jpg";
