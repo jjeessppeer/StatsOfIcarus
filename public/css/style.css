@@ -1,3 +1,14 @@
+.angle_image_window {
+    overflow-x:scroll;
+    white-space: nowrap;
+    max-width: 700px;
+}
+
+.angle_image_window.quake {
+    max-width: none;
+}
+
+
 .blink-div {
     /* float: right; */
     /* font-size: 10px; */

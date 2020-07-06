@@ -35,6 +35,19 @@ function initializeShipBuilder(){
     setTimeout(function(){ initializeShipBuilder(); }, 1000);
     return;
   }
+  angleVis()
+
+  $("#angleImage").on('load', function(){
+    var innerContent = $(this).parent();
+    var outerContent = innerContent.parent();
+    outerContent.scrollLeft((innerContent.width() - outerContent.width()) / 2);
+  })
+  // $(document).ready(function(){
+  //   var outerContent = $('.abc');
+  //   var innerContent = $('.abc > div');
+
+  //   outerContent.scrollLeft((innerContent.width() - outerContent.width()) / 2);        
+  // });
 
   // Fill ship list
   for (let i=0; i < ship_guns_dataset.getNOfRows(); i++){
@@ -708,8 +721,8 @@ function updateRangeVis(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     let dark_mode = $("#darkModeSwitch")[0].checked;
-
-    var pad_left = 250.5;
+    // 500
+    var pad_left = (canvas.width - 500)/2 + 0.5; 
     var pad_top = 80.5;
     let [bw, bh] = [500, 500]//[canvas.width-pad_left-pad_right, canvas.height-pad_bot-pad_top];
 
@@ -867,8 +880,46 @@ function updateRangeVis(){
     }
     
 
-
+    angleVis()
     
     
 
+}
+
+function angleVis(){
+  let canvas = document.getElementById("angleCanvas");
+  let angleImage = document.getElementById("angleImage")
+  angleImage.src = "helm-images/"+ship_builder_ship+"_helm.jpg"
+
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+  // ctx.globalCompositeOperation = "lighter";
+  // ctx.fillStyle = "rgb(50, 50, 50)";
+  ctx.globalAlpha = 0.3
+
+  let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
+  let n_guns = parseInt(ship_data[1]);
+  for (let i=0; i < n_guns; i++){
+
+    let gun_type = ship_builder_guns[i];
+    if (gun_type == "None") continue;
+    let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
+    let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
+    let range = gun_numbers.info.range;
+    let side_angle = degToRad(gun_numbers.info.angle);
+    let initial_angle = degToRad(parseFloat(ship_data[2+i]));
+
+    let a_left = initial_angle - side_angle + Math.PI
+    let a_right = initial_angle + side_angle + Math.PI
+
+    let p_left = a_left * canvas.width / 2 / Math.PI
+    let p_right = a_right * canvas.width / 2 / Math.PI
+    ctx.fillStyle = gun_colors[i];
+    ctx.beginPath();
+    ctx.rect(p_left, 0, p_right-p_left, canvas.height);
+    ctx.fill();
+
+  }
 }
