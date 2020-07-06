@@ -175,7 +175,8 @@ function initTables(){
     "Slot3"	TEXT,
     "Slot4"	TEXT,
     "Slot5"	TEXT,
-    "Slot6"	TEXT
+    "Slot6"	TEXT,
+    "HelmPosition" TEXT
   )`).run();
   data_db.prepare(`CREATE TABLE "Tool_stats" (
     "Name"	TEXT,
