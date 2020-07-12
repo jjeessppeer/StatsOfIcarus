@@ -3,7 +3,7 @@
 
 function initializeDamageCalculator() {
     // Bind events
-    $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect").on("change", updateGunInfoTable);
+    $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect,#armedCheckbox").on("change", updateGunInfoTable);
 
 
 
@@ -88,14 +88,16 @@ function importSelectedAmmo(){
 }
 
 
-function getGunNumbers(gun_type, ammo_type, buffed) {
-
-    if (!buffed)
+function getGunNumbers(gun_type, ammo_type, buffed, armed) {
+    if (buffed == undefined)
         buffed = $("#buffedCheckbox").is(':checked');
-    if (!gun_type)
+    if (gun_type == undefined)
         gun_type = $("#gunSelect").val();
-    if (!ammo_type)
+    if (ammo_type == undefined)
         ammo_type = $("#ammoSelect").val();
+    if (armed == undefined)
+        armed = $("#armedCheckbox").is(':checked');
+
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
 
@@ -214,7 +216,7 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     let damage_type_secondary = gun_d["secondary dmg type"];
 
     let damage_hit_primary = gun_d["primary dmg"] * ammo_d["damage"] * ammo_d["direct damage"] * (buffed ? 1.1 : 1);
-    let damage_hit_secondary = gun_d["secondary dmg"] * ammo_d["damage"] * ammo_d["AoE damage"] * (buffed ? 1.1 : 1);
+    let damage_hit_secondary = gun_d["secondary dmg"] * ammo_d["damage"] * ammo_d["AoE damage"] * (buffed ? 1.1 : 1) * ( (armed || arming_distance == 0) ? 1 : 0);
     
     // Aten Lens special case
     if (gun_type == "Aten Lens Array [Mk. S]"){
@@ -268,11 +270,31 @@ function getGunNumbers(gun_type, ammo_type, buffed) {
     // Calculate damages
 
     // Damage / shot
+    // damage_dict["per shot"] = {};
+    // damage_dict["per shot"]["armor"] = armor_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Armor") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Armor"));
+    // damage_dict["per shot"]["hull"] = hull_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Hull") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Hull"));
+    // damage_dict["per shot"]["balloon"] = balloon_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Balloon") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Balloon"));
+    // damage_dict["per shot"]["component"] = component_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Components") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Components"));
+
     damage_dict["per shot"] = {};
-    damage_dict["per shot"]["armor"] = armor_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Armor") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Armor"));
-    damage_dict["per shot"]["hull"] = hull_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Hull") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Hull"));
-    damage_dict["per shot"]["balloon"] = balloon_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Balloon") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Balloon"));
-    damage_dict["per shot"]["component"] = component_unit_scale * (damage_hit_primary * getDamageMod(damage_type_primary, "Components") + damage_hit_secondary * getDamageMod(damage_type_secondary, "Components"));
+    damage_dict["per shot"]["armor"] = [
+        armor_unit_scale * damage_hit_primary * getDamageMod(damage_type_primary, "Armor"),
+        armor_unit_scale * damage_hit_secondary * getDamageMod(damage_type_secondary, "Armor")
+    ]
+    damage_dict["per shot"]["hull"] = [
+        hull_unit_scale * damage_hit_primary * getDamageMod(damage_type_primary, "Hull"),
+        hull_unit_scale * damage_hit_secondary * getDamageMod(damage_type_secondary, "Hull")
+    ]
+    damage_dict["per shot"]["balloon"] = [
+        balloon_unit_scale * damage_hit_primary * getDamageMod(damage_type_primary, "Balloon"),
+        balloon_unit_scale * damage_hit_secondary * getDamageMod(damage_type_secondary, "Balloon")
+    ]
+    damage_dict["per shot"]["component"] = [
+        component_unit_scale * damage_hit_primary * getDamageMod(damage_type_primary, "Components"),
+        component_unit_scale * damage_hit_secondary * getDamageMod(damage_type_secondary, "Components")
+    ]
+    console.log(damage_dict["per shot"])
+    
 
     // Damage / clip
     damage_dict["per clip"] = {};
@@ -365,10 +387,25 @@ function updateGunInfoTable() {
         </tr>`) + 
         `
           <th>Damage / shot</th>
-          <td>` + precise(gun_numbers.damage["per shot"]["armor"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per shot"]["hull"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per shot"]["balloon"], 3) + `</td>
-          <td>` + precise(gun_numbers.damage["per shot"]["component"], 3) + `</td>
+          <td>` + 
+          precise(gun_numbers.damage["per shot"]["armor"][0] + gun_numbers.damage["per shot"]["armor"][1], 3) + 
+          '<span style="color:grey"> (' + precise(gun_numbers.damage["per shot"]["armor"][0], 2) + "/" + 
+          precise(gun_numbers.damage["per shot"]["armor"][1], 2) + ")</span>" + 
+          `</td>
+          <td>` + 
+          precise(gun_numbers.damage["per shot"]["hull"][0] + gun_numbers.damage["per shot"]["hull"][1], 3) + 
+          '<span style="color:grey"> (' + precise(gun_numbers.damage["per shot"]["hull"][0], 2) + "/" + 
+          precise(gun_numbers.damage["per shot"]["hull"][1], 2) + ")</span>" + 
+          `</td>
+          <td>` + 
+          precise(gun_numbers.damage["per shot"]["balloon"][0] + gun_numbers.damage["per shot"]["balloon"][1], 3) + 
+          '<span style="color:grey"> (' + precise(gun_numbers.damage["per shot"]["balloon"][0], 2) + "/" + 
+          precise(gun_numbers.damage["per shot"]["balloon"][1], 2) + ")</span>" + 
+          `</td>
+          <td>` + precise(gun_numbers.damage["per shot"]["component"][0] + gun_numbers.damage["per shot"]["component"][1], 3) + 
+          '<span style="color:grey"> (' + precise(gun_numbers.damage["per shot"]["component"][0], 2) + "/" + 
+          precise(gun_numbers.damage["per shot"]["component"][1], 2) + ")</span>" +  
+          `</td>
         </tr>
         <tr>
           <th>Damage / clip</th>
