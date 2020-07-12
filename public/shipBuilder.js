@@ -820,11 +820,13 @@ function updateRangeVis(){
 
     // Draw gun descriptions
     let gun_descriptions = [];
+    let colors_tmp = [];
     for (let i=0; i < n_guns; i++){
       if (ship_builder_guns[i] == "None") continue;
       let gun_type = ship_builder_guns[i];
       let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
       gun_descriptions.push(gun_type+"("+ammo_type+")");
+      colors_tmp.push(gun_colors[i])
     }
     ctx.textAlign = "left";
     let text_width_1 = ctx.measureText(gun_descriptions.slice(0, 3).join(" ")).width;
@@ -833,7 +835,7 @@ function updateRangeVis(){
     let left_x_2 = canvas.width/2 - text_width_2/2;
     
     for (let i=0; i < gun_descriptions.length; i++){
-      ctx.fillStyle = gun_colors[i];
+      ctx.fillStyle = colors_tmp[i];
       if (i>=3){
         ctx.fillText(gun_descriptions[i], left_x_2, 62);
         left_x_2 += ctx.measureText(gun_descriptions[i]+" ").width;
