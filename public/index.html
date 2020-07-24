@@ -49,10 +49,8 @@
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
         </div>
         <div>
-          Server status
-          <i id="connectingIcon" class="fas fa-minus-square" style="color:yellow;"></i>
-          <i id="connectedIcon" class="fas fa-check-square" style="color:green;display:none;"></i>
-          <i id="noconnectionIcon" class="fas fa-times-circle" style="color:red;display:none;"></i>
+          Data updated: <a href="https://steamcommunity.com/app/608800/discussions/0/2576571096292768585/" style="color: blue;">
+            <u>2020-06-26</u></a>
         </div>
       </div>
       <div class="sidebar-header collapsed">
@@ -1316,13 +1314,9 @@
       httpxGetRequest("/ping",
         () => {
           console.log("PING RESPONSE");
-          $("#connectingIcon").hide();
-          $("#connectedIcon").show();
         },
         () => {
           console.log("PING TIMEOUT");
-          $("#connectingIcon").hide();
-          $("#noconnectionIcon").show();
         });
       // Load datasets
       loadDatasetsFromServer();
