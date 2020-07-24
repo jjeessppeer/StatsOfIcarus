@@ -293,7 +293,6 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed) {
         component_unit_scale * damage_hit_primary * getDamageMod(damage_type_primary, "Components"),
         component_unit_scale * damage_hit_secondary * getDamageMod(damage_type_secondary, "Components")
     ]
-    console.log(damage_dict["per shot"])
     
 
     // Damage / clip
