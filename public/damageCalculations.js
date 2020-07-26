@@ -88,7 +88,7 @@ function importSelectedAmmo(){
 }
 
 
-function getGunNumbers(gun_type, ammo_type, buffed, armed) {
+function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
     if (buffed == undefined)
         buffed = $("#buffedCheckbox").is(':checked');
     if (gun_type == undefined)
@@ -97,6 +97,8 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed) {
         ammo_type = $("#ammoSelect").val();
     if (armed == undefined)
         armed = $("#armedCheckbox").is(':checked');
+    if (stamina == undefined)
+        stamina = $("#staminaCheck").is(':checked')
 
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
@@ -167,7 +169,7 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed) {
         "AoE radius": parseFloat(gun_data[16]),
         "buckshot": parseFloat(gun_data[17]),
         "arming time": parseFloat(gun_data[18]),
-        "side angle": parseFloat(gun_data[19]),
+        "side angle": parseFloat(gun_data[19]) + (stamina ? 20 : 0),
         "up angle": parseFloat(gun_data[20]),
         "down angle": parseFloat(gun_data[21]),
     };

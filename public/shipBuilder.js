@@ -35,19 +35,12 @@ function initializeShipBuilder(){
     setTimeout(function(){ initializeShipBuilder(); }, 1000);
     return;
   }
-  angleVis()
 
   $("#angleImage").on('load', function(){
     var innerContent = $(this).parent();
     var outerContent = innerContent.parent();
     outerContent.scrollLeft((innerContent.width() - outerContent.width()) / 2);
   })
-  // $(document).ready(function(){
-  //   var outerContent = $('.abc');
-  //   var innerContent = $('.abc > div');
-
-  //   outerContent.scrollLeft((innerContent.width() - outerContent.width()) / 2);        
-  // });
 
   // Fill ship list
   for (let i=0; i < ship_guns_dataset.getNOfRows(); i++){
@@ -64,19 +57,21 @@ function initializeShipBuilder(){
     this.innerHTML = "Copied to clipboard";
   });
 
-  $("#shipBuilderDesCheck").on("change", function(){
-    console.log($("#shipBuilderDesCheck").is(":checked"))
-    if ($("#shipBuilderDesCheck").is(":checked"))
-      $("#buildDescriptionCol").show("slide", {direction: "left"}, 400);
-    else
-      $("#buildDescriptionCol").hide("slide", {direction: "left"}, 400);
-
-  });
+  // $("#shipBuilderDesCheck").on("change", function(){
+  //   console.log($("#shipBuilderDesCheck").is(":checked"))
+  //   if ($("#shipBuilderDesCheck").is(":checked"))
+  //     $("#buildDescriptionCol").show("slide", {direction: "left"}, 400);
+  //   else
+  //     $("#buildDescriptionCol").hide("slide", {direction: "left"}, 400);
+  // });
 
   $("#shipBuilderPvECheck").on("change", function(){
     crewRoleChanged();
+
     shipBuilderReloadShip();
-    updateShipBuildImage();
+    updateShipBuildImage(true);
+    updateRangeVis();
+    shipBuilderUpdateUrl()
   });
 
   $("#shipBuildName,#buildDescriptionArea").on("input", shipBuilderUpdateUrl);
@@ -108,9 +103,6 @@ function initializeShipBuilder(){
     crewRoleChanged();
     shipBuilderUpdateUrl()
   });
-
-  
-  
 
   // Canvas events
 
@@ -171,7 +163,12 @@ function initializeShipBuilder(){
     updateShipBuildImage();
     return false;
   });
+  
 
+  $("#staminaCheck").on('change', function(){
+    updateShipBuildImage();
+    updateRangeVis();
+  })
   $("#weaponSelections select:nth-of-type(1)").on("change", function(e){
     ship_builder_guns[($(this).parent().index()-1)] = $(this).val();
     updateShipBuildImage();
@@ -883,9 +880,6 @@ function updateRangeVis(){
     
 
     angleVis()
-    
-    
-
 }
 
 function angleVis(){
