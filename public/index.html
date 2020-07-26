@@ -49,7 +49,7 @@
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
         </div>
         <div>
-          Data updated: <a href="https://steamcommunity.com/app/608800/discussions/0/2576571096292768585/" style="color: blue;">
+          Latest update: <a href="https://steamcommunity.com/app/608800/discussions/0/2576571096292768585/" style="color: blue;">
             <u>2020-06-26</u></a>
         </div>
       </div>
@@ -78,12 +78,12 @@
           </a>
         </li> -->
 
-        <li id="buildDatabaseLink" data-show="#buildDatabase">
+        <!-- <li id="buildDatabaseLink" data-show="#buildDatabase">
           <a href="#buildDatabase">
             <i class="fas fa-journal-whills"></i>
             Ship database
           </a>
-        </li>
+        </li> -->
         <li id="shipBuilderLink" data-show="#shipBuilder">
           <a href="#shipBuilder">
             <i class="fas fa-hammer"></i>
@@ -238,7 +238,7 @@
 
 
       <!-- Build Database  -->
-      <div id="buildDatabase" class="content-panel" style="display:none">
+      <!-- <div id="buildDatabase" class="content-panel" style="display:none">
         <div>
           <div class="my-col">
             <div class="input-group" style="width:200px">
@@ -305,12 +305,7 @@
                 <option>Alphabetical</option>
               </select>
             </div>
-            <!-- <br> -->
-            <!-- <button id="buildFilterSubmit" class="btn btn-info" type="button">Update filter/list</button> -->
           </div>
-          
-          <!-- <div class="my-col">
-          </div> -->
         </div>
         <br>
         
@@ -338,7 +333,7 @@
           </ul>
         </nav>
 
-      </div>
+      </div> -->
 
       <!-- Ship builder -->
       <div id="shipBuilder" class="content-panel" style="display:none">
@@ -377,12 +372,12 @@
             </div>
             <div class="my-col">
               <div class="input-group">
-                <div class="input-group-prepend">
+                <!-- <div class="input-group-prepend"> -->
                   <button id="copyBuildLinkBtn" class="btn btn-info" type="button">Copy build link</button>
-                </div>
-                <div class="input-group-append">
+                <!-- </div> -->
+                <!-- <div class="input-group-append">
                   <button id="buildSubmitButton" class="btn btn-primary" type="button">Submit to database</button>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>
@@ -1312,64 +1307,12 @@
       
       // Check server status
       httpxGetRequest("/ping",
-        () => {
-          console.log("PING RESPONSE");
-        },
-        () => {
-          console.log("PING TIMEOUT");
-        });
+        () => { console.log("PING RESPONSE"); },
+        () => { console.log("PING TIMEOUT"); });
       // Load datasets
       loadDatasetsFromServer();
 
     });
-
-    // function loadDatasetsFromGoogleSheets(){
-    //   $("#loadalert span").text("Server timeout, loading from google instead");
-    //   console.log("Loading datasets from google.")
-    //   /*loadDatasetFromSheet(google_sheet_id, 2, function (dataset) {
-    //     dataset.sortDatasetContent("Date of match", Date.parse);
-    //     match_dataset = dataset;
-    //   });*/
-    //   loadDatasetFromSheet(google_sheet_id, 4, function (dataset) {
-    //     gun_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 5, function (dataset) {
-    //     ammo_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 6, function (dataset) {
-    //     damage_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 7, function (dataset) {
-    //     tool_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 8, function (dataset) {
-    //     component_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 9, function (dataset) {
-    //     ship_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 10, function (dataset) {
-    //     map_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 11, function (dataset) {
-    //     crosshair_dataset = dataset;
-    //   });
-    //   loadDatasetFromSheet(google_sheet_id, 12, function (dataset) {
-    //     ship_guns_dataset = dataset;
-    //   });
-    //   datasetLoadCheck();
-    // }
-    // function datasetLoadCheck(){
-    //   if (!(match_dataset && gun_dataset && ammo_dataset &&
-    //       damage_dataset && tool_dataset && component_dataset &&
-    //       ship_dataset && map_dataset && crosshair_dataset &&
-    //       ship_guns_dataset)) {
-    //       setTimeout(datasetLoadCheck, 200);
-    //       return;
-    //   }
-    //   console.log("Datasets loaded from google.");
-    //   datasetsLoaded();
-    // }
 
     function loadDatasetsFromServer(){
       $("#loadalert span").text("Getting datasets");
@@ -1448,7 +1391,7 @@
       initializeSpawns();
       //initializeMatchStatistics();
       //initializeMatchList();
-      initializeBuildList();
+      // initializeBuildList();
     }
 
     function openPageFromUrl() {
