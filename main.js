@@ -33,10 +33,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-app.get('/', function(req, res){
-  res.status(200).sendFile(__dirname+'/public/index.html');
-});
-
 app.get('/ping', function(req, res){
   let ip = requestIp.getClientIp(req);
   let username = getUsername(ip);
