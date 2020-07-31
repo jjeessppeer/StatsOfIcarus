@@ -43,11 +43,18 @@ app.get('/ping', function(req, res){
   res.status(200).send("OK");
 });
 
+app.get('/get_match_history', function(req, res) {
+  let ip = requestIp.getClientIp(req);
+  log.info(ip, " get_match_history \t Matches requested.");
+  matches = data_db.prepare("SELECT * FROM Match_History").all();
+  res.status(200).json(matches);
+});
+
 app.get('/get_datasets', function(req, res) {
   let ip = requestIp.getClientIp(req);
   log.info(ip, " get_datasets \t Datasets requested.");
   let datasets = {};
-  //datasets.history = data_db.prepare("SELECT * FROM Match_History").all();
+  // datasets.history = data_db.prepare("SELECT * FROM Match_History").all();
   datasets.gun_stats = data_db.prepare("SELECT * FROM Gun_stats").all();
   datasets.ammo_stats = data_db.prepare("SELECT * FROM Ammo_stats").all();
   datasets.damage_stats = data_db.prepare("SELECT * FROM Damage_types").all();

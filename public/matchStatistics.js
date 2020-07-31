@@ -12,11 +12,14 @@ var scatterChart;
 
 var totalMatches = 1;
 
+var historyRequested = false;
+
 function initializeMatchStatistics(){
     $("#statsShipSelect").on("change", updateStatsPanel);
-
     $("#graphDateFilterStartText,#graphDateFilterEndText").on("input", updateStatsPanel);
-    updateStatsPanel();
+    $("#matchAnalysisLink > a").on('click', function(){
+        updateStatsPanel();
+    });
 }
 
 
@@ -94,18 +97,29 @@ function pickRateTeam(data_rows, active_ship) {
 
 function updateStatsPanel() {
     if (!(match_dataset)) {
-        console.log("Still loading");
-        setTimeout(function () { updateStatsPanel(); }, 1000);
+        if (!historyRequested){
+            historyRequested = true
+            httpxGetRequest("/get_match_history", function(){
+                console.log("HISTORY RECIEVED")
+                match_dataset = jsonToDataset(JSON.parse(this.response), 
+                    ["Timestamp","Date of match","Event",
+                    "Team scores [Team 1 score]","Team scores [Team 2 score]",
+                    "T1 Ship 1","T1 Ship 2","T2 Ship 1","T2 Ship 2",
+                    "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot"]);
+                match_dataset.sortDatasetContent("Date of match", Date.parse);
+            });
+        }
+        setTimeout(function () { updateStatsPanel(); }, 200);
         return;
     }
-    
     let active_ship = $("#statsShipSelect").val();
 
     // let filtered_match_dataset = match_dataset.
     let filter_date_start = $("#graphDateFilterStartText").val();
     let filter_date_end = $("#graphDateFilterEndText").val();
     if (filter_date_start == "")
-        filter_date_start = "2019-01-01";
+        filter_date_start = $("#graphDateFilterStartText").prop('placeholder')
+        // filter_date_start = "2019-01-01";
     if (!Date.parse(filter_date_start))
         return;
 

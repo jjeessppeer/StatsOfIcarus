@@ -15,7 +15,7 @@
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap.min.js"></script>
   <script src="deps/lz-string.min.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
   <script src="https://unpkg.com/darkreader"></script>
 
   <script src="utils.js"></script>
@@ -59,19 +59,19 @@
 
       <ul class="list-unstyled components">
 
-        <!-- <li id="matchAnalysisLink" data-show="#matchAnalysis">
+        <li id="matchAnalysisLink" data-show="#matchAnalysis">
           <a href="#matchAnalysis">
             <i class="fas fa-glasses"></i>
             Match history analysis
           </a>
         </li>
-        <li id="matchesLink" data-show="#matchDatabase">
+        <!-- <li id="matchesLink" data-show="#matchDatabase">
           <a href="#matchDatabase">
             <i class="fas fa-book"></i>
             Competative match database
           </a>
-        </li>
-        <li id="matchSubmissionLink" data-show="#matchSubmission">
+        </li> -->
+        <!-- <li id="matchSubmissionLink" data-show="#matchSubmission">
           <a href="#matchSubmission">
             <i class="fas fa-pen-nib"></i>
             Submit match to history
@@ -129,13 +129,13 @@
     <div id="content" class="container-fluid">
 
       <!-- Match history analysis -->
-      <!-- <div id="matchAnalysis" class="content-panel" style="display:none">
+      <div id="matchAnalysis" class="content-panel" style="display:none">
         <h1>Match history statistics</h1>
         <div class="input-group" style="width:440px">
           <div class="input-group-prepend">
             <div class="input-group-text">Include matches from</div>
           </div>
-          <input type="text" class="form-control" id="graphDateFilterStartText" placeholder="2019-01-01" autocomplete="off">
+          <input type="text" class="form-control" id="graphDateFilterStartText" placeholder="2013-01-01" autocomplete="off">
           <div class="input-group-text">to</div>
           <input type="text" class="form-control" id="graphDateFilterEndText" placeholder="today" autocomplete="off">
 
@@ -194,7 +194,7 @@
             <canvas id="winRatioAllyChart" width="400" height="400"></canvas>
           </div>
         </div>
-      </div> -->
+      </div>
 
       <!-- Match Database -->
       <!-- <div id="matchDatabase" class="content-panel" style="display:none">
@@ -1306,6 +1306,8 @@
         updateRangeVis();
         updateArcPanel();
       });
+      
+      initializeMatchStatistics();
       // console.log("COOKIE: ", getCookie("dark_mode")=="true")
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
       dark_mode_switch.trigger("change");
@@ -1330,16 +1332,8 @@
         if (this.readyState == 4 && this.status == 200){
           datasets_loaded = true;
           let datasets = JSON.parse(this.response);
-          // console.log(this.response);
           console.log(datasets);
 
-          /*match_dataset = jsonToDataset(datasets.history, 
-              ["Timestamp","Date of match","Event",
-              "Team scores [Team 1 score]","Team scores [Team 2 score]",
-              "T1 Ship 1","T1 Ship 2","T2 Ship 1","T2 Ship 2",
-              "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot"]);
-          match_dataset.sortDatasetContent("Date of match", Date.parse);*/
-          
           ammo_dataset = jsonToDataset(datasets.ammo_stats,
               ["Name","Alias","Rotation speed","Jitter","Clip size",
               "AOE radius","AOE damage","Damage","Arming time","Rate of fire",
@@ -1395,7 +1389,6 @@
       initializeAimCalculator();
       initializeShipBuilder();
       initializeSpawns();
-      //initializeMatchStatistics();
       //initializeMatchList();
       // initializeBuildList();
     }
