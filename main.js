@@ -33,6 +33,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+app.get('/', function(req, res){
+  res.status(200).sendFile(__dirname+'/public/index.html');
+});
+
 app.get('/ping', function(req, res){
   let ip = requestIp.getClientIp(req);
   let username = getUsername(ip);
@@ -280,16 +284,6 @@ function makeID(length) {
 
   return result;
 }
-
-
-console.log("Reading files.");
-
-fs.readdirSync("/etc/letsencrypt/live/statsoficarus.xyz").forEach(file => {
-  console.log(file);
-  let f = fs.readFileSync('/etc/letsencrypt/live/statsoficarus.xyz/' + file, 'utf8');
-  console.log(f);
-});
-
 
 var httpServer = http.createServer(app);
 httpServer.listen(80);
