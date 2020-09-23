@@ -4,6 +4,13 @@ class Dataset {
     constructor(title_array, content_array) {
         this.titles = title_array;
         this.content = content_array;
+        for (let i = 0; i < this.content.length; i++) {
+            if (this.content[i].length != this.titles.length){
+                console.log("WARNING BAD CONTENT ROW: \n" + this.content[i]);
+                this.content.splice(i, 1);
+                i--;
+            }
+        }
         this.sanitizeDataset();
     }
 
