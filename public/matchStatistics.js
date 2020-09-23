@@ -28,12 +28,12 @@ function n_in(row, ship_name, team) {
     if (ship_name == "all") return 2;
     let count = 0;
     if (team == 1) {
+        if (row[4].includes(ship_name)) count++;
         if (row[5].includes(ship_name)) count++;
-        if (row[6].includes(ship_name)) count++;
     }
     if (team == 2) {
+        if (row[6].includes(ship_name)) count++;
         if (row[7].includes(ship_name)) count++;
-        if (row[8].includes(ship_name)) count++;
     }
     return count;
 }
@@ -44,8 +44,8 @@ function calcWinsTeam(data_rows, active_ship, team, enemy_ship = "all", ally_shi
     let losses = 0;
 
     for (var i = 0; i < data_rows.length; i++) {
-        let t1_score = data_rows[i][3];
-        let t2_score = data_rows[i][4];
+        let t1_score = data_rows[i][2];
+        let t2_score = data_rows[i][3];
 
         let n_active = n_in(data_rows[i], active_ship, team);
         let n_ally = n_in(data_rows[i], ally_ship, team);
@@ -102,28 +102,33 @@ function updateStatsPanel() {
             httpxGetRequest("/get_match_history", function(){
                 console.log("HISTORY RECIEVED")
                 match_dataset = jsonToDataset(JSON.parse(this.response), 
-                    ["Timestamp","Date of match","Event",
+                    ["Date of match", "Event",
                     "Team scores [Team 1 score]","Team scores [Team 2 score]",
                     "T1 Ship 1","T1 Ship 2","T2 Ship 1","T2 Ship 2",
-                    "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot"]);
+                    "T1S1 Pilot","T1S2 Pilot","T2S1 Pilot","T2S2 Pilot",
+                    "Map"]);
+                console.log(match_dataset.getDatasetRows());
                 match_dataset.sortDatasetContent("Date of match", Date.parse);
             });
         }
         setTimeout(function () { updateStatsPanel(); }, 200);
         return;
     }
+    console.log("ALL MATCHES");
+    console.log(match_dataset);
+
     let active_ship = $("#statsShipSelect").val();
 
-    // let filtered_match_dataset = match_dataset.
+    // Filter the match dataset by date.
     let filter_date_start = $("#graphDateFilterStartText").val();
     let filter_date_end = $("#graphDateFilterEndText").val();
     if (filter_date_start == "")
         filter_date_start = $("#graphDateFilterStartText").prop('placeholder')
-        // filter_date_start = "2019-01-01";
     if (!Date.parse(filter_date_start))
         return;
 
     let filtered_match_dataset = match_dataset.filterByDate(filter_date_start, "Date of match", false, true);
+
     if (filter_date_end == "" || filter_date_end.toLowerCase() == "today"){
 
     }
@@ -134,9 +139,12 @@ function updateStatsPanel() {
         return;
     }
 
-
+    // Filter by selected ship
     let data_rows = filtered_match_dataset.filterByStringMultiCol(active_ship, ["T1 Ship 1", "T1 Ship 2", "T2 Ship 1", "T2 Ship 2"]).getDatasetRows();
-    //let n_matches = data_rows.getNOfRows();
+
+    // Apply detailed filters
+    // TODO
+
     totalMatches = filtered_match_dataset.getNOfRows();
 
     let [wins, losses] = calcWins(data_rows, active_ship);
@@ -219,12 +227,12 @@ function updateStatsPanel() {
 
 
 function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
-
     let ctx_bub = document.getElementById('bubbleChart').getContext('2d');
     // let [win_ratios, pick_ratios, ship_labels, colours]
     let [scatter_data, scatter_labels, scatter_colours] = scatter;
     if (!scatterChart){
         scatterChart = new Chart(ctx_bub, {
+            plugins: [ChartDataLabels],
             type: 'bubble',
             data: {
                 datasets: [{
@@ -232,11 +240,36 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
                     // pointRadius: 10,
                     // pointHoverRadius: 15,
                     data: scatter_data,
-                    backgroundColor: scatter_colours
+                    backgroundColor: scatter_colours,
+                    datalabels: {
+                        labels: {
+                            value: {
+                                color: 'green'
+                            }
+                        }
+                    }
                 }],
                 labels: scatter_labels
             },
             options: {
+                plugins: {
+                    datalabels: {
+                        color: function(value, context){
+                            return 'black';
+                        },
+                        font: function(context){
+                            return {size: 14, lineHeight: context.dataset.data[context.dataIndex].r == 18 ? 3.2 : 2.6};
+                        },
+                        // font: {size: 14, lineHeight: 2.5},
+                        formatter: function(value, context) {
+                            // console.log("hey2")
+                            // console.log(value)
+                            // console.log(context)
+                            // console.log("bye")
+                            return context.chart.data.labels[context.dataIndex] + "\n";
+                        }
+                    }
+                },
                 responsive: false,
                 scales: {
                     xAxes: [{
@@ -290,7 +323,6 @@ function updateCharts(wins, losses, pick_data, enemy_data, ally_data, scatter){
         scatterChart.data.datasets[0].backgroundColor = scatter_colours;
         scatterChart.data.datasets[0].data = scatter_data;
         scatterChart.update();
-
     }
 
     // Pick rate pie chart

@@ -32,8 +32,8 @@ function parseDataset(dataset, table_name){
     if (i != dataset.titles.length-1) cmd+=",";
   }
   cmd += ")";
-
   for (let i=0; i < dataset.content.length; i++){
+    // console.log(dataset.content[i]);
     data_db.prepare(cmd).run(dataset.content[i]);
 
   } 
@@ -126,7 +126,6 @@ function initTables(){
     "MapScale"	TEXT
   )`).run();
   data_db.prepare(`CREATE TABLE "Match_history" (
-    "Timestamp"	TEXT,
     "Dateofmatch"	TEXT,
     "Event"	TEXT,
     "Teamscores[Team1score]"	INTEGER,
@@ -138,7 +137,8 @@ function initTables(){
     "T1S1Pilot"	TEXT,
     "T1S2Pilot"	INTEGER,
     "T2S1Pilot"	TEXT,
-    "T2S2Pilot"	TEXT
+    "T2S2Pilot"	TEXT,
+    "Map" TEXT
   )`).run();
   data_db.prepare(`CREATE TABLE "Ship_Stats" (
     "ShipType"	TEXT,

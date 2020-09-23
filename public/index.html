@@ -17,6 +17,7 @@
   <script src="deps/bootstrap.min.js"></script>
   <script src="deps/lz-string.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.5.0"></script>
   <script src="https://unpkg.com/darkreader"></script>
 
   <script src="utils.js"></script>
@@ -136,7 +137,7 @@
           <div class="input-group-prepend">
             <div class="input-group-text">Include matches from</div>
           </div>
-          <input type="text" class="form-control" id="graphDateFilterStartText" placeholder="2013-01-01" autocomplete="off">
+          <input type="text" class="form-control" id="graphDateFilterStartText" placeholder="2018-01-01" autocomplete="off">
           <div class="input-group-text">to</div>
           <input type="text" class="form-control" id="graphDateFilterEndText" placeholder="today" autocomplete="off">
 
@@ -144,30 +145,129 @@
         </div>
         <br>
 
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Ship</div>
+        <div class="input-group" style="width:440px;">
+          <div class="input-group-prepend small">
+            <div class="input-group-text">Ship</div>
+          </div>
+          <select class="form-control" id="statsShipSelect" autocomplete="off">
+            <option>Goldfish</option>
+            <option>Junker</option>
+            <option>Squid</option>
+            <option>Galleon</option>
+            <option>Spire</option>
+            <option selected>Pyramidion</option>
+            <option>Mobula</option>
+            <option>Magnate</option>
+            <option>Crusader</option>
+            <option>Judgement</option>
+            <option>Corsair</option>
+            <option>Shrike</option>
+            <option>Stormbreaker</option>
+          </select>
+        </div>
+
+        
+        <div id="detailedGraphFiltersAccordion" style="max-width: 440px; display:none;">
+          <div class="card" style="margin-top:10px;margin-bottom:10px;margin:0px;padding:0px;">
+            <div class="card-header" id="headingOne" style="max-height: 50px;margin:0px;padding:0px;">
+              <h5>
+                <button class="btn btn-link" data-toggle="collapse" data-target="#detailedGraphFilters">
+                  <i class="fas fa-chevron-down"></i>Detailed filters
+                </button>
+              </h5>
+            </div>
+            <div id="detailedGraphFilters" class="collapse hide" aria-labelledby="headingOne" data-parent="#detailedGraphFiltersAccordion">
+              <div class="card-body">
+
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="pilotIncludeCheck" data-toggle="collapse" data-target="#pilotIncludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="pilotIncludeCheck">Include pilots</label>
+                </div>
+                <div id="pilotIncludeDiv" class="collapse hide">
+                  <span style="color:grey;">Include only matches with the following pilots. Enter one pilot name per row</span>
+                  <textarea class="form-control" id="pilotIncludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="pilotExcludeCheck" data-toggle="collapse" data-target="#pilotExcludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="pilotExcludeCheck">Exclude pilots</label>
+                </div>
+                <div id="pilotExcludeDiv" class="collapse hide">
+                  <span style="color:grey;">Include only matches without the following pilots. Enter one pilot name per row</span>
+                  <textarea class="form-control" id="pilotExcludeText" style="height:100px;" autocomplete="off" placeholder="None"></textarea>
+                </div>
+                
+                <br>
+
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="eventIncludeCheck" data-toggle="collapse" data-target="#eventIncludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="eventIncludeCheck">Include events</label>
+                </div>
+                <div id="eventIncludeDiv" class="collapse hide">
+                  <span style="color:grey;">Enter one event name per row. Use "SCS" or "Crewcible" to include all events of that type. You can also specify a number. Like "SCS #305" or "Crewcible S11W1".</span>
+                  <textarea class="form-control" id="eventIncludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="eventExcludeCheck" data-toggle="collapse" data-target="#eventExcludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="eventExcludeCheck">Exclude events</label>
+                </div>
+                <div id="eventExcludeDiv" class="collapse hide">
+                  <span style="color:grey;">Enter one event name per row. Use "SCS" or "Crewcible" to exclude all events of that type. You can also specify a number. Like "SCS #305" or "Crewcible S11W1".</span>
+                  <textarea class="form-control" id="eventExcludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+
+                <br>
+                
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="allyIncludeCheck" data-toggle="collapse" data-target="#allyIncludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="allyIncludeCheck">Include ally ship</label>
+                </div>
+                <div id="allyIncludeDiv" class="collapse hide">
+                  <span style="color:grey;">Enter one ship name per row.</span>
+                  <textarea class="form-control" id="allyIncludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="allyExcludeCheck" data-toggle="collapse" data-target="#allyExcludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="allyExcludeCheck">Exclude ally ship</label>
+                </div>
+                <div id="allyExcludeDiv" class="collapse hide">
+                  <span style="color:grey;">Enter one ship name per row.</span>
+                  <textarea class="form-control" id="allyExcludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+
+                <br>
+                
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="enemyIncludeCheck" data-toggle="collapse" data-target="#enemyIncludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="enemyIncludeCheck">Include enemy ship</label>
+                </div>
+                <div id="enemyIncludeDiv" class="collapse hide">
+                  <span style="color:grey;">Enter one ship name per row."</span>
+                  <textarea class="form-control" id="enemyIncludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="enemyExcludeCheck" data-toggle="collapse" data-target="#enemyExcludeDiv" autocomplete="off">
+                  <label class="custom-control-label" for="enemyExcludeCheck">Exclude enemy ship</label>
+                </div>
+                <div id="enemyExcludeDiv" class="collapse hide">
+                  <span style="color:grey;">Enter one ship name per row."</span>
+                  <textarea class="form-control" id="enemyExcludeText" style="height:100px;" autocomplete="off" placeholder="All"></textarea>
+                </div>
+                
               </div>
-              <select class="form-control" id="statsShipSelect" autocomplete="off">
-                <option>Goldfish</option>
-                <option>Junker</option>
-                <option>Squid</option>
-                <option>Galleon</option>
-                <option>Spire</option>
-                <option selected>Pyramidion</option>
-                <option>Mobula</option>
-                <option>Magnate</option>
-                <option>Crusader</option>
-                <option>Judgement</option>
-                <option>Corsair</option>
-                <option>Shrike</option>
-                <option>Stormbreaker</option>
-              </select>
             </div>
           </div>
         </div>
+
+
+        <br>
+
+ 
+        
+
         <div class="row">
           <div class="col-s-3">
             <canvas id="bubbleChart" width="600" height="400"></canvas>
@@ -1289,6 +1389,7 @@
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
+      Chart.plugins.unregister(ChartDataLabels);
       
       $("#sidebar a").on("click", openPageFromUrl);
 
