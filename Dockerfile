@@ -1,3 +1,5 @@
+# Create a docker container hosting the website.
+
 FROM node:10
 COPY package*.json ./
 RUN npm install
