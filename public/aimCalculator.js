@@ -39,7 +39,7 @@ function initializeAimCalculator(){
     $("#arcAmmoSelect").on("change", function () { updateArcPanel(); });
 
     $("#arcGunSelect").on("change", function () {
-        let gun_srcs = { "Lumberjack": "gun-images/lumberjack.jpg", "Heavy Flak Mk. II": "gun-images/flak.jpg", "Hades": "gun-images/lumberjack.jpg" };
+        let gun_srcs = { "Lumberjack": "images/gun-images/lumberjack.jpg", "Heavy Flak Mk. II": "images/gun-images/flak.jpg", "Hades": "images/gun-images/lumberjack.jpg" };
         let gun_image = $("#gunImage")[0];
         gun_image.src = gun_srcs[$(this).val()];
         runOnComplete(gun_image, function (gun_image) {
@@ -55,7 +55,7 @@ function initializeAimCalculator(){
       });
 
     $("#arcMapSelect").on("change", function () {
-        let map_srcs = { "Battle on the Dunes": "map-images/Dunes.jpg", "Northern Fjords": "map-images/Fjords.jpg" };
+        let map_srcs = { "Battle on the Dunes": "images/map-images/Dunes.jpg", "Northern Fjords": "images/map-images/Fjords.jpg" };
         $("#mapImage").attr("src", map_srcs[$(this).val()]);
         updateArcPanel();
     });

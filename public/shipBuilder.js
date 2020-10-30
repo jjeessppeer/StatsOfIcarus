@@ -15,19 +15,19 @@ var builder_matrix = [
   0, 0, 1];
 
 var ship_image_srcs = {
-  "Corsair": "ship-images/corsair_gundeck_small.png",
-  "Crusader": "ship-images/crusader_gundeck_small.png",
-  "Galleon": "ship-images/galleon_gundeck_small.png",
-  "Goldfish": "ship-images/goldfish_gundeck_small.png",
-  "Judgement": "ship-images/judge_gundeck_small.png",
-  "Junker": "ship-images/junker_gundeck_small.png",
-  "Magnate": "ship-images/magnate_gundeck_small.png",
-  "Mobula": "ship-images/mob_gundeck_small.png",
-  "Pyramidion": "ship-images/pyra_gundeck_small.png",
-  "Shrike": "ship-images/shrike_gundeck_small.png",
-  "Spire": "ship-images/spire_gundeck_small.png",
-  "Squid": "ship-images/squid_gundeck_small.png",
-  "Stormbreaker": "ship-images/storm_gundeck_small.png" 
+  "Corsair": "images/ship-images/corsair_gundeck_small.png",
+  "Crusader": "images/ship-images/crusader_gundeck_small.png",
+  "Galleon": "images/ship-images/galleon_gundeck_small.png",
+  "Goldfish": "images/ship-images/goldfish_gundeck_small.png",
+  "Judgement": "images/ship-images/judge_gundeck_small.png",
+  "Junker": "images/ship-images/junker_gundeck_small.png",
+  "Magnate": "images/ship-images/magnate_gundeck_small.png",
+  "Mobula": "images/ship-images/mob_gundeck_small.png",
+  "Pyramidion": "images/ship-images/pyra_gundeck_small.png",
+  "Shrike": "images/ship-images/shrike_gundeck_small.png",
+  "Spire": "images/ship-images/spire_gundeck_small.png",
+  "Squid": "images/ship-images/squid_gundeck_small.png",
+  "Stormbreaker": "images/ship-images/storm_gundeck_small.png" 
 }
 
 function initializeShipBuilder(){
@@ -309,12 +309,12 @@ function shipBuilderImport(e, build_code, encoded=true){
   // let loadout_count = 0;
   // let ability_count = 0;
   for (let i=0; i < 4; i+=1){
-    imgs[i*13].src = "loadout-images/" + build_data.crew[i].role + ".jpg";
+    imgs[i*13].src = "images/loadout-images/" + build_data.crew[i].role + ".jpg";
     for (let j=1; j <= 3; j++){
-      imgs[i*13 + j].src = "loadout-images/" + build_data.crew[i].pilotTools[j-1] + ".jpg";
-      imgs[i*13 + j + 3].src = "loadout-images/" + build_data.crew[i].engiTools[j-1] + ".jpg";
-      imgs[i*13 + j + 6].src = "loadout-images/" + build_data.crew[i].ammo[j-1] + ".jpg";
-      imgs[i*13 + j + 9].src = "loadout-images/" + build_data.crew[i].abilities[j-1] + ".jpg";
+      imgs[i*13 + j].src = "images/loadout-images/" + build_data.crew[i].pilotTools[j-1] + ".jpg";
+      imgs[i*13 + j + 3].src = "images/loadout-images/" + build_data.crew[i].engiTools[j-1] + ".jpg";
+      imgs[i*13 + j + 6].src = "images/loadout-images/" + build_data.crew[i].ammo[j-1] + ".jpg";
+      imgs[i*13 + j + 9].src = "images/loadout-images/" + build_data.crew[i].abilities[j-1] + ".jpg";
     }
   }
   $("#shipBuildName").val(build_data.name);
@@ -575,7 +575,7 @@ function updateShipBuildImage(resetPos=false, important=false){
   let n_guns = parseInt(data_row[1]);
   let img_srcs = [ship_image_srcs[ship_builder_ship]];
   for (let i=0; i < n_guns; i++){
-    img_srcs.push("gun-images/icons/"+ship_builder_guns[i]+".jpg");
+    img_srcs.push("images/gun-images/icons/"+ship_builder_guns[i]+".jpg");
   }
   let images = loadImages(img_srcs, () => {
     redrawShipBuildImage(images, data_row, resetPos);
@@ -648,9 +648,9 @@ function redrawShipBuildImage(images, data_row, resetPos=false){
     // ctx.fill();
     // ctx.stroke();
     // console.log(gun_img.src);
-    // gun_img.src = "gun-images/icons/"+gun_type+".jpg";
-    // if (gun_img.src == "http://localhost/gun-images/icons/Artemis.jpg") gun_img.src = "gun-images/icons/Light Flak.jpg"
-    // else if (gun_img.src == "http://localhost/gun-images/icons/Light%20Flak.jpg") gun_img.src = "gun-images/icons/Artemis.jpg"
+    // gun_img.src = "images/gun-images/icons/"+gun_type+".jpg";
+    // if (gun_img.src == "http://localhost/images/gun-images/icons/Artemis.jpg") gun_img.src = "images/gun-images/icons/Light Flak.jpg"
+    // else if (gun_img.src == "http://localhost/images/gun-images/icons/Light%20Flak.jpg") gun_img.src = "images/gun-images/icons/Artemis.jpg"
     ctx.drawImage(images[i+1], cx-30, cy-30, 60, 60);
     ctx.fillStyle = "rgb(255, 255, 255)";
     ctx.font = "20px Arial";
@@ -885,7 +885,7 @@ function updateRangeVis(){
 function angleVis(){
   let canvas = document.getElementById("angleCanvas");
   let angleImage = document.getElementById("angleImage")
-  angleImage.src = "helm-images/"+ship_builder_ship+"_helm.jpg"
+  angleImage.src = "images/helm-images/"+ship_builder_ship+"_helm.jpg"
 
   let ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);

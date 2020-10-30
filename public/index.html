@@ -3,43 +3,41 @@
 
 <head>
   <title>Best Boats</title>
-  <!-- <link rel="shortcut icon" href="blimp-icon.png"> -->
-  <link rel="icon" href="blimp-icon.png" type="image/x-icon" />
+  <link rel="icon" href="images/blimp-icon.png" type="image/x-icon" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-
-
-  <link rel="stylesheet" href="deps/bootstrap.min.css">
-  <!-- <script src="deps/jquery-3.4.1.slim.min.js"></script> -->
+  <!-- Dependencies -->
   <script src="deps/jquery-3.4.1.min.js"></script>
   <script src="deps/popper.min.js"></script>
-  <script src="deps/bootstrap.min.js"></script>
-  <script src="deps/lz-string.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.5.0"></script>
-  <script src="https://unpkg.com/darkreader"></script>
-
+  <script src="deps/bootstrap-4.3.1.min.js"></script>
+  <script src="deps/lz-string-1.4.4.min.js"></script>
+  <script src="deps/Chart-2.8.0.min.js"></script>
+  <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script>
+  <script src="deps/darkreader-4.9.22.js"></script>
+  <script src="deps/jquery-ui-1.12.1.min.js"></script>
+  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="deps/jquery-ui-1.12.1.min.css">
+  <link rel="stylesheet" href="deps/bootstrap-4.3.1.min.css">
+  
   <script src="utils.js"></script>
   <script src="docsapi.js"></script>
-  <script src="shipBuildList.js"></script>
   <script src="damageCalculations.js"></script>
   <script src="aimCalculator.js"></script>
-  <script src="matchList.js"></script>
   <script src="matchStatistics.js"></script>
   <script src="mapSpawns.js"></script>
   <script src="shipBuilder.js"></script>
   <script src="shipBuilderTranslations.js"></script>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
-    crossorigin="anonymous">
 
-  <script src="jquery-ui.min.js"></script>
-  <link rel="stylesheet" href="jquery-ui.min.css">
+  
+  
+  
 </head>
 
 <body>
-
 
   <div class="wrapper">
     <!-- Sidebar  -->
@@ -67,25 +65,6 @@
             Match history analysis
           </a>
         </li>
-        <!-- <li id="matchesLink" data-show="#matchDatabase">
-          <a href="#matchDatabase">
-            <i class="fas fa-book"></i>
-            Competative match database
-          </a>
-        </li> -->
-        <!-- <li id="matchSubmissionLink" data-show="#matchSubmission">
-          <a href="#matchSubmission">
-            <i class="fas fa-pen-nib"></i>
-            Submit match to history
-          </a>
-        </li> -->
-
-        <!-- <li id="buildDatabaseLink" data-show="#buildDatabase">
-          <a href="#buildDatabase">
-            <i class="fas fa-journal-whills"></i>
-            Ship database
-          </a>
-        </li> -->
         <li id="shipBuilderLink" data-show="#shipBuilder">
           <a href="#shipBuilder">
             <i class="fas fa-hammer"></i>
@@ -297,146 +276,6 @@
         </div>
       </div>
 
-      <!-- Match Database -->
-      <!-- <div id="matchDatabase" class="content-panel" style="display:none">
-        <div class="row row-margin">
-          <div class="col-sm-6">
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">Filter</div>
-              </div>
-              <select class="form-control" id="matchFilterModeSelect" autocomplete="off">
-                <option>Include</option>
-                <option>Exclude</option>
-              </select>
-              <select class="form-control" id="matchFilterSelect" autocomplete="off">
-                <option>All</option>
-                <option>Date after (DDMMYYYY)</option>
-                <option>Date before (DDMMYYYY)</option>
-                <option>Event</option>
-                <option>Ship</option>
-                <option>Pilot</option>
-              </select>
-              <input type="text" class="form-control" id="matchFilterText" placeholder="filter substring">
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col">
-            <table id="matchTable" class="table table-bordered">
-            </table>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Match Submissions -->
-      <!-- <div id="matchSubmission" class="content-panel" style="display:none">
-        <p>Here you can submit a match to the database.</p>
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf8Fyrz4MRAJ8MoDke7it8zB_ihARWv12TBQMtIKstVY3cGXw/viewform?embedded=true"
-          width="640" height="2317" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-      </div> -->
-
-
-      <!-- Build Database  -->
-      <!-- <div id="buildDatabase" class="content-panel" style="display:none">
-        <div>
-          <div class="my-col">
-            <div class="input-group" style="width:200px">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Name</div>
-              </div>
-              <input type="text" class="form-control" id="buildFilterName" placeholder="">
-            </div>
-            <div class="input-group" style="width:200px">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Ship</div>
-              </div>
-              <select class="form-control" id="buildFilterShip" autocomplete="off">
-                <option selected>Any</option>
-                <option>Goldfish</option>
-                <option>Junker</option>
-                <option>Squid</option>
-                <option>Galleon</option>
-                <option>Spire</option>
-                <option>Pyramidion</option>
-                <option>Mobula</option>
-                <option>Magnate</option>
-                <option>Crusader</option>
-                <option>Judgement</option>
-                <option>Corsair</option>
-                <option>Shrike</option>
-                <option>Stormbreaker</option>
-              </select>
-            </div>
-          </div>
-          <div class="my-col">
-            <div class="input-group" style="width:250px">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">PvE builds</div>
-              </div>
-              <select class="form-control" id="buildFilterPvE" autocomplete="off">
-                <option>Exclude</option>
-                <option selected>Include</option>
-                <option>Only</option>
-              </select>
-            </div>
-            <div class="input-group" style="width:250px">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Submitted by</div>
-              </div>
-              <select class="form-control" id="buildFilterAuthor" autocomplete="off">
-                <option selected>Anyone</option>
-                <option>Me</option>
-                <option>Others</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="my-col">
-            <div class="input-group" style="width:210px">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Sorting</div>
-              </div>
-              <select class="form-control" id="buildFilterOrder" autocomplete="off">
-                <option selected>Votes (Desc.)</option>
-                <option>Votes (Asc.)</option>
-                <option>Date (new)</option>
-                <option>Date (old)</option>
-                <option>Alphabetical</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <br>
-        
-        
-
-        <table class="table" style="max-width:1000px" id="buildDatabaseTable">
-          <thead>
-            <tr>
-              <th scope="col" style="width:15px">#</th>
-              <th scope="col" style="width:85px">Votes</th>
-              <th scope="col" style="width:130px">Name</th>
-              <th scope="col" colspan="2" style="width:200px">Ship info</th>
-              <th scope="col">Description</th>
-              <th scope="col" style="width:85px">Options</th>
-            </tr>
-          </thead>  
-        </table>
-        <nav style="margin:auto; width:50%;" id="buildPageNav">
-          <ul class="pagination">
-            <li class="page-item" id="buildPageNavPrev"><a class="page-link">Previous</a></li>
-            <li class="page-item" id="buildPageNavFirst"><a class="page-link">1</a></li>
-            <li class="page-item active" id="buildPageNavCurr"><a id="currentBuildPage" class="page-link">[current]</a></li>
-            <li class="page-item" id="buildPageNavLast"><a class="page-link">[last]</a></li>
-            <li class="page-item" id="buildPageNavNext"><a class="page-link">Next</a></li>
-          </ul>
-        </nav>
-
-      </div> -->
-
-      <!-- Ship builder -->
       <div id="shipBuilder" class="content-panel" style="display:none">
         <h3>Ship builder</h3>
 
@@ -452,8 +291,6 @@
             <button id="shipBuildExportButton" class="btn btn-primary" type="button">Export</button>
           </div>
         </div>
-
-
 
         <br>
 
@@ -569,209 +406,209 @@
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Noclass.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Noclass.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Pilot.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Gunner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Engineer.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Noclass.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Pilot.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Gunner.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Engineer.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Noclass.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Spyglass.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Spyglass.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Claw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Vent.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Chute.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Tar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Sail.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Claw.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Vent.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Chute.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Tar.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Sail.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Kerosene.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Kerosene.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Claw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Vent.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Chute.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Tar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Sail.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Claw.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Vent.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Chute.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Tar.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Sail.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Hydrogen.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Hydrogen.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Claw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Vent.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Chute.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Tar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Sail.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Claw.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Vent.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Chute.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Tar.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Sail.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Mallet.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Mallet.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Mallet.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Spanner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Pipe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Buff.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Mallet.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Spanner.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Pipe.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Buff.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Spanner.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Spanner.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Mallet.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Spanner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Pipe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Buff.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Mallet.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Spanner.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Pipe.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Buff.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Extinguisher.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Extinguisher.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Mallet.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Spanner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Pipe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Buff.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Mallet.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Spanner.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Pipe.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Buff.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Charged.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Charged.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Normal.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Heavy.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Burst.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Greased.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Charged.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Extended.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Normal.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Heavy.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Burst.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Greased.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Charged.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Extended.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Greased.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Greased.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Normal.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Heavy.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Burst.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Greased.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Charged.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Extended.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Normal.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Heavy.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Burst.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Greased.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Charged.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Extended.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/Lesmok.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/Lesmok.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/Normal.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Heavy.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Burst.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Greased.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Charged.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/Extended.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Normal.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Heavy.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Burst.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Greased.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Charged.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/Extended.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/MechanizedRebuild.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/MechanizedRebuild.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/MechanizedRebuild.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/SalvoNeutralizer.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/CombustionDampener.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/AdvancedDynaBuff.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/StaticTurret.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/ComponentDisruption.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/MechanizedRebuild.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/SalvoNeutralizer.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/CombustionDampener.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/AdvancedDynaBuff.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/StaticTurret.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/ComponentDisruption.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/LightningDraw.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/LightningDraw.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/LightningDraw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/ConcussiveBlast.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/MineEjection.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/GigatonBlast.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/ProximalDetonation.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/CataclysmRounds.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/LightningDraw.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/ConcussiveBlast.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/MineEjection.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/GigatonBlast.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/ProximalDetonation.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/CataclysmRounds.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
                 <div>
                   <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="loadout-images/EngineStabilization.jpg" width="35" height="35" class="rounded">
+                    <img src="images/loadout-images/EngineStabilization.jpg" width="35" height="35" class="rounded">
                   </button>
                   <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="loadout-images/EngineStabilization.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/RushingDrift.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/OversurgeRam.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/AirHorn.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/EnhancedEnvelope.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="loadout-images/TarBomb.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/EngineStabilization.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/RushingDrift.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/OversurgeRam.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/AirHorn.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/EnhancedEnvelope.jpg" width="40" height="40"></button></a>
+                    <a class="dropdown-item"><img src="images/loadout-images/TarBomb.jpg" width="40" height="40"></button></a>
                   </div>
                 </div>
 
@@ -853,13 +690,13 @@
           <canvas id="rangeCanvas" width="600" height="600">Your browser does not support the HTML5 canvas tag.</canvas>
           <!-- <br> -->
           <!-- <div id="rangeMapContainer" class="img-canvas-container">
-            <img id="rangeImage" class='img' src="map-images/Dunes.jpg" width="400" height="400" />
+            <img id="rangeImage" class='img' src="images/helm-images/Dunes.jpg" width="400" height="400" />
             <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
             <canvas id="rangeCanvasOffscreen" width="400" height="400" style="display:none">Your browser does not
               support the HTML5 canvas tag.</canvas>
           </div> -->
 
-          <!-- <img class='img' src="ship-images/legend.png" width="114" height="179" /> -->
+          <!-- <img class='img' src="images/ship-images/legend.png" width="114" height="179" /> -->
 
         </div>
 
@@ -1218,7 +1055,7 @@
           <div id="mapContainer" class="img-canvas-container sbs-column">
             <b>Select ship positions (distance)</b>
             <br>
-            <img id="mapImage" class='img' src="map-images/Fjords.jpg" width="400" height="400" />
+            <img id="mapImage" class='img' src="images/map-images/Fjords.jpg" width="400" height="400" />
             <canvas id="mapCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
           </div>
 
@@ -1237,7 +1074,7 @@
             <b>Gunner view, aim with the red line</b>
             <br>
             <div id="gunContainer" class="img-canvas-container column">
-              <img id="gunImage" class='img' src="gun-images/lumberjack.jpg" width="334" height="400" />
+              <img id="gunImage" class='img' src="images/gun-images/lumberjack.jpg" width="334" height="400" />
               <canvas id="gunCanvas" width="334" height="400">
                 Your browser does not support the HTML5 canvas tag.</canvas>
             </div>
@@ -1371,7 +1208,6 @@
 
   </div>
 
-
   <script>
     var datasets_loaded = false;
 
@@ -1387,7 +1223,6 @@
     var ship_guns_dataset = null;
 
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
-    // var google_sheet_id = "1g717ASduXJbQbBnLtQgMpHnskY_krj9KSThDfeGTS-4"; // Testing datasheet
     $(document).ready(function () {
       Chart.plugins.unregister(ChartDataLabels);
       
@@ -1491,8 +1326,6 @@
       initializeAimCalculator();
       initializeShipBuilder();
       initializeSpawns();
-      //initializeMatchList();
-      // initializeBuildList();
     }
 
     function openPageFromUrl() {
