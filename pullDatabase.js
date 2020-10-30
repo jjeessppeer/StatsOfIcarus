@@ -1,14 +1,13 @@
+// Run this script to download the datasets from google sheets into a sqlite database.
+
 const sqlite = require('better-sqlite3');
 const data_db = new sqlite('databases/data_db.db', { verbose: null });
-
-//var docsapi = require('./public/docsapi.js');
 
 var docsapi = require('./docsapi.js');
 
 const sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
 
 var datasets = [];
-
 
 dropTables();
 initTables();
