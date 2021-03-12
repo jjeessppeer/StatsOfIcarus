@@ -319,8 +319,8 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
     damage_dict["per second reload"]["component"] = component_unit_scale * (damage_second_2_primary * getDamageMod(damage_type_primary, "Components") + damage_second_2_secondary * getDamageMod(damage_type_secondary, "Components"));
 
     // Fire / clip
-    let fire_clip_primary = gun_d["fire primary"] * clip_size * ammo_d["fire mod"];
-    let fire_clip_secondary = gun_d["fire secondary"] * clip_size * ammo_d["fire mod"];
+    let fire_clip_primary = (gun_d["fire primary"]+ammo_d["fire mod"]) * clip_size;
+    let fire_clip_secondary = gun_d["fire secondary"] * clip_size;
 
     let fire_clip_armor_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
     let fire_clip_armor_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
