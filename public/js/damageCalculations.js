@@ -321,13 +321,15 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
     // Fire / clip
     let fire_clip_primary = (gun_d["fire primary"]+ammo_d["fire mod"]) * clip_size;
     let fire_clip_secondary = gun_d["fire secondary"] * clip_size;
+    fire_clip_primary += Math.floor(ammo_d["fire dmg"]*damage_hit_primary)*clip_size;
+    fire_clip_secondary += Math.floor(ammo_d["fire dmg"]*damage_hit_secondary)*clip_size;
 
-    let fire_clip_armor_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Armor");
-    let fire_clip_armor_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Armor");
-    let fire_clip_balloon_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Balloon");
-    let fire_clip_balloon_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Balloon");
-    let fire_clip_component_primary = fire_clip_primary + ammo_d["fire dmg"] * damage_clip_primary * getDamageMod(damage_type_primary, "Components");
-    let fire_clip_component_secondary = fire_clip_secondary + ammo_d["fire dmg"] * damage_clip_secondary * getDamageMod(damage_type_secondary, "Components");
+    let fire_clip_armor_primary = fire_clip_primary;
+    let fire_clip_armor_secondary = fire_clip_secondary;
+    let fire_clip_balloon_primary = fire_clip_primary;
+    let fire_clip_balloon_secondary = fire_clip_secondary;
+    let fire_clip_component_primary = fire_clip_primary;
+    let fire_clip_component_secondary = fire_clip_secondary;
 
     damage_dict["fire"] = {};
     damage_dict["fire"]["armor"] = fire_clip_armor_primary + fire_clip_armor_secondary;
