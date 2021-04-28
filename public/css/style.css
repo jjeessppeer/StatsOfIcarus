@@ -238,6 +238,10 @@ select.btn-mini + .caret {
 /* #gunTable {
     width: 200px;
 } */
+#scsTime {
+    font-family: Consolas, monaco, monospace;
+    font-size: 22px;
+}
 
 #damageCalculator .input-group {
     width: 300px;

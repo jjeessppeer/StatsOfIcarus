@@ -24,6 +24,7 @@
   
   <script src="js/utils.js"></script>
   <script src="js/docsapi.js"></script>
+  <script src="js/scsTime.js"></script>
   <script src="js/damageCalculations.js"></script>
   <script src="js/aimCalculator.js"></script>
   <script src="js/matchStatistics.js"></script>
@@ -51,6 +52,10 @@
         <div>
           Latest update: <a href="https://discordapp.com/channels/99903812700999680/562361262340833290/737086849822097420" style="color: blue;">
             <u>2020-07-27</u></a>
+        </div>
+        <br>
+        <div id="scsTime">
+          SCS12:32:14
         </div>
       </div>
       <div class="sidebar-header collapsed">
@@ -1354,6 +1359,7 @@
       initializeShipBuilder();
       initializeSpawns();
     }
+    updateScsTime();
 
     function openPageFromUrl() {
       let tab_href = $(this).attr('href').split("?")[0];
