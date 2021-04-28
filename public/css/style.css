@@ -234,15 +234,35 @@ select.btn-mini + .caret {
 /* table{
     max-width: 270px;
 } */
-table.fixed { 
+
+/* #gunTable {
+    width: 200px;
+} */
+
+#damageCalculator .input-group {
+    width: 300px;
+}
+
+#ttkTable {
+    width: 150px;
+}
+#ttkTable td:first-child {
+    width: 100px;
+}
+/* #ttkTable td:not(:first-child) {
+    width: 100px;
+} */
+
+
+#gunTable, #damageTotalTable { 
     table-layout:fixed; 
-    width: 0px;
+    width: 800px;
     /* max-width: 600px; */
 }
 
-table.fixed td, table.fixed th{
+table td, table th{
     overflow:hidden;
-    width: 150px;
+    /* width: 150px; */
 }
 
 table.fixed.fist-wide > tr > th:first-child{

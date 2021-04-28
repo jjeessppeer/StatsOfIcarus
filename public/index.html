@@ -43,7 +43,7 @@
     <!-- Sidebar  -->
     <nav id="sidebar">
       <div class="sidebar-header">
-        <h3>Guns of Icarus Info</h3>
+        <h3>Stats of Icarus</h3>
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
@@ -726,59 +726,51 @@
       <!-- Gunnery calculator -->
       <div id="damageCalculator" class="content-panel" style="display:block">
         <h2>Damage numbers</h2>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Gun</div>
-              </div>
-              <select class="form-control" id="gunSelect" autocomplete="off">
-                <option>Artemis</option>
-                <option>Light Flak</option>
-                <option>Gatling</option>
-                <option>Flamethrower</option>
-                <option>Light Carronade</option>
-                <option>Harpoon</option>
-                <option>Flare</option>
-                <option>Mercury</option>
-                <option>Mortar</option>
-                <option>Banshee</option>
-                <option>Mine</option>
-                <option>Hades</option>
-                <option>Aten Lens Array [Mk. S]</option>
-                <option>Tempest [Mk. S]</option>
-                <option>Heavy Flak Mk. I</option>
-                <option>Heavy Flak Mk. II</option>
-                <option>Hwacha</option>
-                <option>Heavy Carronade</option>
-                <option>Lumberjack</option>
-                <option>Minotaur</option>
-                <option>Nemesis</option>
-              </select>
-            </div>
+        <div class="input-group">
+          <div class="input-group-prepend small">
+            <div class="input-group-text">Gun</div>
           </div>
+          <select class="form-control" id="gunSelect" autocomplete="off">
+            <option>Artemis</option>
+            <option>Light Flak</option>
+            <option>Gatling</option>
+            <option>Flamethrower</option>
+            <option>Light Carronade</option>
+            <option>Harpoon</option>
+            <option>Flare</option>
+            <option>Mercury</option>
+            <option>Mortar</option>
+            <option>Banshee</option>
+            <option>Mine</option>
+            <option>Hades</option>
+            <option>Aten Lens Array [Mk. S]</option>
+            <option>Tempest [Mk. S]</option>
+            <option>Heavy Flak Mk. I</option>
+            <option>Heavy Flak Mk. II</option>
+            <option>Hwacha</option>
+            <option>Heavy Carronade</option>
+            <option>Lumberjack</option>
+            <option>Minotaur</option>
+            <option>Nemesis</option>
+          </select>
         </div>
 
-        <div class="row row-margin" id="damageCalcAmmoInput">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Ammo</div>
-              </div>
-              <select class="form-control" id="ammoSelect" autocomplete="off">
-                <option>Normal</option>
-                <option>Lochnagar</option>
-                <option>Heavy</option>
-                <option>Incendiary</option>
-                <option>Burst</option>
-                <option>Greased</option>
-                <option>Lesmok</option>
-                <option>Heatsink</option>
-                <option>Charged</option>
-                <option>Extended</option>
-              </select>
-            </div>
+        <div class="input-group">
+          <div class="input-group-prepend small">
+            <div class="input-group-text">Ammo</div>
           </div>
+          <select class="form-control" id="ammoSelect" autocomplete="off">
+            <option>Normal</option>
+            <option>Lochnagar</option>
+            <option>Heavy</option>
+            <option>Incendiary</option>
+            <option>Burst</option>
+            <option>Greased</option>
+            <option>Lesmok</option>
+            <option>Heatsink</option>
+            <option>Charged</option>
+            <option>Extended</option>
+          </select>
         </div>
 
 
@@ -905,6 +897,11 @@
           <input type="checkbox" class="form-check-input" id="buffedCheckbox" autocomplete="off">
           <label class="form-check-label" for="buffedCheckbox">Buffed</label>
         </div>
+        
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="directHitCheckbox" autocomplete="off" checked>
+          <label class="form-check-label" for="directHitCheckbox">Direct hit</label>
+        </div>
 
         <div class="form-check">
           <input type="checkbox" class="form-check-input" id="armedCheckbox" autocomplete="off" checked>
@@ -941,6 +938,7 @@
             <th>Range (m)</th>
             <th>Arming distance (m)</th>
             <th>Seconds / clip (s)</th>
+            <th>Reload time (s)</th>
             <th>Clip size</th>
             <th>AOE (m)</th>
           </tr>
@@ -994,6 +992,35 @@
             </th>
           </tr>
           <tbody id="damageTableContent"></tbody>
+        </table>
+
+
+        <h4>Time to kill (armor broken)</h4>
+        <div class="input-group">
+          <div class="input-group-prepend small">
+            <div class="input-group-text">Ship</div>
+          </div>
+          <select class="form-control" id="ttkSelection" autocomplete="off">
+            <option>Goldfish</option>
+            <option>Junker</option>
+            <option>Squid</option>
+            <option>Galleon</option>
+            <option>Spire</option>
+            <option selected>Pyramidion</option>
+            <option>Mobula</option>
+            <option>Magnate</option>
+            <option>Crusader</option>
+            <option>Judgement</option>
+            <option>Corsair</option>
+            <option>Shrike</option>
+            <option>Stormbreaker</option>
+          </select>
+        </div>
+        <br>
+        <table id="ttkTable" class="table table-bordered">
+          <tr><td>shots</td><td id="ttkShots">x</td></tr>
+          <tr><td>clips</td><td id="ttkClips">x</td></tr>
+          <tr><td>seconds</td><td id="ttkSeconds">x</td> </tr>
         </table>
 
       </div>

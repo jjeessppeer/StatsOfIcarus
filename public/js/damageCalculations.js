@@ -3,7 +3,7 @@
 
 function initializeDamageCalculator() {
     // Bind events
-    $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect,#armedCheckbox").on("change", updateGunInfoTable);
+    $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect,#armedCheckbox,#ttkSelection,#directHitCheckbox").on("change", updateGunInfoTable);
 
 
 
@@ -88,17 +88,21 @@ function importSelectedAmmo(){
 }
 
 
-function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
+function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina, ship_type, direct_hit) {
     if (buffed == undefined)
         buffed = $("#buffedCheckbox").is(':checked');
     if (gun_type == undefined)
         gun_type = $("#gunSelect").val();
+    if (ship_type == undefined)
+        ship_type = $("#ttkSelection").val();
     if (ammo_type == undefined)
         ammo_type = $("#ammoSelect").val();
     if (armed == undefined)
         armed = $("#armedCheckbox").is(':checked');
     if (stamina == undefined)
-        stamina = $("#staminaCheck").is(':checked')
+        stamina = $("#staminaCheck").is(':checked');
+    if (direct_hit == undefined)
+        direct_hit = $("#directHitCheckbox").is(':checked');
 
 
     let gun_data = gun_dataset.filterByString(gun_type, "Alias").getDatasetRow(0);
@@ -127,6 +131,8 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
     }
     else
         ammo_data = ammo_dataset.filterByString(ammo_type, "Alias").getDatasetRow(0);
+
+    let ship_data = ship_dataset.filterByString(ship_type, "Ship Type").getDatasetRow(0);
 
     // Damage unit scales
     let unit_dict = {
@@ -200,6 +206,7 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
     let arming_distance = gun_d["arming time"] * gun_d["proectile speed"] * ammo_d["arming time"] * ammo_d["projectile speed"];
     let seconds_clip = Math.max((clip_size - 1) / rate_of_fire, 1); // Seconds per clip never below 1 
     let aoe = gun_d["AoE radius"] * ammo_d["AoE radius"];
+    let reload_time = gun_d["reload time"] * (buffed ? 0.9 : 1);
 
     let angle = gun_d["side angle"] * ammo_d["rot arcs"];
 
@@ -210,14 +217,17 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
         "seconds per clip": seconds_clip, 
         "clip size": clip_size, 
         "aoe": aoe,
-        "angle": angle
+        "angle": angle,
+        "reload_time": reload_time,
+        "ship_armor": ship_data[1],
+        "ship_hp": ship_data[3]
     };
 
 
     let damage_type_primary = gun_d["primary dmg type"];
     let damage_type_secondary = gun_d["secondary dmg type"];
 
-    let damage_hit_primary = gun_d["primary dmg"] * ammo_d["damage"] * ammo_d["direct damage"] * (buffed ? 1.1 : 1);
+    let damage_hit_primary = gun_d["primary dmg"] * ammo_d["damage"] * ammo_d["direct damage"] * (buffed ? 1.1 : 1) * (direct_hit ? 1 : 0);
     let damage_hit_secondary = gun_d["secondary dmg"] * ammo_d["damage"] * ammo_d["AoE damage"] * (buffed ? 1.1 : 1) * ( (armed || arming_distance == 0) ? 1 : 0);
     
     // Aten Lens special case
@@ -337,7 +347,23 @@ function getGunNumbers(gun_type, ammo_type, buffed, armed, stamina) {
     damage_dict["fire"]["balloon"] = fire_clip_balloon_primary + fire_clip_balloon_secondary;
     damage_dict["fire"]["component"] = fire_clip_component_primary + fire_clip_component_secondary;
 
-    return {"damage": damage_dict, "info": info_dict};
+    let shots_to_kill = info_dict['ship_hp'] / (damage_dict["per shot"]["hull"][0] + damage_dict["per shot"]["hull"][1]);
+    let ctk = shots_to_kill / clip_size;
+    
+    let full_ctk = Math.floor(Math.ceil(shots_to_kill) / clip_size);
+    let ttk_reload_time = (Math.ceil(full_ctk-1)+1) * reload_time;
+    let ttk_full_shot_time = ((clip_size - 1) / rate_of_fire) * full_ctk;
+    
+    let last_clip_shots = Math.ceil(shots_to_kill) - full_ctk * clip_size;
+    let last_clip_time = (last_clip_shots-1) / rate_of_fire;
+
+    let time_to_kill = ttk_full_shot_time + ttk_reload_time + last_clip_time;
+    let ttk_dict = {
+        "shots": shots_to_kill,
+        "clips": ctk,
+        "time": time_to_kill
+    };
+    return {"damage": damage_dict, "info": info_dict, "ttk": ttk_dict};
 }
 
 function updateGunInfoTable() {
@@ -371,6 +397,7 @@ function updateGunInfoTable() {
           <td>` + precise(gun_numbers.info["range"], 3) + `</td>
           <td>` + precise(gun_numbers.info["arming distance"], 3) + `</td>
           <td>` + precise(gun_numbers.info["seconds per clip"], 2) + `</td>
+          <td>` + precise(gun_numbers.info["reload_time"], 2) + `</td>
           <td>` + gun_numbers.info["clip size"] + `</td>
           <td>` + precise(gun_numbers.info["aoe"], 3) + `</td>
         </tr>`);
@@ -439,7 +466,21 @@ function updateGunInfoTable() {
           <td>` + precise(gun_numbers.damage["fire"]["component"], 3) + `</td>
         </tr>
     `);
+
+
+
     $("#damageTableContent").empty();
     $("#damageTableContent").append(damageTableContents);
+
+
+    let ttkTableContents = `
+        <tr><td>shots</td><td>`+precise(gun_numbers.ttk.shots, 3)+`</td></tr>
+        <tr><td>clips</td><td>`+precise(gun_numbers.ttk.clips, 3)+`</td></tr>
+        <tr><td>seconds</td><td>`+precise(gun_numbers.ttk.time, 3)+`</td> </tr>
+        `;
+
+
+    $("#ttkTable").empty();
+    $("#ttkTable").append(ttkTableContents);
 
 }
