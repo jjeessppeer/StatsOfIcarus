@@ -13,5 +13,5 @@ EXPOSE 80
 # EXPOSE 443
 
 VOLUME ["/databases", "/certs/live" "/logs", "/certs/archive"]
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "main.js"]
