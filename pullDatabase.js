@@ -9,7 +9,10 @@ const sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
 
 var datasets = [];
 
-dropTables();
+try{
+  dropTables();
+}
+catch{}
 initTables();
 
 console.log("Downloading datasets...");
