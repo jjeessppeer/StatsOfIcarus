@@ -1,5 +1,5 @@
 
-var SCS_UTC_HOUR = 18; 
+var SCS_UTC_HOUR = 19; 
 
 function updateScsTime(){
     var today = new Date();

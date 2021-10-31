@@ -12,6 +12,6 @@ RUN chmod +x /entrypoint.sh
 EXPOSE 80
 # EXPOSE 443
 
-VOLUME ["/databases", "/logs"]
+VOLUME ["/databases", "/logs", "/public"]
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "main.js"]
