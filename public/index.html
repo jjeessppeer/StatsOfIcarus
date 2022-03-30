@@ -31,7 +31,9 @@
   <script src="js/mapSpawns.js"></script>
   <script src="js/shipBuilder.js"></script>
   <script src="js/shipBuilderTranslations.js"></script>
+  <script src="js/lobbies.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/lobbies.css">
 
   
   
@@ -94,6 +96,12 @@
           <a href="#maps">
             <i class="fas fa-map"></i>
             Maps
+          </a>
+        </li>
+        <li id="lobbiesLink" data-show="#lobbies">
+          <a href="#lobbies">
+            <i class="fas fa-list"></i>
+            Lobbies
           </a>
         </li>
         <li id="aboutLink" data-show="#about">
@@ -1216,6 +1224,36 @@
           1. 
         </div>
 
+      </div>
+
+
+      <div id="lobbies" class="content-panel" style="display:none">
+        <p>Lobby data pulled 14 seconds ago.</p>
+        <table>
+          <tbody>
+            <tr>
+              <td rowspan="2" class="lobbyMap">
+                Battle on the Dunes<br>
+                <img id="spawnImage" src="/images/spawn-images/2v2DM_Dunes.jpg">
+              </td>
+              <td rowspan="2" class="lobbyModifiers">
+                <span>Passworded</span><br>
+                <span>Moderated</span><br>
+                <span>Featured</span>
+              </td>
+              <td>
+                Players
+              </td>
+              <td>1/16</td>
+            </tr>
+            <tr>
+              <td>Pilots</td>
+              <td>1/4</td>
+            </tr>
+          </tbody>
+          
+
+        </table>
       </div>
 
       <!-- About -->
