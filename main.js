@@ -1,7 +1,8 @@
 var express = require('express');
 var fs = require('fs');
 var http = require('http');
-// var https = require('https');
+
+const matchHistory = require("./matchHistory.js");
 
 var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
@@ -52,9 +53,37 @@ app.get('/get_datasets', function(req, res) {
   res.status("200").json(datasets);
 });
 
-// Start HTTP server
-var httpServer = http.createServer(app);
-httpServer.listen(80);
+app.post('/submit_match_history', function(req, res) {
+  let ip = requestIp.getClientIp(req);
+  matchHistory.insertMatchHistory(req.body);
+});
+
+
+function validateHistorySubmission(record){
+  return true;
+}
+
+
+
+async function run() {
+  try {
+      // Connect to mongodb
+      await matchHistory.connect();
+
+      // Start Http server
+      var httpServer = http.createServer(app);
+      httpServer.listen(80);
+
+  } finally {
+      await matchHistory.close();
+  }
+}
+
+run().catch(console.dir);
+
+// // Start HTTP server
+// var httpServer = http.createServer(app);
+// httpServer.listen(80);
 
 // Start HTTPS server
 // var privateKey  = fs.readFileSync('/etc/letsencrypt/live/statsoficarus.xyz/privkey.pem', 'utf8');

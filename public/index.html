@@ -291,7 +291,7 @@
       </div>
 
       <div id="matchHistory" class="content-panel" style="display:none">
-        <ul class="match-history-list">
+        <ul class="match-history-list" id="matchHistoryList">
           <li class="match-history-entry">
             <div class="overview-table">
               <div class="matchup">
@@ -1367,6 +1367,8 @@
         () => { console.log("PING TIMEOUT"); });
       // Load datasets
       loadDatasetsFromServer();
+
+      initializeMatchHistory();
 
     });
 

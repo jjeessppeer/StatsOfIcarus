@@ -7,11 +7,10 @@ class MatchHistoryEntry extends HTMLLIElement {
         this.classList.add("match-history-entry");
 
         this.innerHTML = ``;
-        let overview = document.createElement('div', {is: 'match-history-overview'});
-        this.appendChild(overview);
+        this.overview = document.createElement('div', {is: 'match-history-overview'});
+        this.prepend(overview);
     }
     fillData(matchBasicData) {
-
     }
 }
 
