@@ -43,11 +43,15 @@ async function getShipBuilds(restrictions) {
 }
 
 async function generateMatchQuery(filters){
-    filters = [
-        {filter_type: "PlayersSameTeam", include: true, players: ["whereami"]},
-        {filter_type: "ShipBuilds", include: true, 
-            ships: [ [[97, 171, -1], []], [[16], []] ]}
-    ];
+    // filters = [
+    //     {filter_type: "PlayersSameTeam", include: true, players: ["whereami"]},
+    //     {filter_type: "ShipBuilds", include: true, 
+    //         ships: [ [[97, 171, -1], []], [[16], []] ]}
+    // ];
+    console.log(filters);
+    if (filters.length == 0) {
+        return {};
+    }
     
     let fullQuery = {
         $and: [
@@ -106,47 +110,46 @@ async function generateMatchQuery(filters){
         }
     }
     return fullQuery;
-
 }
 
 
-async function getRecords(filters, count, offset) {
+async function getMatches(filters, offset, count) {
     console.log("Getting record");
     const matchCollection = client.db("mhtest").collection("Matches_2v2");
     const playersCollection = client.db("mhtest").collection("Players");
 
-    
-
     console.log("Getting record");
-    let fullQuery = await generateMatchQuery();
+    let fullQuery = await generateMatchQuery(filters);
 
 
     const pipeline = [
         //{$sort: {...}}
-
         {$match: fullQuery},
-
         {$facet:{
           "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
-          "stage2" : [ { "$skip": 0}, {"$limit": 1} ]
+          "stage2" : [ { "$skip": offset}, {"$limit": count} ]
         }},
-       {$unwind: "$stage1"},
-    
-        //output projection
-       {$project:{
-          count: "$stage1.count",
-          data: "$stage2"
-       }}
+        {$unwind: "$stage1"},
+            //output projection
+        {$project:{
+            count: "$stage1.count",
+            data: "$stage2"
+        }}
    ];
 
     let aggCursor = matchCollection.aggregate(pipeline);
-
-    await aggCursor.forEach(doc => {   
-        console.log(doc);
-    });
+    let result = {};
+    result = await aggCursor.next();
     aggCursor.close();
-    console.log("gotten");
-
+    // aggCursor.close();
+    // await aggCursor.forEach(doc => {
+    //     result.push(doc);
+    //     result = doc;
+    //     // console.log(doc);
+    // });
+    // aggCursor.close();
+    // console.log("gotten");
+    return result;
 
 //    let cc = await matchCollection.estimatedDocumentCount();
 
@@ -178,8 +181,6 @@ async function submitRecord(record) {
     } finally {
         insertionRunning = false;
     }
-    await getRecords();
-
 }
 
 function validateHistorySubmission(record){
@@ -383,7 +384,7 @@ function close() {
 
 module.exports = {
     submitRecord,
-    getRecords,
+    getMatches,
     connect,
     close
     // connect

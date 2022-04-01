@@ -61,6 +61,12 @@ app.post('/submit_match_history', function(req, res) {
   res.status("200").send("OK");
 });
 
+app.post('/get_match_history2', async function(req, res) {
+  let ip = requestIp.getClientIp(req);
+  let response = await matchHistory.getMatches([], 0, 10);
+  res.status("200").json(response);
+});
+
 
 
 
@@ -73,7 +79,7 @@ async function run() {
       await matchHistory.connect();
       console.log("Connected to db...");
 
-      await matchHistory.getRecords();
+      // await matchHistory.getRecords();
 
       // await matchHistory.insertMatchHistory(record);
 

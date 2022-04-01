@@ -8,7 +8,7 @@ class MatchHistoryEntry extends HTMLLIElement {
 
         this.innerHTML = ``;
         this.overview = document.createElement('div', {is: 'match-history-overview'});
-        this.prepend(overview);
+        this.prepend(this.overview);
     }
     fillData(matchBasicData) {
     }
