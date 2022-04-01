@@ -3,6 +3,7 @@ var fs = require('fs');
 var http = require('http');
 
 const matchHistory = require("./matchHistory.js");
+let record = JSON.parse(fs.readFileSync('record.json'));
 
 var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
@@ -55,30 +56,39 @@ app.get('/get_datasets', function(req, res) {
 
 app.post('/submit_match_history', function(req, res) {
   let ip = requestIp.getClientIp(req);
-  matchHistory.insertMatchHistory(req.body);
+  console.log("Recieving match record");
+  matchHistory.submitRecord(req.body);
+  res.status("200").send("OK");
 });
 
 
-function validateHistorySubmission(record){
-  return true;
-}
+
 
 
 
 async function run() {
   try {
       // Connect to mongodb
+      console.log("Connecting to db...")
       await matchHistory.connect();
+      console.log("Connected to db...");
+
+      await matchHistory.getRecords();
+
+      // await matchHistory.insertMatchHistory(record);
 
       // Start Http server
+      console.log("Starting http server...");
       var httpServer = http.createServer(app);
       httpServer.listen(80);
 
   } finally {
-      await matchHistory.close();
+      // console.log("Disconnecting from db...");
+      // await matchHistory.close();
   }
 }
 
+console.log("Starting server...")
 run().catch(console.dir);
 
 // // Start HTTP server

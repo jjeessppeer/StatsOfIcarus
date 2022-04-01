@@ -1,7 +1,9 @@
 const { MongoClient } = require("mongodb");
-var fs = require('fs');
+const fs = require('fs');
+const assert = require('assert');
+const { kill } = require("process");
+const { json } = require("express/lib/response");
 
-let record = JSON.parse(fs.readFileSync('record.json'));
 
 const db_url = 'mongodb://127.0.0.1:27017';
 let client = new MongoClient(db_url);
@@ -13,6 +15,228 @@ let insertionRunning = false;
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function getPlayerId(playerName) {
+    // TODO handle ps4 players?
+    const playersCollection = client.db("mhtest").collection("Players");
+    playerName = playerName + " [PC]";
+    let res = await playersCollection.findOne({Name: playerName});
+    if (!res) return false;
+    return res._id;
+}
+
+// Return all ship build ids matching the restrictions.
+async function getShipBuilds(restrictions) {
+    const matchCollection = client.db("mhtest").collection("Ships");
+    let query = {};
+    for (let i in restrictions) {
+        if (restrictions[i] == -1) continue;
+        if (i == 0) query['ShipModel'] = restrictions[i];
+        else query[`Loadout.${i-1}`] = restrictions[i];
+    }
+    
+    let results = matchCollection.find(query);
+    let out = [];
+    await results.forEach(doc => {out.push(doc._id)});
+    return out;
+}
+
+async function generateMatchQuery(filters){
+    filters = [
+        {filter_type: "PlayersSameTeam", include: true, players: ["whereami"]},
+        {filter_type: "ShipBuilds", include: true, 
+            ships: [ [[97, 171, -1], []], [[16], []] ]}
+    ];
+    
+    let fullQuery = {
+        $and: [
+        ]
+    };
+    console.log(JSON.stringify(filters));
+
+    for (let filter of filters) {
+        if (filter.filter_type == "PlayersSameTeam") {
+
+            // Collect the player ids.
+            let playerIds = [];
+            for (let playerName of filter.players) {
+                let playerId = await getPlayerId(playerName);
+                if (!playerId) {
+                    continue;
+                }
+                playerIds.push(playerId);
+            }
+            let query = {$or: [
+                {T0_Players: {$all: playerIds}},
+                {T1_Players: {$all: playerIds}}
+            ]}
+            if (!filter.include) {
+                query = {'$nor': [query]};
+            }
+            fullQuery['$and'].push(query);
+        }
+        if (filter.filter_type == "ShipBuilds") {
+            // let matchingBuilds = await getShipBuilds(filter.ships);
+            // [ [[T1s1...], [T1s2...]], [[T2s1...], [T2s2...]] ]
+            let shipBuilds = [ [[], []], [[], []] ];
+            for (let i in filter.ships) {
+                for (let j in filter.ships[i]) {
+                    let builds = await getShipBuilds(filter.ships[i][j]);
+                    shipBuilds[i][j] = builds;
+                }
+            }
+            let query = {
+                $or: [
+                    {$and: [
+                        { T0_Ships: {$in: shipBuilds[0][0]} },
+                        { T0_Ships: {$in: shipBuilds[0][1]} },
+                        { T1_Ships: {$in: shipBuilds[1][0]} },
+                        { T1_Ships: {$in: shipBuilds[1][1]} }
+                    ]},
+                    {$and: [
+                        { T1_Ships: {$in: shipBuilds[0][0]} },
+                        { T1_Ships: {$in: shipBuilds[0][1]} },
+                        { T0_Ships: {$in: shipBuilds[1][0]} },
+                        { T0_Ships: {$in: shipBuilds[1][1]} }
+                    ]}
+                ]
+            }
+            fullQuery['$and'].push(query);
+        }
+    }
+    return fullQuery;
+
+}
+
+
+async function getRecords(filters, count, offset) {
+    console.log("Getting record");
+    const matchCollection = client.db("mhtest").collection("Matches_2v2");
+    const playersCollection = client.db("mhtest").collection("Players");
+
+    
+
+    console.log("Getting record");
+    let fullQuery = await generateMatchQuery();
+
+
+    const pipeline = [
+        //{$sort: {...}}
+
+        {$match: fullQuery},
+
+        {$facet:{
+          "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
+          "stage2" : [ { "$skip": 0}, {"$limit": 1} ]
+        }},
+       {$unwind: "$stage1"},
+    
+        //output projection
+       {$project:{
+          count: "$stage1.count",
+          data: "$stage2"
+       }}
+   ];
+
+    let aggCursor = matchCollection.aggregate(pipeline);
+
+    await aggCursor.forEach(doc => {   
+        console.log(doc);
+    });
+    aggCursor.close();
+    console.log("gotten");
+
+
+//    let cc = await matchCollection.estimatedDocumentCount();
+
+//    console.log(cc);
+//    console.log(res);
+}
+
+
+async function submitRecord(record) {
+    if (!validateHistorySubmission(record)) {
+        return;
+    }
+
+    if (record.TeamCount != 2 && record.TeamSize != 2) {
+        console.log("Only 2v2 supported.");
+        return;
+    }
+    
+    // Wait until no concurrent insertion is running.
+    while(insertionRunning){
+        await sleep(10);
+    }
+
+    insertionRunning = true;
+    try {
+        await insertMatchHistory(record);
+    } catch (err){
+        console.log(err)
+    } finally {
+        insertionRunning = false;
+    }
+    await getRecords();
+
+}
+
+function validateHistorySubmission(record){
+    try {
+        assert(typeof record.MatchId == "string");
+        assert(Number.isInteger(record.MapId));
+        assert(Number.isInteger(record.TeamSize));
+        assert(Number.isInteger(record.TeamCount));
+        assert(record.TeamSize <= 4);
+        assert(record.TeamCount <= 4);
+
+        assert(Number.isInteger(record.Winner));
+        assert(Array.isArray(record.Scores));
+        assert(record.Scores.length == record.TeamCount);
+        for (let score of record.Scores) assert(Number.isInteger(score));
+
+        assert(Array.isArray(record.Ships));
+        assert(record.Ships.length == record.TeamSize * record.TeamCount);
+        assert(record.Ships.length <= 8);
+        for (let ship of record.Ships) {
+            assert(typeof ship == 'object'); // Will not allow non existant ships from force start.
+            assert(Number.isInteger(ship.ShipModel));
+            assert(typeof ship.ShipName == "string");
+            assert(Number.isInteger(ship.Team));
+            assert(ship.Team <= 4);
+
+            assert(Array.isArray(ship.ShipLoadout));
+            assert(ship.ShipLoadout.length <= 6);
+            for (let gun of ship.ShipLoadout) {
+                assert(Number.isInteger(gun));
+            }
+
+            assert(Array.isArray(ship.Players));
+            assert(ship.Players.length == 4);
+            for (let player of ship.Players) {
+                assert(player == null || typeof player == 'object');
+                if (player == null) continue;
+                assert(Number.isInteger(player.UserId));
+                assert(typeof player.Name == "string");
+                assert(typeof player.Clan == "string");
+                assert(Number.isInteger(player.Class));
+                assert(Number.isInteger(player.Level));
+                assert(Number.isInteger(player.MatchCount));
+                assert(Number.isInteger(player.MatchCountRecent));
+
+                assert(Array.isArray(player.Skills));
+                assert(player.Skills.length < 9);
+                for (let skill of player.Skills) {
+                    assert(Number.isInteger(skill));
+                }
+            }
+        }
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+    return true;
 }
 
 async function updatePlayer(player, client) {
@@ -28,7 +252,6 @@ async function updatePlayer(player, client) {
 
     if (!dbPlayer) {
         // Insert a new player
-        console.log("Inserting new player...")
         let res = await playersCollection.insertOne({
             _id: player.UserId, 
             Name: player.Name, 
@@ -44,12 +267,7 @@ async function updatePlayer(player, client) {
 }
 
 async function insertMatchHistory(record) {
-    while(insertionRunning){
-        await sleep(10);
-    }
-    insertionRunning = true;
-
-    const matchesCollection = client.db("mhtest").collection("Matches");
+    const matchesCollection = client.db("mhtest").collection("Matches_2v2");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
     const equipmentCollection = client.db("mhtest").collection("PlayerEquipment");
@@ -57,31 +275,42 @@ async function insertMatchHistory(record) {
     // Check if match has already been added.
     let match = await matchesCollection.findOne({MatchId: record.MatchId});
     if (match){
-        insertionRunning = false;
-        return;
+        // Check if record matches. If it does add vote.
+        return true;
     }
 
-    // Find ship build identifiers, or create new ones if does not exist.
     let shipIds = [];
-    for (let ship of record.Ships){
+    let flatShipIds = []
+    let shipNames = [];
+    for (let ship of record.Ships) {
+        while (shipIds.length <= ship.Team) shipIds.push([]);
+        while (shipNames.length <= ship.Team) shipNames.push([]);
+        shipNames[ship.Team].push(ship.ShipName);
         let dbShip = await shipsCollection.findOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
         if (dbShip) {
-            shipIds.push(dbShip._id)
+            shipIds[ship.Team].push(dbShip._id);
+            flatShipIds.push(dbShip._id);
         }
         if (!dbShip){
             let res = await shipsCollection.insertOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
-            shipIds.push(res.insertedId);
+            shipIds[ship.Team].push(res.insertedId);
+            flatShipIds.push(res.insertedId);
         }
     }
 
     // Find player identifiers, or create new ones of does not exist.
     let playerIds = [];
+    let flatPlayerIds = [];
+    let playerLoadouts = [];
+
     let playerLevels = [];
-    let playerEquipments = [];
     for (let ship of record.Ships) {
+        while (playerIds.length <= ship.Team) playerIds.push([]);
+        while (playerLoadouts.length <= ship.Team) playerLoadouts.push([]);
         for (let player of ship.Players){
             await updatePlayer(player, client);
-            playerIds.push(player.UserId);
+            playerIds[ship.Team].push(player.UserId);
+            flatPlayerIds.push(player.Userid);
             playerLevels.push(player.Level);
             
             // // Make sure skills are sorted in db.
@@ -89,13 +318,13 @@ async function insertMatchHistory(record) {
                 return a - b;
             });
 
-            let dbEquipment = await equipmentCollection.findOne({Skills: player.Skills});
+            let dbEquipment = await equipmentCollection.findOne({Class: player.Class, Skills: player.Skills});
             if (dbEquipment){
-                playerEquipments.push(dbEquipment._id);
+                playerLoadouts[ship.Team].push(dbEquipment._id);
             }
             else {
-                let res = await equipmentCollection.insertOne({Skills: player.Skills});
-                playerEquipments.push(res.insertedId);
+                let res = await equipmentCollection.insertOne({Class: player.Class, Skills: player.Skills});
+                playerLoadouts[ship.Team].push(res.insertedId);
             }
         }
     }
@@ -107,15 +336,39 @@ async function insertMatchHistory(record) {
         TeamSize: record.TeamSize,
         TeamCount: record.TeamCount,
         AvgLevel:  playerLevels.reduce( ( p, c ) => p + c, 0 ) / playerLevels.length,
-        Ships: shipIds,
-        Players: playerIds,
-        Scores: [5, 2],
-        MatchTime: 204,
-        Timestamp: new Date().getTime()
+        // Ships: shipIds,
+        // Players: playerIds,
+        Winner: record.Winner,
+        Scores: record.Scores,
+        MatchTime: -1,
+        Timestamp: new Date().getTime(),
+        SubmissionCount: 1,
+        FlatPlayers: flatPlayerIds,
+        FlatShips: flatShipIds
     }
+
+    // Insert ship arrays
+    for (let i in shipIds) {
+        newMatch[`T${i}_Ships`] = []; 
+        newMatch[`T${i}_ShipNames`] = [];  
+        for (let j in shipIds[i]){
+            newMatch[`T${i}_Ships`].push(shipIds[i][j]);
+            newMatch[`T${i}_ShipNames`].push(shipNames[i][j]);
+        }
+    }
+
+    for (let i in playerIds) {
+        newMatch[`T${i}_Players`] = []; 
+        newMatch[`T${i}_PlayerLoadouts`] = [];
+        for (let j in playerIds[i]) {
+            newMatch[`T${i}_Players`].push(playerIds[i][j]);
+            newMatch[`T${i}_PlayerLoadouts`].push(playerLoadouts[i][j]);
+        }
+    }
+
     await matchesCollection.insertOne(newMatch);
 
-    insertionRunning = false;
+    return true;
 }
 
 
@@ -129,7 +382,8 @@ function close() {
 
 
 module.exports = {
-    insertMatchHistory,
+    submitRecord,
+    getRecords,
     connect,
     close
     // connect

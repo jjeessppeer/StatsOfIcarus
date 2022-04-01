@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jjeessppeer/jjeessppeer.github.io#readme",
   "dependencies": {
+    "assert": "^2.0.0",
     "better-sqlite3": "^5.4.3",
     "body-parser": "^1.19.2",
     "express": "^4.17.3",
