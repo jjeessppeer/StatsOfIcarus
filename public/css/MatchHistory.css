@@ -16,6 +16,11 @@
     /* height: 1px; */
 
 }
+
+.match-history-entry {
+    /* display: inline-block; */
+}
+
 .match-history-entry > .overview-table {
     display: table;
     table-layout: fixed;
@@ -31,7 +36,7 @@
 
 .match-history-entry > .overview-table > div {
     display: table-cell;
-    border: 5px black solid;
+    border: 1px black solid;
     height: 100%;
 }
 
@@ -70,8 +75,30 @@
 .match-history-entry .overview-table .matchup-table .red-team img{
     border-color: #c6443e;
 }
+
+.match-history-entry .overview-table .matchup-table.red-winner {
+    /* background-color: #c6443e; */
+    background: repeating-linear-gradient(
+        45deg,
+        #c6443e,
+        #c6443e 10px,
+        #46529800 10px,
+        #46529800 15px
+    );
+}
+
+/* .match-history-entry .overview-table .matchup-table.blue-winner {
+    background: repeating-linear-gradient(
+        45deg,
+        rgb(66, 149, 198),
+        rgb(66, 149, 198) 10px,
+        #46529800 10px,
+        #46529800 15px
+    );
+} */
+
 .match-history-entry .overview-table .matchup-table .blue-team img{
-    border-color: rgb(66, 177, 198);
+    border-color: rgb(66, 149, 198);
 }
 
 .match-history-entry .overview-table .matchup-table .results{
@@ -137,5 +164,14 @@
     height: 16px;
     width: 16px;
     background-color: black;
+}
+
+.match-history-entry .overview-table .expand-button{
+    width: 30px;
+    text-align: center;
+    vertical-align: bottom;
+    /* text-align: ; */
+    padding: 0px;
+    cursor: pointer;
 }
 

@@ -5,7 +5,7 @@ const { kill } = require("process");
 const { json } = require("express/lib/response");
 
 
-const db_url = 'mongodb://127.0.0.1:27017';
+const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
 let client = new MongoClient(db_url);
 
 
@@ -125,6 +125,18 @@ async function getMatches(filters, offset, count) {
     const pipeline = [
         //{$sort: {...}}
         {$match: fullQuery},
+        {$lookup: {
+            from: "Players",
+            localField: "FlatPlayers",
+            foreignField: "_id",
+            as: "PlayerInfo"
+        }},
+        {$lookup: {
+            from: "PlayerEquipment",
+            localField: "FlatSkills",
+            foreignField: "_id",
+            as: "SkillInfo"
+        }},
         {$facet:{
           "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
           "stage2" : [ { "$skip": offset}, {"$limit": count} ]
@@ -158,14 +170,15 @@ async function getMatches(filters, offset, count) {
 }
 
 
-async function submitRecord(record) {
+async function submitRecord(record, ip) {
     if (!validateHistorySubmission(record)) {
-        return;
+        console.log("Invalid match history.");
+        return false;
     }
 
     if (record.TeamCount != 2 && record.TeamSize != 2) {
         console.log("Only 2v2 supported.");
-        return;
+        return false;
     }
     
     // Wait until no concurrent insertion is running.
@@ -175,12 +188,13 @@ async function submitRecord(record) {
 
     insertionRunning = true;
     try {
-        await insertMatchHistory(record);
+        await insertMatchHistory(record, ip);
     } catch (err){
         console.log(err)
     } finally {
         insertionRunning = false;
     }
+    return true;
 }
 
 function validateHistorySubmission(record){
@@ -193,6 +207,7 @@ function validateHistorySubmission(record){
         assert(record.TeamCount <= 4);
 
         assert(Number.isInteger(record.Winner));
+        assert(Number.isInteger(record.MatchTime));
         assert(Array.isArray(record.Scores));
         assert(record.Scores.length == record.TeamCount);
         for (let score of record.Scores) assert(Number.isInteger(score));
@@ -267,7 +282,7 @@ async function updatePlayer(player, client) {
     }
 }
 
-async function insertMatchHistory(record) {
+async function insertMatchHistory(record, ip) {
     const matchesCollection = client.db("mhtest").collection("Matches_2v2");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
@@ -303,6 +318,7 @@ async function insertMatchHistory(record) {
     let playerIds = [];
     let flatPlayerIds = [];
     let playerLoadouts = [];
+    let flatPlayerLoadouts = [];
 
     let playerLevels = [];
     for (let ship of record.Ships) {
@@ -311,7 +327,7 @@ async function insertMatchHistory(record) {
         for (let player of ship.Players){
             await updatePlayer(player, client);
             playerIds[ship.Team].push(player.UserId);
-            flatPlayerIds.push(player.Userid);
+            flatPlayerIds.push(player.UserId);
             playerLevels.push(player.Level);
             
             // // Make sure skills are sorted in db.
@@ -322,16 +338,20 @@ async function insertMatchHistory(record) {
             let dbEquipment = await equipmentCollection.findOne({Class: player.Class, Skills: player.Skills});
             if (dbEquipment){
                 playerLoadouts[ship.Team].push(dbEquipment._id);
+                flatPlayerLoadouts.push(dbEquipment._id);
             }
             else {
                 let res = await equipmentCollection.insertOne({Class: player.Class, Skills: player.Skills});
                 playerLoadouts[ship.Team].push(res.insertedId);
+                flatPlayerLoadouts.push(res.insertedId);
             }
         }
     }
 
     // Insert the match.
     let newMatch = {
+        SubmitterIp: ip,
+        SubmissionCount: 1,
         MatchId: record.MatchId,
         MapId: record.MapId,
         TeamSize: record.TeamSize,
@@ -341,11 +361,14 @@ async function insertMatchHistory(record) {
         // Players: playerIds,
         Winner: record.Winner,
         Scores: record.Scores,
-        MatchTime: -1,
+        MatchTime: record.MatchTime,
         Timestamp: new Date().getTime(),
-        SubmissionCount: 1,
         FlatPlayers: flatPlayerIds,
-        FlatShips: flatShipIds
+        FlatShips: flatShipIds,
+        FlatSkills: flatPlayerLoadouts,
+        Players: playerIds,
+        Ships: shipIds,
+        Skills: playerLoadouts
     }
 
     // Insert ship arrays

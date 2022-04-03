@@ -382,9 +382,9 @@ function laserAvgDamage(gun_data, ammo_data, distance, time) {
    
 }
 
-Array.prototype.injectArray = function( idx, arr ) {
-    return this.slice( 0, idx ).concat( arr ).concat( this.slice( idx ) );
-};
+// Array.prototype.injectArray = function( idx, arr ) {
+//     return this.slice( 0, idx ).concat( arr ).concat( this.slice( idx ) );
+// };
 
 CanvasRenderingContext2D.prototype.zoomAround = function(x, y, factor){
     [x, y] = transformPoint(x, y, this.getTransform().invertSelf());

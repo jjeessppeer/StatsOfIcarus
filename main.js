@@ -1,7 +1,7 @@
+require('dotenv').config()
 var express = require('express');
 var fs = require('fs');
 var http = require('http');
-
 const matchHistory = require("./matchHistory.js");
 let record = JSON.parse(fs.readFileSync('record.json'));
 
@@ -57,6 +57,7 @@ app.get('/get_datasets', function(req, res) {
 app.post('/submit_match_history', function(req, res) {
   let ip = requestIp.getClientIp(req);
   console.log("Recieving match record");
+  console.log(req.body);
   matchHistory.submitRecord(req.body);
   res.status("200").send("OK");
 });
@@ -67,11 +68,6 @@ app.post('/get_match_history2', async function(req, res) {
   res.status("200").json(response);
 });
 
-
-
-
-
-
 async function run() {
   try {
       // Connect to mongodb
@@ -81,6 +77,7 @@ async function run() {
 
       // await matchHistory.getRecords();
 
+      // await matchHistory.submitRecord(record);
       // await matchHistory.insertMatchHistory(record);
 
       // Start Http server
