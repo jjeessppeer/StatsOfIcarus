@@ -137,6 +137,12 @@ async function getMatches(filters, offset, count) {
             foreignField: "_id",
             as: "SkillInfo"
         }},
+        {$lookup: {
+            from: "Ships",
+            localField: "FlatShips",
+            foreignField: "_id",
+            as: "ShipInfo"
+        }},
         {$facet:{
           "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
           "stage2" : [ { "$skip": offset}, {"$limit": count} ]
@@ -201,6 +207,7 @@ function validateHistorySubmission(record){
     try {
         assert(typeof record.MatchId == "string");
         assert(Number.isInteger(record.MapId));
+        assert(Number.isInteger(record.GameMode));
         assert(Number.isInteger(record.TeamSize));
         assert(Number.isInteger(record.TeamCount));
         assert(record.TeamSize <= 4);
@@ -354,6 +361,7 @@ async function insertMatchHistory(record, ip) {
         SubmissionCount: 1,
         MatchId: record.MatchId,
         MapId: record.MapId,
+        GameMode: record.GameMode,
         TeamSize: record.TeamSize,
         TeamCount: record.TeamCount,
         AvgLevel:  playerLevels.reduce( ( p, c ) => p + c, 0 ) / playerLevels.length,
@@ -404,10 +412,15 @@ function close() {
     return client.close();
 }
 
+function setMongoClient(clientIn) {
+    client = clientIn;
+}
+
 
 module.exports = {
     submitRecord,
     getMatches,
+    setMongoClient,
     connect,
     close
     // connect

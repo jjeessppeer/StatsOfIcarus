@@ -1,6 +1,6 @@
 # Create a docker container hosting the website.
 
-FROM node:10
+FROM node:14
 COPY package*.json ./
 RUN npm install
 COPY public /public

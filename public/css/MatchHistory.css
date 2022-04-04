@@ -3,31 +3,34 @@
 
 
 .match-history-list {
-    background-color: rgba(240, 191, 191, 0.726);
+    /* background-color: rgba(240, 191, 191, 0.726); */
     padding: 20px;
     margin: 20px;
 }
 
 .match-history-entry {
-    background-color: rgb(229, 210, 147);
     list-style: none;
     margin: 20px;
     width: 700px;
+    border: 1px solid;
+    border-bottom: none;
     /* height: 1px; */
-
 }
 
-.match-history-entry {
-    /* display: inline-block; */
+.match-history-entry.red-winner {
+    background-color: var(--red-1);
+    border-color: var(--red-4);
+}
+.match-history-entry.blue-winner {
+    background-color: var(--blue-1);
+    border-color: var(--blue-4);
 }
 
 .match-history-entry > .overview-table {
     display: table;
     table-layout: fixed;
     height: 100%;
-    width: 100%
-    
-
+    width: 100%;
 }
 
 /* ------------------------------ */
@@ -36,7 +39,7 @@
 
 .match-history-entry > .overview-table > div {
     display: table-cell;
-    border: 1px black solid;
+    /* border-right: 1px solid; */
     height: 100%;
 }
 
@@ -76,27 +79,6 @@
     border-color: #c6443e;
 }
 
-.match-history-entry .overview-table .matchup-table.red-winner {
-    /* background-color: #c6443e; */
-    background: repeating-linear-gradient(
-        45deg,
-        #c6443e,
-        #c6443e 10px,
-        #46529800 10px,
-        #46529800 15px
-    );
-}
-
-/* .match-history-entry .overview-table .matchup-table.blue-winner {
-    background: repeating-linear-gradient(
-        45deg,
-        rgb(66, 149, 198),
-        rgb(66, 149, 198) 10px,
-        #46529800 10px,
-        #46529800 15px
-    );
-} */
-
 .match-history-entry .overview-table .matchup-table .blue-team img{
     border-color: rgb(66, 149, 198);
 }
@@ -117,6 +99,13 @@
     /* padding-top: 8px; */
     text-align: center;
     vertical-align: top;
+
+    
+    /* background-image: url("/images/item-icons/map6.png");
+    background-size:cover;
+    background-position: center;
+    background-color: #cccccc;
+    background-size: 284px 160px; */
 
     font-size: 14px;
     color: #555e5e;
@@ -154,9 +143,6 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-}
-
-.match-history-entry .overview-table .players li:hover{
     cursor: pointer;
 }
 
@@ -173,5 +159,151 @@
     /* text-align: ; */
     padding: 0px;
     cursor: pointer;
+    border-left: 1px solid;
 }
 
+.match-history-entry .overview-table > div:not(:last-child){
+    border-bottom: 1px solid;
+}
+
+.match-history-entry.red-winner .overview-table > div:not(:last-child){
+    border-color: var(--red-4);
+}
+.match-history-entry.blue-winner .overview-table > div:not(:last-child){
+    border-color: var(--blue-4);
+}
+
+.match-history-entry.red-winner .overview-table .expand-button{
+    background-color: var(--red-3);
+    color: var(--red-4);
+}
+
+.match-history-entry.blue-winner .overview-table .expand-button{
+    background-color: var(--blue-3);
+    color: var(--blue-4);
+}
+
+
+/* ----------------------------- */
+/* ----- Match foldout box ----- */
+/* ----------------------------- */
+
+.match-history-entry .foldout {
+    display: none;
+    padding-top: 5px;
+    /* border-top: 1px solid; */
+}
+
+.match-history-entry.red-winner .foldout {
+    background-color: var(--red-3);
+}
+.match-history-entry.blue-winner .foldout {
+    background-color: var(--blue-3);
+}
+
+.match-history-entry.open .foldout {
+    display: block;
+}
+
+.match-history-entry .foldout .content{
+    background-color: rgb(234, 234, 234);
+}
+
+.match-history-entry .foldout > ul {
+    /* border-color: black; */
+    margin-top: 10px;
+    list-style: none;
+    display: table;
+    width: 100%;
+}
+
+
+.match-history-entry .foldout > ul li {
+    /* border-color: black; */
+    list-style: none;
+    justify-content: center;
+    text-align: center;
+    display: table-cell;
+    /* width: 33%; */
+}
+
+.match-history-entry .foldout button {
+    /* border-color: black; */
+    border: 1px solid;
+    border-bottom: none;
+    width: 200px;
+}
+.match-history-entry.red-winner .foldout button {
+    background-color: var(--red-2);
+    border-color: var(--red-4);
+}
+.match-history-entry.blue-winner .foldout button {
+    background-color: var(--blue-2);
+    border-color: var(--blue-4);
+}
+
+/* ------------------------------ */
+/* ----- Match details view ----- */
+/* ------------------------------ */
+
+.match-history-entry .foldout .details {
+    display: table;
+    width: 100%;
+    /* background-color: black; */
+}
+
+.match-history-entry .foldout .details>div{
+    display: table-row;
+}
+.match-history-entry .foldout .details>div>div{
+    display: table-cell;
+    float: left;
+    /* width: 25%; */
+    vertical-align: top;
+}
+
+.match-history-entry .foldout .details canvas{
+    display: table-cell;
+    width: 175px;
+    height: 175px;
+    background-color: grey;
+}
+
+.match-history-entry .foldout .details ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.match-history-entry .foldout .details ul li{
+    height: 43.75px;
+    margin: 0;
+    margin-right: 20px;
+    padding: 0;
+    /* padding-top: 2px; */
+    font-size: 14px;
+    border: black solid 1px;
+    border-bottom: none;
+    /* border-right: none; */
+    border-left: none;
+    vertical-align: bottom;
+}
+
+.match-history-entry .foldout .details ul li:last-child{
+    border-bottom: solid 1px;
+}
+
+.match-history-entry .foldout .details ul li div{
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+}
+
+.match-history-entry .foldout .details ul li img{
+    margin: 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    background: black;
+}

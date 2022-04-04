@@ -1,3 +1,20 @@
+:root {
+    --red-1: rgb(226, 182, 179);
+    --red-2: rgb(243, 172, 167);
+    --red-3: rgb(232, 157, 153);
+    --red-4: rgb(198, 68, 62);
+
+    --blue-1: rgb(163, 207, 236);
+    --blue-2: rgb(137, 200, 242);
+    --blue-3: rgb(100, 177, 228);
+    --blue-4: rgb(0, 105, 166);
+
+    /* -- */
+
+    background-color: rgb(234, 234, 234);
+  }
+
+
 .angle_image_window {
     overflow-x:scroll;
     white-space: nowrap;

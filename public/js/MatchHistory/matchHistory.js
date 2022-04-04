@@ -44,3 +44,24 @@ function updateMatchHistoryList(matchHistory){
     }
     
 }
+
+function getShipInfo(matchRecord, shipId) {
+    for (let ship of matchRecord.ShipInfo) {
+        if (ship._id == shipId) return ship;
+    }
+    throw "No ship with specified id found";
+}
+
+function getPlayerInfo(matchRecord, playerId) {
+    for (let player of matchRecord.PlayerInfo) {
+        if (player._id == playerId) return player;
+    }
+    throw "No player with specified id found";
+}
+
+function getLoadoutInfo(matchRecord, loadoutId) {
+    for (let loadout of matchRecord.SkillInfo) {
+        if (loadout._id == loadoutId) return loadout;
+    }
+    throw "No loadout with specified id found";
+}
