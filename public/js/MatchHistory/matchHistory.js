@@ -93,7 +93,8 @@ var ship_scales = {
     14: 10.6,
     13: 10.6,
     64: 8.6,
-    82: 10.6
+    82: 10.6,
+    12: 10.6
 }
 var ship_offsets = {
     15: 305,
@@ -104,7 +105,8 @@ var ship_offsets = {
     14: 410,
     13: 295,
     64: 470,
-    82: 355
+    82: 355,
+    12: 340
 }
 
 function toShipImageCoordinates(point, shipModel, shipImage) {

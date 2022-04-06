@@ -18,6 +18,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
 async function getPlayerId(playerName) {
     // TODO handle ps4 players?
     const playersCollection = client.db("mhtest").collection("Players");
@@ -116,12 +117,10 @@ async function generateMatchQuery(filters){
 
 async function getMatches(filters, offset, count) {
     console.log("Getting record");
-    const matchCollection = client.db("mhtest").collection("Matches_2v2");
+    const matchCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
 
-    console.log("Getting record");
     let fullQuery = await generateMatchQuery(filters);
-
 
     const pipeline = [
         //{$sort: {...}}
@@ -162,6 +161,12 @@ async function getMatches(filters, offset, count) {
             foreignField: "_id",
             as: "GunItems"
         }},
+        {$lookup: {
+            from: "Items-Maps",
+            localField: "MapId",
+            foreignField: "_id",
+            as: "MapItem"
+        }},
         {$facet:{
           "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
           "stage2" : [ { "$skip": offset}, {"$limit": count} ]
@@ -172,11 +177,13 @@ async function getMatches(filters, offset, count) {
             count: "$stage1.count",
             data: "$stage2"
         }}
-   ];
+    ];
 
     let aggCursor = matchCollection.aggregate(pipeline);
+    // let aggCursor = matchCollection.find();
     let result = {};
     result = await aggCursor.next();
+    console.log(result);
     aggCursor.close();
     // aggCursor.close();
     // await aggCursor.forEach(doc => {
@@ -198,11 +205,6 @@ async function getMatches(filters, offset, count) {
 async function submitRecord(record, ip) {
     if (!validateHistorySubmission(record)) {
         console.log("Invalid match history.");
-        return false;
-    }
-
-    if (record.TeamCount != 2 && record.TeamSize != 2) {
-        console.log("Only 2v2 supported.");
         return false;
     }
     
@@ -338,14 +340,25 @@ async function getShipLoadoutId(ship) {
 }
 
 
-// async function getEquipmentId(player){
-// }
+async function getEquipmentId(player){
+    // Make sure skills are sorted in db.
+    player.Skills.sort(function(a, b) {
+        return a - b;
+    });
+
+    const equipmentCollection = client.db("mhtest").collection("PlayerEquipment");
+    let dbEquipment = await equipmentCollection.findOne({Class: player.Class, Skills: player.Skills});
+    if (dbEquipment){
+        return dbEquipment._id;
+    }
+    let res = await equipmentCollection.insertOne({Class: player.Class, Skills: player.Skills});
+    return res.insertedId;
+}
 
 async function insertMatchHistory(record, ip) {
-    const matchesCollection = client.db("mhtest").collection("Matches_2v2");
+    const matchesCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
-    const equipmentCollection = client.db("mhtest").collection("PlayerEquipment");
 
     // Check if match has already been added.
     let match = await matchesCollection.findOne({MatchId: record.MatchId});
@@ -355,104 +368,92 @@ async function insertMatchHistory(record, ip) {
     }
 
     let shipIds = [];
-    let flatShipIds = []
     let shipNames = [];
-    for (let ship of record.Ships) {
-        while (shipIds.length <= ship.Team) shipIds.push([]);
-        while (shipNames.length <= ship.Team) shipNames.push([]);
-        shipNames[ship.Team].push(ship.ShipName);
+    let shipCounters = [];
 
-        let shipId = await getShipLoadoutId(ship);
-        shipIds[ship.Team].push(shipId);
-        flatShipIds.push(shipId);
-    }
-
-    // Find player identifiers, or create new ones of does not exist.
     let playerIds = [];
-    let flatPlayerIds = [];
-    let playerLoadouts = [];
-    let flatPlayerLoadouts = [];
+    let playerSkills = [];
+    let playerLevels = [];
     let playerCount = 0;
 
-    let playerLevels = [];
-    for (let ship of record.Ships) {
-        while (playerIds.length <= ship.Team) playerIds.push([]);
-        while (playerLoadouts.length <= ship.Team) playerLoadouts.push([]);
-        for (let player of ship.Players){
-            if (player == null){
-                playerIds[ship.Team].push(-1);
-                flatPlayerIds.push(-1);
-                playerLoadouts[ship.Team].push(-1);
-                flatPlayerLoadouts.push(-1);
+    // Initialize array structure.
+    for (let i = 0; i < record.TeamCount; i++) {
+        // Add a ship info array per team
+        shipIds.push([]);
+        shipNames.push([]);
+        shipCounters.push(0);
+
+        playerIds.push([]);
+        playerSkills.push([]);
+        playerLevels.push([]);
+
+        for (let j = 0; j < record.TeamSize; j++) {
+            // Add a player info array per ship
+            playerIds[i].push([]);
+            playerSkills[i].push([]);
+            playerLevels[i].push([]);
+        }
+    }
+
+    // Load ships and players into arrays
+    for (let i = 0; i < record.Ships.length; i++) {
+        let ship = record.Ships[i];
+        let shipIndex = shipCounters[i]+0;
+        shipCounters[i] += 1;
+        let team = ship.Team;
+        let shipLoadoutId = await getShipLoadoutId(ship);
+        shipNames[team].push(ship.ShipName);
+        shipIds[team].push(shipLoadoutId);
+
+        for (let p = 0; p < ship.Players.length; p++) {
+            let player = ship.Players[p];
+            if (player == null) {
+                playerIds[team][shipIndex].push(-1);
+                playerSkills[team][shipIndex].push(-1);
+                playerLevels[team][shipIndex].push(-1);
                 continue;
             }
             playerCount += 1;
             await updatePlayer(player);
-            playerIds[ship.Team].push(player.UserId);
-            flatPlayerIds.push(player.UserId);
-            playerLevels.push(player.Level);
-            
-            // // Make sure skills are sorted in db.
-            player.Skills.sort(function(a, b) {
-                return a - b;
-            });
+            let equipmentId = await getEquipmentId(player);
 
-            let dbEquipment = await equipmentCollection.findOne({Class: player.Class, Skills: player.Skills});
-            if (dbEquipment){
-                playerLoadouts[ship.Team].push(dbEquipment._id);
-                flatPlayerLoadouts.push(dbEquipment._id);
-            }
-            else {
-                let res = await equipmentCollection.insertOne({Class: player.Class, Skills: player.Skills});
-                playerLoadouts[ship.Team].push(res.insertedId);
-                flatPlayerLoadouts.push(res.insertedId);
-            }
+            playerIds[team][shipIndex].push(player.UserId);
+            playerSkills[team][shipIndex].push(equipmentId);
+            playerLevels[team][shipIndex].push(player.Level);
         }
     }
+
+    let flatPlayerIds = playerIds.flat(Infinity);
+    let flatShipIds = shipIds.flat(Infinity);
+    let flatSkills = playerSkills.flat(Infinity);
+    let flatPlayerLevels = playerLevels.flat(Infinity);
 
     // Insert the match.
     let newMatch = {
         SubmitterIp: ip,
+        Timestamp: new Date().getTime(),
         SubmissionCount: 1,
         MatchId: record.MatchId,
         MapId: record.MapId,
         ShipsFull: record.Ships.length == record.TeamSize * record.TeamCount,
         PlayersFull: playerCount == record.TeamSize * record.TeamCount * 4,
+        MatchTime: record.MatchTime,
         GameMode: record.GameMode,
         TeamSize: record.TeamSize,
         TeamCount: record.TeamCount,
-        AvgLevel:  playerLevels.reduce( ( p, c ) => p + c, 0 ) / playerLevels.length,
         Winner: record.Winner,
         Scores: record.Scores,
-        MatchTime: record.MatchTime,
-        Timestamp: new Date().getTime(),
-        FlatPlayers: flatPlayerIds,
-        FlatShips: flatShipIds,
-        FlatSkills: flatPlayerLoadouts,
-        Players: playerIds,
         Ships: shipIds,
         ShipNames: shipNames,
-        Skills: playerLoadouts
+        Players: playerIds,
+        Skills: playerSkills,
+        PlayerLevels: playerLevels,
+        FlatPlayers: flatPlayerIds,
+        FlatShips: flatShipIds,
+        FlatSkills: flatSkills,
+        FlatPlayerLevels: flatPlayerLevels
     }
 
-    // // Insert ship arrays
-    // for (let i in shipIds) {
-    //     newMatch[`T${i}_Ships`] = []; 
-    //     newMatch[`T${i}_ShipNames`] = [];  
-    //     for (let j in shipIds[i]){
-    //         newMatch[`T${i}_Ships`].push(shipIds[i][j]);
-    //         newMatch[`T${i}_ShipNames`].push(shipNames[i][j]);
-    //     }
-    // }
-
-    // for (let i in playerIds) {
-    //     newMatch[`T${i}_Players`] = []; 
-    //     newMatch[`T${i}_PlayerLoadouts`] = [];
-    //     for (let j in playerIds[i]) {
-    //         newMatch[`T${i}_Players`].push(playerIds[i][j]);
-    //         newMatch[`T${i}_PlayerLoadouts`].push(playerLoadouts[i][j]);
-    //     }
-    // }
 
     await matchesCollection.insertOne(newMatch);
 
