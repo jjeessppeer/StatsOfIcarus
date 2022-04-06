@@ -239,7 +239,7 @@ function validateHistorySubmission(record){
         for (let score of record.Scores) assert(Number.isInteger(score));
 
         assert(Array.isArray(record.Ships));
-        assert(record.Ships.length == record.TeamSize * record.TeamCount);
+        assert(record.Ships.length <= record.TeamSize * record.TeamCount);
         assert(record.Ships.length <= 8);
         for (let ship of record.Ships) {
             if (ship == null) continue;
@@ -288,7 +288,7 @@ function validateHistorySubmission(record){
     return true;
 }
 
-async function updatePlayer(player, client) {
+async function updatePlayer(player) {
     const playersCollection = client.db("mhtest").collection("Players");
     let dbPlayer = await playersCollection.findOne({_id: player.UserId});
     
@@ -337,6 +337,7 @@ async function getShipLoadoutId(ship) {
     return res.insertedId;
 }
 
+
 // async function getEquipmentId(player){
 // }
 
@@ -371,13 +372,22 @@ async function insertMatchHistory(record, ip) {
     let flatPlayerIds = [];
     let playerLoadouts = [];
     let flatPlayerLoadouts = [];
+    let playerCount = 0;
 
     let playerLevels = [];
     for (let ship of record.Ships) {
         while (playerIds.length <= ship.Team) playerIds.push([]);
         while (playerLoadouts.length <= ship.Team) playerLoadouts.push([]);
         for (let player of ship.Players){
-            await updatePlayer(player, client);
+            if (player == null){
+                playerIds[ship.Team].push(-1);
+                flatPlayerIds.push(-1);
+                playerLoadouts[ship.Team].push(-1);
+                flatPlayerLoadouts.push(-1);
+                continue;
+            }
+            playerCount += 1;
+            await updatePlayer(player);
             playerIds[ship.Team].push(player.UserId);
             flatPlayerIds.push(player.UserId);
             playerLevels.push(player.Level);
@@ -406,12 +416,12 @@ async function insertMatchHistory(record, ip) {
         SubmissionCount: 1,
         MatchId: record.MatchId,
         MapId: record.MapId,
+        ShipsFull: record.Ships.length == record.TeamSize * record.TeamCount,
+        PlayersFull: playerCount == record.TeamSize * record.TeamCount * 4,
         GameMode: record.GameMode,
         TeamSize: record.TeamSize,
         TeamCount: record.TeamCount,
         AvgLevel:  playerLevels.reduce( ( p, c ) => p + c, 0 ) / playerLevels.length,
-        // Ships: shipIds,
-        // Players: playerIds,
         Winner: record.Winner,
         Scores: record.Scores,
         MatchTime: record.MatchTime,
@@ -421,27 +431,28 @@ async function insertMatchHistory(record, ip) {
         FlatSkills: flatPlayerLoadouts,
         Players: playerIds,
         Ships: shipIds,
+        ShipNames: shipNames,
         Skills: playerLoadouts
     }
 
-    // Insert ship arrays
-    for (let i in shipIds) {
-        newMatch[`T${i}_Ships`] = []; 
-        newMatch[`T${i}_ShipNames`] = [];  
-        for (let j in shipIds[i]){
-            newMatch[`T${i}_Ships`].push(shipIds[i][j]);
-            newMatch[`T${i}_ShipNames`].push(shipNames[i][j]);
-        }
-    }
+    // // Insert ship arrays
+    // for (let i in shipIds) {
+    //     newMatch[`T${i}_Ships`] = []; 
+    //     newMatch[`T${i}_ShipNames`] = [];  
+    //     for (let j in shipIds[i]){
+    //         newMatch[`T${i}_Ships`].push(shipIds[i][j]);
+    //         newMatch[`T${i}_ShipNames`].push(shipNames[i][j]);
+    //     }
+    // }
 
-    for (let i in playerIds) {
-        newMatch[`T${i}_Players`] = []; 
-        newMatch[`T${i}_PlayerLoadouts`] = [];
-        for (let j in playerIds[i]) {
-            newMatch[`T${i}_Players`].push(playerIds[i][j]);
-            newMatch[`T${i}_PlayerLoadouts`].push(playerLoadouts[i][j]);
-        }
-    }
+    // for (let i in playerIds) {
+    //     newMatch[`T${i}_Players`] = []; 
+    //     newMatch[`T${i}_PlayerLoadouts`] = [];
+    //     for (let j in playerIds[i]) {
+    //         newMatch[`T${i}_Players`].push(playerIds[i][j]);
+    //         newMatch[`T${i}_PlayerLoadouts`].push(playerLoadouts[i][j]);
+    //     }
+    // }
 
     await matchesCollection.insertOne(newMatch);
 

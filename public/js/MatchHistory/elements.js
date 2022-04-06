@@ -217,16 +217,12 @@ class ShipCrew extends HTMLDivElement {
             if (maxY == undefined || y > maxY) maxY = y;
             // break;
         }
-
         maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
         minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
 
         let centerX = shipImage.width/2
         let centerY = (minY + maxY) / 2;
         
-
-        
-
         resetMatrix(this.transform);
         // translateMatrix(this.transform, canvas.width/2 - , canvas.height/2 - shipImage.height/2);
         // zoomMatrixAround(this.transform, canvas.width/2, canvas.height/2, 0.4);
@@ -237,7 +233,6 @@ class ShipCrew extends HTMLDivElement {
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = "source-over";
         ctx.drawImage(shipImage, 0, 0);
-
 
         let iconSize = 100;
         // Spread close guns out from eachother 
