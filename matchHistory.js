@@ -5,7 +5,8 @@ const { kill } = require("process");
 const { json } = require("express/lib/response");
 
 
-const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
+// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
+const db_url = `mongodb://localhost:27017/`;
 let client = new MongoClient(db_url);
 
 
@@ -135,13 +136,31 @@ async function getMatches(filters, offset, count) {
             from: "PlayerEquipment",
             localField: "FlatSkills",
             foreignField: "_id",
-            as: "SkillInfo"
+            as: "LoadoutInfo"
         }},
         {$lookup: {
             from: "Ships",
             localField: "FlatShips",
             foreignField: "_id",
-            as: "ShipInfo"
+            as: "ShipLoadouts"
+        }},
+        {$lookup: {
+            from: "Items-Ships",
+            localField: "ShipLoadouts.ShipModel",
+            foreignField: "_id",
+            as: "ShipItems"
+        }},
+        {$lookup: {
+            from: "Items-Skills",
+            localField: "LoadoutInfo.Skills",
+            foreignField: "_id",
+            as: "SkillItems"
+        }},
+        {$lookup: {
+            from: "Items-Guns",
+            localField: "ShipLoadouts.Loadout",
+            foreignField: "_id",
+            as: "GunItems"
         }},
         {$facet:{
           "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
@@ -223,7 +242,8 @@ function validateHistorySubmission(record){
         assert(record.Ships.length == record.TeamSize * record.TeamCount);
         assert(record.Ships.length <= 8);
         for (let ship of record.Ships) {
-            assert(typeof ship == 'object'); // Will not allow non existant ships from force start.
+            if (ship == null) continue;
+            assert(typeof ship == 'object');
             assert(Number.isInteger(ship.ShipModel));
             assert(typeof ship.ShipName == "string");
             assert(Number.isInteger(ship.Team));
@@ -233,6 +253,12 @@ function validateHistorySubmission(record){
             assert(ship.ShipLoadout.length <= 6);
             for (let gun of ship.ShipLoadout) {
                 assert(Number.isInteger(gun));
+            }
+
+            assert(Array.isArray(ship.SlotNames));
+            assert(ship.SlotNames.length <= 6);
+            for (let slotName of ship.SlotNames){
+                assert(typeof slotName == "string");
             }
 
             assert(Array.isArray(ship.Players));
@@ -289,6 +315,31 @@ async function updatePlayer(player, client) {
     }
 }
 
+async function getShipLoadoutId(ship) {
+    const shipsCollection = client.db("mhtest").collection("Ships");
+    // Sort the ship loadout
+    let sortedLoadout = [];
+    for (let i = 0; i < ship.ShipLoadout.length; i++) {
+        for (let j = 0; j < ship.ShipLoadout.length; j++) {
+            if (ship.SlotNames[j] == `gun-slot-${i+1}`){
+                sortedLoadout.push(ship.ShipLoadout[j]);
+                break;
+            }
+        }
+    }
+    ship.ShipLoadout = sortedLoadout;
+    
+    let dbShip = await shipsCollection.findOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
+    if (dbShip) {
+        return dbShip._id;
+    }
+    let res = await shipsCollection.insertOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
+    return res.insertedId;
+}
+
+// async function getEquipmentId(player){
+// }
+
 async function insertMatchHistory(record, ip) {
     const matchesCollection = client.db("mhtest").collection("Matches_2v2");
     const playersCollection = client.db("mhtest").collection("Players");
@@ -298,7 +349,7 @@ async function insertMatchHistory(record, ip) {
     // Check if match has already been added.
     let match = await matchesCollection.findOne({MatchId: record.MatchId});
     if (match){
-        // Check if record matches. If it does add vote.
+        // TODO: Check if record matches. If it does add vote.
         return true;
     }
 
@@ -309,16 +360,10 @@ async function insertMatchHistory(record, ip) {
         while (shipIds.length <= ship.Team) shipIds.push([]);
         while (shipNames.length <= ship.Team) shipNames.push([]);
         shipNames[ship.Team].push(ship.ShipName);
-        let dbShip = await shipsCollection.findOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
-        if (dbShip) {
-            shipIds[ship.Team].push(dbShip._id);
-            flatShipIds.push(dbShip._id);
-        }
-        if (!dbShip){
-            let res = await shipsCollection.insertOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
-            shipIds[ship.Team].push(res.insertedId);
-            flatShipIds.push(res.insertedId);
-        }
+
+        let shipId = await getShipLoadoutId(ship);
+        shipIds[ship.Team].push(shipId);
+        flatShipIds.push(shipId);
     }
 
     // Find player identifiers, or create new ones of does not exist.

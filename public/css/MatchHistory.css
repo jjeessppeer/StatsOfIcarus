@@ -11,7 +11,7 @@
 .match-history-entry {
     list-style: none;
     margin: 20px;
-    width: 700px;
+    width: 800px;
     border: 1px solid;
     border-bottom: none;
     /* height: 1px; */
@@ -245,65 +245,83 @@
 /* ------------------------------ */
 /* ----- Match details view ----- */
 /* ------------------------------ */
+.match-history-entry .details {
+    display: flex;
+    flex-direction: row;
+    /* flex-wrap: nowrap; */
 
-.match-history-entry .foldout .details {
-    display: table;
-    width: 100%;
-    /* background-color: black; */
+    justify-content: center;
 }
 
-.match-history-entry .foldout .details>div{
-    display: table-row;
-}
-.match-history-entry .foldout .details>div>div{
-    display: table-cell;
-    float: left;
-    /* width: 25%; */
-    vertical-align: top;
+.match-history-entry .details > div{
+    /* margin: auto; */
+    border: 1px black solid;
+    /* flex: 0 0 auto; */
+    /* flex-grow: 0; */
+    /* flex: 0 */
 }
 
-.match-history-entry .foldout .details canvas{
-    display: table-cell;
-    width: 175px;
-    height: 175px;
-    background-color: grey;
+.match-history-entry .details .shipcrew > div{
+    /* display: table; */
+    /* max-height: 175px; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+    gap: 0;
+    /* align-items: stretch; */
+    padding: 0;
+    margin: 0;
 }
 
-.match-history-entry .foldout .details ul{
+.match-history-entry .details > div:last-child .shipcrew > div{
+    flex-direction: row-reverse;
+}
+
+
+.match-history-entry .details .shipcrew > div > *{
+    padding: 0;
+    margin: 0;
+    /* margin: auto; */
+    
+}
+
+.match-history-entry .details .shipcrew:not(:last-child){
+    margin-bottom: 10px;
+}
+
+.match-history-entry .details .shipcrew canvas {
+    /* height: 600px; */
+    /* width: 600px; */
+    background-color: white;
+}
+
+.match-history-entry .details .shipcrew ul {
     list-style: none;
-    margin: 0;
     padding: 0;
-    height: 100%;
+    margin: 0;
 }
-
-.match-history-entry .foldout .details ul li{
-    height: 43.75px;
-    margin: 0;
-    margin-right: 20px;
-    padding: 0;
-    /* padding-top: 2px; */
-    font-size: 14px;
-    border: black solid 1px;
-    border-bottom: none;
-    /* border-right: none; */
-    border-left: none;
+.match-history-entry .details .shipcrew li {
+    height: 25%;
+    border: 1px black solid;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    width: 140px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
     vertical-align: bottom;
+    
+}
+.match-history-entry .details .shipcrew li:first-child {
+    border-top: 1px solid;
 }
 
-.match-history-entry .foldout .details ul li:last-child{
-    border-bottom: solid 1px;
-}
-
-.match-history-entry .foldout .details ul li div{
-    margin: 0;
-    padding: 0;
-    font-size: 0;
-}
-
-.match-history-entry .foldout .details ul li img{
-    margin: 0;
-    padding: 0;
+.match-history-entry .details .shipcrew img {
     width: 20px;
     height: 20px;
-    background: black;
+    background-color: black;
 }
+

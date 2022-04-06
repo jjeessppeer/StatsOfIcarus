@@ -414,7 +414,7 @@ function sanitizeHtml(str){
 
 function loadImages(files, onAllLoaded){
     var numLoading = files.length;
-    const onload = () => --numLoading === 0 && onAllLoaded();
+    const onload = () => --numLoading === 0 && onAllLoaded(images);
     const images = [];
     for (let i = 0; i < files.length; ++i){
         const img = new Image;
@@ -423,6 +423,23 @@ function loadImages(files, onAllLoaded){
         img.onload = onload;
     }
     return images;
+}
+
+async function loadImagesAsync(imgSources) {
+    const promises = [];
+    for (let src of imgSources){
+        promises.push(loadImageAsync(src));
+    }
+    return Promise.all(promises);
+}
+
+async function loadImageAsync(imgSrc) {
+    const promise = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = imgSrc;
+        img.onload = () => resolve(img);
+    });
+    return promise;
 }
 
 function httpxPostRequest(url, data, callback=null, timeout_callback=null){

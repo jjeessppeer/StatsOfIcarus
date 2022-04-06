@@ -1,4 +1,20 @@
 
+var ship_image_srcs2 = {
+    70: "images/ship-images/corsair_gundeck_small.png",
+    67: "images/ship-images/crusader_gundeck_small.png",
+    14: "images/ship-images/galleon_gundeck_small.png",
+    11: "images/ship-images/goldfish_gundeck_small.png",
+    69: "images/ship-images/judge_gundeck_small.png",
+    12: "images/ship-images/junker_gundeck_small.png",
+    64: "images/ship-images/magnate_gundeck_small.png",
+    19: "images/ship-images/mob_gundeck_small.png",
+    16: "images/ship-images/pyra_gundeck_small.png",
+    82: "images/ship-images/shrike_gundeck_small.png",
+    15: "images/ship-images/spire_gundeck_small.png",
+    13: "images/ship-images/squid_gundeck_small.png",
+    97: "images/ship-images/storm_gundeck_small.png" 
+  }
+
 
 
 class MatchHistoryEntry extends HTMLLIElement {
@@ -46,34 +62,57 @@ class MatchHistoryDetails extends HTMLDivElement {
     constructor(){
         super();
         this.classList.add("details");
+        // this.innerHTML = `
+        //     <div>
+        //         <div>t1s1</div>
+        //         <div></div>
+        //         <div>t2s1</div>
+        //         <div></div>
+        //     </div>
+        //     <div>
+        //         <div><canvas class="ship-canvas"></canvas></div>
+        //         <div><ul></ul></div>
+        //         <div><canvas class="ship-canvas"></canvas></div>
+        //         <div><ul></ul></div>
+        //     </div>
+        //     <div>
+        //         <div>t1s1</div>
+        //         <div></div>
+        //         <div>t2s1</div>
+        //         <div></div>
+        //     </div>
+        //     <div>
+        //         <div><canvas class="ship-canvas"></canvas></div>
+        //         <div><ul></ul></div>
+        //         <div><canvas class="ship-canvas"></canvas></div>
+        //         <div><ul></ul></div>
+        //     </div>
+        // `;
         this.innerHTML = `
-            <div>
-                <div>t1s1</div>
-                <div></div>
-                <div>t2s1</div>
-                <div></div>
-            </div>
-            <div>
-                <div><canvas class="ship-canvas"></canvas></div>
-                <div><ul></ul></div>
-                <div><canvas class="ship-canvas"></canvas></div>
-                <div><ul></ul></div>
-            </div>
-            <div>
-                <div>t1s1</div>
-                <div></div>
-                <div>t2s1</div>
-                <div></div>
-            </div>
-            <div>
-                <div><canvas class="ship-canvas"></canvas></div>
-                <div><ul></ul></div>
-                <div><canvas class="ship-canvas"></canvas></div>
-                <div><ul></ul></div>
-            </div>
+            <div></div>
+            <div></div>
         `;
+
+        this.ships = [];
+        // this.details = document.createElement('div', {is: 'shipcrew'});
+        
     }
     async fillData(matchData) {
+        for (let t = 0; t < matchData.Ships.length; t++) {
+            this.ships.push([]);
+            for (let s = 0; s < matchData.Ships[t].length; s++) {
+                let shipcrew = document.createElement('div', {is: 'match-history-shipcrew'});
+                shipcrew.fillData(matchData, t, s);
+                this.ships[t].push(shipcrew);
+                this.querySelector(`:scope > div:nth-child(${t+1})`).append(shipcrew);
+                
+            }
+            // for (let p = 0; p < matchData.Players[t].length; p++) {
+
+            // }
+        }
+
+        return;
         for (let t = 0; t < matchData.Players.length; t++) {
             let list1 = this.querySelectorAll("ul")[t];
             let list2 = this.querySelectorAll("ul")[t+2];
@@ -112,20 +151,132 @@ class MatchHistoryDetails extends HTMLDivElement {
     }
 }
 
-class ShipCanvas extends HTMLCanvasElement {
-    constructor(){
+class ShipCrew extends HTMLDivElement {
+    constructor() {
         super();
-        this.classList.add("player-list");
+        this.classList.add("shipcrew");
+        // <span>SHIP NAME</span>
         this.innerHTML = `
-            <ul>
-            </ul>
+        <span>SHIP NAME</span>
+            <div>
+                <canvas height="250" width="250"></canvas>
+                <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                </ul>
+            </div>
         `;
+        this.transform = [
+            1, 0, 0, 
+            0, 1, 0,
+            0, 0, 1];
 
-    }
-    async paintShip(){
-        let ctx = this.getContext("2d");
+      
     }
 
+    async fillData(matchData, teamIdx, shipIdx) {
+        // Initialize player list.
+        let listElements = this.querySelectorAll("li");
+        for (let i = 0; i < 4; i++) {
+            let playerIdx = i + shipIdx * 4;
+            let player = getPlayerInfo(matchData, matchData.Players[teamIdx][playerIdx]);
+            let loadout = getLoadoutInfo(matchData, matchData.Skills[teamIdx][playerIdx]);
+            listElements[i].innerHTML = "<div></div><span></span>";
+            listElements[i].querySelector("span").textContent = player.Name.substring(0, player.Name.length-5);
+
+            let loadoutDiv = listElements[i].querySelector("div");
+            let roleImg = document.createElement("img");
+            let roleImages = {1: "pilot.png", 2: "engineer.png", 4: "gunner.png"};
+            roleImg.src = `images/class-icons/${roleImages[loadout.Class]}`;
+            loadoutDiv.append(roleImg);
+            for (let l = 0; l < loadout.Skills.length; l++) {
+                let skillImg = document.createElement("img");
+                skillImg.src = `/item-icon?Item=skill&Id=${loadout.Skills[l]}`;
+                loadoutDiv.append(skillImg);
+            }
+        }
+        // Paint ship preview
+        
+        let shipInfo = getShipLoadout(matchData, matchData.Ships[teamIdx][shipIdx]);
+        let shipItem = getShipItem(matchData, shipInfo.ShipModel);
+        let gunPositions = shipItem.GunPositions;
+        let shipLoadout = shipInfo.Loadout;
+        let shipModel = shipInfo.ShipModel;
+
+        let canvas = this.querySelector("canvas");
+        let ctx = canvas.getContext("2d");
+        let shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
+
+        // Find gun bounding rectangle.
+        let maxY, minY;
+        for (let i = 0; i < gunPositions.length; i++){
+            let [x, y] = gunPositions[i];
+            if (minY == undefined || y < minY) minY = y;
+            if (maxY == undefined || y > maxY) maxY = y;
+            // break;
+        }
+
+        maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
+        minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
+
+        let centerX = shipImage.width/2
+        let centerY = (minY + maxY) / 2;
+        
+
+        
+
+        resetMatrix(this.transform);
+        // translateMatrix(this.transform, canvas.width/2 - , canvas.height/2 - shipImage.height/2);
+        // zoomMatrixAround(this.transform, canvas.width/2, canvas.height/2, 0.4);
+        translateMatrix(this.transform, canvas.width/2 - centerX, canvas.height/2 - centerY);
+        zoomMatrixAround(this.transform, canvas.width/2, canvas.height/2, 0.5);
+        applyMatrix(ctx, this.transform);
+
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.drawImage(shipImage, 0, 0);
+
+
+        let iconSize = 100;
+        // Spread close guns out from eachother 
+        let adjustedGunPositions = [];
+        let repellingForce = 500;
+        for (let i = 0; i < gunPositions.length; i++){
+            let pos = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
+            adjustedGunPositions.push(pos);
+        }
+        adjustedGunPositions = spreadGunPositions(adjustedGunPositions, iconSize);
+
+        // Draw gun icons.
+        for (let i = 0; i < shipLoadout.length; i++){
+            let gunId = shipLoadout[i];
+            if (gunId == 0) continue;
+            let gunInfo = getGunItem(matchData, gunId);
+            let gunImage = await loadImageAsync(`/images/item-icons/${gunInfo.IconPath}`);
+
+            // let [cx, cy] = toShipImageCoordinates(adjustedGunPositions[i], shipModel, shipImage);
+            let [cx, cy] = adjustedGunPositions[i];
+            ctx.drawImage(gunImage, cx-iconSize/2, cy-iconSize/2, iconSize, iconSize);
+
+            // let boxSize = 25;
+            // let [cx2, cy2] = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
+            // ctx.fillStyle = "red";
+            // ctx.beginPath();
+            // ctx.rect(cx2-boxSize/2, cy2-boxSize/2, boxSize, boxSize); 
+            // ctx.fill();
+            // ctx.stroke();
+
+            // ctx.beginPath();
+            // ctx.fillStyle = "black";
+            // ctx.font = "30px Arial"; 
+            // ctx.textAlign = "center"; 
+            // ctx.fillText(i, cx2, cy2+10); 
+            // ctx.stroke();
+
+        }
+    }
 }
 
 
@@ -182,7 +333,7 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
         // Load ships
         for (let t in matchData.Ships) {
             for (let s in matchData.Ships[t]){
-                let shipInfo = getShipInfo(matchData, matchData.Ships[t][s]);
+                let shipInfo = getShipLoadout(matchData, matchData.Ships[t][s]);
                 let img = this.querySelector(`.matchup-table ${t==0 ? ".red-team" : ".blue-team"} img:nth-of-type(${Number(s)+1})`);
                 img.src = `item-icon?Item=ship&Id=${shipInfo.ShipModel}`;
             }
@@ -192,7 +343,7 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
         for (let t in matchData.Players) {
             for (let p in matchData.Players[t]) {
                 let nametag = document.createElement('li', {is: 'player-nametag'});
-                nametag.fillData(matchData.Players[t][p], matchData.Skills[t][p], matchData.PlayerInfo, matchData.SkillInfo);
+                nametag.fillData(matchData.Players[t][p], matchData.Skills[t][p], matchData.PlayerInfo, matchData.LoadoutInfo);
                 this.querySelector(`.players .${t==0 ? "red" : "blue"}-players ul:nth-of-type(${p <= 3 ? 1 : 2})`).append(nametag);
             }
         }
@@ -205,7 +356,7 @@ class PlayerNametag extends HTMLLIElement {
         this.classList.add("nametag");
         this.innerHTML = `<img src="images/class-icons/gunner.png"><span></span>`;
     }
-    fillData(playerId, loadoutId, playerInfo, SkillInfo){
+    fillData(playerId, loadoutId, playerInfo, LoadoutInfo){
         let name;
         for (let pInfo of playerInfo) {
             if (pInfo._id != playerId) continue;
@@ -215,7 +366,7 @@ class PlayerNametag extends HTMLLIElement {
         this.querySelector("span").textContent = name;
         
         let loadout;
-        for (let sInfo of SkillInfo) {
+        for (let sInfo of LoadoutInfo) {
             if (sInfo._id != loadoutId) continue;
             loadout = sInfo;
             break;
@@ -232,4 +383,5 @@ customElements.define('match-history-entry', MatchHistoryEntry, { extends: 'li' 
 customElements.define('match-history-overview', MatchHistoryEntryOverview, { extends: 'div' });
 customElements.define('match-history-foldout', MatchHistoryFoldout, { extends: 'div' });
 customElements.define('match-history-details', MatchHistoryDetails, { extends: 'div' });
+customElements.define('match-history-shipcrew', ShipCrew, { extends: 'div' });
 customElements.define('player-nametag', PlayerNametag, { extends: 'li' });
