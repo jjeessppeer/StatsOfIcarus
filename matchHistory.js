@@ -45,69 +45,41 @@ async function getShipBuilds(restrictions) {
 }
 
 async function generateMatchQuery(filters){
-    // filters = [
-    //     {filter_type: "PlayersSameTeam", include: true, players: ["whereami"]},
-    //     {filter_type: "ShipBuilds", include: true, 
-    //         ships: [ [[97, 171, -1], []], [[16], []] ]}
-    // ];
     console.log(filters);
     if (filters.length == 0) {
         return {};
     }
+    const shipItems = client.db("mhtest").collection("Items-Ships");
     
     let fullQuery = {
         $and: [
         ]
     };
-    console.log(JSON.stringify(filters));
 
     for (let filter of filters) {
-        if (filter.filter_type == "PlayersSameTeam") {
-
-            // Collect the player ids.
-            let playerIds = [];
-            for (let playerName of filter.players) {
-                let playerId = await getPlayerId(playerName);
-                if (!playerId) {
-                    continue;
-                }
-                playerIds.push(playerId);
-            }
-            let query = {$or: [
-                {T0_Players: {$all: playerIds}},
-                {T1_Players: {$all: playerIds}}
-            ]}
-            if (!filter.include) {
-                query = {'$nor': [query]};
-            }
-            fullQuery['$and'].push(query);
-        }
-        if (filter.filter_type == "ShipBuilds") {
-            // let matchingBuilds = await getShipBuilds(filter.ships);
-            // [ [[T1s1...], [T1s2...]], [[T2s1...], [T2s2...]] ]
-            let shipBuilds = [ [[], []], [[], []] ];
-            for (let i in filter.ships) {
-                for (let j in filter.ships[i]) {
-                    let builds = await getShipBuilds(filter.ships[i][j]);
-                    shipBuilds[i][j] = builds;
-                }
-            }
-            let query = {
-                $or: [
-                    {$and: [
-                        { T0_Ships: {$in: shipBuilds[0][0]} },
-                        { T0_Ships: {$in: shipBuilds[0][1]} },
-                        { T1_Ships: {$in: shipBuilds[1][0]} },
-                        { T1_Ships: {$in: shipBuilds[1][1]} }
-                    ]},
-                    {$and: [
-                        { T1_Ships: {$in: shipBuilds[0][0]} },
-                        { T1_Ships: {$in: shipBuilds[0][1]} },
-                        { T0_Ships: {$in: shipBuilds[1][0]} },
-                        { T0_Ships: {$in: shipBuilds[1][1]} }
-                    ]}
-                ]
-            }
+        // if (filter.filter_type == "Player") {
+        //     // Collect the player ids.
+        //     let playerIds = [];
+        //     for (let playerName of filter.players) {
+        //         let playerId = await getPlayerId(playerName);
+        //         if (!playerId) {
+        //             continue;
+        //         }
+        //         playerIds.push(playerId);
+        //     }
+        //     let query = {$or: [
+        //         {T0_Players: {$all: playerIds}},
+        //         {T1_Players: {$all: playerIds}}
+        //     ]}
+        //     if (!filter.include) {
+        //         query = {'$nor': [query]};
+        //     }
+        //     fullQuery['$and'].push(query);
+        // }
+        if (filter.filter_type == "Ship") {
+            // let shipModel = await shipItems.findOne({});
+            let shipItem = await shipItems.findOne({A: new RegExp(filter.data, "i") });
+            console.log(shipItem);
             fullQuery['$and'].push(query);
         }
     }
@@ -115,16 +87,23 @@ async function generateMatchQuery(filters){
 }
 
 
-async function getMatches(filters, offset, count) {
+async function getMatches(filters, perspective, offset, count) {
     console.log("Getting record");
     const matchCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
 
-    let fullQuery = await generateMatchQuery(filters);
+    // let query = await generateMatchQuery(filters);
+    // let query = {
+    //     $text: {
+    //         $search: "Pyramidion",
+    //         $caseSensitive: false,
+    //         $diacriticSensitive: false
+    //     }
+    // }
+    let query = {};
 
     const pipeline = [
-        //{$sort: {...}}
-        {$match: fullQuery},
+        {$match: query},
         {$lookup: {
             from: "Players",
             localField: "FlatPlayers",
@@ -168,8 +147,8 @@ async function getMatches(filters, offset, count) {
             as: "MapItem"
         }},
         {$facet:{
-          "stage1" : [ {"$group": {_id:null, count:{$sum:1}}} ],
-          "stage2" : [ { "$skip": offset}, {"$limit": count} ]
+          "stage1" : [ {"$group": {_id:null, count:{$sum:count}}} ],
+          "stage2" : [ {"$sort": {"Timestamp": -1}}, { "$skip": offset}, {"$limit": count} ]
         }},
         {$unwind: "$stage1"},
             //output projection
@@ -178,12 +157,12 @@ async function getMatches(filters, offset, count) {
             data: "$stage2"
         }}
     ];
-
+    // let aggCursor2 = await matchCollection.aggregate(pipeline).explain(true);
+    // console.log(JSON.stringify(aggCursor2));
     let aggCursor = matchCollection.aggregate(pipeline);
     // let aggCursor = matchCollection.find();
     let result = {};
     result = await aggCursor.next();
-    console.log(result);
     aggCursor.close();
     // aggCursor.close();
     // await aggCursor.forEach(doc => {
@@ -317,19 +296,25 @@ async function updatePlayer(player) {
     }
 }
 
-async function getShipLoadoutId(ship) {
-    const shipsCollection = client.db("mhtest").collection("Ships");
-    // Sort the ship loadout
+
+function sortShipLoadout(ship) {
     let sortedLoadout = [];
+    let sortedNames = [];
     for (let i = 0; i < ship.ShipLoadout.length; i++) {
         for (let j = 0; j < ship.ShipLoadout.length; j++) {
             if (ship.SlotNames[j] == `gun-slot-${i+1}`){
                 sortedLoadout.push(ship.ShipLoadout[j]);
+                sortedNames.push(ship.SlotNames[j]);
                 break;
             }
         }
     }
+    ship.SlotNames = sortedNames;
     ship.ShipLoadout = sortedLoadout;
+}
+
+async function getShipLoadoutId(ship) {
+    const shipsCollection = client.db("mhtest").collection("Ships");
     
     let dbShip = await shipsCollection.findOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
     if (dbShip) {
@@ -369,6 +354,8 @@ async function insertMatchHistory(record, ip) {
 
     let shipIds = [];
     let shipNames = [];
+    let shipModels = [];
+    let shipLoadouts = [];
     let shipCounters = [];
 
     let playerIds = [];
@@ -381,6 +368,8 @@ async function insertMatchHistory(record, ip) {
         // Add a ship info array per team
         shipIds.push([]);
         shipNames.push([]);
+        shipModels.push([]);
+        shipLoadouts.push([]);
         shipCounters.push(0);
 
         playerIds.push([]);
@@ -401,9 +390,13 @@ async function insertMatchHistory(record, ip) {
         let shipIndex = shipCounters[i]+0;
         shipCounters[i] += 1;
         let team = ship.Team;
+        sortShipLoadout(ship); // Sort the ship loadout before doing anything with it.
         let shipLoadoutId = await getShipLoadoutId(ship);
         shipNames[team].push(ship.ShipName);
         shipIds[team].push(shipLoadoutId);
+
+        shipModels[team][shipIndex] = ship.ShipModel;
+        shipLoadouts[team][shipIndex] = ship.ShipModel;
 
         for (let p = 0; p < ship.Players.length; p++) {
             let player = ship.Players[p];
@@ -444,6 +437,8 @@ async function insertMatchHistory(record, ip) {
         Winner: record.Winner,
         Scores: record.Scores,
         Ships: shipIds,
+        ShipModels: shipModels,
+        ShipLoadouts: shipLoadouts,
         ShipNames: shipNames,
         Players: playerIds,
         Skills: playerSkills,

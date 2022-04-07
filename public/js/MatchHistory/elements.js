@@ -50,10 +50,10 @@ class MatchHistoryFoldout extends HTMLDivElement {
     constructor() {
         super();
         this.classList.add("foldout");
+        // <li><button>Gunnery Analysis</button></li>
         this.innerHTML = `
             <ul>
                 <li><button>Overview</button></li>
-                <li><button>Gunnery Analysis</button></li>
                 <li><button>Another button</button></li>
             </ul>
             <div class="content"></div>`;
@@ -154,17 +154,22 @@ class ShipCrew extends HTMLDivElement {
         let shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
 
         // Find gun bounding rectangle.
-        let maxY, minY;
+        let maxY, minY, minX, maxX;
         for (let i = 0; i < gunPositions.length; i++){
             let [x, y] = gunPositions[i];
+            if (minX == undefined || x < minX) minX = x;
+            if (maxX == undefined || x > maxX) maxX = x;
             if (minY == undefined || y < minY) minY = y;
             if (maxY == undefined || y > maxY) maxY = y;
             // break;
         }
+        // maxX = toShipImageCoordinates([maxX, 0], shipModel, shipImage)[0];
+        // minX = toShipImageCoordinates([minX, 0], shipModel, shipImage)[0];
         maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
         minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
 
         let centerX = shipImage.width/2
+        // let centerX = (minX + maxX) / 2;
         let centerY = (minY + maxY) / 2;
         
         resetMatrix(this.transform);

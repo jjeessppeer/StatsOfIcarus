@@ -1,11 +1,74 @@
 
+var search_mode = 0;
+
+
 
 function initializeMatchHistory(){
+    // Initialize search categories
+    document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
+        element.addEventListener("click", evt => {
+            // Hide other search categories.
+            document.querySelectorAll(".category-content").forEach(el => {
+                el.style.height = "0px";
+            });
+            let category = evt.originalTarget.parentElement.parentElement;
+            // Show this one
+            let target = category.querySelector(".category-content")
+            target.style.height = target.scrollHeight+"px";
 
-    let overview = document.createElement('li', {is: 'match-history-entry'});
+            const index = Array.from(category.parentNode.children).indexOf((category))
+            search_mode = index;
+        });
+    });
 
-    document.getElementById("matchHistoryList").append(overview);  
+    let basicCat = document.querySelector("#basicSearchCategory .category-content");
+    let advanCat = document.querySelector("#advancedSearchCategory .category-content");
+    basicCat.style.height = basicCat.scrollHeight+"px";
+    advanCat.style.height = "0px";
+
+    // Initialize basic search
+    document.querySelector(".basic-search button").addEventListener("click", requestFilteredSearch);
+    document.querySelector(".basic-search input").addEventListener("keydown", evt => {
+        if (evt.keyCode === 13) {
+            evt.preventDefault();
+            requestFilteredSearch();
+        }
+    });
+
     requestMatchListUpdate(); 
+}
+
+function getSearchOptions() {
+    let options = {
+        filters: [], 
+        perspective: "All", 
+        offset: 0,
+        count: 10};
+
+    if (search_mode == 0) {
+        let searchString = document.querySelector(".basic-search input").value;
+        let searchType = document.querySelector(".basic-search select").value;
+
+        if (searchType == "All" || searchString == ""){
+            return options;
+        } 
+        options.perspective = searchType;
+        options.filters.push( {
+            filterType: searchType, 
+            data: [[searchString], []]} );
+    }
+    return options;
+}
+
+function requestFilteredSearch() {
+    let options = getSearchOptions();
+    document.getElementById("matchHistoryList").innerHTML = "";
+    httpxPostRequest('/get_match_history2', options, function() {
+        if (this.readyState == 4 && this.status == 200){
+            let response = JSON.parse(this.response);
+            updateMatchHistoryList(response); 
+        }
+    });
 }
 
 function requestMatchListUpdate(){
@@ -94,7 +157,10 @@ var ship_scales = {
     13: 10.6,
     64: 8.6,
     82: 10.6,
-    12: 10.6
+    12: 10.6,
+    67: 10.6,
+    16: 10.6,
+    97: 10.5
 }
 var ship_offsets = {
     15: 305,
@@ -106,8 +172,16 @@ var ship_offsets = {
     13: 295,
     64: 470,
     82: 355,
-    12: 340
+    12: 340,
+    67: 370,
+    16: 440,
+    97: 370
+
 }
+
+// storm_gundeck_small
+// pyra_gundeck_small
+// magnate_gundeck_small
 
 function toShipImageCoordinates(point, shipModel, shipImage) {
     return [
