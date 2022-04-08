@@ -25,7 +25,7 @@ class MatchHistoryEntry extends HTMLLIElement {
     constructor() {
         super();
         this.classList.add("match-history-entry");
-        this.classList.add("open");
+        // this.classList.add("open");
 
         this.innerHTML = ``;
         this.overview = document.createElement('div', {is: 'match-history-overview'});
@@ -124,8 +124,9 @@ class ShipCrew extends HTMLDivElement {
         for (let i = 0; i < 4; i++) {
             let playerId = matchData.Players[teamIdx][shipIdx][i];
             let loadoutId = matchData.Skills[teamIdx][shipIdx][i];
-
+            // console.log("Getting player info " + teamIdx + ", " + shipIdx + ", " + i);
             let player = getPlayerInfo(matchData, playerId);
+            // console.log("got player info");
             let loadout = getLoadoutInfo(matchData, loadoutId);
             listElements[i].innerHTML = "<div></div><span></span>";
             listElements[i].querySelector("span").textContent = player.Name.substring(0, player.Name.length-5);
@@ -298,7 +299,7 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
                     let loadoutId = matchData.Skills[t][s][p];
                     let nametag = document.createElement('li', {is: 'player-nametag'});
                     nametag.fillData(playerId, loadoutId, matchData.PlayerInfo, matchData.LoadoutInfo);
-                    this.querySelector(`.players .${t==0 ? "red" : "blue"}-players ul:nth-of-type(${p <= 3 ? 1 : 2})`).append(nametag);
+                    this.querySelector(`.players .${t==0 ? "red" : "blue"}-players ul:nth-child(${Number(s)+1})`).append(nametag);
                 }
             }
             

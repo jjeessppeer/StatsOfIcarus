@@ -5,13 +5,13 @@ const { kill } = require("process");
 const { json } = require("express/lib/response");
 
 
-// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
-const db_url = `mongodb://localhost:27017/`;
+const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
+// const db_url = `mongodb://localhost:27017/`;
 let client = new MongoClient(db_url);
 
 
 // Lock for insertMatchHistory. Function waits unil false to run.
-let insertionRunning = false; 
+let insertionRunning = false;
 
 
 function sleep(ms) {
@@ -23,7 +23,7 @@ async function getPlayerId(playerName) {
     // TODO handle ps4 players?
     const playersCollection = client.db("mhtest").collection("Players");
     playerName = playerName + " [PC]";
-    let res = await playersCollection.findOne({Name: playerName});
+    let res = await playersCollection.findOne({ Name: playerName });
     if (!res) return false;
     return res._id;
 }
@@ -35,64 +35,61 @@ async function getShipBuilds(restrictions) {
     for (let i in restrictions) {
         if (restrictions[i] == -1) continue;
         if (i == 0) query['ShipModel'] = restrictions[i];
-        else query[`Loadout.${i-1}`] = restrictions[i];
+        else query[`Loadout.${i - 1}`] = restrictions[i];
     }
-    
+
     let results = matchCollection.find(query);
     let out = [];
-    await results.forEach(doc => {out.push(doc._id)});
+    await results.forEach(doc => { out.push(doc._id) });
     return out;
 }
 
-async function generateMatchQuery(filters){
+async function generateMatchQuery(filters) {
     console.log(filters);
-    if (filters.length == 0) {
-        return {};
-    }
     const shipItems = client.db("mhtest").collection("Items-Ships");
-    
-    let fullQuery = {
-        $and: [
-        ]
-    };
+    const playerCollection = client.db("mhtest").collection("Players");
+    let filterPipeline = [];
 
     for (let filter of filters) {
-        // if (filter.filter_type == "Player") {
-        //     // Collect the player ids.
-        //     let playerIds = [];
-        //     for (let playerName of filter.players) {
-        //         let playerId = await getPlayerId(playerName);
-        //         if (!playerId) {
-        //             continue;
-        //         }
-        //         playerIds.push(playerId);
-        //     }
-        //     let query = {$or: [
-        //         {T0_Players: {$all: playerIds}},
-        //         {T1_Players: {$all: playerIds}}
-        //     ]}
-        //     if (!filter.include) {
-        //         query = {'$nor': [query]};
-        //     }
-        //     fullQuery['$and'].push(query);
-        // }
-        if (filter.filter_type == "Ship") {
-            // let shipModel = await shipItems.findOne({});
-            let shipItem = await shipItems.findOne({A: new RegExp(filter.data, "i") });
-            console.log(shipItem);
-            fullQuery['$and'].push(query);
+        if (filter.filterType == "Player") {
+            let searchName = filter.data;
+            let player = await playerCollection.findOne({ "Name": new RegExp(searchName, "i") });
+            if (!player) continue;
+            let query = {
+                $match: {
+                    FlatPlayers: player._id
+                }
+            };
+            filterPipeline.push(query);
+        }
+        if (filter.filterType == "Ship") {
+            let searchName = filter.data;
+            let shipItem = await shipItems.findOne({ "Name": new RegExp(searchName, "i") });
+            if (!shipItem) continue;
+            let shipModel = shipItem._id;
+            let query = {
+                $match: {
+                    $or: [
+                        { Team_0_ShipModels: { $all: [shipModel] } },
+                        { Team_1_ShipModels: { $all: [shipModel] } }
+                    ]
+                }
+            };
+            filterPipeline.push(query);
         }
     }
-    return fullQuery;
+
+    return filterPipeline;
 }
 
 
 async function getMatches(filters, perspective, offset, count) {
     console.log("Getting record");
     const matchCollection = client.db("mhtest").collection("Matches");
-    const playersCollection = client.db("mhtest").collection("Players");
 
     // let query = await generateMatchQuery(filters);
+    let filterPipeline = await generateMatchQuery(filters);
+    // console.log(query)
     // let query = {
     //     $text: {
     //         $search: "Pyramidion",
@@ -100,65 +97,97 @@ async function getMatches(filters, perspective, offset, count) {
     //         $diacriticSensitive: false
     //     }
     // }
-    let query = {};
+    // let query = {};
 
     const pipeline = [
-        {$match: query},
-        {$lookup: {
-            from: "Players",
-            localField: "FlatPlayers",
-            foreignField: "_id",
-            as: "PlayerInfo"
-        }},
-        {$lookup: {
-            from: "PlayerEquipment",
-            localField: "FlatSkills",
-            foreignField: "_id",
-            as: "LoadoutInfo"
-        }},
-        {$lookup: {
-            from: "Ships",
-            localField: "FlatShips",
-            foreignField: "_id",
-            as: "ShipLoadouts"
-        }},
-        {$lookup: {
-            from: "Items-Ships",
-            localField: "ShipLoadouts.ShipModel",
-            foreignField: "_id",
-            as: "ShipItems"
-        }},
-        {$lookup: {
-            from: "Items-Skills",
-            localField: "LoadoutInfo.Skills",
-            foreignField: "_id",
-            as: "SkillItems"
-        }},
-        {$lookup: {
-            from: "Items-Guns",
-            localField: "ShipLoadouts.Loadout",
-            foreignField: "_id",
-            as: "GunItems"
-        }},
-        {$lookup: {
-            from: "Items-Maps",
-            localField: "MapId",
-            foreignField: "_id",
-            as: "MapItem"
-        }},
-        {$facet:{
-          "stage1" : [ {"$group": {_id:null, count:{$sum:count}}} ],
-          "stage2" : [ {"$sort": {"Timestamp": -1}}, { "$skip": offset}, {"$limit": count} ]
-        }},
-        {$unwind: "$stage1"},
-            //output projection
-        {$project:{
-            count: "$stage1.count",
-            data: "$stage2"
-        }}
+        // {$match: {
+        //     Team_0_ShipModels: { $all: [64] }
+        // }},
+
+        {
+            $facet: {
+                "stage1": [{ "$group": { _id: null, count: { $sum: 1 } } }],
+                "stage2": [
+                    { "$sort": { "Timestamp": -1 } }, 
+                    { "$skip": offset }, 
+                    { "$limit": count },
+                    {
+                        $lookup: {
+                            from: "Players",
+                            localField: "FlatPlayers",
+                            foreignField: "_id",
+                            as: "PlayerInfo"
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "PlayerEquipment",
+                            localField: "FlatSkills",
+                            foreignField: "_id",
+                            as: "LoadoutInfo"
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "Ships",
+                            localField: "FlatShips",
+                            foreignField: "_id",
+                            as: "ShipLoadouts"
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "Items-Ships",
+                            localField: "ShipLoadouts.ShipModel",
+                            foreignField: "_id",
+                            as: "ShipItems"
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "Items-Skills",
+                            localField: "LoadoutInfo.Skills",
+                            foreignField: "_id",
+                            as: "SkillItems"
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "Items-Guns",
+                            localField: "ShipLoadouts.Loadout",
+                            foreignField: "_id",
+                            as: "GunItems"
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "Items-Maps",
+                            localField: "MapId",
+                            foreignField: "_id",
+                            as: "MapItem"
+                        }
+                    },
+                ]
+            }
+        },
+        { $unwind: "$stage1" },
+        //output projection
+        {
+            $project: {
+                count: "$stage1.count",
+                data: "$stage2"
+            }
+        }
     ];
+
+    filterPipeline.forEach(q => {
+        // console.log(JSON.stringify(q));
+        pipeline.unshift(q);
+    });
     // let aggCursor2 = await matchCollection.aggregate(pipeline).explain(true);
+    // console.log("__");
     // console.log(JSON.stringify(aggCursor2));
+    // console.log("__");
     let aggCursor = matchCollection.aggregate(pipeline);
     // let aggCursor = matchCollection.find();
     let result = {};
@@ -171,13 +200,13 @@ async function getMatches(filters, perspective, offset, count) {
     //     // console.log(doc);
     // });
     // aggCursor.close();
-    // console.log("gotten");
+    // console.log(result);
     return result;
 
-//    let cc = await matchCollection.estimatedDocumentCount();
+    //    let cc = await matchCollection.estimatedDocumentCount();
 
-//    console.log(cc);
-//    console.log(res);
+    //    console.log(cc);
+    //    console.log(res);
 }
 
 
@@ -186,16 +215,16 @@ async function submitRecord(record, ip) {
         console.log("Invalid match history.");
         return false;
     }
-    
+
     // Wait until no concurrent insertion is running.
-    while(insertionRunning){
+    while (insertionRunning) {
         await sleep(10);
     }
 
     insertionRunning = true;
     try {
         await insertMatchHistory(record, ip);
-    } catch (err){
+    } catch (err) {
         console.log(err)
     } finally {
         insertionRunning = false;
@@ -203,7 +232,7 @@ async function submitRecord(record, ip) {
     return true;
 }
 
-function validateHistorySubmission(record){
+function validateHistorySubmission(record) {
     try {
         assert(typeof record.MatchId == "string");
         assert(Number.isInteger(record.MapId));
@@ -238,7 +267,7 @@ function validateHistorySubmission(record){
 
             assert(Array.isArray(ship.SlotNames));
             assert(ship.SlotNames.length <= 6);
-            for (let slotName of ship.SlotNames){
+            for (let slotName of ship.SlotNames) {
                 assert(typeof slotName == "string");
             }
 
@@ -271,8 +300,8 @@ function validateHistorySubmission(record){
 
 async function updatePlayer(player) {
     const playersCollection = client.db("mhtest").collection("Players");
-    let dbPlayer = await playersCollection.findOne({_id: player.UserId});
-    
+    let dbPlayer = await playersCollection.findOne({ _id: player.UserId });
+
     let levels = [-1, -1, -1];
     let levelIndex = 0;
     if (player.Class == 1) levelIndex = 0;
@@ -283,12 +312,12 @@ async function updatePlayer(player) {
     if (!dbPlayer) {
         // Insert a new player
         let res = await playersCollection.insertOne({
-            _id: player.UserId, 
-            Name: player.Name, 
+            _id: player.UserId,
+            Name: player.Name,
             Clan: player.Clan,
             MaxLevel: player.Level,
             Levels: levels
-            });
+        });
     }
     else {
         // Update existing player
@@ -302,7 +331,7 @@ function sortShipLoadout(ship) {
     let sortedNames = [];
     for (let i = 0; i < ship.ShipLoadout.length; i++) {
         for (let j = 0; j < ship.ShipLoadout.length; j++) {
-            if (ship.SlotNames[j] == `gun-slot-${i+1}`){
+            if (ship.SlotNames[j] == `gun-slot-${i + 1}`) {
                 sortedLoadout.push(ship.ShipLoadout[j]);
                 sortedNames.push(ship.SlotNames[j]);
                 break;
@@ -315,28 +344,28 @@ function sortShipLoadout(ship) {
 
 async function getShipLoadoutId(ship) {
     const shipsCollection = client.db("mhtest").collection("Ships");
-    
-    let dbShip = await shipsCollection.findOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
+
+    let dbShip = await shipsCollection.findOne({ ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout });
     if (dbShip) {
         return dbShip._id;
     }
-    let res = await shipsCollection.insertOne({ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout});
+    let res = await shipsCollection.insertOne({ ShipModel: ship.ShipModel, Loadout: ship.ShipLoadout });
     return res.insertedId;
 }
 
 
-async function getEquipmentId(player){
+async function getEquipmentId(player) {
     // Make sure skills are sorted in db.
-    player.Skills.sort(function(a, b) {
+    player.Skills.sort(function (a, b) {
         return a - b;
     });
 
     const equipmentCollection = client.db("mhtest").collection("PlayerEquipment");
-    let dbEquipment = await equipmentCollection.findOne({Class: player.Class, Skills: player.Skills});
-    if (dbEquipment){
+    let dbEquipment = await equipmentCollection.findOne({ Class: player.Class, Skills: player.Skills });
+    if (dbEquipment) {
         return dbEquipment._id;
     }
-    let res = await equipmentCollection.insertOne({Class: player.Class, Skills: player.Skills});
+    let res = await equipmentCollection.insertOne({ Class: player.Class, Skills: player.Skills });
     return res.insertedId;
 }
 
@@ -346,8 +375,8 @@ async function insertMatchHistory(record, ip) {
     const shipsCollection = client.db("mhtest").collection("Ships");
 
     // Check if match has already been added.
-    let match = await matchesCollection.findOne({MatchId: record.MatchId});
-    if (match){
+    let match = await matchesCollection.findOne({ MatchId: record.MatchId });
+    if (match) {
         // TODO: Check if record matches. If it does add vote.
         return true;
     }
@@ -387,8 +416,8 @@ async function insertMatchHistory(record, ip) {
     // Load ships and players into arrays
     for (let i = 0; i < record.Ships.length; i++) {
         let ship = record.Ships[i];
-        let shipIndex = shipCounters[i]+0;
-        shipCounters[i] += 1;
+        let shipIndex = shipCounters[team] + 0;
+        shipCounters[team] += 1;
         let team = ship.Team;
         sortShipLoadout(ship); // Sort the ship loadout before doing anything with it.
         let shipLoadoutId = await getShipLoadoutId(ship);
@@ -447,6 +476,14 @@ async function insertMatchHistory(record, ip) {
         FlatShips: flatShipIds,
         FlatSkills: flatSkills,
         FlatPlayerLevels: flatPlayerLevels
+    }
+
+    // Create some new fields to ease future filtering.
+    for (let i = 0; i < record.ShipModels.length; i++) {
+        let teamModels = record.ShipModels[i];
+        newMatch[`Team_${i}_ShipModels`] = newMatch.ShipModels[i];
+        newMatch[`Team_${i}_ShipLoadouts`] = newMatch.ShipLoadouts[i];
+        newMatch[`Team_${i}_ShipPlayers`] = newMatch.Players[i].flat(Infinity);
     }
 
 

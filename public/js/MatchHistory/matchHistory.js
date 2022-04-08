@@ -34,6 +34,17 @@ function initializeMatchHistory(){
             requestFilteredSearch();
         }
     });
+    document.querySelector(".basic-search select").addEventListener("change", evt => {
+        let textInput = document.querySelector(".basic-search input");
+        textInput.disabled = false;
+        if (evt.target.value == "Player") textInput.placeholder = "Player name..."
+        if (evt.target.value == "Ship") textInput.placeholder = "Ship name..."
+
+        if (evt.target.value == "All") {
+            textInput.disabled = true;
+            // textInput.placeholder = "";
+        }
+    });
 
     requestMatchListUpdate(); 
 }
@@ -55,7 +66,7 @@ function getSearchOptions() {
         options.perspective = searchType;
         options.filters.push( {
             filterType: searchType, 
-            data: [[searchString], []]} );
+            data: searchString} );
     }
     return options;
 }
@@ -119,9 +130,13 @@ function getShipLoadout(matchRecord, shipLoadoutId) {
 
 function getPlayerInfo(matchRecord, playerId) {
     for (let player of matchRecord.PlayerInfo) {
-        if (player._id == playerId) return player;
+        if (player._id == playerId) {
+            return player;
+        }
     }
-    throw "No player with specified id found";
+    console.log("No player " + playerId);
+    console.log(matchRecord);
+    throw "No player with specified id found " + playerId;
 }
 
 function getLoadoutInfo(matchRecord, loadoutId) {

@@ -5,8 +5,8 @@ var fs = require('fs');
 var http = require('http');
 const matchHistory = require("./matchHistory.js");
 
-// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
-const db_url = `mongodb://localhost:27017/`;
+const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
+// const db_url = `mongodb://localhost:27017/`;
 let mongoClient = new MongoClient(db_url);
 
 
