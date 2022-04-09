@@ -51,10 +51,10 @@ class MatchHistoryFoldout extends HTMLDivElement {
         super();
         this.classList.add("foldout");
         // <li><button>Gunnery Analysis</button></li>
+        // <li><button>Another button</button></li>
         this.innerHTML = `
             <ul>
                 <li><button>Overview</button></li>
-                <li><button>Another button</button></li>
             </ul>
             <div class="content"></div>`;
         this.details = document.createElement('div', {is: 'match-history-details'});
@@ -270,8 +270,12 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
     }
     fillData(matchData){
         // this.querySelectorAll(".matchup-table .red-team img")
-        let mapName = matchData.MapItem[0].Name;
-        let gameMode = game_modes[matchData.MapItem[0].GameMode];
+        let mapName = "unknown map";
+        let gameMode = "unknown game mode";
+        if (matchData.MapItem[0]) {
+            mapName = matchData.MapItem[0].Name;
+            gameMode = game_modes[matchData.MapItem[0].GameMode];
+        }
         this.querySelector(".info .map").textContent = `${mapName}\n${gameMode}`;
 
         let timeMinutes = Math.floor(matchData.MatchTime / 60);

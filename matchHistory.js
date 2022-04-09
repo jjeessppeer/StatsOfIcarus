@@ -416,9 +416,9 @@ async function insertMatchHistory(record, ip) {
     // Load ships and players into arrays
     for (let i = 0; i < record.Ships.length; i++) {
         let ship = record.Ships[i];
+        let team = ship.Team;
         let shipIndex = shipCounters[team] + 0;
         shipCounters[team] += 1;
-        let team = ship.Team;
         sortShipLoadout(ship); // Sort the ship loadout before doing anything with it.
         let shipLoadoutId = await getShipLoadoutId(ship);
         shipNames[team].push(ship.ShipName);
@@ -479,8 +479,7 @@ async function insertMatchHistory(record, ip) {
     }
 
     // Create some new fields to ease future filtering.
-    for (let i = 0; i < record.ShipModels.length; i++) {
-        let teamModels = record.ShipModels[i];
+    for (let i = 0; i < newMatch.ShipModels.length; i++) {
         newMatch[`Team_${i}_ShipModels`] = newMatch.ShipModels[i];
         newMatch[`Team_${i}_ShipLoadouts`] = newMatch.ShipLoadouts[i];
         newMatch[`Team_${i}_ShipPlayers`] = newMatch.Players[i].flat(Infinity);
