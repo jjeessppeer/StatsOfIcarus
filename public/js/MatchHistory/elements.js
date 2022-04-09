@@ -263,8 +263,8 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
             </div>
             <div class="expand-button"><i class="fas fa-chevron-down"></i></div>
         `;
-
-        this.querySelector(".expand-button").addEventListener("click", () => {
+        this.querySelector(".expand-button").addEventListener("click", evt => {
+            // evt.target.parentElement.parentElement.toggleFoldout();
             this.parentElement.toggleFoldout();
         });
     }

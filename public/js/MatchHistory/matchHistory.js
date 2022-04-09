@@ -11,7 +11,7 @@ function initializeMatchHistory(){
             document.querySelectorAll(".category-content").forEach(el => {
                 el.style.height = "0px";
             });
-            let category = evt.originalTarget.parentElement.parentElement;
+            let category = evt.target.parentElement.parentElement;
             // Show this one
             let target = category.querySelector(".category-content")
             target.style.height = target.scrollHeight+"px";
