@@ -249,7 +249,7 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
                 <div class="time">11m 14s</div>
                 <br>
                 <br>
-                <div class="date">12 days ago</div>
+                <div class="date">x days ago</div>
             </div>
             <div class="players">
                 <div class="blue-players">
@@ -276,12 +276,28 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
             mapName = matchData.MapItem[0].Name;
             gameMode = game_modes[matchData.MapItem[0].GameMode];
         }
+        else {
+            
+            console.log(matchData.MapId);
+        }
         this.querySelector(".info .map").textContent = `${mapName}\n${gameMode}`;
 
         let timeMinutes = Math.floor(matchData.MatchTime / 60);
         let timeSeconds = matchData.MatchTime % 60;
         let timeString = `${timeMinutes!=0 ? `${timeMinutes}m` : ""} ${timeSeconds}s`;
         this.querySelector(".time").textContent = timeString;
+
+        let msAgo = Date.now() - matchData.Timestamp;
+        let minutesAgo = msAgo / 1000 / 60;
+        let hoursAgo = minutesAgo / 60;
+        let daysAgo = hoursAgo / 24;
+        let monthsAgo = daysAgo / 30.437;
+        let timeAgoString = "";
+        if (monthsAgo > 1) timeAgoString = `${Math.floor(monthsAgo)} months ago`;
+        else if (daysAgo > 1) timeAgoString = `${Math.floor(daysAgo)} days ago`;
+        else if (hoursAgo > 1) timeAgoString = `${Math.floor(hoursAgo)} hours ago`;
+        else timeAgoString = `${Math.ceil(minutesAgo)} minutes ago`;
+        this.querySelector(".info .date").textContent = timeAgoString;
 
         // TODO?: can only handle 2 teams.
         this.querySelector(".matchup-table .results").textContent = `${matchData.Scores[0]}:${matchData.Scores[1]}`;
