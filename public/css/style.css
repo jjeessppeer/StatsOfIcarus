@@ -515,16 +515,23 @@ a.article:hover {
 
 #content {
     width: 100%;
-    padding: 20px;
+    /* padding: 20px; */
     min-height: 100vh;
     /* background: #999; */
     /* min-width: 1000px; */
     /* transition: all 0.3s; */
+    padding: 0;
+    margin: 0;
 }
 
-/* #content-panel {
-    min-width: 1000px;
+/* #content {
+    background-color: rgb(234, 234, 234);
 } */
+
+.content-panel {
+    padding: 50px;
+}
+
 
 /* ---------------------------------------------------
     MEDIAQUERIES

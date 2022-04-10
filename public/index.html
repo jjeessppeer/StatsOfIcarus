@@ -12,8 +12,12 @@
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap-4.3.1.min.js"></script>
   <script src="deps/lz-string-1.4.4.min.js"></script>
-  <script src="deps/Chart-2.8.0.min.js"></script>
-  <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.js"></script>
+  <!-- <script src="deps/Chart-2.8.0.min.js"></script> -->
+  <!-- <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script> -->
+
+
   <script src="deps/darkreader-4.9.22.js"></script>
   <script src="deps/jquery-ui-1.12.1.min.js"></script>
   
@@ -33,9 +37,11 @@
   <script src="js/shipBuilderTranslations.js"></script>
   <script src="js/MatchHistory/matchHistory.js"></script>
   <script src="js/MatchHistory/elements.js"></script>
+  <script src="js/MatchHistory/OverviewElements.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
   <link rel="stylesheet" href="css/HistorySearch.css">
+  <link rel="stylesheet" href="css/HistoryGraphs.css">
 
   
   
@@ -323,10 +329,21 @@
 
 
         </div>
-        <div>
-          <ul class="match-history-list" id="matchHistoryList">
-          </ul>
-
+        <div class="content-area">
+          <div class="top-area">
+            <!-- <div id="winpickChartContainer" class="chart-container">
+              <canvas id="winpickChart"></canvas>
+            </div> -->
+          </div>
+          <div class="middle-area">
+            <div class="left-area">
+              <ul id="ShipPopularityList"></ul>
+            </div>
+            <div class="right-area">
+              <ul class="match-history-list" id="matchHistoryList">
+              </ul>
+            </div>
+          </div>
         </div>
 
 
@@ -1308,7 +1325,8 @@
 
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     $(document).ready(function () {
-      Chart.plugins.unregister(ChartDataLabels);
+      // Chart.plugins.unregister(ChartDataLabels);
+      // Chart.register(ChartDataLabels);
       
       $("#sidebar a").on("click", openPageFromUrl);
 
@@ -1328,7 +1346,7 @@
         updateArcPanel();
       });
       
-      initializeMatchStatistics();
+      // initializeMatchStatistics();
       // console.log("COOKIE: ", getCookie("dark_mode")=="true")
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
       dark_mode_switch.trigger("change");

@@ -1,7 +1,7 @@
 
 var search_mode = 0;
 
-
+var pickwinrateChart;
 
 function initializeMatchHistory(){
     // Initialize search categories
@@ -45,8 +45,138 @@ function initializeMatchHistory(){
             // textInput.placeholder = "";
         }
     });
+    
 
-    requestMatchListUpdate(); 
+    // initializeCharts();
+    requestFilteredSearch(); 
+}
+
+function initializeCharts() {
+    const ctx = document.getElementById('winpickChart');
+
+    let options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                title: {
+                    display: true,
+                    text: 'Win rate'
+                },
+                align: "end",
+                min: 0,
+                ticks: {
+                    callback: function (value) {
+                      return `${value*100}%`;
+                    },
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Pick rate'
+                },
+                min: 0,
+                ticks: {
+                    callback: function (value) {
+                      return `${value*100}%`;
+                    },
+                }
+            }
+        },
+        layout: {
+            padding: 10
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: "Ship win rate and popularity",
+                padding: {
+                    bottom: 20
+                }
+            },
+            tooltip: {
+                usePointStyle: false,
+                callbacks: {
+                    title: function(context) {
+                        let title = [];
+                        context.forEach(element => {
+                            title.push(element.chart.data.labels[element.dataIndex])
+                        });
+                        return title.join(", ");
+                    },
+                    label: function(context){
+                        let datapoint = context.dataset.data[context.dataIndex];
+                        let pickPercentage = precise(context.raw.x*100, 2);
+                        let winPercentage = precise(context.raw.y*100, 2);
+                        return [`Wins:   ${winPercentage}% [${context.raw.picks}]`,`Picked:\t${pickPercentage}% [${context.raw.wins}]`];
+                    }
+                }
+            },
+            datalabels: {
+                display: 'auto',
+                align: 'end',
+                offset: function (context) {
+                    return -40
+                },
+                color: function(value, context){
+                    return 'black';
+                },
+                font: function(context){
+                    return {size: 14, lineHeight: context.dataset.data[context.dataIndex].r == 18 ? 3.2 : 2.6};
+                },
+                // font: {size: 14, lineHeight: 2.5},
+                formatter: function(value, context) {
+                    return context.chart.data.labels[context.dataIndex] + "\n";
+                }
+            }
+        }
+    };
+    pickwinrateChart = new Chart(ctx, {
+        type: 'bubble',
+        data: {},
+        options: options
+    });
+}
+
+
+function updatePopularityList(modelWinrates, totalMatches) {
+    modelWinrates.sort(function (a, b) {
+        return b.PlayedGames - a.PlayedGames;
+    });
+    document.getElementById('ShipPopularityList').innerHTML = "";
+    modelWinrates.forEach(ship => {
+        let li = document.createElement('li', {is: 'ship-popularity-element'});
+        li.initialize(ship, totalMatches);
+        document.getElementById('ShipPopularityList').append(li)
+    });
+}
+
+function redrawWinpickChart(modelWinrates, totalMatches) {
+    removeChartData(pickwinrateChart);
+    let percentageMode = true;
+
+    let labels = [];
+    let dataset = [];
+    let totalPicks = totalMatches * 4;
+    modelWinrates.forEach(el => {
+        labels.push(el.ShipItem[0].Name);
+        dataset.push({x: el.PlayedGames / totalPicks, y: el.Wins / el.PlayedGames, r: 12, picks: el.PlayedGames, wins: el.Wins});
+    });
+
+    let data = {
+        labels: labels,
+        datasets: [{
+            label: "Scatterdata",
+            data: dataset
+        }]
+    }
+    pickwinrateChart.data = data;
+    pickwinrateChart.update();
+    console.log("UPDATING CHART");
 }
 
 function getSearchOptions() {
@@ -54,7 +184,7 @@ function getSearchOptions() {
         filters: [], 
         perspective: "All", 
         offset: 0,
-        count: 10};
+        count: 50};
 
     if (search_mode == 0) {
         let searchString = document.querySelector(".basic-search input").value;
@@ -77,30 +207,10 @@ function requestFilteredSearch() {
     httpxPostRequest('/get_match_history2', options, function() {
         if (this.readyState == 4 && this.status == 200){
             let response = JSON.parse(this.response);
+            if (!response) return;
             updateMatchHistoryList(response); 
-        }
-    });
-}
-
-function requestMatchListUpdate(){
-    console.log("Requesting match history update");
-
-    // Clear old table.
-    document.getElementById("matchHistoryList").innerHTML = "";
-
-    // Parse filters
-    // TODO
-    let filters = [];
-    let offset = 0;
-    let count = 10;
-
-    let requestData = {filters: filters, offset: offset, count: count};
-
-    // Request new data
-    httpxPostRequest('/get_match_history2', requestData, function() {
-        if (this.readyState == 4 && this.status == 200){
-            let response = JSON.parse(this.response);
-            updateMatchHistoryList(response); 
+            // redrawWinpickChart(response.modelWinrates, response.count);
+            updatePopularityList(response.modelWinrates, response.count);
         }
     });
 }

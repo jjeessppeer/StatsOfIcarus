@@ -442,6 +442,25 @@ async function loadImageAsync(imgSrc) {
     return promise;
 }
 
+function addChartData(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });
+    // chart.update();
+}
+
+// function setChartData(chart, )
+
+function removeChartData(chart) {
+    chart.data.labels.pop();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.pop();
+    });
+    // chart.update();
+}
+
+
 function httpxPostRequest(url, data, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.timeout = 10000;
@@ -462,3 +481,40 @@ function httpxGetRequest(url, callback=null, timeout_callback=null){
     xhttp.send();
 }
 
+
+
+
+function spreadPoints(points, iconSize, iterations=10) {
+    let adjustedPositions = [];
+    const movementStrength = 1/10;
+
+    for (let i = 0; i < points.length; i++) {
+        let pos = [
+            points[i][0]+0,
+            points[i][1]+0
+        ];
+        for (let j = 0; j < points.length; j++) {
+            if (i == j) continue;
+            let vector = [
+                points[j][0] - points[i][0],
+                points[j][1] - points[i][1]
+            ];
+            let xDist = vector[0];
+            let yDist = vector[1];
+
+            let distSq = vector[0]*vector[0] + vector[1]*vector[1];
+            let dist = Math.sqrt(distSq);
+            let vectorNorm = [
+                vector[0] / dist,
+                vector[1] / dist
+            ];
+            if (dist < iconSize) {
+                pos[0] -= vectorNorm[0] * iconSize * movementStrength;
+                pos[1] -= vectorNorm[1] * iconSize * movementStrength;
+            }
+        }
+        adjustedPositions.push(pos);
+    }
+    if (iterations > 1) adjustedPositions = spreadGunPositions(adjustedPositions, iconSize, iterations-1);
+    return adjustedPositions;
+}

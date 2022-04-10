@@ -45,7 +45,6 @@ async function getShipBuilds(restrictions) {
 }
 
 async function generateMatchQuery(filters) {
-    console.log(filters);
     const shipItems = client.db("mhtest").collection("Items-Ships");
     const playerCollection = client.db("mhtest").collection("Players");
     let filterPipeline = [];
@@ -54,10 +53,11 @@ async function generateMatchQuery(filters) {
         if (filter.filterType == "Player") {
             let searchName = filter.data;
             let player = await playerCollection.findOne({ "Name": new RegExp(searchName, "i") });
-            if (!player) continue;
+            let playerId = -2;
+            if (player) playerId = player._id;
             let query = {
                 $match: {
-                    FlatPlayers: player._id
+                    FlatPlayers: playerId
                 }
             };
             filterPipeline.push(query);
@@ -65,8 +65,8 @@ async function generateMatchQuery(filters) {
         if (filter.filterType == "Ship") {
             let searchName = filter.data;
             let shipItem = await shipItems.findOne({ "Name": new RegExp(searchName, "i") });
-            if (!shipItem) continue;
-            let shipModel = shipItem._id;
+            let shipModel = -1;
+            if (shipItem) shipModel = shipItem._id;
             let query = {
                 $match: {
                     $or: [
@@ -84,29 +84,67 @@ async function generateMatchQuery(filters) {
 
 
 async function getMatches(filters, perspective, offset, count) {
-    console.log("Getting record");
     const matchCollection = client.db("mhtest").collection("Matches");
 
-    // let query = await generateMatchQuery(filters);
     let filterPipeline = await generateMatchQuery(filters);
-    // console.log(query)
-    // let query = {
-    //     $text: {
-    //         $search: "Pyramidion",
-    //         $caseSensitive: false,
-    //         $diacriticSensitive: false
-    //     }
-    // }
-    // let query = {};
+
+    let modelWinratePipeline = [
+        { "$unwind": {
+            path: "$ShipModels",
+            includeArrayIndex: "TeamIndex"}},
+        { "$unwind": {
+            path: "$ShipModels"
+        }},
+        { $group: {
+            _id: "$ShipModels",
+            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
+            // Losses: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 0, 1]} },
+            PlayedGames: { $sum: 1 }
+        }},
+        { $lookup: {
+            from: "Items-Ships",
+            localField: "_id",
+            foreignField: "_id",
+            as: "ShipItem"
+    }},
+    ];
+
+    let playerInfoPipeline = [
+        { $unwind: {
+            path: "$Players",
+            includeArrayIndex: "TeamIndex"}},
+        { $unwind: {
+            path: "$Players"
+        }},
+        { $unwind: {
+            path: "$Players"
+        }},
+        { $group: {
+            _id: "$Players",
+            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
+            PlayedGames: { $sum: 1 }
+        }},
+        { $sort: { "PlayedGames": -1 } },
+        { $limit: 5 },
+        { $lookup: {
+                from: "Players",
+                localField: "_id",
+                foreignField: "_id",
+                as: "PlayerData"
+        }},
+    ];
 
     const pipeline = [
-        // {$match: {
-        //     Team_0_ShipModels: { $all: [64] }
-        // }},
+        {$match: { TeamSize: 2 }},
+        {$match: { TeamCount: 2 }},
 
         {
             $facet: {
-                "stage1": [{ "$group": { _id: null, count: { $sum: 1 } } }],
+                "playerInfo": playerInfoPipeline,
+                "winpickRate": modelWinratePipeline,
+                "stage1": [
+                    { "$group": { _id: null, count: { $sum: 1 } } }
+                ],
                 "stage2": [
                     { "$sort": { "Timestamp": -1 } }, 
                     { "$skip": offset }, 
@@ -175,7 +213,9 @@ async function getMatches(filters, perspective, offset, count) {
         {
             $project: {
                 count: "$stage1.count",
-                data: "$stage2"
+                data: "$stage2",
+                modelWinrates: "$winpickRate",
+                playerInfo: "$playerInfo"
             }
         }
     ];
@@ -193,20 +233,7 @@ async function getMatches(filters, perspective, offset, count) {
     let result = {};
     result = await aggCursor.next();
     aggCursor.close();
-    // aggCursor.close();
-    // await aggCursor.forEach(doc => {
-    //     result.push(doc);
-    //     result = doc;
-    //     // console.log(doc);
-    // });
-    // aggCursor.close();
-    // console.log(result);
     return result;
-
-    //    let cc = await matchCollection.estimatedDocumentCount();
-
-    //    console.log(cc);
-    //    console.log(res);
 }
 
 

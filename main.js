@@ -74,7 +74,7 @@ app.post('/get_match_history2', async function (req, res) {
     let offset = options.offset;
     let count = options.count;
     let perspective = options.perspective;
-    console.log(options)
+    // console.log(options)
     let response = await matchHistory.getMatches(filters, perspective, offset, count);
     res.status("200").json(response);
 });
