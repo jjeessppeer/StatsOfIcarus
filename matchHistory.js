@@ -4,6 +4,9 @@ const assert = require('assert');
 const { kill } = require("process");
 const { json } = require("express/lib/response");
 
+const SCS_START_HOUR_UTC = 18;
+const SCS_HOUR_LENGTH = 4;
+
 
 const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
 // const db_url = `mongodb://localhost:27017/`;
@@ -17,6 +20,10 @@ let insertionRunning = false;
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+function posModulo(a, b) {
+    return ((a % b) + b) % b;
+  };
 
 
 async function getPlayerId(playerName) {
@@ -137,6 +144,7 @@ async function getMatches(filters, perspective, offset, count) {
     const pipeline = [
         {$match: { TeamSize: 2 }},
         {$match: { TeamCount: 2 }},
+        {$match: { GameMode: 2 }},
 
         {
             $facet: {
@@ -261,8 +269,12 @@ async function submitRecord(record, ip) {
 
 function validateHistorySubmission(record) {
     try {
+        assert(typeof record.ModVersion == "string");
         assert(typeof record.MatchId == "string");
+        assert(typeof record.Passworded == "boolean");
+
         assert(Number.isInteger(record.MapId));
+        assert(typeof record.MapName == "string");
         assert(Number.isInteger(record.GameMode));
         assert(Number.isInteger(record.TeamSize));
         assert(Number.isInteger(record.TeamCount));
@@ -279,7 +291,6 @@ function validateHistorySubmission(record) {
         assert(record.Ships.length <= record.TeamSize * record.TeamCount);
         assert(record.Ships.length <= 8);
         for (let ship of record.Ships) {
-            if (ship == null) continue;
             assert(typeof ship == 'object');
             assert(Number.isInteger(ship.ShipModel));
             assert(typeof ship.ShipName == "string");
@@ -347,8 +358,17 @@ async function updatePlayer(player) {
         });
     }
     else {
-        // Update existing player
-        // TODO
+        // Upadede existing player
+        let dbLevels = dbPlayer.Levels;
+        for (let i = 0; i < 3; i++) {
+            if (levels[i] > dbLevels[i]) {
+                dbLevels[i] = levels[i];
+            }
+        }
+        await playersCollection.updateOne(
+            {_id: player.UserId},
+            {Levels: dbLevels, MaxLevel: Math.max(dbLevels)},
+        )
     }
 }
 
@@ -477,15 +497,31 @@ async function insertMatchHistory(record, ip) {
     let flatSkills = playerSkills.flat(Infinity);
     let flatPlayerLevels = playerLevels.flat(Infinity);
 
+    let avgPlayerLevel = flatPlayerLevels.reduce((partialSum, a) => partialSum + a, 0) / flatPlayerLevels.length;
+    
+    let shipsFull = record.Ships.length == record.TeamSize * record.TeamCount;
+    let playersFull = playerCount == record.TeamSize * record.TeamCount * 4;
+    let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
+
+    let submissionDate = new Date();
+    let submissionHour = submissionDate.getUTCHours();
+    let competetiveTags = {
+        SCS: posModulo(submissionHour - SCS_START_HOUR_UTC) <= SCS_HOUR_LENGTH && record.Passworded,
+        Competetive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 20 && record.Passworded,
+        HighLevel: avgPlayerLevel >= 30 && emptySlots <= 4
+    };
+
     // Insert the match.
     let newMatch = {
         SubmitterIp: ip,
+        Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
         SubmissionCount: 1,
+        CompetetiveTags: competetiveTags,
         MatchId: record.MatchId,
         MapId: record.MapId,
-        ShipsFull: record.Ships.length == record.TeamSize * record.TeamCount,
-        PlayersFull: playerCount == record.TeamSize * record.TeamCount * 4,
+        ShipsFull: shipsFull,
+        PlayersFull: playersFull,
         MatchTime: record.MatchTime,
         GameMode: record.GameMode,
         TeamSize: record.TeamSize,
@@ -504,6 +540,8 @@ async function insertMatchHistory(record, ip) {
         FlatSkills: flatSkills,
         FlatPlayerLevels: flatPlayerLevels
     }
+
+    
 
     // Create some new fields to ease future filtering.
     for (let i = 0; i < newMatch.ShipModels.length; i++) {

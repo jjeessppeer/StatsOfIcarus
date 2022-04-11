@@ -9,10 +9,13 @@ const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS
 // const db_url = `mongodb://localhost:27017/`;
 let mongoClient = new MongoClient(db_url);
 
+const MOD_VERSION_LATEST = "0.1.3";
+
 
 var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
 const sqlite = require('better-sqlite3');
+const { assert } = require('console');
 
 const logOpts = {
     fileNamePattern: 'log-<DATE>.log',
@@ -59,16 +62,21 @@ app.get('/get_datasets', function (req, res) {
     res.status("200").json(datasets);
 });
 
-app.post('/submit_match_history', function (req, res) {
+app.post('/submit_match_history', async function (req, res) {
     let ip = requestIp.getClientIp(req);
-    console.log("Recieving match record");
-    console.log(req.body);
+    assert(typeof req.body.ModVersion == "string");
+    if (req.body.ModVersion != MOD_VERSION_LATEST) {
+        res.status("400").send(`Mod version incompatible. Required version ${latestModVersion} (recieved ${req.body.ModVersion})`);
+        return;
+    }
     matchHistory.submitRecord(req.body, ip);
-    res.status("200").send("OK");
+    res.status("202").send();
 });
 
 app.post('/get_match_history2', async function (req, res) {
     let ip = requestIp.getClientIp(req);
+
+
     let options = req.body;
     let filters = options.filters;
     let offset = options.offset;
