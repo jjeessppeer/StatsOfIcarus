@@ -12,8 +12,12 @@
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap-4.3.1.min.js"></script>
   <script src="deps/lz-string-1.4.4.min.js"></script>
-  <script src="deps/Chart-2.8.0.min.js"></script>
-  <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.js"></script>
+  <!-- <script src="deps/Chart-2.8.0.min.js"></script> -->
+  <!-- <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script> -->
+
+
   <script src="deps/darkreader-4.9.22.js"></script>
   <script src="deps/jquery-ui-1.12.1.min.js"></script>
   
@@ -31,7 +35,13 @@
   <script src="js/mapSpawns.js"></script>
   <script src="js/shipBuilder.js"></script>
   <script src="js/shipBuilderTranslations.js"></script>
+  <script src="js/MatchHistory/matchHistory.js"></script>
+  <script src="js/MatchHistory/elements.js"></script>
+  <script src="js/MatchHistory/OverviewElements.js"></script>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/MatchHistory.css">
+  <link rel="stylesheet" href="css/HistorySearch.css">
+  <link rel="stylesheet" href="css/HistoryGraphs.css">
 
   
   
@@ -50,8 +60,8 @@
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
         </div>
         <div>
-          Latest update: <a href="https://discordapp.com/channels/99903812700999680/562361262340833290/737086849822097420" style="color: blue;">
-            <u>2020-07-27</u></a>
+          <!-- Latest update: <a href="https://discordapp.com/channels/99903812700999680/562361262340833290/737086849822097420" style="color: blue;">
+            <u>2020-07-27</u></a> -->
         </div>
         <br>
         <div id="scsTime">
@@ -64,10 +74,16 @@
 
       <ul class="list-unstyled components">
 
-        <li id="matchAnalysisLink" data-show="#matchAnalysis">
+        <!-- <li id="matchAnalysisLink" data-show="#matchAnalysis">
           <a href="#matchAnalysis">
             <i class="fas fa-glasses"></i>
             Match history analysis
+          </a>
+        </li> -->
+        <li id="matchHistoryLink" data-show="#matchHistory">
+          <a href="#matchHistory">
+            <i class="fas fa-glasses"></i>
+            Match history
           </a>
         </li>
         <li id="shipBuilderLink" data-show="#shipBuilder">
@@ -279,6 +295,65 @@
             <canvas id="winRatioAllyChart" width="400" height="400"></canvas>
           </div>
         </div>
+      </div>
+
+      <div id="matchHistory" class="content-panel" style="display:none">
+        <div id="ModInfobox">
+          <a href="https://github.com/jjeessppeer/MatchHistoryMod" target="_blank">
+            Install the mod to have your match history uploaded
+            <svg viewBox="0 0 24 24"><use href="icons.svg#launch" /></svg>
+          </a>
+        </div>
+        <div class="match-history-search">
+          <div id="basicSearchCategory" class="category">
+            <div class="category-button">
+              <button><i class="fas fa-chevron-up"></i> Basic search</button>
+            </div>
+            <div class="category-content">
+              <div class="basic-search">
+                <select autocomplete="off">
+                  <option value="Player" selected>Player</option>
+                  <option value="Ship">Ship</option>
+                  <option value="All">All</option>
+                </select>
+                <input type="text" placeholder="Name..." autocomplete="off">
+                <button>Search</button>
+              </div>
+            </div>
+          </div>
+
+          
+          <div id="advancedSearchCategory" class="category">
+            <div class="category-button">
+              <button><i class="fas fa-chevron-up"></i> Advanced filters</button>
+            </div>
+            <div class="category-content">
+              &#128679; Under construction &#128679;
+            </div>
+
+          </div>
+
+
+        </div>
+        <div class="content-area">
+          <div class="top-area">
+            <!-- <div id="winpickChartContainer" class="chart-container">
+              <canvas id="winpickChart"></canvas>
+            </div> -->
+          </div>
+          <div class="middle-area">
+            <div class="left-area">
+              <ul id="ShipPopularityList"></ul>
+            </div>
+            <div class="right-area">
+              <ul class="match-history-list" id="matchHistoryList">
+              </ul>
+            </div>
+          </div>
+        </div>
+
+
+
       </div>
 
       <div id="shipBuilder" class="content-panel" style="display:none">
@@ -1256,7 +1331,8 @@
 
     var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     $(document).ready(function () {
-      Chart.plugins.unregister(ChartDataLabels);
+      // Chart.plugins.unregister(ChartDataLabels);
+      // Chart.register(ChartDataLabels);
       
       $("#sidebar a").on("click", openPageFromUrl);
 
@@ -1276,7 +1352,7 @@
         updateArcPanel();
       });
       
-      initializeMatchStatistics();
+      // initializeMatchStatistics();
       // console.log("COOKIE: ", getCookie("dark_mode")=="true")
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
       dark_mode_switch.trigger("change");
@@ -1288,6 +1364,8 @@
         () => { console.log("PING TIMEOUT"); });
       // Load datasets
       loadDatasetsFromServer();
+
+      initializeMatchHistory();
 
     });
 

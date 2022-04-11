@@ -1,0 +1,118 @@
+
+:root {
+    --text-light: rgb(135, 146, 146);
+}
+/* Stuff */
+
+#matchHistory .content-area {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    /* margin: auto; */
+    width: 1200px;
+    margin-top: 25px;
+}
+
+#matchHistory .middle-area {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+    /* margin: auto; */
+    /* width: 1200px; */
+}
+
+#matchHistory .top-area {
+    margin-bottom: 20px;
+    /* height: 300px; */
+}
+
+#matchHistory .left-area {
+    width: 400px;
+}
+
+#matchHistory .right-area {
+    padding: 0;
+    margin: 0;
+}
+
+/* Charts */
+
+.chart-container {
+    position: relative;
+}
+
+#winpickChartContainer {
+    width: 500px;
+    height: 100%;
+}
+
+
+
+#ShipPopularityList {
+    list-style: none;
+    text-align: left;
+    margin: 0;
+    padding: 0;
+    vertical-align: top;
+    background-color: rgb(237, 237, 237);
+    border: 1px solid;
+    border-bottom: 0;
+    border-color: rgb(205, 210, 210);
+}
+
+.ship-popularity-element {
+    display: flex;
+    flex-direction: row;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid;
+    border-color: rgb(205, 210, 210);
+    /* width: 100%; */
+    padding: 5px;
+
+    color: var(--text-light);
+}
+.ship-popularity-element > *{
+    /* padding-left: 5px; */
+    /* padding-right: 5px; */
+}
+
+.ship-popularity-element img {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+
+}
+
+.ship-popularity-element .shipname {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+
+}
+
+.ship-popularity-element > div {
+    flex: 1;
+}
+
+.ship-popularity-element .rates {
+    display: flex;
+    justify-content: space-around;
+    /* align-content: space-around; */
+    flex-direction: column;
+}
+
+.ship-popularity-element .rates > div{
+    /* flex: 1; */
+    /* overflow: visible; */
+    white-space: nowrap; 
+    font-size: 13px;
+}
+/* .ship-popularity-element span {
+    vertical-align: middle;
+    text-align: center;
+
+} */

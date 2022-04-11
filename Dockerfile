@@ -1,10 +1,11 @@
 # Create a docker container hosting the website.
 
-FROM node:10
+FROM node:14
 COPY package*.json ./
 RUN npm install
 COPY public /public
 COPY *.js ./
+COPY .env ./
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

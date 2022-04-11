@@ -1,0 +1,395 @@
+
+:root {
+    --tag-fill-1: rgb(140, 81, 197);
+    --tag-border-1: rgb(127, 53, 144);
+}
+
+#matchHistory {
+    background-color: rgb(234, 234, 234);
+    padding-top: 10px;
+}
+
+#ModInfobox {
+    margin-bottom: 10px;
+}
+
+#ModInfobox a {
+    color: black;
+    text-decoration: underline;
+    color: rgb(82, 82, 255);
+}
+#ModInfobox svg {
+    height: 1em;
+    width: 1em;
+}
+
+.match-history-list {
+    /* background-color: rgba(240, 191, 191, 0.726); */
+    /* padding: 20px; */
+    /* margin: 20px; */
+    padding: 0;
+    margin: 0;
+    margin-left: 10px;
+}
+
+.match-history-entry {
+    list-style: none;
+    margin-bottom: 10px;
+    width: 800px;
+    border: 1px solid;
+    border-bottom: none;
+    /* height: 1px; */
+}
+
+.match-history-entry.red-winner {
+    background-color: var(--red-1);
+    border-color: var(--red-4);
+}
+.match-history-entry.blue-winner {
+    background-color: var(--blue-1);
+    border-color: var(--blue-4);
+}
+
+.match-history-entry > .overview-table {
+    /* display: table; */
+    /* table-layout: fixed; */
+    /* flex: 1; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+
+    height: 100%;
+    width: 100%;
+}
+
+/* ------------------------------ */
+/* ----- Match overview box ----- */
+/* ------------------------------ */
+
+.match-history-entry > .overview-table > div {
+    /* display: table-cell; */
+    /* border-right: 1px solid; */
+    /* height: 100%; */
+}
+
+
+.match-history-entry .matchup-table {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    height: 100%;
+
+}
+.match-history-entry .matchup-table > div{
+    display: table-cell;
+    vertical-align: middle;
+    /* border: 2px black solid; */
+    text-align: center;
+    
+    
+}
+
+/* Matchup and score table */
+
+.match-history-entry .overview-table .matchup {
+    width: 150px;
+}
+
+.match-history-entry .overview-table .matchup-table img{
+    width: 50px;
+    height: 50px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border: 3px solid;
+    border-radius: 4px;
+}
+
+.match-history-entry .overview-table .matchup-table .red-team img{
+    border-color: #c6443e;
+}
+
+.match-history-entry .overview-table .matchup-table .blue-team img{
+    border-color: rgb(66, 149, 198);
+}
+
+.match-history-entry .overview-table .matchup-table .results{
+    width: 20%;
+    font-weight: bold;
+    /* font-family: "Goudy Bookletter 1911", monospace; */
+    /* font-family: system-ui; */
+    /* color: #c6443e; */
+    /* color: rgb(66, 177, 198); */
+}
+
+
+/* Info box */
+.match-history-entry .overview-table .info {
+    width: 160px;
+    /* padding-top: 8px; */
+    text-align: center;
+    vertical-align: top;
+
+    
+    /* background-image: url("/images/item-icons/map6.png");
+    background-size:cover;
+    background-position: center;
+    background-color: #cccccc;
+    background-size: 284px 160px; */
+
+    font-size: 14px;
+    color: #555e5e;
+}
+.match-history-entry .overview-table .info > div{
+    margin-top: 6px;
+}
+
+.match-history-entry .overview-table .tags {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    padding-top: 25px;
+    align-items: center;
+    /* text-align: ;
+    vertical-align: top; */
+}
+
+.match-history-entry .overview-table .tags span {
+    /* flex: 0; */
+    margin: 5px;
+    padding: 2px 5px;
+    line-height: 1;
+    font-size: 10px;
+    color: rgb(234, 234, 234);
+    border-radius: 10px;
+
+    border: 1px solid var(--tag-border-1);
+    background-color: var(--tag-fill-1);
+
+    /* border-top-left-radius: 5px; */
+
+    /* width: 100px; */
+}
+
+/* Player list */
+.match-history-entry .overview-table .players {
+    text-align: left;
+    vertical-align: top;
+    /* padding: 0; */
+}
+
+.match-history-entry .overview-table .players > div {
+    float: right;
+    margin-right: 8px;
+}
+
+.match-history-entry .overview-table .players ul{
+    width: 80px;
+    /* float: left; */
+    list-style: none;
+    padding: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin: 0;
+    font-size: 11px;
+    color: rgb(85, 85, 85);
+    /* font-family: Helvetica,"Malgun Gothic","Apple SD Gothic Neo",AppleGothic,Dotum,Arial,Tahoma; */
+}
+
+.match-history-entry .overview-table .players li{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.match-history-entry .overview-table .players img{
+    height: 16px;
+    width: 16px;
+    background-color: black;
+}
+
+.match-history-entry .overview-table .expand-button{
+    display: flex;
+    justify-content: end;
+    flex-direction: column;
+
+    width: 30px;
+    text-align: center;
+    vertical-align: bottom;
+    /* text-align: ; */
+    padding: 0px;
+    padding-bottom: 10px;
+    cursor: pointer;
+    border-left: 1px solid;
+    border-bottom: 1px solid;
+}
+
+.match-history-entry.open .overview-table .expand-button{
+    border-bottom: none;
+}
+
+.match-history-entry .overview-table > div:not(:last-child){
+    border-bottom: 1px solid;
+}
+
+.match-history-entry.red-winner .overview-table > div:not(:last-child){
+    border-color: var(--red-4);
+}
+.match-history-entry.blue-winner .overview-table > div:not(:last-child){
+    border-color: var(--blue-4);
+}
+
+.match-history-entry.red-winner .overview-table .expand-button{
+    background-color: var(--red-3);
+    color: var(--red-4);
+}
+
+.match-history-entry.blue-winner .overview-table .expand-button{
+    background-color: var(--blue-3);
+    color: var(--blue-4);
+}
+
+
+/* ----------------------------- */
+/* ----- Match foldout box ----- */
+/* ----------------------------- */
+
+.match-history-entry .foldout {
+    display: none;
+    padding-top: 5px;
+    /* border-top: 1px solid; */
+}
+
+.match-history-entry.red-winner .foldout {
+    background-color: var(--red-3);
+}
+.match-history-entry.blue-winner .foldout {
+    background-color: var(--blue-3);
+}
+
+.match-history-entry.open .foldout {
+    display: block;
+}
+
+.match-history-entry .foldout .content{
+    background-color: rgb(234, 234, 234);
+}
+
+.match-history-entry .foldout > ul {
+    /* border-color: black; */
+    margin-top: 10px;
+    list-style: none;
+    display: table;
+    width: 100%;
+}
+
+
+.match-history-entry .foldout > ul li {
+    /* border-color: black; */
+    list-style: none;
+    justify-content: center;
+    text-align: center;
+    display: table-cell;
+    /* width: 33%; */
+}
+
+.match-history-entry .foldout button {
+    /* border-color: black; */
+    border: 1px solid;
+    border-bottom: none;
+    width: 200px;
+}
+.match-history-entry.red-winner .foldout button {
+    background-color: var(--red-2);
+    border-color: var(--red-4);
+}
+.match-history-entry.blue-winner .foldout button {
+    background-color: var(--blue-2);
+    border-color: var(--blue-4);
+}
+
+/* ------------------------------ */
+/* ----- Match details view ----- */
+/* ------------------------------ */
+.match-history-entry .details {
+    display: flex;
+    flex-direction: row;
+    /* flex-wrap: nowrap; */
+
+    justify-content: center;
+}
+
+.match-history-entry .details > div{
+    /* margin: auto; */
+    border: 1px black solid;
+    /* flex: 0 0 auto; */
+    /* flex-grow: 0; */
+    /* flex: 0 */
+}
+
+.match-history-entry .details .shipcrew > div{
+    /* display: table; */
+    /* max-height: 175px; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+    gap: 0;
+    /* align-items: stretch; */
+    padding: 0;
+    margin: 0;
+}
+
+.match-history-entry .details > div:last-child .shipcrew > div{
+    flex-direction: row-reverse;
+}
+
+
+.match-history-entry .details .shipcrew > div > *{
+    padding: 0;
+    margin: 0;
+    /* margin: auto; */
+    
+}
+
+.match-history-entry .details .shipcrew:not(:last-child){
+    margin-bottom: 10px;
+}
+
+.match-history-entry .details .shipcrew canvas {
+    /* height: 600px; */
+    /* width: 600px; */
+    background-color: white;
+}
+
+.match-history-entry .details .shipcrew ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.match-history-entry .details .shipcrew li {
+    height: 25%;
+    border: 1px black solid;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
+    width: 140px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: left;
+    vertical-align: bottom;
+    
+}
+.match-history-entry .details .shipcrew li:first-child {
+    border-top: 1px solid;
+}
+
+.match-history-entry .details .shipcrew img {
+    width: 20px;
+    height: 20px;
+    background-color: black;
+}
+
