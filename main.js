@@ -17,13 +17,6 @@ var requestIp = require('request-ip');
 const sqlite = require('better-sqlite3');
 const { assert } = require('console');
 
-const logOpts = {
-    fileNamePattern: 'log-<DATE>.log',
-    logDirectory: 'logs',
-    timestampFormat: 'YYYY-MM-DD HH:mm:ss.SSS',
-    dateFormat: 'YYYY.MM.DD'
-}
-const log = require('simple-node-logger').createRollingFileLogger(logOpts);
 const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readonly: true });
 
 var app = express()
@@ -34,20 +27,17 @@ app.use(express.static('public'));
 
 app.get('/ping', function (req, res) {
     let ip = requestIp.getClientIp(req);
-    log.info(ip, " ping.");
     res.status(200).send("OK");
 });
 
 app.get('/get_match_history', function (req, res) {
     let ip = requestIp.getClientIp(req);
-    log.info(ip, " get_match_history \t Matches requested.");
     matches = data_db.prepare("SELECT * FROM Match_History").all();
     res.status(200).json(matches);
 });
 
 app.get('/get_datasets', function (req, res) {
     let ip = requestIp.getClientIp(req);
-    log.info(ip, " get_datasets \t Datasets requested.");
     let datasets = {};
     // datasets.history = data_db.prepare("SELECT * FROM Match_History").all();
     datasets.gun_stats = data_db.prepare("SELECT * FROM Gun_stats").all();
