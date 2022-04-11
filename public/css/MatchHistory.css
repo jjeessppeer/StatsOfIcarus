@@ -1,5 +1,8 @@
 
-
+:root {
+    --tag-fill-1: rgb(140, 81, 197);
+    --tag-border-1: rgb(127, 53, 144);
+}
 
 #matchHistory {
     background-color: rgb(234, 234, 234);
@@ -48,8 +51,14 @@
 }
 
 .match-history-entry > .overview-table {
-    display: table;
-    table-layout: fixed;
+    /* display: table; */
+    /* table-layout: fixed; */
+    /* flex: 1; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+
     height: 100%;
     width: 100%;
 }
@@ -59,9 +68,9 @@
 /* ------------------------------ */
 
 .match-history-entry > .overview-table > div {
-    display: table-cell;
+    /* display: table-cell; */
     /* border-right: 1px solid; */
-    height: 100%;
+    /* height: 100%; */
 }
 
 
@@ -135,6 +144,34 @@
     margin-top: 6px;
 }
 
+.match-history-entry .overview-table .tags {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    padding-top: 25px;
+    align-items: center;
+    /* text-align: ;
+    vertical-align: top; */
+}
+
+.match-history-entry .overview-table .tags span {
+    /* flex: 0; */
+    margin: 5px;
+    padding: 2px 5px;
+    line-height: 1;
+    font-size: 10px;
+    color: rgb(234, 234, 234);
+    border-radius: 10px;
+
+    border: 1px solid var(--tag-border-1);
+    background-color: var(--tag-fill-1);
+
+    /* border-top-left-radius: 5px; */
+
+    /* width: 100px; */
+}
+
 /* Player list */
 .match-history-entry .overview-table .players {
     text-align: left;
@@ -174,13 +211,23 @@
 }
 
 .match-history-entry .overview-table .expand-button{
+    display: flex;
+    justify-content: end;
+    flex-direction: column;
+
     width: 30px;
     text-align: center;
     vertical-align: bottom;
     /* text-align: ; */
     padding: 0px;
+    padding-bottom: 10px;
     cursor: pointer;
     border-left: 1px solid;
+    border-bottom: 1px solid;
+}
+
+.match-history-entry.open .overview-table .expand-button{
+    border-bottom: none;
 }
 
 .match-history-entry .overview-table > div:not(:last-child){

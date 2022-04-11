@@ -259,6 +259,8 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
                 <br>
                 <div class="date">x days ago</div>
             </div>
+            <div class="tags">
+            </div>
             <div class="players">
                 <div class="blue-players">
                     <ul></ul>
@@ -307,7 +309,7 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
         else timeAgoString = `${Math.ceil(minutesAgo)} minutes ago`;
         this.querySelector(".info .date").textContent = timeAgoString;
 
-        // TODO?: can only handle 2 teams.
+        // Load results and ships
         this.querySelector(".matchup-table .results").textContent = `${matchData.Scores[0]}:${matchData.Scores[1]}`;
         // Load ships
         for (let t in matchData.Ships) {
@@ -316,6 +318,20 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
                 let shipItem = getShipItem(matchData, shipInfo.ShipModel);
                 let img = this.querySelector(`.matchup-table ${t==0 ? ".red-team" : ".blue-team"} img:nth-of-type(${Number(s)+1})`);
                 img.src = `/images/item-icons/${shipItem.IconPath}`;
+            }
+        }
+
+        // Load tags
+        
+        let tagDiv = this.querySelector(".tags");
+        for (let tag in matchData.CompetetiveTags){
+            if (tag == "HighLevel") continue;
+            if (matchData.CompetetiveTags[tag]) {
+                let s = document.createElement('span');
+                s.classList.add(tag);
+                if (tag == "SCS") s.textContent = "SCS";
+                if (tag == "Competitive") s.textContent = "Competitive";
+                tagDiv.append(s);
             }
         }
 

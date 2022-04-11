@@ -498,17 +498,18 @@ async function insertMatchHistory(record, ip) {
     let flatPlayerLevels = playerLevels.flat(Infinity);
 
     let avgPlayerLevel = flatPlayerLevels.reduce((partialSum, a) => partialSum + a, 0) / flatPlayerLevels.length;
-    
+    avgPlayerLevel = Math.ceil(avgPlayerLevel);
+
     let shipsFull = record.Ships.length == record.TeamSize * record.TeamCount;
     let playersFull = playerCount == record.TeamSize * record.TeamCount * 4;
     let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
 
     let submissionDate = new Date();
     let submissionHour = submissionDate.getUTCHours();
-    let competetiveTags = {
-        SCS: posModulo(submissionHour - SCS_START_HOUR_UTC) <= SCS_HOUR_LENGTH && record.Passworded,
-        Competetive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 20 && record.Passworded,
-        HighLevel: avgPlayerLevel >= 30 && emptySlots <= 4
+    let competitive = {
+        SCS: posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
+        Competitive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded,
+        HighLevel: avgPlayerLevel >= 30 && emptySlots <= 2
     };
 
     // Insert the match.
@@ -518,7 +519,7 @@ async function insertMatchHistory(record, ip) {
         Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
         SubmissionCount: 1,
-        CompetetiveTags: competetiveTags,
+        CompetetiveTags: competitive,
         MatchId: record.MatchId,
         MapId: record.MapId,
         ShipsFull: shipsFull,
@@ -529,6 +530,7 @@ async function insertMatchHistory(record, ip) {
         TeamCount: record.TeamCount,
         Winner: record.Winner,
         Scores: record.Scores,
+        AvgPlayerLevel: avgPlayerLevel,
         Ships: shipIds,
         ShipModels: shipModels,
         ShipLoadouts: shipLoadouts,
