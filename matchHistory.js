@@ -513,6 +513,7 @@ async function insertMatchHistory(record, ip) {
 
     // Insert the match.
     let newMatch = {
+        ModVersion: record.ModVersion,
         SubmitterIp: ip,
         Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
