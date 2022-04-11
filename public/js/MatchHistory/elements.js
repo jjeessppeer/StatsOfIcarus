@@ -128,6 +128,13 @@ class ShipCrew extends HTMLDivElement {
             let player = getPlayerInfo(matchData, playerId);
             // console.log("got player info");
             let loadout = getLoadoutInfo(matchData, loadoutId);
+            loadout.Skills.sort((a, b) => {
+                let itemA = getSkillItem(matchData, a);
+                let itemB = getSkillItem(matchData, b);
+                return SKILL_ORDER.indexOf(itemA.Name) - SKILL_ORDER.indexOf(itemB.Name);
+            })
+
+
             listElements[i].innerHTML = "<div></div><span></span>";
             listElements[i].querySelector("span").textContent = player.Name.substring(0, player.Name.length-5);
 
@@ -137,8 +144,9 @@ class ShipCrew extends HTMLDivElement {
             roleImg.src = `images/class-icons/${roleImages[loadout.Class]}`;
             loadoutDiv.append(roleImg);
             for (let l = 0; l < loadout.Skills.length; l++) {
+                let skillItem = getSkillItem(matchData, loadout.Skills[l]);
                 let skillImg = document.createElement("img");
-                skillImg.src = `/item-icon?Item=skill&Id=${loadout.Skills[l]}`;
+                skillImg.src = `/images/item-icons/${skillItem.IconPath}`;
                 loadoutDiv.append(skillImg);
             }
         }

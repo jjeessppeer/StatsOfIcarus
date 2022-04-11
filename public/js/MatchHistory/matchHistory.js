@@ -3,6 +3,39 @@ var search_mode = 0;
 
 var pickwinrateChart;
 
+const SKILL_ORDER = [
+    "Rubber Mallet",
+    "Fail-safe Kit",
+    "Pipe Wrench",
+    "Shifting Spanner",
+    "Fire Extinguisher",
+    "Chemical Spray",
+    "DynaBuff Industries Kit",
+    "Armor Kit",
+
+    "Charged Rounds",
+    "Burst Rounds",
+    "Greased Rounds",
+    "Lesmok Rounds",
+    "Lochnagar Shot",
+    "Heavy Clip",
+    "Incendiary Rounds",
+    "Heatsink Clip",
+    "Extended Magazine",
+
+    "Spyglass",
+    "Range-Finder",
+    "Phoenix Claw",
+    "Kerosene",
+    "Moonshine",
+    "Drift Sail",
+    "Hydrogen Canister",
+    "Balloon Vent",
+    "Drogue Chute",
+    "Impact Bumpers",
+    "Tar Barrel"
+]
+
 function initializeMatchHistory(){
     // Initialize search categories
     document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
@@ -254,6 +287,13 @@ function getLoadoutInfo(matchRecord, loadoutId) {
         if (loadout._id == loadoutId) return loadout;
     }
     throw "No loadout with specified id found";
+}
+
+function getSkillItem(matchRecord, skillId) {
+    for (let skill of matchRecord.SkillItems) {
+        if (skill._id == skillId) return skill;
+    }
+    throw "No skill with specified id found";
 }
 
 function getGunItem(matchRecord, gunId) {
