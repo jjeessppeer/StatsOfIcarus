@@ -56,7 +56,7 @@ app.post('/submit_match_history', async function (req, res) {
     let ip = requestIp.getClientIp(req);
     assert(typeof req.body.ModVersion == "string");
     if (req.body.ModVersion != MOD_VERSION_LATEST) {
-        res.status("400").send(`Mod version incompatible. Required version ${latestModVersion} (recieved ${req.body.ModVersion})`);
+        res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
         return;
     }
     matchHistory.submitRecord(req.body, ip);

@@ -1,7 +1,23 @@
 
 
+
 #matchHistory {
     background-color: rgb(234, 234, 234);
+    padding-top: 10px;
+}
+
+#ModInfobox {
+    margin-bottom: 10px;
+}
+
+#ModInfobox a {
+    color: black;
+    text-decoration: underline;
+    color: rgb(82, 82, 255);
+}
+#ModInfobox svg {
+    height: 1em;
+    width: 1em;
 }
 
 .match-history-list {
