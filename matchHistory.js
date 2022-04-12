@@ -6,10 +6,13 @@ const { json } = require("express/lib/response");
 
 const SCS_START_HOUR_UTC = 18;
 const SCS_HOUR_LENGTH = 4;
+const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
+const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
 
 
-const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
+// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
 // const db_url = `mongodb://localhost:27017/`;
+const db_url = process.env.MONGODB_URL_STRING;
 let client = new MongoClient(db_url);
 
 
@@ -420,11 +423,37 @@ async function insertMatchHistory(record, ip) {
     const matchesCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
+    var ipCollection = client.db("mhtest").collection("Submitters");
+
+    let submissionDate = new Date();
+    let submissionHour = submissionDate.getUTCHours();
+    let submissionTicks = submissionDate.getTime();
+
+    let submitter = await ipCollection.findOneAndUpdate(
+        {_id: ip},
+        {$set: {LastTimestamp: submissionTicks}, $inc: {SubmissionCount: 1}},
+        {upsert: true});
+
+    // Check so matches are not submitter too fast.
+    if (submitter.value != null && 
+        submissionTicks - submitter.value.LastTimestamp < MIN_SUBMISSION_INTERVAL_MS ) {
+        await ipCollection.updateOne(
+            {_id: ip},
+            {$inc: {FailedSubmissions: 1}});
+        return false;
+    }
 
     // Check if match has already been added.
     let match = await matchesCollection.findOne({ MatchId: record.MatchId });
+    
     if (match) {
-        // TODO: Check if record matches. If it does add vote.
+        if (!match.SubmitterIps.includes(ip)) {
+            match.SubmitterIps.push(ip);
+            await matchesCollection.updateOne(
+                {MatchId: record.MatchId},
+                {$set: {SubmitterIps: match.SubmitterIps}});
+        }
+
         return true;
     }
 
@@ -504,8 +533,7 @@ async function insertMatchHistory(record, ip) {
     let playersFull = playerCount == record.TeamSize * record.TeamCount * 4;
     let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
 
-    let submissionDate = new Date();
-    let submissionHour = submissionDate.getUTCHours();
+    
     let competitive = {
         SCS: posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
         Competitive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded,
@@ -516,6 +544,7 @@ async function insertMatchHistory(record, ip) {
     let newMatch = {
         ModVersion: record.ModVersion,
         SubmitterIp: ip,
+        SubmitterIps: [ip],
         Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
         SubmissionCount: 1,

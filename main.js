@@ -5,8 +5,9 @@ var fs = require('fs');
 var http = require('http');
 const matchHistory = require("./matchHistory.js");
 
-const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
+// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
 // const db_url = `mongodb://localhost:27017/`;
+const db_url = process.env.MONGODB_URL_STRING;
 let mongoClient = new MongoClient(db_url);
 
 const MOD_VERSION_LATEST = "0.1.3";
@@ -70,7 +71,7 @@ app.post('/get_match_history2', async function (req, res) {
     let options = req.body;
     let filters = options.filters;
     let offset = options.offset;
-    let count = options.count;
+    let count = Math.min(options.count, 100);
     let perspective = options.perspective;
     // console.log(options)
     let response = await matchHistory.getMatches(filters, perspective, offset, count);
