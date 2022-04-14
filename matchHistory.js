@@ -216,6 +216,11 @@ async function getMatches(filters, perspective, offset, count) {
                             as: "MapItem"
                         }
                     },
+                    {
+                        $project: {
+                            SubmitterIp: 0
+                        }
+                    }
                 ]
             }
         },
