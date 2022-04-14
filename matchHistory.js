@@ -1,25 +1,15 @@
-const { MongoClient } = require("mongodb");
-const fs = require('fs');
 const assert = require('assert');
-const { kill } = require("process");
-const { json } = require("express/lib/response");
-const pipelines = require("./matchHistoryPipelines.js");
 
 const SCS_START_HOUR_UTC = 18;
 const SCS_HOUR_LENGTH = 4;
 const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
 const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
 
-
-// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
-// const db_url = `mongodb://localhost:27017/`;
-const db_url = process.env.MONGODB_URL_STRING;
-let client = new MongoClient(db_url);
+var client;
 
 
 // Lock for insertMatchHistory. Function waits unil false to run.
 let insertionRunning = false;
-
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -37,73 +27,6 @@ async function getPlayerId(playerName) {
     let res = await playersCollection.findOne({ Name: playerName });
     if (!res) return false;
     return res._id;
-}
-
-// Return all ship build ids matching the restrictions.
-async function getShipBuilds(restrictions) {
-    const matchCollection = client.db("mhtest").collection("Ships");
-    let query = {};
-    for (let i in restrictions) {
-        if (restrictions[i] == -1) continue;
-        if (i == 0) query['ShipModel'] = restrictions[i];
-        else query[`Loadout.${i - 1}`] = restrictions[i];
-    }
-
-    let results = matchCollection.find(query);
-    let out = [];
-    await results.forEach(doc => { out.push(doc._id) });
-    return out;
-}
-
-async function getPlayerIdFromName(name, exactMatch=false) {
-    const playersCollection = client.db("mhtest").collection("Players");
-    let player;
-    if (exactMatch) {
-        name = name + " [PC]";
-        player = await playersCollection.findOne({ Name: name });
-    }
-    else {
-        player = await playersCollection.findOne(
-            { "Name": new RegExp(name, "i") },
-            { _id: true });
-    }
-    if (player) return player._id;
-    return false;
-}
-
-async function getPlayerInfo(playerName, timeSpanDays=366) {
-    const playersCollection = client.db("mhtest").collection("Players");
-    let playerId = await getPlayerIdFromName(playerName);
-    let playerInfoPipeline = pipelines.playerInfoPipeline(playerId, timeSpanDays);
-    
-    let playerInfoAggregate = playersCollection.aggregate(playerInfoPipeline);
-    let playerInfo = await playerInfoAggregate.next();
-    return playerInfo;
-}
-
-async function getRecentMatches(filters, page) {
-    const RESULTS_PER_PAGE = 10;
-    const matchCollection = client.db("mhtest").collection("Matches");
-    let basePipeline = pipelines.recentMatchesPipeline(RESULTS_PER_PAGE*page, RESULTS_PER_PAGE);
-    let filterPipeline = await pipelines.generateMatchFilterPipeline(
-        filters,
-        client.db("mhtest").collection("Players"));
-    let fullPipeline = filterPipeline.concat(basePipeline);
-    let matchesAggregate = matchCollection.aggregate(fullPipeline);
-    let matches = await matchesAggregate.next();
-    return matches;
-}
-
-async function getShipsOverviewInfo() {
-    // TODO: add filter option.
-    const matchCollection = client.db("mhtest").collection("Matches");
-    let basePipeline = pipelines.modelPickWinRates();
-    let aggregate = matchCollection.aggregate(basePipeline);
-    let result = await aggregate.next();
-    await aggregate.forEach(element => {
-        result.push(element);
-    });
-    return result;
 }
 
 async function submitRecord(record, ip) {
@@ -446,15 +369,6 @@ async function insertMatchHistory(record, ip) {
     return true;
 }
 
-
-function connect() {
-    return client.connect();
-}
-
-function close() {
-    return client.close();
-}
-
 function setMongoClient(clientIn) {
     client = clientIn;
 }
@@ -462,11 +376,6 @@ function setMongoClient(clientIn) {
 
 module.exports = {
     submitRecord,
-    getPlayerInfo,
-    getRecentMatches,
-    getShipsOverviewInfo,
-    setMongoClient,
-    connect,
-    close
+    setMongoClient
     // connect
 }

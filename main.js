@@ -4,6 +4,8 @@ const { MongoClient, ReturnDocument } = require("mongodb");
 var fs = require('fs');
 var http = require('http');
 const matchHistory = require("./matchHistory.js");
+const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
+const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 
 // const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
 // const db_url = `mongodb://localhost:27017/`;
@@ -67,7 +69,7 @@ app.post('/submit_match_history', async function (req, res) {
 
 app.post('/get_player_info', async function(req, res) {
     let name = req.body.name;
-    let response = await matchHistory.getPlayerInfo(name);
+    let response = await matchHistoryRetrieve.getPlayerInfo(name);
     res.status(200).json(response);
 });
 
@@ -76,14 +78,14 @@ app.post(
     async function(req, res) {
     let page = req.body.pageNumber;
     let filters = req.body.filters;
-    let response = await matchHistory.getRecentMatches(filters, page);
+    let response = await matchHistoryRetrieve.getRecentMatches(filters, page);
     res.status(200).json(response);
 });
 
 app.post(
     '/get_ship_winrates',
     async function(req, res) {
-        let response = await matchHistory.getShipsOverviewInfo();
+        let response = await matchHistoryRetrieve.getShipsOverviewInfo();
         res.status(200).json(response);
 });
 
@@ -140,6 +142,8 @@ async function run() {
         console.log("Connecting to db...")
         await mongoClient.connect();
         matchHistory.setMongoClient(mongoClient);
+        // matchHistoryRetrieve.sayHello();
+        matchHistoryRetrieve.setMongoClient(mongoClient);
         // await matchHistory.connect();
         console.log("Connected to db...");
 
