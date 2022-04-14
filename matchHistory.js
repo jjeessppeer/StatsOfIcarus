@@ -228,7 +228,7 @@ async function updatePlayer(player) {
         }
         await playersCollection.updateOne(
             {_id: player.UserId},
-            {Levels: dbLevels, MaxLevel: Math.max(dbLevels)},
+            {$set: {Levels: dbLevels, MaxLevel: Math.max(dbLevels)}},
         )
     }
 }
