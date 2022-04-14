@@ -142,7 +142,11 @@ function recentMatchesPipeline(offset, count) {
             as: "MapItem"
           }},
           { $project: {
-            SubmitterIp: 0
+            SubmitterIp: 0,
+            SubmitterIps: 0,
+            SubmissionCount: 0,
+            MatchId: 0,
+            _id: 0
           }}
         ]
       }},

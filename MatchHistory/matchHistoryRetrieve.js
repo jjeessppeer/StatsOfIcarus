@@ -7,20 +7,20 @@ function setMongoClient(clientIn) {
 }
 
 // Return all ship build ids matching the restrictions.
-async function getShipBuilds(restrictions) {
-    const matchCollection = client.db("mhtest").collection("Ships");
-    let query = {};
-    for (let i in restrictions) {
-        if (restrictions[i] == -1) continue;
-        if (i == 0) query['ShipModel'] = restrictions[i];
-        else query[`Loadout.${i - 1}`] = restrictions[i];
-    }
+// async function getShipBuilds(restrictions) {
+//     const matchCollection = client.db("mhtest").collection("Ships");
+//     let query = {};
+//     for (let i in restrictions) {
+//         if (restrictions[i] == -1) continue;
+//         if (i == 0) query['ShipModel'] = restrictions[i];
+//         else query[`Loadout.${i - 1}`] = restrictions[i];
+//     }
 
-    let results = matchCollection.find(query);
-    let out = [];
-    await results.forEach(doc => { out.push(doc._id) });
-    return out;
-}
+//     let results = matchCollection.find(query);
+//     let out = [];
+//     await results.forEach(doc => { out.push(doc._id) });
+//     return out;
+// }
 
 async function getPlayerIdFromName(name, exactMatch=false) {
     const playersCollection = client.db("mhtest").collection("Players");
