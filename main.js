@@ -13,7 +13,7 @@ let mongoClient = new MongoClient(db_url);
 const MOD_VERSION_LATEST = "0.1.3";
 
 
-var bodyParser = require("body-parser");
+// var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
 const sqlite = require('better-sqlite3');
 const { assert } = require('console');
@@ -22,8 +22,9 @@ const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readon
 
 var app = express()
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.static('public'));
 
 app.get('/ping', function (req, res) {
@@ -64,105 +65,74 @@ app.post('/submit_match_history', async function (req, res) {
     res.status("202").send();
 });
 
-app.post('/get_match_history2', async function (req, res) {
-    let ip = requestIp.getClientIp(req);
-
-
-    let options = req.body;
-    let filters = options.filters;
-    let offset = options.offset;
-    let count = Math.min(options.count, 100);
-    let perspective = options.perspective;
-    // console.log(options)
-    let response = await matchHistory.getMatches(filters, perspective, offset, count);
-    res.status("200").json(response);
+app.post('/get_player_info', async function(req, res) {
+    let name = req.body.name;
+    let response = await matchHistory.getPlayerInfo(name);
+    res.status(200).json(response);
 });
 
-app.get('/item-dataset', async function (req, res) {
-    const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
-    const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
-    const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
-    const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
-    let response = {
-        "Maps": await mapCollection.find({GameMode: 2}).toArray(),
-        "Ships": await shipCollection.find({}).toArray(),
-        "Guns": await gunCollection.find({}).toArray(),
-        "Skills": await skillCollection.find({}).toArray()
-    }
-    res.status("200").json(response);
+app.post(
+    '/get_recent_matches', 
+    async function(req, res) {
+    let page = req.body.pageNumber;
+    let filters = req.body.filters;
+    let response = await matchHistory.getRecentMatches(filters, page);
+    res.status(200).json(response);
 });
 
-app.get('/item', async function (req, res) {
-    const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
-    const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
-    const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
-    const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
-
-    let itemType = req.query.Item;
-    let itemId = req.query.Id;
-    if (!(itemType && itemId)){
-        res.status("404").send();
-        return;
-    }
-    let response = false;
-
-    if (itemType == "map"){
-        response = await mapCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (itemType == "skill"){
-        response = await skillCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (itemType == "gun"){
-        response = await gunCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (itemType == "ship"){
-        response = await shipCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (!response || response.IconPath == "") {
-        res.status("404").send();
-        return;
-    }
-    res.status("200").json(response);
-
-    // res.sendFile(__dirname + "/public/images/item-icons/item195.png");
-    // res.status("200").json(response);
-    
+app.post(
+    '/get_ship_winrates',
+    async function(req, res) {
+        let response = await matchHistory.getShipsOverviewInfo();
+        res.status(200).json(response);
 });
 
-app.get('/item-icon', async function (req, res) {
-    const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
-    const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
-    const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
-    const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
+// app.get('/item-dataset', async function (req, res) {
+//     const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
+//     const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
+//     const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
+//     const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
+//     let response = {
+//         "Maps": await mapCollection.find({GameMode: 2}).toArray(),
+//         "Ships": await shipCollection.find({}).toArray(),
+//         "Guns": await gunCollection.find({}).toArray(),
+//         "Skills": await skillCollection.find({}).toArray()
+//     }
+//     res.status("200").json(response);
+// });
 
-    let itemType = req.query.Item;
-    let itemId = req.query.Id;
-    if (!(itemType && itemId)){
-        res.status("404").send();
-        return;
-    }
+// app.get('/item', async function (req, res) {
+//     const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
+//     const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
+//     const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
+//     const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
 
-    let response = false;
-    if (itemType == "map"){
-        response = await mapCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (itemType == "skill"){
-        response = await skillCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (itemType == "gun"){
-        response = await gunCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (itemType == "ship"){
-        response = await shipCollection.findOne({_id: Number(req.query.Id)});
-    }
-    if (!response || response.IconPath == "") {
-        res.status("404").send();
-        return;
-    }
-    res.sendFile(`${__dirname}/public/images/item-icons/${response.IconPath}`);
-    // res.status("200").json(response);
-    
-});
+//     let itemType = req.query.Item;
+//     let itemId = req.query.Id;
+//     if (!(itemType && itemId)){
+//         res.status("404").send();
+//         return;
+//     }
+//     let response = false;
+
+//     if (itemType == "map"){
+//         response = await mapCollection.findOne({_id: Number(req.query.Id)});
+//     }
+//     if (itemType == "skill"){
+//         response = await skillCollection.findOne({_id: Number(req.query.Id)});
+//     }
+//     if (itemType == "gun"){
+//         response = await gunCollection.findOne({_id: Number(req.query.Id)});
+//     }
+//     if (itemType == "ship"){
+//         response = await shipCollection.findOne({_id: Number(req.query.Id)});
+//     }
+//     if (!response || response.IconPath == "") {
+//         res.status("404").send();
+//         return;
+//     }
+//     res.status("200").json(response);
+// });
 
 async function run() {
     try {

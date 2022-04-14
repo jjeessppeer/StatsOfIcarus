@@ -3,6 +3,7 @@ const fs = require('fs');
 const assert = require('assert');
 const { kill } = require("process");
 const { json } = require("express/lib/response");
+const pipelines = require("./matchHistoryPipelines.js");
 
 const SCS_START_HOUR_UTC = 18;
 const SCS_HOUR_LENGTH = 4;
@@ -54,199 +55,56 @@ async function getShipBuilds(restrictions) {
     return out;
 }
 
-async function generateMatchQuery(filters) {
-    const shipItems = client.db("mhtest").collection("Items-Ships");
-    const playerCollection = client.db("mhtest").collection("Players");
-    let filterPipeline = [];
-
-    for (let filter of filters) {
-        if (filter.filterType == "Player") {
-            let searchName = filter.data;
-            let player = await playerCollection.findOne({ "Name": new RegExp(searchName, "i") });
-            let playerId = -2;
-            if (player) playerId = player._id;
-            let query = {
-                $match: {
-                    FlatPlayers: playerId
-                }
-            };
-            filterPipeline.push(query);
-        }
-        if (filter.filterType == "Ship") {
-            let searchName = filter.data;
-            let shipItem = await shipItems.findOne({ "Name": new RegExp(searchName, "i") });
-            let shipModel = -1;
-            if (shipItem) shipModel = shipItem._id;
-            let query = {
-                $match: {
-                    $or: [
-                        { Team_0_ShipModels: { $all: [shipModel] } },
-                        { Team_1_ShipModels: { $all: [shipModel] } }
-                    ]
-                }
-            };
-            filterPipeline.push(query);
-        }
+async function getPlayerIdFromName(name, exactMatch=false) {
+    const playersCollection = client.db("mhtest").collection("Players");
+    let player;
+    if (exactMatch) {
+        name = name + " [PC]";
+        player = await playersCollection.findOne({ Name: name });
     }
-
-    return filterPipeline;
+    else {
+        player = await playersCollection.findOne(
+            { "Name": new RegExp(name, "i") },
+            { _id: true });
+    }
+    if (player) return player._id;
+    return false;
 }
 
+async function getPlayerInfo(playerName, timeSpanDays=366) {
+    const playersCollection = client.db("mhtest").collection("Players");
+    let playerId = await getPlayerIdFromName(playerName);
+    let playerInfoPipeline = pipelines.playerInfoPipeline(playerId, timeSpanDays);
+    
+    let playerInfoAggregate = playersCollection.aggregate(playerInfoPipeline);
+    let playerInfo = await playerInfoAggregate.next();
+    return playerInfo;
+}
 
-async function getMatches(filters, perspective, offset, count) {
+async function getRecentMatches(filters, page) {
+    const RESULTS_PER_PAGE = 10;
     const matchCollection = client.db("mhtest").collection("Matches");
+    let basePipeline = pipelines.recentMatchesPipeline(RESULTS_PER_PAGE*page, RESULTS_PER_PAGE);
+    let filterPipeline = await pipelines.generateMatchFilterPipeline(
+        filters,
+        client.db("mhtest").collection("Players"));
+    let fullPipeline = filterPipeline.concat(basePipeline);
+    let matchesAggregate = matchCollection.aggregate(fullPipeline);
+    let matches = await matchesAggregate.next();
+    return matches;
+}
 
-    let filterPipeline = await generateMatchQuery(filters);
-
-    let modelWinratePipeline = [
-        { "$unwind": {
-            path: "$ShipModels",
-            includeArrayIndex: "TeamIndex"}},
-        { "$unwind": {
-            path: "$ShipModels"
-        }},
-        { $group: {
-            _id: "$ShipModels",
-            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
-            // Losses: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 0, 1]} },
-            PlayedGames: { $sum: 1 }
-        }},
-        { $lookup: {
-            from: "Items-Ships",
-            localField: "_id",
-            foreignField: "_id",
-            as: "ShipItem"
-    }},
-    ];
-
-    let playerInfoPipeline = [
-        { $unwind: {
-            path: "$Players",
-            includeArrayIndex: "TeamIndex"}},
-        { $unwind: {
-            path: "$Players"
-        }},
-        { $unwind: {
-            path: "$Players"
-        }},
-        { $group: {
-            _id: "$Players",
-            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
-            PlayedGames: { $sum: 1 }
-        }},
-        { $sort: { "PlayedGames": -1 } },
-        { $limit: 5 },
-        { $lookup: {
-                from: "Players",
-                localField: "_id",
-                foreignField: "_id",
-                as: "PlayerData"
-        }},
-    ];
-
-    const pipeline = [
-        {$match: { TeamSize: 2 }},
-        {$match: { TeamCount: 2 }},
-        {$match: { GameMode: 2 }},
-
-        {
-            $facet: {
-                "playerInfo": playerInfoPipeline,
-                "winpickRate": modelWinratePipeline,
-                "stage1": [
-                    { "$group": { _id: null, count: { $sum: 1 } } }
-                ],
-                "stage2": [
-                    { "$sort": { "Timestamp": -1 } }, 
-                    { "$skip": offset }, 
-                    { "$limit": count },
-                    {
-                        $lookup: {
-                            from: "Players",
-                            localField: "FlatPlayers",
-                            foreignField: "_id",
-                            as: "PlayerInfo"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "PlayerEquipment",
-                            localField: "FlatSkills",
-                            foreignField: "_id",
-                            as: "LoadoutInfo"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Ships",
-                            localField: "FlatShips",
-                            foreignField: "_id",
-                            as: "ShipLoadouts"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Ships",
-                            localField: "ShipLoadouts.ShipModel",
-                            foreignField: "_id",
-                            as: "ShipItems"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Skills",
-                            localField: "LoadoutInfo.Skills",
-                            foreignField: "_id",
-                            as: "SkillItems"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Guns",
-                            localField: "ShipLoadouts.Loadout",
-                            foreignField: "_id",
-                            as: "GunItems"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Maps",
-                            localField: "MapId",
-                            foreignField: "_id",
-                            as: "MapItem"
-                        }
-                    },
-                ]
-            }
-        },
-        { $unwind: "$stage1" },
-        //output projection
-        {
-            $project: {
-                count: "$stage1.count",
-                data: "$stage2",
-                modelWinrates: "$winpickRate",
-                playerInfo: "$playerInfo"
-            }
-        }
-    ];
-
-    filterPipeline.forEach(q => {
-        // console.log(JSON.stringify(q));
-        pipeline.unshift(q);
+async function getShipsOverviewInfo() {
+    // TODO: add filter option.
+    const matchCollection = client.db("mhtest").collection("Matches");
+    let basePipeline = pipelines.modelPickWinRates();
+    let aggregate = matchCollection.aggregate(basePipeline);
+    let result = await aggregate.next();
+    await aggregate.forEach(element => {
+        result.push(element);
     });
-    // let aggCursor2 = await matchCollection.aggregate(pipeline).explain(true);
-    // console.log("__");
-    // console.log(JSON.stringify(aggCursor2));
-    // console.log("__");
-    let aggCursor = matchCollection.aggregate(pipeline);
-    // let aggCursor = matchCollection.find();
-    let result = {};
-    result = await aggCursor.next();
-    aggCursor.close();
     return result;
 }
-
 
 async function submitRecord(record, ip) {
     if (!validateHistorySubmission(record)) {
@@ -604,7 +462,9 @@ function setMongoClient(clientIn) {
 
 module.exports = {
     submitRecord,
-    getMatches,
+    getPlayerInfo,
+    getRecentMatches,
+    getShipsOverviewInfo,
     setMongoClient,
     connect,
     close

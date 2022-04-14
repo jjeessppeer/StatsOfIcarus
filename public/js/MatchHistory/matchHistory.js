@@ -60,11 +60,11 @@ function initializeMatchHistory(){
     advanCat.style.height = "0px";
 
     // Initialize basic search
-    document.querySelector(".basic-search button").addEventListener("click", requestFilteredSearch);
+    document.querySelector(".basic-search button").addEventListener("click", requestRecentMatches);
     document.querySelector(".basic-search input").addEventListener("keydown", evt => {
         if (evt.keyCode === 13) {
             evt.preventDefault();
-            requestFilteredSearch();
+            requestRecentMatches();
         }
     });
     document.querySelector(".basic-search select").addEventListener("change", evt => {
@@ -78,10 +78,29 @@ function initializeMatchHistory(){
             // textInput.placeholder = "";
         }
     });
+
+    httpxPostRequest('/get_ship_winrates', {}, function() {
+        if (this.readyState == 4 && this.status == 200){
+            let response = JSON.parse(this.response);
+            if (!response) return;
+            console.log(response);
+            // updateMatchHistoryList(response); 
+            // redrawWinpickChart(response.modelWinrates, response.count);
+            updatePopularityList(response.ModelWinrates, response.Count);
+        }
+    });
     
 
     // initializeCharts();
-    requestFilteredSearch(); 
+    requestRecentMatches();
+
+    httpxPostRequest('/get_player_info', {name: "whereami"}, function() {
+        if (this.readyState == 4 && this.status == 200){
+            let response = JSON.parse(this.response);
+            if (!response) return;
+            console.log(response);
+        }
+    });
 }
 
 function initializeCharts() {
@@ -212,54 +231,48 @@ function redrawWinpickChart(modelWinrates, totalMatches) {
     console.log("UPDATING CHART");
 }
 
-function getSearchOptions() {
-    let options = {
-        filters: [], 
-        perspective: "All", 
-        offset: 0,
-        count: 50};
-
+function getMatchFilters() {
+    let filters = [];
     if (search_mode == 0) {
         let searchString = document.querySelector(".basic-search input").value;
         let searchType = document.querySelector(".basic-search select").value;
 
         if (searchType == "All" || searchString == ""){
-            return options;
-        } 
-        options.perspective = searchType;
-        options.filters.push( {
+            return filters;
+        }
+        filters.push({
             filterType: searchType, 
-            data: searchString} );
+            data: searchString});
     }
-    return options;
+    return filters;
 }
 
-function requestFilteredSearch() {
-    let options = getSearchOptions();
-    document.getElementById("matchHistoryList").innerHTML = "";
-    httpxPostRequest('/get_match_history2', options, function() {
+function requestRecentMatches(page=0, clearMatchList=true) {
+    let filters = getMatchFilters();
+    if (clearMatchList) {
+        document.getElementById("matchHistoryList").innerHTML = "";
+    }
+    httpxPostRequest('/get_recent_matches', {filters: filters, pageNumber: page}, function() {
         if (this.readyState == 4 && this.status == 200){
             let response = JSON.parse(this.response);
             if (!response) return;
             updateMatchHistoryList(response); 
             // redrawWinpickChart(response.modelWinrates, response.count);
-            updatePopularityList(response.modelWinrates, response.count);
+            // updatePopularityList(response.modelWinrates, response.count);
         }
     });
 }
-
 function updateMatchHistoryList(matchHistory){
     console.log("Match history recieved");
     console.log(matchHistory);
 
     // Insert new match history elements from the input list.
-    for (let entry of matchHistory.data) {
+    for (let entry of matchHistory.Matches) {
         let overview = document.createElement('li', {is: 'match-history-entry'});
         overview.fillData(entry);
         document.getElementById("matchHistoryList").append(overview); 
         console.log("added entry") 
     }
-    
 }
 
 // TODO: Make these functions fetch and cache data instead of resending with every match record.

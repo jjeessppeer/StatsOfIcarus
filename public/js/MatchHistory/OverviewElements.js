@@ -11,13 +11,13 @@ class ShipPopularityElement extends HTMLLIElement {
             </div>`;
     }
 
-    initialize(modelWinrate, totalMatches) {
+    initialize(modelWinrate, totalPicks) {
         let shipItem = modelWinrate.ShipItem[0];
         this.querySelector('img').src = `images/item-icons/${shipItem.IconPath}`;
         this.querySelector('.shipname a').textContent = shipItem.Name;
 
         let picked = modelWinrate.PlayedGames;
-        let pickRate = picked / (totalMatches*4)
+        let pickRate = picked / totalPicks;
         let wins = modelWinrate.Wins;
         let winRate = wins / picked; 
         this.querySelector('.shippopularity').textContent = `Picked: ${precise(pickRate*100, 2)}% [${picked}]`;
