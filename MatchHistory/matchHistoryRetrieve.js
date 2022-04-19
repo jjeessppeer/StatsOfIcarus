@@ -51,6 +51,8 @@ async function getPlayerInfo(playerName, timeSpanDays=366) {
 async function getRecentMatches(filters, page) {
     const RESULTS_PER_PAGE = 10;
     const matchCollection = client.db("mhtest").collection("Matches");
+    console.log(filters)
+    console.log(page);
     let basePipeline = pipelines.recentMatchesPipeline(RESULTS_PER_PAGE*page, RESULTS_PER_PAGE);
     let filterPipeline = await pipelines.generateMatchFilterPipeline(
         filters,

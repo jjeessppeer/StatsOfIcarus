@@ -60,7 +60,7 @@ function initializeMatchHistory(){
     advanCat.style.height = "0px";
 
     // Initialize basic search
-    document.querySelector(".basic-search button").addEventListener("click", requestRecentMatches);
+    document.querySelector(".basic-search button").addEventListener("click", () => requestRecentMatches());
     document.querySelector(".basic-search input").addEventListener("keydown", evt => {
         if (evt.keyCode === 13) {
             evt.preventDefault();
@@ -93,14 +93,7 @@ function initializeMatchHistory(){
 
     // initializeCharts();
     requestRecentMatches();
-
-    httpxPostRequest('/get_player_info', {name: "whereami"}, function() {
-        if (this.readyState == 4 && this.status == 200){
-            let response = JSON.parse(this.response);
-            if (!response) return;
-            console.log(response);
-        }
-    });
+    updatePlayerInfo();
 }
 
 function initializeCharts() {
@@ -192,6 +185,13 @@ function initializeCharts() {
         data: {},
         options: options
     });
+}
+
+async function updatePlayerInfo() {
+    let res = await asyncPostRequest('/get_player_info', {name: "whereami"});
+    if (res.status != 200) throw new Error('Error getting player info');
+    let playerInfo = JSON.parse(res.response);
+    console.log(playerInfo)
 }
 
 

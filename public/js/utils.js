@@ -481,6 +481,22 @@ function httpxGetRequest(url, callback=null, timeout_callback=null){
     xhttp.send();
 }
 
+function asyncPostRequest(url, data) {
+    let xhttp = new XMLHttpRequest();
+    xhttp.timeout = 5000;
+    xhttp.open("POST", url);
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    // xhttp.onreadystatechange = callback;
+    // xhttp.ontimeout = timeout_callback;
+    xhttp.send(JSON.stringify(data));
+    return new Promise((resolve, reject) => {
+        xhttp.onload = evt => resolve(evt.target);
+        xhttp.ontimeout = reject;
+        xhttp.onerror = reject;
+        // reject();
+    });
+}
+
 
 
 

@@ -1,9 +1,9 @@
 
 function playerInfoPipeline(playerId, daysAgo) {
-    let timeNow = new Date().getTime();
+    const timeNow = new Date().getTime();
     const msPerDay = 24 * 60 * 60 * 1000;
-    let minTime = timeNow - daysAgo * msPerDay;
-    let pipeline = [
+    const minTime = timeNow - daysAgo * msPerDay;
+    const pipeline = [
         { $match: {_id: playerId} },
         { $facet: {
           "ShipRates": [
@@ -46,14 +46,19 @@ function playerInfoPipeline(playerId, daysAgo) {
                 Class: "$PlayerLoadout.Class"},
               count: {$sum: 1},
               wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
-            }}],
+            }}
+          ],
           "PlayerInfo": [
             {$project: {
               Name: "$Name",
               MatchesRecordedCount: "22"
-            }}
+            }},
           ]
-          }}]
+        }},
+        { $unwind: {
+          path: "$PlayerInfo"
+        }},
+      ]
     return pipeline;
 }
 
