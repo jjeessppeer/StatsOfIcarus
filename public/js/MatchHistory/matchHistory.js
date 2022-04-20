@@ -34,7 +34,25 @@ const SKILL_ORDER = [
     "Drogue Chute",
     "Impact Bumpers",
     "Tar Barrel"
-]
+];
+var ship_image_srcs2 = {
+    70: "images/ship-images/corsair_gundeck_small.png",
+    67: "images/ship-images/crusader_gundeck_small.png",
+    14: "images/ship-images/galleon_gundeck_small.png",
+    11: "images/ship-images/goldfish_gundeck_small.png",
+    69: "images/ship-images/judge_gundeck_small.png",
+    12: "images/ship-images/junker_gundeck_small.png",
+    64: "images/ship-images/magnate_gundeck_small.png",
+    19: "images/ship-images/mob_gundeck_small.png",
+    16: "images/ship-images/pyra_gundeck_small.png",
+    82: "images/ship-images/shrike_gundeck_small.png",
+    15: "images/ship-images/spire_gundeck_small.png",
+    13: "images/ship-images/squid_gundeck_small.png",
+    97: "images/ship-images/storm_gundeck_small.png" 
+};
+const SHIP_ICONS = {
+
+}
 
 function initializeMatchHistory(){
     // Initialize search categories
@@ -188,10 +206,17 @@ function initializeCharts() {
 }
 
 async function updatePlayerInfo() {
-    let res = await asyncPostRequest('/get_player_info', {name: "whereami"});
+    let res = await asyncPostRequest('/get_player_info', {name: "Sonami"});
+    // let res = await asyncPostRequest('/get_player_info', {name: "Rensen"});
+    // let res = await asyncPostRequest('/get_player_info', {name: "Bestvon"});
     if (res.status != 200) throw new Error('Error getting player info');
     let playerInfo = JSON.parse(res.response);
     console.log(playerInfo)
+
+    let t = document.createElement('div', {is: "player-ship-info-table"});
+    t.initialize(playerInfo.ShipRates);
+    document.querySelector('.top-area').append(t);
+
 }
 
 
@@ -271,7 +296,6 @@ function updateMatchHistoryList(matchHistory){
         let overview = document.createElement('li', {is: 'match-history-entry'});
         overview.fillData(entry);
         document.getElementById("matchHistoryList").append(overview); 
-        console.log("added entry") 
     }
 }
 

@@ -46,17 +46,45 @@ function playerInfoPipeline(playerId, daysAgo) {
                 Class: "$PlayerLoadout.Class"},
               count: {$sum: 1},
               wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
-            }}
+            }},
+            { $project: {
+              ShipModel: "$_id.Ship",
+              PlayerClass: "$_id.Class",
+              MatchCount: "$count",
+              Wins: "$wins"
+            }},
+            { $group: {
+              _id: "$ShipModel",
+              MatchCount: { $sum: "$MatchCount" },
+              Wins: { $sum: "$Wins" },
+              ClassStats: { $push : "$$ROOT" }
+            }},
+            { $sort: {
+              MatchCount: -1
+            }},
+            { $group: {
+              _id: null,
+              MatchCount: { $sum: "$MatchCount" },
+              Wins: { $sum: "$Wins" },
+              ModelStats: { $push : "$$ROOT" }
+            }},
+            // { $unwind: {
+            //   path: "$$ROOT"
+            // }},
           ],
           "PlayerInfo": [
             {$project: {
               Name: "$Name",
-              MatchesRecordedCount: "22"
+              Clan: "$Clan",
+              MatchCount: "$MatchCount"
             }},
           ]
         }},
         { $unwind: {
           path: "$PlayerInfo"
+        }},
+        { $unwind: {
+          path: "$ShipRates"
         }},
       ]
     return pipeline;

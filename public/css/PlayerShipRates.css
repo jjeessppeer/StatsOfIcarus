@@ -1,0 +1,74 @@
+.player-ship-info-table {
+    width: 500px;
+}
+
+.player-ship-info-table .ship-list{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+
+.player-ship-info-cell {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border: 1px solid;
+    border-color: rgb(205, 210, 210);
+    margin-top: -1px;
+    margin-left: -1px;
+    /* outline: 1px solid; */
+    /* outline-color: rgb(205, 210, 210); */
+    /* width: 100%; */
+    padding: 5px;
+    width: 250px;
+
+
+    /* height: 200px; */
+
+    color: var(--text-light);
+}
+
+.player-ship-info-cell img {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+
+}
+
+
+
+.player-ship-info-cell .numbers {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 20px;
+    margin-left: 20px;
+    
+    font-size: 13px;
+}
+.player-ship-info-cell .numbers > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-ship-info-cell .barcharts {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-ship-info-cell .chart-container {
+    width: 80px;
+    height: 40px;
+    /* border-radius: 2px; */
+    /* border: 1px solid black; */
+    /* overflow: hidden; */
+    /* height: 400px; */
+    /* height: 400px; */
+    /* width: 400px; */
+}
