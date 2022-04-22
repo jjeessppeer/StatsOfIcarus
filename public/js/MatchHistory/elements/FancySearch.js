@@ -6,25 +6,40 @@ class FancySearchbar extends HTMLDivElement {
     this.innerHTML = `
       <div class="searchbar">
         <input class="search-input" type="text" placeholder="Search for a player or ship" autocomplete="off">
-        <button>Filters<i class="fas fa-chevron-down"></i></button>
-        <button><i class="fas fa-search"></i></button>
+        <button disabled>Filters<i class="fas fa-chevron-down"></i></button>
+        <button class="searchbutton"><i class="fas fa-search"></i></button>
       </div>      
       <div class="search-suggestion-box">
       </div>
     `;
     this.categories = [];
 
-    this.querySelector('input').addEventListener('focus', () => this.toggleSuggestionBox(true));
-    this.querySelector('input').addEventListener('click', () => this.toggleSuggestionBox(true));
-    this.querySelector('input').addEventListener('focusout', () => this.toggleSuggestionBox(false));
+    // this.querySelector('input').addEventListener('focus', () => this.toggleSuggestionBox(true));
+    // this.querySelector('input').addEventListener('click', () => this.toggleSuggestionBox(true));
+    // this.querySelector('input').addEventListener('focusout', evt => {
+    //   console.log(evt)
+    // });
+    this.querySelector('input').addEventListener('focus', evt => {
+      this.toggleSuggestionBox(true);
+    });
+    this.querySelector('input').addEventListener('click', evt => {
+      this.toggleSuggestionBox(true);
+    });
+    document.addEventListener('click', evt => {
+      if (!this.contains(evt.target)) this.toggleSuggestionBox(false);
+    });
+
+
+    this.querySelector('input').addEventListener('input', () => this.updateSuggestions());
+
+    // Search events
     this.querySelector("input").addEventListener("keydown", evt => {
       if (evt.key === 'Enter') {
         evt.preventDefault();
-        this.toggleSuggestionBox(false)
+        this.createSearchEvent();
       }
     });
-    this.querySelector('input').addEventListener('input', () => this.updateSuggestions());
-
+    this.querySelector(".searchbutton").addEventListener('click', () => this.createSearchEvent());
 
     let shipListItems = [];
     for (let shipId in SHIP_ITEMS) {
@@ -41,10 +56,13 @@ class FancySearchbar extends HTMLDivElement {
       name: "PlayerName"
     }]);
     this.addCategory("Recent Searches", [
-      { icon: `images/item-icons/ship123123123.jpg`, name: "recent1" },
-      { icon: `images/item-icons/ship123123123.jpg`, name: "recent2" },
-      { icon: `images/item-icons/ship123123123.jpg`, name: "recent3" },
-      { icon: `images/item-icons/ship123123123.jpg`, name: "recent4" },
+      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent1" },
+      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent2" },
+      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent3" },
+      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent4" },
+    ]);
+    this.addCategory("Generic Info", [
+      { icon: `images/item-icons/ship123123123.jpg`, name: "Generic info" },
     ]);
 
     this.updateSuggestions();
@@ -67,8 +85,7 @@ class FancySearchbar extends HTMLDivElement {
                 <img src="${item.icon}">
                 <span>${item.name}</span>
                 </li>`);
-
-      // <span>${item.name}</span>
+      listItem.addEventListener('click', () => this.createSearchEvent());
 
       item.element = listItem;
       categoryData.items.push(item);
@@ -85,6 +102,31 @@ class FancySearchbar extends HTMLDivElement {
     this.classList.toggle('open', open);
   }
 
+  createSearchEvent() {
+    const evt = new CustomEvent("search", {
+      detail: this.getSearchQuery(),
+      bubbles: false,
+      cancelable: true,
+      composed: false,
+    });
+    this.toggleSuggestionBox(false);
+    this.dispatchEvent(evt);
+  }
+
+  getSearchQuery() {
+    let query = {
+      perspective: undefined,
+      filters: []
+    };
+    let [category, item] = this.getTopItem();
+
+    if (category.name = "Search Player") {
+      query.filters.push( {type: "Player", data: item.name} );
+      query.perspective = {type: "Player", name: item.name};
+    }
+    return query;
+  }
+
   getTopItem(){
     // Return first displayed item and category.
     for (let category of this.categories) {
@@ -94,6 +136,10 @@ class FancySearchbar extends HTMLDivElement {
         }
       }
     }
+  }
+
+  itemSelected(item) {
+    console.log(item);
   }
 
   itemFilterStatus(category, item) {
@@ -112,7 +158,11 @@ class FancySearchbar extends HTMLDivElement {
       // Only show recent searches if nothing is typed.
       return searchText == "";
     }
-    return false;
+    if (category.name == "Generic Info") {
+      // return searchText == "";
+      return true;
+    }
+    return true;
   }
 
   updateSuggestions() {
@@ -148,20 +198,9 @@ class FancySearchbar extends HTMLDivElement {
 }
 customElements.define('fancy-searchbar', FancySearchbar, { extends: 'div' });
 
-function htmlToElement(html) {
-  var template = document.createElement('template');
-  html = html.trim();
-  template.innerHTML = html;
-  return template.content.firstChild;
-}
 
-function initializeSearchbar() {
-  let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
-  document.getElementById('matchHistorySearch').append(searchbar);
-  // let input = document.querySelector('.fancy-search .search-input');
-  // console.log(input);
-  // input.addEventListener('focus', () => console.log("WWW"))
-}
-// initializeSearchbar();
 
-console.log("ASDASDASDASDS")
+// function initializeSearchbar() {
+//   let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
+//   document.getElementById('matchHistorySearch').append(searchbar);
+// }

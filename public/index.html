@@ -36,19 +36,18 @@
   <script src="js/shipBuilder.js"></script>
   <script src="js/shipBuilderTranslations.js"></script>
   <script src="js/MatchHistory/matchHistory.js"></script>
-  <script src="js/MatchHistory/elements.js"></script>
-  <script src="js/MatchHistory/OverviewElements.js"></script>
-  <script src="js/MatchHistory/FancySearch.js"></script>
+  <!-- <script src="js/MatchHistory/FancySearch.js"></script> -->
+  <script src="js/MatchHistory/elements/FancySearch.js"></script>
+  <script src="js/MatchHistory/elements/ShipPopularity.js"></script>
+  <script src="js/MatchHistory/elements/MatchHistoryList.js"></script>
+  <script src="js/MatchHistory/elements/PlayerShipInfo.js"></script>
+  <script src="js/MatchHistory/elements/PlayerInfo.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
   <link rel="stylesheet" href="css/HistorySearch.css">
   <link rel="stylesheet" href="css/HistoryGraphs.css">
   <link rel="stylesheet" href="css/PlayerShipRates.css">
   <link rel="stylesheet" href="css/FancySearch.css">
-
-  
-  
-  
 </head>
 
 <body>
@@ -311,50 +310,17 @@
             
         </div>
         <br>
-        <div class="match-history-search">
-          <div id="basicSearchCategory" class="category">
-            <div class="category-button">
-              <button><i class="fas fa-chevron-up"></i> Basic search</button>
-            </div>
-            <div class="category-content">
-              <div class="basic-search">
-                <select autocomplete="off">
-                  <option value="Player" selected>Player</option>
-                  <option value="Ship">Ship</option>
-                  <option value="All">All</option>
-                </select>
-                <input type="text" placeholder="Name..." autocomplete="off">
-                <button>Search</button>
-              </div>
-            </div>
-          </div>
-
-          
-          <div id="advancedSearchCategory" class="category">
-            <div class="category-button">
-              <button><i class="fas fa-chevron-up"></i> Advanced filters</button>
-            </div>
-            <div class="category-content">
-              &#128679; Under construction &#128679;
-            </div>
-
-          </div>
-
-
-        </div>
         <div class="content-area">
-          <div class="top-area">
-            <!-- <div id="winpickChartContainer" class="chart-container">
-              <canvas id="winpickChart"></canvas>
-            </div> -->
+          <div class="left-area">
+            <ul class="ship-popularity-list"></ul>
           </div>
+          
           <div class="middle-area">
-            <div class="left-area">
-              <ul id="ShipPopularityList"></ul>
+            <div class="top-area">
             </div>
             <div class="right-area">
-              <ul class="match-history-list" id="matchHistoryList">
-              </ul>
+              <!-- <ul class="match-history-list" id="matchHistoryList">
+              </ul> -->
             </div>
           </div>
         </div>
@@ -1454,7 +1420,6 @@
       div.siblings("div").hide();
     }
 
-    initializeSearchbar();
   </script>
 
 

@@ -6,7 +6,7 @@
 
 #matchHistory .content-area {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
     /* margin: auto; */
@@ -16,7 +16,7 @@
 
 #matchHistory .middle-area {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: nowrap;
     justify-content: left;
     /* margin: auto; */
@@ -50,7 +50,8 @@
 
 
 
-#ShipPopularityList {
+
+.ship-popularity-list {
     list-style: none;
     text-align: left;
     margin: 0;

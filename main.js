@@ -32,11 +32,11 @@ app.get('/ping', function (req, res) {
     res.status(200).send("OK");
 });
 
-app.get('/get_match_history', function (req, res) {
-    let ip = requestIp.getClientIp(req);
-    matches = data_db.prepare("SELECT * FROM Match_History").all();
-    res.status(200).json(matches);
-});
+// app.get('/get_match_history', function (req, res) {
+//     let ip = requestIp.getClientIp(req);
+//     matches = data_db.prepare("SELECT * FROM Match_History").all();
+//     res.status(200).json(matches);
+// });
 
 app.get('/get_datasets', function (req, res) {
     let ip = requestIp.getClientIp(req);
@@ -66,6 +66,27 @@ app.post('/submit_match_history', async function (req, res) {
 });
 
 
+app.post('/match_history_search', async function(req, res) {
+    // TODO input assertions
+    let responseData = {perspective: req.body.perspective};
+    if (req.body.perspective.type == 'Player') {
+        let playerData = await matchHistoryRetrieve.getPlayerInfo(req.body.perspective.name);
+        responseData.playerData = playerData;
+    }
+    let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, 0);
+    responseData.matches = matches;
+
+    res.status(200).json(responseData);
+});
+
+app.get('/match_history_overview', async function(req, res) {
+    let responseData = {
+        matches: await matchHistoryRetrieve.getRecentMatches([], 0),
+        shipWinrates: await matchHistoryRetrieve.getShipsOverviewInfo()
+    }
+    res.status(200).json(responseData);
+});
+
 app.post('/get_player_info', async function(req, res) {
     let name = req.body.name;
     let response = await matchHistoryRetrieve.getPlayerInfo(name);
@@ -94,12 +115,8 @@ async function run() {
         console.log("Connecting to db...")
         await mongoClient.connect();
         matchHistory.setMongoClient(mongoClient);
-        // matchHistoryRetrieve.sayHello();
         matchHistoryRetrieve.setMongoClient(mongoClient);
-        // await matchHistory.connect();
         console.log("Connected to db...");
-
-
 
         // Start Http server
         console.log("Starting http server...");
@@ -114,15 +131,3 @@ async function run() {
 
 console.log("Starting server...")
 run().catch(console.dir);
-
-// // Start HTTP server
-// var httpServer = http.createServer(app);
-// httpServer.listen(80);
-
-// Start HTTPS server
-// var privateKey  = fs.readFileSync('privkey.pem', 'utf8');
-// var certificate = fs.readFileSync('cert.pem', 'utf8');
-// var ca = fs.readFileSync('chain.pem');
-// var credentials = {key: privateKey, cert: certificate, ca: ca};
-// var httpsServer = https.createServer(credentials, app);
-// httpsServer.listen(443);

@@ -51,6 +51,10 @@ var ship_image_srcs2 = {
     97: "images/ship-images/storm_gundeck_small.png" 
 };
 
+const game_modes = {
+    2: "Deathmatch"
+}
+
 const SHIP_ITEMS = {
     11: {Name: "Goldfish", Id: 11},
     12: {Name: "Junker", Id: 12},
@@ -68,127 +72,103 @@ const SHIP_ITEMS = {
 }
 
 function initializeMatchHistory(){
-    // Initialize search categories
-    document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
-        element.addEventListener("click", evt => {
-            // Hide other search categories.
-            document.querySelectorAll(".match-history-search .category-content").forEach(el => {
-                el.style.height = "0px";
-            });
-            let category = evt.target.parentElement.parentElement;
-            // Show this one
-            let target = category.querySelector(".category-content")
-            target.style.height = target.scrollHeight+"px";
+    // // Initialize search categories
+    // document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
+    //     element.addEventListener("click", evt => {
+    //         // Hide other search categories.
+    //         document.querySelectorAll(".match-history-search .category-content").forEach(el => {
+    //             el.style.height = "0px";
+    //         });
+    //         let category = evt.target.parentElement.parentElement;
+    //         // Show this one
+    //         let target = category.querySelector(".category-content")
+    //         target.style.height = target.scrollHeight+"px";
 
-            const index = Array.from(category.parentNode.children).indexOf((category))
-            search_mode = index;
-        });
-    });
+    //         const index = Array.from(category.parentNode.children).indexOf((category))
+    //         search_mode = index;
+    //     });
+    // });
 
-    let basicCat = document.querySelector("#basicSearchCategory .category-content");
-    let advanCat = document.querySelector("#advancedSearchCategory .category-content");
-    basicCat.style.height = basicCat.scrollHeight+"px";
-    advanCat.style.height = "0px";
+    // let basicCat = document.querySelector("#basicSearchCategory .category-content");
+    // let advanCat = document.querySelector("#advancedSearchCategory .category-content");
+    // basicCat.style.height = basicCat.scrollHeight+"px";
+    // advanCat.style.height = "0px";
 
-    // Initialize basic search
-    document.querySelector(".basic-search button").addEventListener("click", () => requestRecentMatches());
-    document.querySelector(".basic-search input").addEventListener("keydown", evt => {
-        if (evt.keyCode === 13) {
-            evt.preventDefault();
-            requestRecentMatches();
-        }
-    });
-    document.querySelector(".basic-search select").addEventListener("change", evt => {
-        let textInput = document.querySelector(".basic-search input");
-        textInput.disabled = false;
-        if (evt.target.value == "Player") textInput.placeholder = "Player name..."
-        if (evt.target.value == "Ship") textInput.placeholder = "Ship name..."
+    // // Initialize basic search
+    // document.querySelector(".basic-search button").addEventListener("click", () => requestRecentMatches());
+    // document.querySelector(".basic-search input").addEventListener("keydown", evt => {
+    //     if (evt.keyCode === 13) {
+    //         evt.preventDefault();
+    //         requestRecentMatches();
+    //     }
+    // });
+    // document.querySelector(".basic-search select").addEventListener("change", evt => {
+    //     let textInput = document.querySelector(".basic-search input");
+    //     textInput.disabled = false;
+    //     if (evt.target.value == "Player") textInput.placeholder = "Player name..."
+    //     if (evt.target.value == "Ship") textInput.placeholder = "Ship name..."
 
-        if (evt.target.value == "All") {
-            textInput.disabled = true;
-            // textInput.placeholder = "";
-        }
-    });
+    //     if (evt.target.value == "All") {
+    //         textInput.disabled = true;
+    //         // textInput.placeholder = "";
+    //     }
+    // });
+    
+    let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
+    document.getElementById('matchHistorySearch').append(searchbar);
+
+    searchbar.addEventListener('search', executeSearch)
 
     httpxPostRequest('/get_ship_winrates', {}, function() {
         if (this.readyState == 4 && this.status == 200){
             let response = JSON.parse(this.response);
             if (!response) return;
-            console.log(response);
-            // updateMatchHistoryList(response); 
-            // redrawWinpickChart(response.modelWinrates, response.count);
-            updatePopularityList(response.ModelWinrates, response.Count);
+            initializePopularityList(response.ModelWinrates, response.Count);
         }
     });
     
-    requestRecentMatches();
-    updatePlayerInfo();
+    // requestRecentMatches();
+    // updatePlayerInfo();
 }
 
-async function updatePlayerInfo() {
-    // let res = await asyncPostRequest('/get_player_info', {name: "Sonami"});
-    let res = await asyncPostRequest('/get_player_info', {name: "koek"});
-    // let res = await asyncPostRequest('/get_player_info', {name: "Bestvon"});
-    if (res.status != 200) throw new Error('Error getting player info');
-    let playerInfo = JSON.parse(res.response);
-    console.log(playerInfo)
+async function executeSearch(evt) {
+    clearMatchHistoryDisplay();
+    let query = evt.detail;
+    let res = await asyncPostRequest('/match_history_search', query);
+    let response = JSON.parse(res.response);
+    console.log(response);
+    initializePlayerInfo(response.playerData);
+    intializeMatchHistoryList(response.matches.Matches);
+}
 
+function clearMatchHistoryDisplay() {
+    console.log("Cleaning...")
+    document.querySelectorAll('.player-ship-info-table').forEach(el => el.remove());
+    document.querySelectorAll('.ship-popularity-list').forEach(el => el.remove());
+    document.querySelectorAll('.match-history-list').forEach(el => el.remove());
+}
+
+function initializePlayerInfo(playerData) {
     let t = document.createElement('div', {is: "player-ship-info-table"});
-    t.initialize(playerInfo.ShipRates);
+    t.initialize(playerData.ShipRates);
     document.querySelector('.top-area').append(t);
-
 }
 
-function updatePopularityList(modelWinrates, totalMatches) {
+function intializeMatchHistoryList(matches, matchCount=0) {
+    let ul = document.createElement('ul', {is: 'match-history-list'});
+    ul.addMatches(matches);
+    document.querySelector("#matchHistory .right-area").append(ul);
+}
+
+function initializePopularityList(modelWinrates, totalMatches) {
     modelWinrates.sort(function (a, b) {
         return b.PlayedGames - a.PlayedGames;
     });
-    document.getElementById('ShipPopularityList').innerHTML = "";
-    modelWinrates.forEach(ship => {
-        let li = document.createElement('li', {is: 'ship-popularity-element'});
-        li.initialize(ship, totalMatches);
-        document.getElementById('ShipPopularityList').append(li)
-    });
-}
+    document.querySelectorAll('.ship-popularity-list').forEach(el => el.remove());
 
-function redrawWinpickChart(modelWinrates, totalMatches) {
-    removeChartData(pickwinrateChart);
-    let percentageMode = true;
-
-    let labels = [];
-    let dataset = [];
-    let totalPicks = totalMatches * 4;
-    modelWinrates.forEach(el => {
-        labels.push(el.ShipItem[0].Name);
-        dataset.push({x: el.PlayedGames / totalPicks, y: el.Wins / el.PlayedGames, r: 12, picks: el.PlayedGames, wins: el.Wins});
-    });
-
-    let data = {
-        labels: labels,
-        datasets: [{
-            label: "Scatterdata",
-            data: dataset
-        }]
-    }
-    pickwinrateChart.data = data;
-    pickwinrateChart.update();
-    console.log("UPDATING CHART");
-}
-
-function getMatchFilters() {
-    let filters = [];
-    if (search_mode == 0) {
-        let searchString = document.querySelector(".basic-search input").value;
-        let searchType = document.querySelector(".basic-search select").value;
-
-        if (searchType == "All" || searchString == ""){
-            return filters;
-        }
-        filters.push({
-            filterType: searchType, 
-            data: searchString});
-    }
-    return filters;
+    let ul = document.createElement('ul', {is: 'ship-popularity-list'});
+    ul.initialize(modelWinrates, totalMatches);
+    document.querySelector('#matchHistory .left-area').append(ul);
 }
 
 function requestRecentMatches(page=0, clearMatchList=true) {
@@ -201,8 +181,6 @@ function requestRecentMatches(page=0, clearMatchList=true) {
             let response = JSON.parse(this.response);
             if (!response) return;
             updateMatchHistoryList(response); 
-            // redrawWinpickChart(response.modelWinrates, response.count);
-            // updatePopularityList(response.modelWinrates, response.count);
         }
     });
 }
