@@ -463,7 +463,7 @@ function removeChartData(chart) {
 
 function httpxPostRequest(url, data, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
-    xhttp.timeout = 10000;
+    xhttp.timeout = 5000;
     xhttp.open("POST", url);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.onreadystatechange = callback;
@@ -474,7 +474,7 @@ function httpxPostRequest(url, data, callback=null, timeout_callback=null){
 function httpxGetRequest(url, callback=null, timeout_callback=null){
     let xhttp = new XMLHttpRequest();
     xhttp.open("GET", url);
-    xhttp.timeout = 10000;
+    xhttp.timeout = 5000;
     // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.onload = callback;
     xhttp.ontimeout = timeout_callback;
@@ -486,15 +486,26 @@ function asyncPostRequest(url, data) {
     xhttp.timeout = 5000;
     xhttp.open("POST", url);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    // xhttp.onreadystatechange = callback;
-    // xhttp.ontimeout = timeout_callback;
-    xhttp.send(JSON.stringify(data));
-    return new Promise((resolve, reject) => {
+    let promise = new Promise((resolve, reject) => {
         xhttp.onload = evt => resolve(evt.target);
         xhttp.ontimeout = reject;
         xhttp.onerror = reject;
-        // reject();
     });
+    xhttp.send(JSON.stringify(data));
+    return promise;
+}
+
+function asyncGetRequest(url, data) {
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("GET", url);
+    xhttp.timeout = 5000;
+    let promise = new Promise((resolve, reject) => {
+        xhttp.onload = evt => resolve(evt.target);
+        xhttp.ontimeout = reject;
+        xhttp.onerror = reject;
+    });
+    xhttp.send();
+    return promise;
 }
 
 

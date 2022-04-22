@@ -1,0 +1,109 @@
+
+
+.fancy-search {
+    width: 500px;
+    position: relative;
+    z-index: 2;
+}
+
+.fancy-search .searchbar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: left;
+    /* border: 1px solid black; */
+    height: 46px;
+    border-radius: 8px;
+    overflow: hidden;
+    
+    border: 1px solid;
+    border-color: rgb(205, 210, 210);
+    box-shadow: none;
+}
+
+.fancy-search.open .searchbar {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 0;
+}
+
+.fancy-search .searchbar input {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    padding-left: 15px;
+    border: 0;
+    height: 100%;
+}
+
+.fancy-search .searchbar input:focus{
+    outline: none;
+}
+
+.fancy-search .searchbar button {
+    margin: 0;
+    padding: 10px;
+    border: 0;
+    box-shadow: 0;
+    text-shadow: 0;
+    height: 100%;
+    border-left: 1px solid;
+    border-color: rgb(205, 210, 210);
+}
+
+.fancy-search > .search-suggestion-box {
+    width: 100%;
+    position: absolute;
+    display: none;
+    background-color: white;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border: 1px solid;
+    border-top: 0;
+    border-color: rgb(205, 210, 210);
+}
+.fancy-search.open > .search-suggestion-box {
+    display: block;
+}
+
+.fancy-search .search-category > span {
+    list-style: none;
+    padding-left: 12px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    font-family: Helvetica, sans-serif;
+    text-transform: uppercase;
+}
+
+.fancy-search .category-entry {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 20px;
+    cursor: pointer;
+}
+
+.fancy-search .category-entry:hover {
+    background-color: rgb(227, 227, 235);
+}
+
+
+
+.fancy-search .search-category li {
+    font-size: 14px;
+    font-family: Helvetica,sans-serif;
+    
+}
+
+.fancy-search .search-category img {
+    height: 24px;
+    width: 24px;
+    
+}
+
+.fancy-search .search-category ul {
+    list-style: none;
+    /* padding-left: 1em; */
+    padding: 0;
+    margin: 0;
+}

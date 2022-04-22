@@ -7,18 +7,16 @@ const matchHistory = require("./matchHistory.js");
 const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 
-// const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
-// const db_url = `mongodb://localhost:27017/`;
 const db_url = process.env.MONGODB_URL_STRING;
 let mongoClient = new MongoClient(db_url);
 
 const MOD_VERSION_LATEST = "0.1.3";
 
-
 // var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
 const sqlite = require('better-sqlite3');
 const { assert } = require('console');
+const { nextTick } = require('process');
 
 const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readonly: true });
 
@@ -67,6 +65,7 @@ app.post('/submit_match_history', async function (req, res) {
     res.status("202").send();
 });
 
+
 app.post('/get_player_info', async function(req, res) {
     let name = req.body.name;
     let response = await matchHistoryRetrieve.getPlayerInfo(name);
@@ -88,53 +87,6 @@ app.post(
         let response = await matchHistoryRetrieve.getShipsOverviewInfo();
         res.status(200).json(response);
 });
-
-// app.get('/item-dataset', async function (req, res) {
-//     const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
-//     const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
-//     const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
-//     const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
-//     let response = {
-//         "Maps": await mapCollection.find({GameMode: 2}).toArray(),
-//         "Ships": await shipCollection.find({}).toArray(),
-//         "Guns": await gunCollection.find({}).toArray(),
-//         "Skills": await skillCollection.find({}).toArray()
-//     }
-//     res.status("200").json(response);
-// });
-
-// app.get('/item', async function (req, res) {
-//     const mapCollection = mongoClient.db("mhtest").collection("Items-Maps");
-//     const skillCollection = mongoClient.db("mhtest").collection("Items-Skills");
-//     const gunCollection = mongoClient.db("mhtest").collection("Items-Guns");
-//     const shipCollection = mongoClient.db("mhtest").collection("Items-Ships");
-
-//     let itemType = req.query.Item;
-//     let itemId = req.query.Id;
-//     if (!(itemType && itemId)){
-//         res.status("404").send();
-//         return;
-//     }
-//     let response = false;
-
-//     if (itemType == "map"){
-//         response = await mapCollection.findOne({_id: Number(req.query.Id)});
-//     }
-//     if (itemType == "skill"){
-//         response = await skillCollection.findOne({_id: Number(req.query.Id)});
-//     }
-//     if (itemType == "gun"){
-//         response = await gunCollection.findOne({_id: Number(req.query.Id)});
-//     }
-//     if (itemType == "ship"){
-//         response = await shipCollection.findOne({_id: Number(req.query.Id)});
-//     }
-//     if (!response || response.IconPath == "") {
-//         res.status("404").send();
-//         return;
-//     }
-//     res.status("200").json(response);
-// });
 
 async function run() {
     try {
@@ -168,9 +120,9 @@ run().catch(console.dir);
 // httpServer.listen(80);
 
 // Start HTTPS server
-// var privateKey  = fs.readFileSync('/etc/letsencrypt/live/statsoficarus.xyz/privkey.pem', 'utf8');
-// var certificate = fs.readFileSync('/etc/letsencrypt/live/statsoficarus.xyz/cert.pem', 'utf8');
-// var ca = fs.readFileSync('/etc/letsencrypt/live/statsoficarus.xyz/chain.pem');
+// var privateKey  = fs.readFileSync('privkey.pem', 'utf8');
+// var certificate = fs.readFileSync('cert.pem', 'utf8');
+// var ca = fs.readFileSync('chain.pem');
 // var credentials = {key: privateKey, cert: certificate, ca: ca};
 // var httpsServer = https.createServer(credentials, app);
 // httpsServer.listen(443);

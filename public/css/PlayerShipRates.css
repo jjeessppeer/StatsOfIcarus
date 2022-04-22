@@ -1,5 +1,5 @@
 .player-ship-info-table {
-    width: 500px;
+    width: 750px;
 }
 
 .player-ship-info-table .ship-list{
@@ -20,9 +20,6 @@
     border-color: rgb(205, 210, 210);
     margin-top: -1px;
     margin-left: -1px;
-    /* outline: 1px solid; */
-    /* outline-color: rgb(205, 210, 210); */
-    /* width: 100%; */
     padding: 5px;
     width: 250px;
 

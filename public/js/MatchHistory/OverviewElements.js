@@ -32,7 +32,6 @@ class PlayerShipInfoTable extends HTMLDivElement {
 
     this.classList.add("player-ship-info-table");
     this.innerHTML = `
-
       <div class="ship-list">
       </div>
       `;

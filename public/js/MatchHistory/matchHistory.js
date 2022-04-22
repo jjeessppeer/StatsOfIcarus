@@ -50,8 +50,21 @@ var ship_image_srcs2 = {
     13: "images/ship-images/squid_gundeck_small.png",
     97: "images/ship-images/storm_gundeck_small.png" 
 };
-const SHIP_ICONS = {
 
+const SHIP_ITEMS = {
+    11: {Name: "Goldfish", Id: 11},
+    12: {Name: "Junker", Id: 12},
+    13: {Name: "Squid", Id: 13},
+    14: {Name: "Galleon", Id: 14},
+    15: {Name: "Spire", Id: 15},
+    16: {Name: "Pyramidion", Id: 16},
+    19: {Name: "Mobula", Id: 19},
+    64: {Name: "Magnate", Id: 64},
+    67: {Name: "Crusader", Id: 67},
+    69: {Name: "Judgement", Id: 69},
+    70: {Name: "Corsair", Id: 70},
+    82: {Name: "Shrike", Id: 82},
+    97: {Name: "Stormbreaker", Id: 97},
 }
 
 function initializeMatchHistory(){
@@ -59,7 +72,7 @@ function initializeMatchHistory(){
     document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
         element.addEventListener("click", evt => {
             // Hide other search categories.
-            document.querySelectorAll(".category-content").forEach(el => {
+            document.querySelectorAll(".match-history-search .category-content").forEach(el => {
                 el.style.height = "0px";
             });
             let category = evt.target.parentElement.parentElement;
@@ -108,106 +121,13 @@ function initializeMatchHistory(){
         }
     });
     
-
-    // initializeCharts();
     requestRecentMatches();
     updatePlayerInfo();
 }
 
-function initializeCharts() {
-    const ctx = document.getElementById('winpickChart');
-
-    let options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                title: {
-                    display: true,
-                    text: 'Win rate'
-                },
-                align: "end",
-                min: 0,
-                ticks: {
-                    callback: function (value) {
-                      return `${value*100}%`;
-                    },
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Pick rate'
-                },
-                min: 0,
-                ticks: {
-                    callback: function (value) {
-                      return `${value*100}%`;
-                    },
-                }
-            }
-        },
-        layout: {
-            padding: 10
-        },
-        plugins: {
-            legend: {
-                display: false
-            },
-            title: {
-                display: true,
-                text: "Ship win rate and popularity",
-                padding: {
-                    bottom: 20
-                }
-            },
-            tooltip: {
-                usePointStyle: false,
-                callbacks: {
-                    title: function(context) {
-                        let title = [];
-                        context.forEach(element => {
-                            title.push(element.chart.data.labels[element.dataIndex])
-                        });
-                        return title.join(", ");
-                    },
-                    label: function(context){
-                        let datapoint = context.dataset.data[context.dataIndex];
-                        let pickPercentage = precise(context.raw.x*100, 2);
-                        let winPercentage = precise(context.raw.y*100, 2);
-                        return [`Wins:   ${winPercentage}% [${context.raw.picks}]`,`Picked:\t${pickPercentage}% [${context.raw.wins}]`];
-                    }
-                }
-            },
-            datalabels: {
-                display: 'auto',
-                align: 'end',
-                offset: function (context) {
-                    return -40
-                },
-                color: function(value, context){
-                    return 'black';
-                },
-                font: function(context){
-                    return {size: 14, lineHeight: context.dataset.data[context.dataIndex].r == 18 ? 3.2 : 2.6};
-                },
-                // font: {size: 14, lineHeight: 2.5},
-                formatter: function(value, context) {
-                    return context.chart.data.labels[context.dataIndex] + "\n";
-                }
-            }
-        }
-    };
-    pickwinrateChart = new Chart(ctx, {
-        type: 'bubble',
-        data: {},
-        options: options
-    });
-}
-
 async function updatePlayerInfo() {
-    let res = await asyncPostRequest('/get_player_info', {name: "Sonami"});
-    // let res = await asyncPostRequest('/get_player_info', {name: "Rensen"});
+    // let res = await asyncPostRequest('/get_player_info', {name: "Sonami"});
+    let res = await asyncPostRequest('/get_player_info', {name: "koek"});
     // let res = await asyncPostRequest('/get_player_info', {name: "Bestvon"});
     if (res.status != 200) throw new Error('Error getting player info');
     let playerInfo = JSON.parse(res.response);
@@ -218,7 +138,6 @@ async function updatePlayerInfo() {
     document.querySelector('.top-area').append(t);
 
 }
-
 
 function updatePopularityList(modelWinrates, totalMatches) {
     modelWinrates.sort(function (a, b) {

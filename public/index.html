@@ -38,11 +38,13 @@
   <script src="js/MatchHistory/matchHistory.js"></script>
   <script src="js/MatchHistory/elements.js"></script>
   <script src="js/MatchHistory/OverviewElements.js"></script>
+  <script src="js/MatchHistory/FancySearch.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
   <link rel="stylesheet" href="css/HistorySearch.css">
   <link rel="stylesheet" href="css/HistoryGraphs.css">
   <link rel="stylesheet" href="css/PlayerShipRates.css">
+  <link rel="stylesheet" href="css/FancySearch.css">
 
   
   
@@ -305,6 +307,10 @@
             <svg viewBox="0 0 24 24"><use href="icons.svg#launch" /></svg>
           </a>
         </div>
+        <div id="matchHistorySearch">
+            
+        </div>
+        <br>
         <div class="match-history-search">
           <div id="basicSearchCategory" class="category">
             <div class="category-button">
@@ -1448,7 +1454,7 @@
       div.siblings("div").hide();
     }
 
-
+    initializeSearchbar();
   </script>
 
 
