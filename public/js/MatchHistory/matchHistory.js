@@ -71,6 +71,11 @@ const SHIP_ITEMS = {
     97: {Name: "Stormbreaker", Id: 97},
 }
 
+const DEFAULT_QUERY = {
+    perspective: {type: "Overview", name: ""},
+    filters: []
+};
+
 function initializeMatchHistory(){
     // // Initialize search categories
     // document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
@@ -116,34 +121,66 @@ function initializeMatchHistory(){
     
     let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
     document.getElementById('matchHistorySearch').append(searchbar);
+    searchbar.addEventListener('search', evt => getMatchHistoryData(evt.detail))
 
-    searchbar.addEventListener('search', executeSearch)
-
-    
-    loadOverviewData();
-}
-
-async function loadOverviewData() {
-    clearMatchHistoryDisplay();
-    let res = await asyncGetRequest('/match_history_overview');
-    let response = JSON.parse(res.response);
-    intializeMatchHistoryList(response.matches.Matches);
-    initializePopularityList(response.shipWinrates);
-
-}
-
-async function executeSearch(evt) {
-    clearMatchHistoryDisplay();
-    let query = evt.detail;
-    console.log(query.perspective.type);
-    if (query.perspective.type == "Overview") {
-        loadOverviewData();
-        return;
+    let urlQuery = getUrlQuery();
+    if (urlQuery != undefined) {
+        getMatchHistoryData(urlQuery);
     }
+    else {
+        getMatchHistoryData(DEFAULT_QUERY);
+    }
+
+}
+
+function getUrlQuery() {
+    let urlparams = getUrlParam();
+    if (!urlparams) return undefined;
+    let query = JSON.parse(decodeURIComponent(urlparams));
+    return query;
+}
+
+async function getMatchHistoryData(query) {
+    // Clear old graphics
+    clearMatchHistoryDisplay();
+
+    // Request data
     let res = await asyncPostRequest('/match_history_search', query);
     let response = JSON.parse(res.response);
+    let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
+    setUrlParam(encodedQuery);
+    console.log(getUrlQuery());
+
+    //Update search field based on recieved data.
+    let search = document.querySelector('.fancy-search');
+    search.setText(response.perspective.name);
+    if (response.perspective.type == 'Overview'){
+        search.setText("");
+        setUrlParam();
+    } 
+
+    // Update graphics with recieved data
+    if (query.perspective.type == "Overview") {
+        loadOverviewPerspective(response);
+    }
+    else if (query.perspective.type == "Player") {
+        loadPlayerPerspective(response);
+    }
+}
+
+function loadOverviewPerspective(response) {
+    intializeMatchHistoryList(response.matches.Matches);
+    initializePopularityList(response.shipWinrates);
+}
+
+function loadPlayerPerspective(response) {
     initializePlayerInfo(response.playerData);
     intializeMatchHistoryList(response.matches.Matches);
+
+}
+
+function loadShipPerspective(response) {
+
 }
 
 function clearMatchHistoryDisplay() {

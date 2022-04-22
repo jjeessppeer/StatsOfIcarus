@@ -67,6 +67,11 @@ class FancySearchbar extends HTMLDivElement {
     this.updateSuggestions();
   }
 
+  setText(text) {
+    this.querySelector('.searchbar input').value = text;
+    this.updateSuggestions();
+  }
+
   
   addCategory(categoryName, categoryItems) {
     let categoryData = { name: categoryName, items: [], element: undefined }

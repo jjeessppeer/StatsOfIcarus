@@ -17,11 +17,15 @@ var SHIP_LIST = [
 
 function setUrlParam(param){
     let split_url = window.location.href.split("?");
-    window.location.href = split_url[0] + "?" + param;
+    if (param == undefined)
+        window.location.href = split_url[0];
+    else
+        window.location.href = split_url[0] + "?" + param;
     // return split_url[0] + "?" + param;
 }
 
 function getUrlParam(url){
+    if (!url) url = window.location.hash;
     let split_url = url.split("?");
     if (split_url.length > 0)
         return split_url[1];

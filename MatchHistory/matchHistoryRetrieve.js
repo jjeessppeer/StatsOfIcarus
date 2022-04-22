@@ -30,8 +30,10 @@ async function getPlayerIdFromName(name, exactMatch=false) {
         player = await playersCollection.findOne({ Name: name });
     }
     else {
+        // Escape characters before searching
+        let queryString = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         player = await playersCollection.findOne(
-            { "Name": new RegExp(name, "i") },
+            { "Name": new RegExp(queryString, "i") },
             { _id: true });
     }
     if (player) return player._id;

@@ -68,10 +68,18 @@ app.post('/submit_match_history', async function (req, res) {
 
 app.post('/match_history_search', async function(req, res) {
     // TODO input assertions
-    let responseData = {perspective: req.body.perspective};
+    let responseData = {
+        perspective: req.body.perspective,
+        originalQuery: req.body
+    };
     if (req.body.perspective.type == 'Player') {
         let playerData = await matchHistoryRetrieve.getPlayerInfo(req.body.perspective.name);
         responseData.playerData = playerData;
+        responseData.perspective.name = playerData.PlayerInfo.Name;
+    }
+    if (req.body.perspective.type == 'Overview'){
+        // TODO: cache default result of overview info
+        responseData.shipWinrates = await matchHistoryRetrieve.getShipsOverviewInfo();
     }
     let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, 0);
     responseData.matches = matches;
@@ -79,13 +87,13 @@ app.post('/match_history_search', async function(req, res) {
     res.status(200).json(responseData);
 });
 
-app.get('/match_history_overview', async function(req, res) {
-    let responseData = {
-        matches: await matchHistoryRetrieve.getRecentMatches([], 0),
-        shipWinrates: await matchHistoryRetrieve.getShipsOverviewInfo()
-    }
-    res.status(200).json(responseData);
-});
+// app.get('/match_history_overview', async function(req, res) {
+//     let responseData = {
+//         matches: await matchHistoryRetrieve.getRecentMatches([], 0),
+//         shipWinrates: await matchHistoryRetrieve.getShipsOverviewInfo()
+//     }
+//     res.status(200).json(responseData);
+// });
 
 app.post('/get_player_info', async function(req, res) {
     let name = req.body.name;
