@@ -488,6 +488,9 @@ function httpxGetRequest(url, callback=null, timeout_callback=null){
     xhttp.send();
 }
 
+
+// TODO use fetch instead of these.
+
 function asyncPostRequest(url, data) {
     let xhttp = new XMLHttpRequest();
     xhttp.timeout = 5000;

@@ -119,24 +119,29 @@ function initializeMatchHistory(){
 
     searchbar.addEventListener('search', executeSearch)
 
-    httpxPostRequest('/get_ship_winrates', {}, function() {
-        if (this.readyState == 4 && this.status == 200){
-            let response = JSON.parse(this.response);
-            if (!response) return;
-            initializePopularityList(response.ModelWinrates, response.Count);
-        }
-    });
     
-    // requestRecentMatches();
-    // updatePlayerInfo();
+    loadOverviewData();
+}
+
+async function loadOverviewData() {
+    clearMatchHistoryDisplay();
+    let res = await asyncGetRequest('/match_history_overview');
+    let response = JSON.parse(res.response);
+    intializeMatchHistoryList(response.matches.Matches);
+    initializePopularityList(response.shipWinrates);
+
 }
 
 async function executeSearch(evt) {
     clearMatchHistoryDisplay();
     let query = evt.detail;
+    console.log(query.perspective.type);
+    if (query.perspective.type == "Overview") {
+        loadOverviewData();
+        return;
+    }
     let res = await asyncPostRequest('/match_history_search', query);
     let response = JSON.parse(res.response);
-    console.log(response);
     initializePlayerInfo(response.playerData);
     intializeMatchHistoryList(response.matches.Matches);
 }
@@ -160,7 +165,9 @@ function intializeMatchHistoryList(matches, matchCount=0) {
     document.querySelector("#matchHistory .right-area").append(ul);
 }
 
-function initializePopularityList(modelWinrates, totalMatches) {
+function initializePopularityList(shipRateData) {
+    let modelWinrates = shipRateData.ModelWinrates;
+    let totalMatches = shipRateData.Count;
     modelWinrates.sort(function (a, b) {
         return b.PlayedGames - a.PlayedGames;
     });

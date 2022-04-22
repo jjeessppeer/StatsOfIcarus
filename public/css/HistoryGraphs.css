@@ -24,12 +24,12 @@
 }
 
 #matchHistory .top-area {
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
     /* height: 300px; */
 }
 
 #matchHistory .left-area {
-    width: 400px;
+    min-width: 400px;
 }
 
 #matchHistory .right-area {

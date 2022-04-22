@@ -14,11 +14,6 @@ class FancySearchbar extends HTMLDivElement {
     `;
     this.categories = [];
 
-    // this.querySelector('input').addEventListener('focus', () => this.toggleSuggestionBox(true));
-    // this.querySelector('input').addEventListener('click', () => this.toggleSuggestionBox(true));
-    // this.querySelector('input').addEventListener('focusout', evt => {
-    //   console.log(evt)
-    // });
     this.querySelector('input').addEventListener('focus', evt => {
       this.toggleSuggestionBox(true);
     });
@@ -46,6 +41,7 @@ class FancySearchbar extends HTMLDivElement {
       let item = {
         icon: `images/item-icons/ship${shipId}.jpg`,
         name: SHIP_ITEMS[shipId].Name,
+        type: "Ship",
         callback: "TODO"
       }
       shipListItems.push(item);
@@ -53,7 +49,8 @@ class FancySearchbar extends HTMLDivElement {
     this.addCategory("Ship", shipListItems);
     this.playerCategory = this.addCategory("Search Player", [{
       icon: `images/item-icons/ship123123123.jpg`,
-      name: "PlayerName"
+      type: "Player",
+      name: ""
     }]);
     this.addCategory("Recent Searches", [
       // { icon: `images/item-icons/ship123123123.jpg`, name: "recent1" },
@@ -61,9 +58,11 @@ class FancySearchbar extends HTMLDivElement {
       // { icon: `images/item-icons/ship123123123.jpg`, name: "recent3" },
       // { icon: `images/item-icons/ship123123123.jpg`, name: "recent4" },
     ]);
-    this.addCategory("Generic Info", [
-      { icon: `images/item-icons/ship123123123.jpg`, name: "Generic info" },
-    ]);
+    this.addCategory("Generic Info", [{ 
+      icon: `images/item-icons/ship123123123.jpg`, 
+      type: "Overview",
+      name: "Generic info" 
+    }]);
 
     this.updateSuggestions();
   }
@@ -85,7 +84,7 @@ class FancySearchbar extends HTMLDivElement {
                 <img src="${item.icon}">
                 <span>${item.name}</span>
                 </li>`);
-      listItem.addEventListener('click', () => this.createSearchEvent());
+      listItem.addEventListener('click', () => this.createSearchEvent(item));
 
       item.element = listItem;
       categoryData.items.push(item);
@@ -102,9 +101,9 @@ class FancySearchbar extends HTMLDivElement {
     this.classList.toggle('open', open);
   }
 
-  createSearchEvent() {
+  createSearchEvent(item) {
     const evt = new CustomEvent("search", {
-      detail: this.getSearchQuery(),
+      detail: this.getSearchQuery(item),
       bubbles: false,
       cancelable: true,
       composed: false,
@@ -113,16 +112,18 @@ class FancySearchbar extends HTMLDivElement {
     this.dispatchEvent(evt);
   }
 
-  getSearchQuery() {
+  getSearchQuery(item) {
+    if (item == undefined) {
+      item = this.getTopItem()[1];
+    }
+    console.log(item);
     let query = {
-      perspective: undefined,
+      perspective: {type: item.type, name: item.name},
       filters: []
     };
-    let [category, item] = this.getTopItem();
 
-    if (category.name = "Search Player") {
+    if (item.type == "Player") {
       query.filters.push( {type: "Player", data: item.name} );
-      query.perspective = {type: "Player", name: item.name};
     }
     return query;
   }
@@ -136,10 +137,6 @@ class FancySearchbar extends HTMLDivElement {
         }
       }
     }
-  }
-
-  itemSelected(item) {
-    console.log(item);
   }
 
   itemFilterStatus(category, item) {

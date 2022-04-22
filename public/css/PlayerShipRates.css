@@ -1,5 +1,6 @@
 .player-ship-info-table {
-    width: 750px;
+    width: 500px;
+    margin: 10px;
 }
 
 .player-ship-info-table .ship-list{

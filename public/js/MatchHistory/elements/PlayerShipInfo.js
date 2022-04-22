@@ -41,10 +41,6 @@ class PlayerShipInfoTable extends HTMLDivElement {
       // <canvas class="pickrate"></canvas>
     }
   
-    disconnectedCallback() {
-      console.log("Player info cell destroyed")
-    }
-  
     initialize(rates) {
       let winrate = rates.Wins / rates.MatchCount;
       this.querySelector('.winrate').textContent = `${Math.round(winrate*100)}%`;
