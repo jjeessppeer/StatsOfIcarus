@@ -71,6 +71,12 @@ const SHIP_ITEMS = {
     97: {Name: "Stormbreaker", Id: 97},
 }
 
+const CLASS_COLORS = {
+    "Pilot": 'rgb(85, 135, 170)',
+    "Gunner": 'rgb(167, 76, 18)',
+    "Engineer": 'rgb(189, 137, 45)'
+}
+
 const DEFAULT_QUERY = {
     perspective: {type: "Overview", name: ""},
     filters: []
@@ -130,6 +136,8 @@ function initializeMatchHistory(){
     else {
         getMatchHistoryData(DEFAULT_QUERY);
     }
+        
+    
 
 }
 
@@ -143,20 +151,21 @@ function getUrlQuery() {
 async function getMatchHistoryData(query) {
     // Clear old graphics
     clearMatchHistoryDisplay();
-
+    
     // Request data
     let res = await asyncPostRequest('/match_history_search', query);
     let response = JSON.parse(res.response);
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
-    setUrlParam(encodedQuery);
-    console.log(getUrlQuery());
+    if (window.location.hash.substr(1).split("?")[0] == "matchHistory"){
+        setUrlParam(encodedQuery);
+        if (response.perspective.type == 'Overview') setUrlParam();
+    }
 
     //Update search field based on recieved data.
     let search = document.querySelector('.fancy-search');
     search.setText(response.perspective.name);
     if (response.perspective.type == 'Overview'){
         search.setText("");
-        setUrlParam();
     } 
 
     // Update graphics with recieved data
@@ -174,7 +183,18 @@ function loadOverviewPerspective(response) {
 }
 
 function loadPlayerPerspective(response) {
-    initializePlayerInfo(response.playerData);
+    let playerData = response.playerData;
+    console.log(response)
+    // Initialize ship rates card
+    let t = document.createElement('div', {is: "player-ship-info-table"});
+    t.initialize(playerData.Winrates);
+    document.querySelector('.top-area').append(t);
+
+    // Initialize player overview card.
+    let infobox = document.createElement('div', {is: 'player-info-box'});
+    document.querySelector('#matchHistory .left-area').append(infobox);
+    infobox.initialize(playerData);
+
     intializeMatchHistoryList(response.matches.Matches);
 
 }
@@ -185,22 +205,22 @@ function loadShipPerspective(response) {
 
 function clearMatchHistoryDisplay() {
     console.log("Cleaning...")
-    document.querySelectorAll('.player-ship-info-table').forEach(el => el.remove());
-    document.querySelectorAll('.ship-popularity-list').forEach(el => el.remove());
-    document.querySelectorAll('.match-history-list').forEach(el => el.remove());
+    const CLEAR_QUERIES = [
+        '.player-ship-info-table',
+        '.ship-popularity-list',
+        '.match-history-list',
+        '.player-infobox'
+    ];
+    CLEAR_QUERIES.forEach(q => document.querySelectorAll(q).forEach(el => el.remove()))
 }
 
-function initializePlayerInfo(playerData) {
-    let t = document.createElement('div', {is: "player-ship-info-table"});
-    t.initialize(playerData.ShipRates);
-    document.querySelector('.top-area').append(t);
-}
 
 function intializeMatchHistoryList(matches, matchCount=0) {
     let ul = document.createElement('ul', {is: 'match-history-list'});
     ul.addMatches(matches);
     document.querySelector("#matchHistory .right-area").append(ul);
 }
+
 
 function initializePopularityList(shipRateData) {
     let modelWinrates = shipRateData.ModelWinrates;

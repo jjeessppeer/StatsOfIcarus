@@ -1,6 +1,7 @@
 .player-ship-info-table {
     width: 500px;
     margin: 10px;
+    background-color: var(--card-color-1);
 }
 
 .player-ship-info-table .ship-list{
@@ -18,7 +19,7 @@
     padding-top: 5px;
     padding-bottom: 5px;
     border: 1px solid;
-    border-color: rgb(205, 210, 210);
+    border-color: var(--card-border);
     margin-top: -1px;
     margin-left: -1px;
     padding: 5px;

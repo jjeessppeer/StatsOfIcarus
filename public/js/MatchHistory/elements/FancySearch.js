@@ -46,9 +46,9 @@ class FancySearchbar extends HTMLDivElement {
       }
       shipListItems.push(item);
     }
-    this.addCategory("Ship", shipListItems);
+    // this.addCategory("Ship", shipListItems);
     this.playerCategory = this.addCategory("Search Player", [{
-      icon: `images/item-icons/ship123123123.jpg`,
+      icon: `images/item-icons/item1182.jpg`,
       type: "Player",
       name: ""
     }]);
@@ -59,7 +59,7 @@ class FancySearchbar extends HTMLDivElement {
       // { icon: `images/item-icons/ship123123123.jpg`, name: "recent4" },
     ]);
     this.addCategory("Generic Info", [{ 
-      icon: `images/item-icons/ship123123123.jpg`, 
+      icon: `images/item-icons/coopMap244.jpg`, 
       type: "Overview",
       name: "Generic info" 
     }]);
@@ -121,15 +121,14 @@ class FancySearchbar extends HTMLDivElement {
     if (item == undefined) {
       item = this.getTopItem()[1];
     }
-    console.log(item);
     let query = {
       perspective: {type: item.type, name: item.name},
       filters: []
     };
 
-    if (item.type == "Player") {
-      query.filters.push( {type: "Player", data: item.name} );
-    }
+    // if (item.type == "Player") {
+    //   query.filters.push( {type: "Player", data: item.name} );
+    // }
     return query;
   }
 
@@ -192,7 +191,7 @@ class FancySearchbar extends HTMLDivElement {
     // Update player suggestion item to match search text
     let searchText = this.querySelector('input').value;
     this.playerCategory.items[0].name = searchText;
-    this.playerCategory.items[0].element.querySelector('span').textContent = searchText;
+    this.playerCategory.items[0].element.querySelector('span').textContent = searchText + "...";
 
 
     this.getTopItem();

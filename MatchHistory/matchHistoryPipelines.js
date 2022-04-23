@@ -1,3 +1,108 @@
+const utils = require("./matchHistoryUtils.js");
+
+function playerWinratesPipeline(playerId, daysAgo) {
+  const timeNow = new Date().getTime();
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const minTime = timeNow - daysAgo * msPerDay;
+  const pipeline = [
+    { $match: {_id: playerId} },
+    { $unwind: {
+      path: "$MatchesPlayed"
+    }},
+    { $match: {"MatchesPlayed.Timestamp": {$gt: minTime}} },
+    { $lookup: {
+      from: "Matches",
+      localField: "MatchesPlayed.MatchObjId",
+      foreignField: "_id",
+      as: "Matches"
+    }},
+    { $unwind: {
+      path: "$Matches"
+    }},
+    { $lookup: {
+      from: "PlayerEquipment",
+      localField: "MatchesPlayed.PlayerLoadoutId",
+      foreignField: "_id",
+      as: "PlayerLoadout"
+    }},
+    { $unwind: {
+      path: "$PlayerLoadout"
+    }},
+    { $lookup: {
+      from: "Ships",
+      localField: "MatchesPlayed.PlayerShipId",
+      foreignField: "_id",
+      as: "PlayerShipLoadout"
+    }},
+    { $unwind: {
+      path: "$PlayerShipLoadout"
+    }},
+    { $facet: {
+      "OverallRates": [
+        { $group: {
+          _id: null,
+          count: {$sum: 1},
+          wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
+        }},
+      ],
+      "ModelRates": [
+        // Group: ShipModells -> PlayerClass
+        { $group: {
+          _id: {
+            Ship: "$PlayerShipLoadout.ShipModel",
+            Class: "$PlayerLoadout.Class"},
+          count: {$sum: 1},
+          wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
+        }},
+        { $project: {
+          ShipModel: "$_id.Ship",
+          PlayerClass: "$_id.Class",
+          MatchCount: "$count",
+          Wins: "$wins"
+        }},
+        { $group: {
+          _id: "$ShipModel",
+          MatchCount: { $sum: "$MatchCount" },
+          Wins: { $sum: "$Wins" },
+          ClassStats: { $push : "$$ROOT" }
+        }},
+        { $sort: {
+          MatchCount: -1
+        }}
+      ],
+      "ClassRates": [
+        // Group: PlayerClass -> ShipModel
+        { $group: {
+          _id: {
+            Ship: "$PlayerShipLoadout.ShipModel",
+            Class: "$PlayerLoadout.Class"},
+          count: {$sum: 1},
+          wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
+        }},
+        { $project: {
+          ShipModel: "$_id.Ship",
+          PlayerClass: "$_id.Class",
+          MatchCount: "$count",
+          Wins: "$wins"
+        }},
+        { $group: {
+          _id: "$PlayerClass",
+          MatchCount: { $sum: "$MatchCount" },
+          Wins: { $sum: "$Wins" },
+          ModelStats: { $push : "$$ROOT" }
+        }},
+        { $sort: {
+          _id: 1
+        }}
+      ]
+    }},
+    { $unwind: {
+      path: "$OverallRates"
+    }}
+  ];
+  return pipeline;
+}
+
 
 function playerInfoPipeline(playerId, daysAgo) {
     const timeNow = new Date().getTime();
@@ -6,101 +111,37 @@ function playerInfoPipeline(playerId, daysAgo) {
     const pipeline = [
         { $match: {_id: playerId} },
         { $facet: {
-          "ShipRates": [
-            { $unwind: {
-              path: "$MatchesPlayed"
-            }},
-            { $match: {"MatchesPlayed.Timestamp": {$gt: minTime}} },
-        
-            // Get the recent matches
-            { $lookup: {
-                from: "Matches",
-                localField: "MatchesPlayed.MatchObjId",
-                foreignField: "_id",
-                as: "Matches"
-            }},
-            { $unwind: {
-              path: "$Matches"
-            }},
-            { $lookup: {
-              from: "PlayerEquipment",
-              localField: "MatchesPlayed.PlayerLoadoutId",
-              foreignField: "_id",
-              as: "PlayerLoadout"
-            }},
-            { $unwind: {
-              path: "$PlayerLoadout"
-            }},
-            { $lookup: {
-              from: "Ships",
-              localField: "MatchesPlayed.PlayerShipId",
-              foreignField: "_id",
-              as: "PlayerShipLoadout"
-            }},
-            { $unwind: {
-              path: "$PlayerShipLoadout"
-            }},
-            { $group: {
-              _id: {
-                Ship: "$PlayerShipLoadout.ShipModel",
-                Class: "$PlayerLoadout.Class"},
-              count: {$sum: 1},
-              wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
-            }},
-            { $project: {
-              ShipModel: "$_id.Ship",
-              PlayerClass: "$_id.Class",
-              MatchCount: "$count",
-              Wins: "$wins"
-            }},
-            { $group: {
-              _id: "$ShipModel",
-              MatchCount: { $sum: "$MatchCount" },
-              Wins: { $sum: "$Wins" },
-              ClassStats: { $push : "$$ROOT" }
-            }},
-            { $sort: {
-              MatchCount: -1
-            }},
-            { $group: {
-              _id: null,
-              MatchCount: { $sum: "$MatchCount" },
-              Wins: { $sum: "$Wins" },
-              ModelStats: { $push : "$$ROOT" }
-            }},
-            // { $unwind: {
-            //   path: "$$ROOT"
-            // }},
-          ],
           "PlayerInfo": [
             {$project: {
               Name: "$Name",
               Clan: "$Clan",
-              MatchCount: "$MatchCount"
+              MatchCount: "$MatchCount",
+              Levels: "$Levels",
+              SkillRatings: "$SkillRatings"
             }},
           ]
         }},
         { $unwind: {
           path: "$PlayerInfo"
-        }},
-        { $unwind: {
-          path: "$ShipRates"
-        }},
+        }}
       ]
     return pipeline;
 }
 
 
-async function generateMatchFilterPipeline(filters, playerCollection, shipItemsCollection) {
+async function generateMatchFilterPipeline(filters, mongoClient) {
+  // let playerCollection = mongoClient.db("mhtest").collection("Players");
+
   let filterPipeline = [];
   for (let filter of filters) {
-    if (filter.filterType == "Player") {
-        let searchName = filter.data;
-        let player = await playerCollection.findOne({ "Name": new RegExp(searchName, "i") });
-        let playerId = -2;
-        if (player) playerId = player._id;
-        let query = { $match: { FlatPlayers: playerId } };
-        filterPipeline.push(query);
+    if (filter.type == "Player") {
+      let playerId = await utils.getPlayerIdFromName(mongoClient, filter.data);
+      let query = { $match: { FlatPlayers: playerId } };
+      filterPipeline.push(query);
+    }
+    if (filter.type == "PlayerId") {
+      let query = { $match: { FlatPlayers: filter.id } };
+      filterPipeline.push(query);
     }
     // if (filter.filterType == "Ship") {
     //     let searchName = filter.data;
@@ -230,6 +271,7 @@ function modelPickWinRates() {
 
 module.exports = {
     playerInfoPipeline,
+    playerWinratesPipeline,
     recentMatchesPipeline,
     generateMatchFilterPipeline,
     modelPickWinRates

@@ -11,7 +11,7 @@ class PlayerShipInfoTable extends HTMLDivElement {
   
     initialize(shipRates) {
       let modelInfos = {};
-      for (let rates of shipRates.ModelStats) {
+      for (let rates of shipRates.ModelRates) {
         // if (rates._id != 15) continue;
         let cell = document.createElement('div', { is: 'player-ship-info-cell' });
         cell.initialize(rates);

@@ -1,4 +1,5 @@
 const pipelines = require("./matchHistoryPipelines.js");
+const utils = require("./matchHistoryUtils.js");
 
 var client;
 
@@ -22,43 +23,32 @@ function setMongoClient(clientIn) {
 //     return out;
 // }
 
-async function getPlayerIdFromName(name, exactMatch=false) {
-    const playersCollection = client.db("mhtest").collection("Players");
-    let player;
-    if (exactMatch) {
-        name = name + " [PC]";
-        player = await playersCollection.findOne({ Name: name });
-    }
-    else {
-        // Escape characters before searching
-        let queryString = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        player = await playersCollection.findOne(
-            { "Name": new RegExp(queryString, "i") },
-            { _id: true });
-    }
-    if (player) return player._id;
-    return false;
-}
+
 
 async function getPlayerInfo(playerName, timeSpanDays=366) {
     const playersCollection = client.db("mhtest").collection("Players");
-    let playerId = await getPlayerIdFromName(playerName);
+    let playerId = await utils.getPlayerIdFromName(client, playerName);
     let playerInfoPipeline = pipelines.playerInfoPipeline(playerId, timeSpanDays);
     
     let playerInfoAggregate = playersCollection.aggregate(playerInfoPipeline);
     let playerInfo = await playerInfoAggregate.next();
+
+    let playerWinratePipeline = pipelines.playerWinratesPipeline(playerId, timeSpanDays);
+    let winrateAggregate = playersCollection.aggregate(playerWinratePipeline);
+    let playerWinrates = await winrateAggregate.next();
+
+    playerInfo.Winrates = playerWinrates;
+
     return playerInfo;
 }
 
 async function getRecentMatches(filters, page) {
     const RESULTS_PER_PAGE = 10;
     const matchCollection = client.db("mhtest").collection("Matches");
-    console.log(filters)
-    console.log(page);
     let basePipeline = pipelines.recentMatchesPipeline(RESULTS_PER_PAGE*page, RESULTS_PER_PAGE);
     let filterPipeline = await pipelines.generateMatchFilterPipeline(
         filters,
-        client.db("mhtest").collection("Players"));
+        client);
     let fullPipeline = filterPipeline.concat(basePipeline);
     let matchesAggregate = matchCollection.aggregate(fullPipeline);
     let matches = await matchesAggregate.next();

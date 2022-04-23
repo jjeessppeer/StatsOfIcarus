@@ -138,7 +138,15 @@ async function updatePlayer(player) {
             Name: player.Name,
             Clan: player.Clan,
             MaxLevel: player.Level,
-            Levels: levels
+            Levels: levels,
+            MatchCount: 0,
+            MatchesWon: 0,
+            MatchesPlayer: [],
+            SkillRanking: {
+                Overall: {mu: 100, sigma: 50},
+                Pilot: {mu: 100, sigma: 50},
+                Crew: {mu: 100, sigma: 50}
+            }
         });
     }
     else {
@@ -155,7 +163,6 @@ async function updatePlayer(player) {
         )
     }
 }
-
 
 function sortShipLoadout(ship) {
     let sortedLoadout = [];
