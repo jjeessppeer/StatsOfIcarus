@@ -46,7 +46,7 @@ class FancySearchbar extends HTMLDivElement {
       }
       shipListItems.push(item);
     }
-    this.addCategory("Ship", shipListItems);
+    // this.addCategory("Ship", shipListItems);
     this.playerCategory = this.addCategory("Search Player", [{
       icon: `images/item-icons/item1182.jpg`,
       type: "Player",
