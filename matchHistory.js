@@ -1,7 +1,10 @@
 const assert = require('assert');
 
 const SCS_START_HOUR_UTC = 18;
+const SCS_START_DAY = 0;
 const SCS_HOUR_LENGTH = 4;
+
+
 const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
 const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
 
@@ -215,6 +218,7 @@ async function insertMatchHistory(record, ip) {
 
     let submissionDate = new Date();
     let submissionHour = submissionDate.getUTCHours();
+    let submissionDay = submissionDate.getUTCDay();
     let submissionTicks = submissionDate.getTime();
 
     let submitter = await ipCollection.findOneAndUpdate(
@@ -323,7 +327,7 @@ async function insertMatchHistory(record, ip) {
 
     
     let competitive = {
-        SCS: posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
+        SCS: submissionDay == SCS_START_DAY && posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
         Competitive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded,
         HighLevel: avgPlayerLevel >= 30 && emptySlots <= 2
     };
