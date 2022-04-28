@@ -65,8 +65,7 @@ const MATCH_SUBMISSION_SCHEMA = Joi.object({
     Passworded: Joi.boolean()
         .required(),
     Moderated: Joi.boolean()
-    .required(),
-
+        .required(),
     MapId: Joi.number()
         .integer()
         .required(),
@@ -107,7 +106,7 @@ const MATCH_SUBMISSION_SCHEMA = Joi.object({
 
 // Match history requests
 
-const MATCH_FILTER_SCHEMA = Joi.array().items(
+const FILTER_ITEM_SCHEMA = Joi.allow(
     Joi.object({
         type: Joi.string().allow('Player').required(),
         data: Joi.string().max(100).required()
@@ -115,9 +114,7 @@ const MATCH_FILTER_SCHEMA = Joi.array().items(
     Joi.object({
         type: Joi.string().allow('PlayerId').required(),
         id: Joi.number().integer().min(-1).required()
-    }))
-    .min(0)
-    .max(10);
+    }));
 
 
 const MATCH_REQUEST_SCHEMA = Joi.object({
@@ -126,7 +123,11 @@ const MATCH_REQUEST_SCHEMA = Joi.object({
         .min(0)
         .max(100)
         .required(),
-    filters: MATCH_FILTER_SCHEMA.required()
+    filters: Joi.array()
+        .items(FILTER_ITEM_SCHEMA)
+        .min(0)
+        .max(10)
+        .required()
 });
 
 
@@ -142,7 +143,11 @@ const HISTORY_SEARCH_SCHEMA = Joi.object({
             .required()
         })
         .required(),
-    filters: MATCH_FILTER_SCHEMA.required()
+    filters: Joi.array()
+        .items(FILTER_ITEM_SCHEMA)
+        .min(0)
+        .max(10)
+        .required()
 });
 
 module.exports = {
