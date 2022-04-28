@@ -127,7 +127,9 @@ function initializeMatchHistory(){
     
     let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
     document.getElementById('matchHistorySearch').append(searchbar);
-    searchbar.addEventListener('search', evt => getMatchHistoryData(evt.detail))
+    searchbar.addEventListener('search', evt => getMatchHistoryData(evt.detail));
+
+    document.getElementById('loadMoreMatchesButton').addEventListener('click', requestNextMatchHistoryPage)
 
     let urlQuery = getUrlQuery();
     if (urlQuery != undefined) {
@@ -148,6 +150,24 @@ function getUrlQuery() {
     return query;
 }
 
+var current_match_page = 0;
+var current_match_filters = [];
+async function requestNextMatchHistoryPage(evt) {
+    evt.target.disabled = true;
+    current_match_page += 1;
+
+    let response = await fetch('/request_matches', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({page: current_match_page, filters: current_match_filters})
+    });
+    let json = await response.json();
+    document.querySelector('#matchHistory .match-history-list').addMatches(json.Matches);
+    evt.target.disabled = false;
+}
+
 async function getMatchHistoryData(query) {
     // Clear old graphics
     clearMatchHistoryDisplay();
@@ -155,6 +175,10 @@ async function getMatchHistoryData(query) {
     // Request data
     let res = await asyncPostRequest('/match_history_search', query);
     let response = JSON.parse(res.response);
+
+    current_match_filters = response.modifiedQuery.filters;
+    console.log(response);
+
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
     if (window.location.hash.substr(1).split("?")[0] == "matchHistory"){
         setUrlParam(encodedQuery);
@@ -205,6 +229,8 @@ function loadShipPerspective(response) {
 
 function clearMatchHistoryDisplay() {
     console.log("Cleaning...")
+    current_match_page = 0;
+    current_match_filters = [];
     const CLEAR_QUERIES = [
         '.player-ship-info-table',
         '.ship-popularity-list',
@@ -218,7 +244,7 @@ function clearMatchHistoryDisplay() {
 function intializeMatchHistoryList(matches, matchCount=0) {
     let ul = document.createElement('ul', {is: 'match-history-list'});
     ul.addMatches(matches);
-    document.querySelector("#matchHistory .right-area").append(ul);
+    document.querySelector("#matchHistory .right-area").prepend(ul);
 }
 
 

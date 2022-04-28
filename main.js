@@ -9,6 +9,8 @@ const matchHistory = require("./matchHistory.js");
 const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
+const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
+
 
 const db_url = process.env.MONGODB_URL_STRING;
 let mongoClient = new MongoClient(db_url);
@@ -48,36 +50,19 @@ app.get('/get_datasets', function (req, res) {
 
 app.post('/submit_match_history', async function (req, res) {
     let ip = requestIp.getClientIp(req);
-    assert(typeof req.body.ModVersion == "string");
+
+    let validationResult = MATCH_SUBMISSION_SCHEMA.validate(req.body);
+    if (validationResult.error){
+        return res.status(400).send("Error submitting match history.");
+    }
+
     if (req.body.ModVersion != MOD_VERSION_LATEST) {
-        res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
-        return;
+        return res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
     }
     matchHistory.submitRecord(req.body, ip);
     res.status("202").send();
 });
 
-const HISTORY_SEARCH_SCHEMA = Joi.object({
-    perspective: Joi.object({
-        type: Joi.string()
-            .allow('Overview', 'Player', 'Ship'),
-        name: Joi.string()
-            .max(100)
-            .min(0)
-        })
-        .required(),
-    filters: Joi.array().items(
-        Joi.object({
-            type: Joi.string().allow('Player'),
-            data: Joi.string().max(100)
-        }),
-        Joi.object({
-            type: Joi.string().allow('PlayerId'),
-            data: Joi.number().integer().min(-1)
-        }))
-        .max(0)
-        .min(0)
-});
 app.post(
     '/match_history_search',
     async function(req, res) {
@@ -89,7 +74,8 @@ app.post(
 
     let responseData = {
         perspective: req.body.perspective,
-        originalQuery: JSON.parse(JSON.stringify(req.body))
+        originalQuery: JSON.parse(JSON.stringify(req.body)),
+        modifiedQuery: req.body
     };
     if (req.body.perspective.type == 'Player') {
         // Add match filter for player;
@@ -100,32 +86,32 @@ app.post(
             responseData.playerData = playerData;
             responseData.perspective.name = playerData.PlayerInfo.Name;
         }
-        
     }
     if (req.body.perspective.type == 'Overview'){
         // TODO: cache default result of overview info
         responseData.shipWinrates = await matchHistoryRetrieve.getShipsOverviewInfo();
     }
+
     let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, 0);
     responseData.matches = matches;
     res.status(200).json(responseData);
 });
 
-// app.post(
-//     '/get_recent_matches', 
-//     async function(req, res) {
-//     let page = req.body.pageNumber;
-//     let filters = req.body.filters;
-//     let response = await matchHistoryRetrieve.getRecentMatches(filters, page);
-//     res.status(200).json(response);
-// });
 
-// app.post(
-//     '/get_ship_winrates',
-//     async function(req, res) {
-//         let response = await matchHistoryRetrieve.getShipsOverviewInfo();
-//         res.status(200).json(response);
-// });
+
+app.post(
+    '/request_matches', 
+    async function(req, res) {
+
+    let requestValidation = MATCH_REQUEST_SCHEMA.validate(req.body);
+    if (requestValidation.error){
+        return res.status(400).send();
+    }
+
+    let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, req.body.page);
+    res.status(200).json(matches);
+});
+
 
 async function run() {
     try {
