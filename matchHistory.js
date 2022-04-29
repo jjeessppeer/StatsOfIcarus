@@ -326,11 +326,28 @@ async function insertMatchHistory(record, ip) {
     let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
 
     
-    let competitive = {
-        SCS: submissionDay == SCS_START_DAY && posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
-        Competitive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded,
-        HighLevel: avgPlayerLevel >= 30 && emptySlots <= 2
-    };
+    // let competitive = {
+    //     SCS: submissionDay == SCS_START_DAY && posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
+    //     Competitive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded,
+    //     HighLevel: avgPlayerLevel >= 30 && emptySlots <= 2
+    // };
+
+
+    let matchTags = [];
+    if (record.Passworded)
+        matchTags.push('Passworded')
+    if (shipsFull)
+        matchTags.push('ShipsFull')
+    if (playersFull)
+        matchTags.push('PlayersFull')
+
+    if (submissionDay == SCS_START_DAY && posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded)
+        matchTags.push('SCS')
+    if (shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded)
+        matchTags.push('Competitive')
+    if (avgPlayerLevel >= 30 && emptySlots <= 2)
+        matchTags.push('HighLevel')
+
 
     // Insert the match.
     let newMatch = {
@@ -340,7 +357,8 @@ async function insertMatchHistory(record, ip) {
         Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
         SubmissionCount: 1,
-        CompetetiveTags: competitive,
+        // CompetetiveTags: competitive,
+        MatchTags: matchTags,
         MatchId: record.MatchId,
         MapId: record.MapId,
         ShipsFull: shipsFull,

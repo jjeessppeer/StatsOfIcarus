@@ -3,6 +3,7 @@ class FancySearchbar extends HTMLDivElement {
     super();
 
     this.classList.add('fancy-search')
+    this.classList.add('filters-open')
     this.innerHTML = `
       <div class="searchbar">
         <input class="search-input" type="text" placeholder="Search for a player or ship" autocomplete="off">
@@ -11,8 +12,17 @@ class FancySearchbar extends HTMLDivElement {
       </div>      
       <div class="search-suggestion-box">
       </div>
+      <div class="filter-box">
+        <ul>
+        <li>FILTER1</li>
+        <li>FILTER2</li>
+        </ul>
+      </div>
     `;
     this.categories = [];
+
+    let tagFiltersElement = document.createElement('li', {is: 'tag-filters'});
+    this.querySelector('.filter-box > ul').append(tagFiltersElement)
 
     this.querySelector('input').addEventListener('focus', evt => {
       this.toggleSuggestionBox(true);
@@ -197,7 +207,91 @@ class FancySearchbar extends HTMLDivElement {
     this.getTopItem();
   }
 }
+
+class FilterCategory extends HTMLLIElement {
+  constructor(){
+    super();
+    this.classList.add('filter-category');
+    this.innerHTML = `
+      <button class="category-title">
+        TITLE
+      </button>
+      <div class="category-content">
+      </div>
+    `;
+
+    this.content = this.querySelector('.category-content');
+    this.content.style.height = '0px';
+
+    this.querySelector('.category-title').addEventListener('click', () => this.toggleOpen());
+  }
+  toggleOpen(open) {
+    if (open == undefined)
+      open = this.classList.toggle('open');
+    else
+      this.classList.toggle('open', open);
+
+    if (open) {
+      console.log("OPENING");
+      this.content.style.height = this.content.scrollHeight+"px";
+    }
+    else{
+      this.content.style.height = "0px";
+    }
+    
+  }
+  setTitle(title) {
+    this.querySelector('.category-title').textContent = title;
+  }
+}
+
+
+class TagFilters extends FilterCategory {
+  constructor(){
+    super();
+    this.classList.add('tag-filters');
+    let scs_triple = document.createElement('div', {is: 'triple-radios'});
+    let comp_triple = document.createElement('div', {is: 'triple-radios'});
+    let full_triple = document.createElement('div', {is: 'triple-radios'});
+    scs_triple.initialize("SCS");
+    comp_triple.initialize("Competitive");
+    full_triple.initialize("Match Full");
+    this.content.append(scs_triple)
+    this.content.append(comp_triple)
+    this.content.append(full_triple)
+    this.setTitle('Match Tags');
+    this.toggleOpen(true);
+    this.toggleOpen(true);
+  }
+}
+
+class TripleRadios extends HTMLDivElement {
+  constructor() {
+    super();
+    this.classList.add('triple-radios');
+
+    this.innerHTML = `
+      <div class="radio-container">
+        <input type="radio" name="radio" />
+        <input type="radio" name="radio" checked/>
+        <input type="radio" name="radio" />
+      </div>
+      <span>LABEL</span>
+    `;
+  }
+  initialize(labelText, groupName) {
+    if (groupName == undefined) groupName = labelText;
+    this.querySelectorAll('input').forEach(el => el.name = labelText);
+    this.querySelector('span').textContent = labelText;
+  }
+}
+
+
+
+
+customElements.define('triple-radios', TripleRadios, { extends: 'div' });
 customElements.define('fancy-searchbar', FancySearchbar, { extends: 'div' });
+customElements.define('tag-filters', TagFilters, { extends: 'li' });
 
 
 

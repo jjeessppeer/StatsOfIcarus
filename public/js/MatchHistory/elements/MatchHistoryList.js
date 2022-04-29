@@ -6,6 +6,7 @@ class MatchHistoryList extends HTMLUListElement {
 
   addMatches(matches) {
     for (let match of matches) {
+      console.log(match.Tags)
       let overview = document.createElement('li', { is: 'match-history-entry' });
       overview.fillData(match);
       this.append(overview);
@@ -315,15 +316,14 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
     // Load tags
 
     let tagDiv = this.querySelector(".tags");
-    for (let tag in matchData.CompetetiveTags) {
-      if (tag == "HighLevel") continue;
-      if (matchData.CompetetiveTags[tag]) {
-        let s = document.createElement('span');
-        s.classList.add(tag);
-        if (tag == "SCS") s.textContent = "SCS";
-        if (tag == "Competitive") s.textContent = "Competitive";
-        tagDiv.append(s);
-      }
+    const DISPLAYED_TAGS = ['SCS', 'Competitive', 'HighLevel'];
+    for (let tag of matchData.MatchTags) {
+      console.log(tag)
+      if (!DISPLAYED_TAGS.includes(tag)) continue;
+      let s = document.createElement('span');
+      s.classList.add(tag);
+      s.textContent = tag;
+      tagDiv.append(s);
     }
 
     // Add players

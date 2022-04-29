@@ -1,4 +1,9 @@
 
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
 
 .fancy-search {
     width: 500px;
@@ -107,3 +112,152 @@
     padding: 0;
     margin: 0;
 }
+
+/* -------------------------------- */
+/* ------ Filter foldout box ------ */
+/* -------------------------------- */
+
+.fancy-search .filter-box {
+    border: 1px solid;
+    border-top: 0;
+    border-radius: 8px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-color: rgb(205, 210, 210);
+    display: none;
+    font-family: Helvetica, sans-serif;
+    
+    /* height: 0; */
+    overflow: hidden;
+}
+
+.fancy-search.filters-open .searchbar {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.fancy-search.filters-open .filter-box {
+    display: block;
+    /* height: 100px; */
+    
+}
+
+
+
+.fancy-search .filter-box > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.fancy-search .filter-box > ul > li:not(:last-child) {
+    border-bottom: 1px solid;
+    border-color: rgb(205, 210, 210);
+}
+
+/* ------------------------------- */
+/* ------- Filter Category ------- */
+/* ------------------------------- */
+
+.filter-category .category-title{
+    margin: 0;
+    padding: 5px;
+    width: 100%;
+    border: 0;
+    box-shadow: 0;
+    text-shadow: 0;
+    height: 40px;
+    text-align: left;
+    border-left: 1px solid;
+    border-color: rgb(205, 210, 210);
+}
+
+.filter-category .category-content {
+    overflow: hidden;
+    transition: height 0.1s linear;
+}
+
+.filter-category .category-content {
+    overflow: hidden;
+    transition: height 0.1s linear;
+}
+
+
+/* ------------------------------- */
+/* --------- Tag filters --------- */
+/* ------------------------------- */
+
+.tag-filters > span {
+    font-weight: bold;
+}
+
+/* --------------------------------- */
+/* --------- Radio Triplet --------- */
+/* --------------------------------- */
+
+.triple-radios {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    margin: 0;
+    padding: 5px;
+    padding-left: 0;
+}
+
+.triple-radios .radio-container {
+    font-size: 0;
+    margin-right: 5px;
+}
+
+.triple-radios input{
+    font-size: 20px;
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    position: relative;
+
+    border: 1px solid;
+    border-right: 0;
+    border-color: rgb(205, 210, 210);
+    background-color: var(--card-color-1); 
+}
+.triple-radios input:last-child{
+    border-right: 1px solid;
+    border-color: rgb(205, 210, 210);
+}
+.triple-radios input:checked:nth-child(1) {
+    background-color: #ED4245; 
+}
+.triple-radios input:checked:nth-child(2) {
+    background-color: #b3b3b3; 
+}
+.triple-radios input:checked:nth-child(3) {
+    background-color: #45BB6B; 
+}
+.triple-radios input:checked:before {
+    background-color: #FFFFFF !important; 
+}
+
+.triple-radios input:nth-child(1):before {
+    clip-path: polygon(0 0, 19% 0, 50% 38%, 80% 0, 100% 0, 62% 49%, 100% 100%, 80% 100%, 50% 62%, 20% 100%, 0 100%, 38% 50%);
+    background-color: #ED4245;
+}
+.triple-radios input:nth-child(2):before {
+    clip-path: polygon(70% 0, 80% 0, 30% 100%, 20% 100%);
+    background-color: #FFFFFF;
+}
+.triple-radios input:nth-child(3):before {
+    clip-path: polygon(10% 60%, 0 70%, 30% 100%, 100% 10%, 90% 0, 30% 80%);
+    background-color: #45BB6B;
+}
+
+.triple-radios input::before {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    margin-left: 20%;
+    margin-top: 20%;
+}
+
