@@ -3,7 +3,7 @@ class FancySearchbar extends HTMLDivElement {
     super();
 
     this.classList.add('fancy-search');
-    this.classList.add('filters-open')
+    this.classList.add('filters-open');
     this.innerHTML = `
       <div class="searchbar">
         <input class="search-input" type="text" placeholder="Search for a player or ship" autocomplete="off">
@@ -25,6 +25,7 @@ class FancySearchbar extends HTMLDivElement {
 
     this.querySelector('.filter-box').addEventListener('change', evt => {
       console.log("Filters changed");
+      this.classList.toggle('filters-changed', true);
       console.log(this.filterCategories['TagFilters'].getMatchFilters());
       evt.stopPropagation();
     });
@@ -124,6 +125,7 @@ class FancySearchbar extends HTMLDivElement {
   }
 
   createSearchEvent(item) {
+    this.classList.toggle('filters-changed', false);
     const evt = new CustomEvent("search", {
       detail: this.getSearchQuery(item),
       bubbles: false,
@@ -227,11 +229,13 @@ class FilterCategory extends HTMLLIElement {
         TITLE
       </button>
       <div class="category-content">
+        <div>
+        </div>
       </div>
     `;
-
-    this.content = this.querySelector('.category-content');
-    this.content.style.height = '0px';
+    this.contentTab = this.querySelector('.category-content');
+    this.content = this.querySelector('.category-content > div');
+    // this.content.style.height = '0px';
 
     this.querySelector('.category-title').addEventListener('click', () => this.toggleOpen());
   }
@@ -245,10 +249,10 @@ class FilterCategory extends HTMLLIElement {
       this.classList.toggle('open', open);
 
     if (open) {
-      this.content.style.height = this.content.scrollHeight+"px";
+      this.contentTab.style.height = this.contentTab.scrollHeight+"px";
     }
     else{
-      this.content.style.height = "0px";
+      this.contentTab.style.height = "0px";
     }
   }
   setTitle(title) {
@@ -265,8 +269,7 @@ class TagFilters extends FilterCategory {
     this.addTag('SCS');
     this.addTag('Competitive');
     this.addTag('PlayersFull');
-    this.addTag('HighLevel');
-    this.setTitle('Match Tags');
+    this.setTitle('Tag Filters');
     this.toggleOpen(true);
   }
 

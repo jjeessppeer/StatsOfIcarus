@@ -316,7 +316,7 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
     // Load tags
 
     let tagDiv = this.querySelector(".tags");
-    const DISPLAYED_TAGS = ['SCS', 'Competitive', 'HighLevel'];
+    const DISPLAYED_TAGS = ['SCS', 'Competitive'];
     for (let tag of matchData.MatchTags) {
       if (!DISPLAYED_TAGS.includes(tag)) continue;
       let s = document.createElement('span');

@@ -8,7 +8,6 @@
 .fancy-search {
     width: 500px;
     position: relative;
-    z-index: 2;
 }
 
 .fancy-search .searchbar {
@@ -56,6 +55,11 @@
     border-color: rgb(205, 210, 210);
 }
 
+.fancy-search.filters-changed .searchbar .search-button {
+    transition: background-color ease-in 0.1s;
+    background-color: #45BB6B;
+}
+
 .fancy-search > .search-suggestion-box {
     width: 100%;
     position: absolute;
@@ -66,6 +70,7 @@
     border: 1px solid;
     border-top: 0;
     border-color: rgb(205, 210, 210);
+    z-index: 2;
 }
 .fancy-search.open > .search-suggestion-box {
     display: block;
@@ -118,7 +123,6 @@
 /* -------------------------------- */
 
 .fancy-search .filter-box {
-    
     border-radius: 8px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -167,13 +171,15 @@
     /* transition: scaleY; */
 }
 .filter-category .category-title{
+    font-size: 12px;
+    font-weight: 400;
+    font-family: Helvetica, sans-serif;
+    text-transform: uppercase;
+
     margin: 0;
     padding: 5px;
     width: 100%;
     border: 0;
-    box-shadow: 0;
-    text-shadow: 0;
-    height: 40px;
     text-align: left;
     border-left: 1px solid;
     border-color: rgb(205, 210, 210);
@@ -189,6 +195,9 @@
     transition: height 0.1s linear;
 }
 
+.filter-category .category-content > div{
+    padding: 5px;
+}
 
 /* ------------------------------- */
 /* --------- Tag filters --------- */
@@ -207,8 +216,11 @@
     flex-direction: row;
     justify-content: left;
     margin: 0;
-    padding: 5px;
-    padding-left: 0;
+    /* padding: 5px; */
+    /* padding-left: 0; */
+}
+.triple-radios + .triple-radios {
+    margin-top: 5px;
 }
 
 .triple-radios .radio-container {
