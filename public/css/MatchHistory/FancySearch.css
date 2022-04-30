@@ -118,16 +118,14 @@
 /* -------------------------------- */
 
 .fancy-search .filter-box {
-    border: 1px solid;
-    border-top: 0;
+    
     border-radius: 8px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    border-color: rgb(205, 210, 210);
-    display: none;
     font-family: Helvetica, sans-serif;
     
-    /* height: 0; */
+    /* display: none; */
+    height: 0;
     overflow: hidden;
 }
 
@@ -137,8 +135,9 @@
 }
 .fancy-search.filters-open .filter-box {
     display: block;
-    /* height: 100px; */
-    
+    height: auto;
+    border: 1px solid rgb(205, 210, 210);
+    border-top: 0;
 }
 
 
@@ -158,6 +157,15 @@
 /* ------- Filter Category ------- */
 /* ------------------------------- */
 
+.fancy-search .filter-button > i {
+    transition: scaleY 1s ease-in;
+}
+
+.fancy-search.filters-open .filter-button > i {
+    /* transform: rotate(180deg); */
+    transform: scaleY(-1);
+    /* transition: scaleY; */
+}
 .filter-category .category-title{
     margin: 0;
     padding: 5px;

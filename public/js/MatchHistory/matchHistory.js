@@ -83,51 +83,14 @@ const DEFAULT_QUERY = {
 };
 
 function initializeMatchHistory(){
-    // // Initialize search categories
-    // document.querySelectorAll(".match-history-search .category-button > button").forEach(element => {
-    //     element.addEventListener("click", evt => {
-    //         // Hide other search categories.
-    //         document.querySelectorAll(".match-history-search .category-content").forEach(el => {
-    //             el.style.height = "0px";
-    //         });
-    //         let category = evt.target.parentElement.parentElement;
-    //         // Show this one
-    //         let target = category.querySelector(".category-content")
-    //         target.style.height = target.scrollHeight+"px";
-
-    //         const index = Array.from(category.parentNode.children).indexOf((category))
-    //         search_mode = index;
-    //     });
-    // });
-
-    // let basicCat = document.querySelector("#basicSearchCategory .category-content");
-    // let advanCat = document.querySelector("#advancedSearchCategory .category-content");
-    // basicCat.style.height = basicCat.scrollHeight+"px";
-    // advanCat.style.height = "0px";
-
-    // // Initialize basic search
-    // document.querySelector(".basic-search button").addEventListener("click", () => requestRecentMatches());
-    // document.querySelector(".basic-search input").addEventListener("keydown", evt => {
-    //     if (evt.keyCode === 13) {
-    //         evt.preventDefault();
-    //         requestRecentMatches();
-    //     }
-    // });
-    // document.querySelector(".basic-search select").addEventListener("change", evt => {
-    //     let textInput = document.querySelector(".basic-search input");
-    //     textInput.disabled = false;
-    //     if (evt.target.value == "Player") textInput.placeholder = "Player name..."
-    //     if (evt.target.value == "Ship") textInput.placeholder = "Ship name..."
-
-    //     if (evt.target.value == "All") {
-    //         textInput.disabled = true;
-    //         // textInput.placeholder = "";
-    //     }
-    // });
-    
     let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
     document.getElementById('matchHistorySearch').append(searchbar);
     searchbar.addEventListener('search', evt => getMatchHistoryData(evt.detail));
+
+    searchbar.querySelector('.filter-button').addEventListener('click', evt => {
+        let search = evt.target.parentElement.parentElement;
+        search.classList.toggle('filters-open');
+    });
 
     document.getElementById('loadMoreMatchesButton').addEventListener('click', requestNextMatchHistoryPage)
 
@@ -138,9 +101,6 @@ function initializeMatchHistory(){
     else {
         getMatchHistoryData(DEFAULT_QUERY);
     }
-        
-    
-
 }
 
 function getUrlQuery() {
@@ -171,6 +131,7 @@ async function requestNextMatchHistoryPage(evt) {
 async function getMatchHistoryData(query) {
     // Clear old graphics
     clearMatchHistoryDisplay();
+    console.log(query);
     
     // Request data
     let res = await asyncPostRequest('/match_history_search', query);

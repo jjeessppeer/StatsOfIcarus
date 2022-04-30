@@ -67,37 +67,14 @@ app.post(
     '/match_history_search',
     async function(req, res) {
 
-    let result = HISTORY_SEARCH_SCHEMA.validate(req.body);
-    if (result.error){
+    let validationResult = HISTORY_SEARCH_SCHEMA.validate(req.body);
+    if (validationResult.error){
+        console.log(validationResult.error)
         return res.status(400).send();
     }
-
-    let responseData = {
-        perspective: req.body.perspective,
-        originalQuery: JSON.parse(JSON.stringify(req.body)),
-        modifiedQuery: req.body
-    };
-    if (req.body.perspective.type == 'Player') {
-        // Add match filter for player;
-        let playerId = await matchHistoryUtils.getPlayerIdFromName(mongoClient, req.body.perspective.name);
-        if (playerId) {
-            req.body.filters.push( {type: "PlayerId", id: playerId} );
-            let playerData = await matchHistoryRetrieve.getPlayerInfo(req.body.perspective.name);
-            responseData.playerData = playerData;
-            responseData.perspective.name = playerData.PlayerInfo.Name;
-        }
-    }
-    if (req.body.perspective.type == 'Overview'){
-        // TODO: cache default result of overview info
-        responseData.shipWinrates = await matchHistoryRetrieve.getShipsOverviewInfo();
-    }
-
-    let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, 0);
-    responseData.matches = matches;
+    let responseData = await matchHistoryRetrieve.matchHistorySearch(req.body);
     res.status(200).json(responseData);
 });
-
-
 
 app.post(
     '/request_matches', 

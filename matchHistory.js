@@ -349,6 +349,7 @@ async function insertMatchHistory(record, ip) {
         matchTags.push('HighLevel')
 
 
+    
     // Insert the match.
     let newMatch = {
         ModVersion: record.ModVersion,
@@ -372,7 +373,7 @@ async function insertMatchHistory(record, ip) {
         AvgPlayerLevel: avgPlayerLevel,
         Ships: shipIds,
         ShipModels: shipModels,
-        ShipLoadouts: shipLoadouts,
+        ShipLoadouts: shipLoadouts, // TODO: Insert full ship loadout, not just model
         ShipNames: shipNames,
         Players: playerIds,
         Skills: playerSkills,

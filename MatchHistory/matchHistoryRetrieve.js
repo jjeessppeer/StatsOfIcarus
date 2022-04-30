@@ -1,3 +1,4 @@
+const { MongoClient } = require("mongodb");
 const pipelines = require("./matchHistoryPipelines.js");
 const utils = require("./matchHistoryUtils.js");
 
@@ -23,18 +24,53 @@ function setMongoClient(clientIn) {
 //     return out;
 // }
 
+async function matchHistorySearch(query) {
+    let responseData = {
+        perspective: query.perspective,
+        originalQuery: JSON.parse(JSON.stringify(query)),
+        modifiedQuery: query
+    };
 
+    if (query.perspective.type == 'Player') {
+        // Add match filter for player;
+        let playerId = await utils.getPlayerIdFromName(client, query.perspective.name);
+        if (playerId) {
+            query.filters.push( {type: "PlayerId", id: playerId} );
+        }
+    }
 
-async function getPlayerInfo(playerName, timeSpanDays=366) {
+    let filterPipeline = await pipelines.generateMatchFilterPipeline(
+        query.filters,
+        client);
+
+    if (query.perspective.type == 'Player') {
+        // Add match filter for player;
+        let playerId = await utils.getPlayerIdFromName(client, query.perspective.name);
+        if (playerId) {
+            let playerData = await getPlayerInfo(query.perspective.name, filterPipeline);
+            responseData.playerData = playerData;
+            responseData.perspective.name = playerData.PlayerInfo.Name;
+        }
+    }
+    if (query.perspective.type == 'Overview'){
+        responseData.shipWinrates = await getShipsOverviewInfo(filterPipeline);
+    }
+    let matches = await getRecentMatches(query.filters, 0);
+    responseData.matches = matches;
+    return responseData;
+}
+
+async function getPlayerInfo(playerName, filterPipeline) {
     const playersCollection = client.db("mhtest").collection("Players");
+    const matchCollection = client.db("mhtest").collection("Matches");
     let playerId = await utils.getPlayerIdFromName(client, playerName);
-    let playerInfoPipeline = pipelines.playerInfoPipeline(playerId, timeSpanDays);
-    
+
+    let playerInfoPipeline = pipelines.playerInfoPipeline(playerId);
     let playerInfoAggregate = playersCollection.aggregate(playerInfoPipeline);
     let playerInfo = await playerInfoAggregate.next();
 
-    let playerWinratePipeline = pipelines.playerWinratesPipeline(playerId, timeSpanDays);
-    let winrateAggregate = playersCollection.aggregate(playerWinratePipeline);
+    let playerWinratePipeline = pipelines.playerWinratesPipeline(filterPipeline, playerId);
+    let winrateAggregate = matchCollection.aggregate(playerWinratePipeline);
     let playerWinrates = await winrateAggregate.next();
 
     playerInfo.Winrates = playerWinrates;
@@ -51,24 +87,30 @@ async function getRecentMatches(filters, page) {
         client);
     let fullPipeline = filterPipeline.concat(basePipeline);
     let matchesAggregate = matchCollection.aggregate(fullPipeline);
+    // let matchesAggregate2 = matchCollection.aggregate(fullPipeline);
+    // console.log('__')
+    // console.log(JSON.stringify(await matchesAggregate2.explain(true)));
+    // console.log('__')
     let matches = await matchesAggregate.next();
+    matches['TotalCount'] = await matchCollection.count();
     return matches;
 }
 
-async function getShipsOverviewInfo() {
-    // TODO: add filter option.
+async function getShipsOverviewInfo(filterPipeline) {
+
     const matchCollection = client.db("mhtest").collection("Matches");
-    let basePipeline = pipelines.modelPickWinRates();
-    let aggregate = matchCollection.aggregate(basePipeline);
+    // let filterPipeline = await pipelines.generateMatchFilterPipeline(
+    //     filters,
+    //     client);
+    let pipeline = pipelines.modelPickWinRates(filterPipeline);
+    let aggregate = matchCollection.aggregate(pipeline);
     let result = await aggregate.next();
-    await aggregate.forEach(element => {
-        result.push(element);
-    });
     return result;
 }
 
 
 module.exports = {
+    matchHistorySearch,
     getPlayerInfo,
     getRecentMatches,
     getShipsOverviewInfo,

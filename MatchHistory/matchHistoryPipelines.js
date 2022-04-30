@@ -1,48 +1,44 @@
 const utils = require("./matchHistoryUtils.js");
 
-function playerWinratesPipeline(playerId, daysAgo) {
-  const timeNow = new Date().getTime();
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const minTime = timeNow - daysAgo * msPerDay;
+
+function playerWinratesPipeline(filterPipeline, playerId) {
   const pipeline = [
-    { $match: {_id: playerId} },
-    { $unwind: {
-      path: "$MatchesPlayed"
+    ...filterPipeline,
+    { $addFields: {
+      playerFlatIndex: { $indexOfArray: [ "$FlatPlayers", playerId ] },
     }},
-    { $match: {"MatchesPlayed.Timestamp": {$gt: minTime}} },
+    { $addFields: {
+      playerTeamIndex: { $floor: { $divide: [ 
+        "$playerFlatIndex",
+        { $multiply: ["$TeamCount", 4] }
+      ]}},
+      playerLoadoutId: {$arrayElemAt: [
+        "$FlatSkills", 
+        "$playerFlatIndex"
+      ]},
+      playerShipLoadoutId: {$arrayElemAt: [
+        "$FlatShips",
+        { $floor: { $divide: ["$playerFlatIndex", 4 ] } }
+      ]},
+    }},
     { $lookup: {
-      from: "Matches",
-      localField: "MatchesPlayed.MatchObjId",
-      foreignField: "_id",
-      as: "Matches"
-    }},
-    { $unwind: {
-      path: "$Matches"
+        from: "Ships",
+        localField: "playerShipLoadoutId",
+        foreignField: "_id",
+        as: "PlayerShipLoadout"
     }},
     { $lookup: {
       from: "PlayerEquipment",
-      localField: "MatchesPlayed.PlayerLoadoutId",
+      localField: "playerLoadoutId",
       foreignField: "_id",
       as: "PlayerLoadout"
-    }},
-    { $unwind: {
-      path: "$PlayerLoadout"
-    }},
-    { $lookup: {
-      from: "Ships",
-      localField: "MatchesPlayed.PlayerShipId",
-      foreignField: "_id",
-      as: "PlayerShipLoadout"
-    }},
-    { $unwind: {
-      path: "$PlayerShipLoadout"
     }},
     { $facet: {
       "OverallRates": [
         { $group: {
           _id: null,
           count: {$sum: 1},
-          wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
+          wins: { $sum: {$cond: [{$eq: ["$playerTeamIndex", "$Winner"]}, 1, 0]} }
         }},
       ],
       "ModelRates": [
@@ -52,7 +48,7 @@ function playerWinratesPipeline(playerId, daysAgo) {
             Ship: "$PlayerShipLoadout.ShipModel",
             Class: "$PlayerLoadout.Class"},
           count: {$sum: 1},
-          wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
+          wins: { $sum: {$cond: [{$eq: ["$playerTeamIndex", "$Winner"]}, 1, 0]} }
         }},
         { $project: {
           ShipModel: "$_id.Ship",
@@ -77,7 +73,7 @@ function playerWinratesPipeline(playerId, daysAgo) {
             Ship: "$PlayerShipLoadout.ShipModel",
             Class: "$PlayerLoadout.Class"},
           count: {$sum: 1},
-          wins: { $sum: {$cond: [{$eq: ["$MatchesPlayed.TeamIndex", "$Matches.Winner"]}, 1, 0]} }
+          wins: { $sum: {$cond: [{$eq: ["$teamIndex", "$Winner"]}, 1, 0]} }
         }},
         { $project: {
           ShipModel: "$_id.Ship",
@@ -96,18 +92,11 @@ function playerWinratesPipeline(playerId, daysAgo) {
         }}
       ]
     }},
-    { $unwind: {
-      path: "$OverallRates"
-    }}
-  ];
-  return pipeline;
+  ]
+  return pipeline
 }
 
-
-function playerInfoPipeline(playerId, daysAgo) {
-    const timeNow = new Date().getTime();
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const minTime = timeNow - daysAgo * msPerDay;
+function playerInfoPipeline(playerId) {
     const pipeline = [
         { $match: {_id: playerId} },
         { $facet: {
@@ -141,6 +130,14 @@ async function generateMatchFilterPipeline(filters, mongoClient) {
     }
     if (filter.type == "PlayerId") {
       let query = { $match: { FlatPlayers: filter.id } };
+      filterPipeline.push(query);
+    }
+    if (filter.type == "TagsInclude") {
+      let query = { $match: { MatchTags: { $all: filter.tags } }};
+      filterPipeline.push(query);
+    }
+    if (filter.type == "TagsExclude") {
+      let query = { $match: { MatchTags: {$not: { $all: filter.tags }}}};
       filterPipeline.push(query);
     }
     // if (filter.filterType == "Ship") {
@@ -227,7 +224,7 @@ function recentMatchesPipeline(offset, count) {
       { $unwind: "$Count" },
       //output projection
       { $project: {
-        Count: "$Count.count",
+        FilteredCount: "$Count.count",
         Matches: "$Matches"
       }}
   ]
@@ -235,7 +232,7 @@ function recentMatchesPipeline(offset, count) {
 }
 
 
-function modelPickWinRates() {
+function modelPickWinRates(filterPipeline) {
   let pipeline = [
       { "$unwind": {
         path: "$ShipModels",
@@ -266,13 +263,14 @@ function modelPickWinRates() {
       ModelWinrates: "$ModelWinrates"
     }}
   ];
+  pipeline = filterPipeline.concat(pipeline);
   return pipeline;
 }
 
 module.exports = {
-    playerInfoPipeline,
-    playerWinratesPipeline,
-    recentMatchesPipeline,
-    generateMatchFilterPipeline,
-    modelPickWinRates
+  playerInfoPipeline,
+  playerWinratesPipeline,
+  recentMatchesPipeline,
+  generateMatchFilterPipeline,
+  modelPickWinRates
 }

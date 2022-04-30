@@ -2,26 +2,32 @@ class FancySearchbar extends HTMLDivElement {
   constructor() {
     super();
 
-    this.classList.add('fancy-search')
+    this.classList.add('fancy-search');
     this.classList.add('filters-open')
     this.innerHTML = `
       <div class="searchbar">
         <input class="search-input" type="text" placeholder="Search for a player or ship" autocomplete="off">
-        <button disabled>Filters<i class="fas fa-chevron-down"></i></button>
-        <button class="searchbutton"><i class="fas fa-search"></i></button>
+        <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
+        <button class="search-button"><i class="fas fa-search"></i></button>
       </div>      
       <div class="search-suggestion-box">
       </div>
       <div class="filter-box">
         <ul>
-        <li>FILTER1</li>
-        <li>FILTER2</li>
         </ul>
       </div>
     `;
     this.categories = [];
+    this.filterCategories = {};
 
     let tagFiltersElement = document.createElement('li', {is: 'tag-filters'});
+    this.filterCategories['TagFilters'] = tagFiltersElement;
+
+    this.querySelector('.filter-box').addEventListener('change', evt => {
+      console.log("Filters changed");
+      console.log(this.filterCategories['TagFilters'].getMatchFilters());
+      evt.stopPropagation();
+    });
     this.querySelector('.filter-box > ul').append(tagFiltersElement)
 
     this.querySelector('input').addEventListener('focus', evt => {
@@ -44,7 +50,7 @@ class FancySearchbar extends HTMLDivElement {
         this.createSearchEvent();
       }
     });
-    this.querySelector(".searchbutton").addEventListener('click', () => this.createSearchEvent());
+    this.querySelector(".search-button").addEventListener('click', () => this.createSearchEvent());
 
     let shipListItems = [];
     for (let shipId in SHIP_ITEMS) {
@@ -77,11 +83,12 @@ class FancySearchbar extends HTMLDivElement {
     this.updateSuggestions();
   }
 
+  
+
   setText(text) {
     this.querySelector('.searchbar input').value = text;
     this.updateSuggestions();
   }
-
   
   addCategory(categoryName, categoryItems) {
     let categoryData = { name: categoryName, items: [], element: undefined }
@@ -127,13 +134,17 @@ class FancySearchbar extends HTMLDivElement {
     this.dispatchEvent(evt);
   }
 
+  getMatchFilters() {
+    return this.filterCategories['TagFilters'].getMatchFilters();
+  }
+
   getSearchQuery(item) {
     if (item == undefined) {
       item = this.getTopItem()[1];
     }
     let query = {
       perspective: {type: item.type, name: item.name},
-      filters: []
+      filters: this.getMatchFilters()
     };
 
     // if (item.type == "Player") {
@@ -203,7 +214,6 @@ class FancySearchbar extends HTMLDivElement {
     this.playerCategory.items[0].name = searchText;
     this.playerCategory.items[0].element.querySelector('span').textContent = searchText + "...";
 
-
     this.getTopItem();
   }
 }
@@ -225,20 +235,21 @@ class FilterCategory extends HTMLLIElement {
 
     this.querySelector('.category-title').addEventListener('click', () => this.toggleOpen());
   }
-  toggleOpen(open) {
+  toggleOpen(open, delay=true) {
+    if (delay) {
+      setTimeout(() => this.toggleOpen(open, false), 10);
+    }
     if (open == undefined)
       open = this.classList.toggle('open');
     else
       this.classList.toggle('open', open);
 
     if (open) {
-      console.log("OPENING");
       this.content.style.height = this.content.scrollHeight+"px";
     }
     else{
       this.content.style.height = "0px";
     }
-    
   }
   setTitle(title) {
     this.querySelector('.category-title').textContent = title;
@@ -250,18 +261,39 @@ class TagFilters extends FilterCategory {
   constructor(){
     super();
     this.classList.add('tag-filters');
-    let scs_triple = document.createElement('div', {is: 'triple-radios'});
-    let comp_triple = document.createElement('div', {is: 'triple-radios'});
-    let full_triple = document.createElement('div', {is: 'triple-radios'});
-    scs_triple.initialize("SCS");
-    comp_triple.initialize("Competitive");
-    full_triple.initialize("Match Full");
-    this.content.append(scs_triple)
-    this.content.append(comp_triple)
-    this.content.append(full_triple)
+    this.tripletElements = [];
+    this.addTag('SCS');
+    this.addTag('Competitive');
+    this.addTag('PlayersFull');
+    this.addTag('HighLevel');
     this.setTitle('Match Tags');
     this.toggleOpen(true);
-    this.toggleOpen(true);
+  }
+
+  addTag(tagName) {
+    let tripleRadio = document.createElement('div', {is: 'triple-radios'});
+    tripleRadio.initialize(tagName);
+    this.tripletElements.push(tripleRadio);
+    this.content.append(tripleRadio);
+  }
+
+  getMatchFilters() {
+    let tagsInclude = [];
+    let tagsExclude = [];
+    this.tripletElements.forEach(el => {
+      if (el.value == 2) {
+        tagsInclude.push(el.label);
+      }
+      if (el.value == 0) {
+        tagsExclude.push(el.label);
+      }
+    });
+    let filters = [];
+    if (tagsInclude.length != 0) 
+      filters.push({type: "TagsInclude", tags: tagsInclude});
+    if (tagsExclude.length != 0)
+      filters.push({type: "TagsExclude", tags: tagsExclude});
+    return filters;
   }
 }
 
@@ -272,14 +304,21 @@ class TripleRadios extends HTMLDivElement {
 
     this.innerHTML = `
       <div class="radio-container">
-        <input type="radio" name="radio" />
-        <input type="radio" name="radio" checked/>
-        <input type="radio" name="radio" />
+        <input type="radio" name="radio" value="0" />
+        <input type="radio" name="radio" value="1" checked/>
+        <input type="radio" name="radio" value="2" />
       </div>
       <span>LABEL</span>
     `;
+    this.value = "1";
+    this.querySelectorAll('input').forEach(input => {
+      input.addEventListener('change', evt => {
+        this.value = evt.target.value;
+      });
+    });
   }
   initialize(labelText, groupName) {
+    this.label = labelText;
     if (groupName == undefined) groupName = labelText;
     this.querySelectorAll('input').forEach(el => el.name = labelText);
     this.querySelector('span').textContent = labelText;
