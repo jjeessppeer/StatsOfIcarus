@@ -64,8 +64,8 @@ const MATCH_SUBMISSION_SCHEMA = Joi.object({
         .required(),
     Passworded: Joi.boolean()
         .required(),
-    Moderated: Joi.boolean()
-        .required(),
+    // Moderated: Joi.boolean()
+    //     .required(),
     MapId: Joi.number()
         .integer()
         .required(),
