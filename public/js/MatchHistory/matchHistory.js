@@ -131,14 +131,12 @@ async function requestNextMatchHistoryPage(evt) {
 async function getMatchHistoryData(query) {
     // Clear old graphics
     clearMatchHistoryDisplay();
-    console.log(query);
     
     // Request data
     let res = await asyncPostRequest('/match_history_search', query);
     let response = JSON.parse(res.response);
 
     current_match_filters = response.modifiedQuery.filters;
-    console.log(response);
 
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
     if (window.location.hash.substr(1).split("?")[0] == "matchHistory"){
@@ -169,7 +167,6 @@ function loadOverviewPerspective(response) {
 
 function loadPlayerPerspective(response) {
     let playerData = response.playerData;
-    console.log(response)
     // Initialize ship rates card
     let t = document.createElement('div', {is: "player-ship-info-table"});
     t.initialize(playerData.Winrates);
@@ -189,7 +186,6 @@ function loadShipPerspective(response) {
 }
 
 function clearMatchHistoryDisplay() {
-    console.log("Cleaning...")
     current_match_page = 0;
     current_match_filters = [];
     const CLEAR_QUERIES = [
@@ -236,9 +232,6 @@ function requestRecentMatches(page=0, clearMatchList=true) {
     });
 }
 function updateMatchHistoryList(matchHistory){
-    console.log("Match history recieved");
-    console.log(matchHistory);
-
     // Insert new match history elements from the input list.
     for (let entry of matchHistory.Matches) {
         let overview = document.createElement('li', {is: 'match-history-entry'});
@@ -285,7 +278,6 @@ function getGunItem(matchRecord, gunId) {
     for (let gun of matchRecord.GunItems) {
         if (gun._id == gunId) return gun;
     }
-    console.log(matchRecord);
     throw `No gun with specified id found: ${gunId}`;
 }
 
