@@ -33,7 +33,8 @@ class PlayerInfoBox extends HTMLDivElement {
     this.querySelector('.clan-name').textContent = playerData.PlayerInfo.Clan == "" ? "" : `[${playerData.PlayerInfo.Clan}]`;
     this.querySelector('.player-name').textContent = playerData.PlayerInfo.Name.substring(0, playerData.PlayerInfo.Name.length - 5);
     this.querySelector('.match-count').textContent = `${playerData.PlayerInfo.MatchCount} matches recorded`;
-    this.querySelector('.skill-rating').textContent = `Skill rating ${playerData.PlayerInfo.SkillRatings.Overall.mu.toFixed(0)}`;
+    this.querySelector('.skill-rating').textContent = 
+      `Skill rating ${playerData.PlayerInfo.SkillRatings.Overall.mu.toFixed(0)} ± ${playerData.PlayerInfo.SkillRatings.Overall.sigma.toFixed(0)}`;
     this.initializePlayrateChart(playerData.Winrates);
     this.initializeWinrateChart(playerData.Winrates);
     

@@ -73,7 +73,7 @@ function playerWinratesPipeline(filterPipeline, playerId) {
             Ship: "$PlayerShipLoadout.ShipModel",
             Class: "$PlayerLoadout.Class"},
           count: {$sum: 1},
-          wins: { $sum: {$cond: [{$eq: ["$teamIndex", "$Winner"]}, 1, 0]} }
+          wins: { $sum: {$cond: [{$eq: ["$playerTeamIndex", "$Winner"]}, 1, 0]} }
         }},
         { $project: {
           ShipModel: "$_id.Ship",
