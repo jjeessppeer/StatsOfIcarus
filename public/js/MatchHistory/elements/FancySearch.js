@@ -240,6 +240,7 @@ class FilterCategory extends HTMLLIElement {
     this.querySelector('.category-title').addEventListener('click', () => this.toggleOpen());
   }
   toggleOpen(open, delay=true) {
+    return
     if (delay) {
       setTimeout(() => this.toggleOpen(open, false), 10);
     }
