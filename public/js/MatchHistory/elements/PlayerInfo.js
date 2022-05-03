@@ -13,7 +13,8 @@ class PlayerInfoBox extends HTMLDivElement {
             <span class="match-count">1336 matches</span>
           </div>
           <div>
-            <span class="skill-rating">Skill rating: </span>
+            <div class="skill-rating">Skill rating: </div>
+            <div class="skill-rating">Skill rating: </div>
           </div>
         <div>
         <div class="charts">
@@ -33,8 +34,11 @@ class PlayerInfoBox extends HTMLDivElement {
     this.querySelector('.clan-name').textContent = playerData.PlayerInfo.Clan == "" ? "" : `[${playerData.PlayerInfo.Clan}]`;
     this.querySelector('.player-name').textContent = playerData.PlayerInfo.Name.substring(0, playerData.PlayerInfo.Name.length - 5);
     this.querySelector('.match-count').textContent = `${playerData.PlayerInfo.MatchCount} matches recorded`;
-    this.querySelector('.skill-rating').textContent = 
-      `Skill rating ${playerData.PlayerInfo.SkillRatings.Overall.mu.toFixed(0)} ± ${playerData.PlayerInfo.SkillRatings.Overall.sigma.toFixed(0)}`;
+    let ratingFields = this.querySelectorAll('.skill-rating');
+    ratingFields[0].textContent = `Comp rating: ${playerData.PlayerInfo.SkillRatings.Competitive.mu.toFixed(0)} ± ${playerData.PlayerInfo.SkillRatings.Competitive.sigma.toFixed(0)}`;
+    ratingFields[1].textContent = `Overall rating: ${playerData.PlayerInfo.SkillRatings.Overall.mu.toFixed(0)} ± ${playerData.PlayerInfo.SkillRatings.Overall.sigma.toFixed(0)}`;
+    // this.querySelector('.skill-rating').textContent = 
+      
     this.initializePlayrateChart(playerData.Winrates);
     this.initializeWinrateChart(playerData.Winrates);
     
