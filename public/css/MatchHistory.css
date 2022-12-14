@@ -2,6 +2,12 @@
 :root {
     --tag-fill-1: rgb(140, 81, 197);
     --tag-border-1: rgb(127, 53, 144);
+
+    --background-color: #EAEAEA;
+    --card-border: #D2D2D2;
+    --card-color-1: #F2F2F2;
+    --card-color-2: #EDEDED;
+
 }
 
 #matchHistory {
@@ -23,13 +29,33 @@
     width: 1em;
 }
 
+#loadMoreMatchesButton {
+    padding: 0;
+    margin: 10px;
+    margin-top: 0;
+    width: 800px;
+    height: 50px;
+    outline: none;
+
+    background-color: var(--card-color-1);
+    border: 1px solid;
+    border-color: var(--card-border);
+}
+/* #loadMoreMatchesButton::after {
+    content: 'Show Older';
+} */
+#loadMoreMatchesButton:hover:not(:disabled) {
+    background-color: var(--card-color-2);
+}
+
 .match-history-list {
     /* background-color: rgba(240, 191, 191, 0.726); */
     /* padding: 20px; */
     /* margin: 20px; */
     padding: 0;
-    margin: 0;
-    margin-left: 10px;
+    margin: 10px;
+    
+    /* margin-left: 10px; */
 }
 
 .match-history-entry {

@@ -1,21 +1,18 @@
-const { MongoClient } = require("mongodb");
-const fs = require('fs');
 const assert = require('assert');
-const { kill } = require("process");
-const { json } = require("express/lib/response");
 
 const SCS_START_HOUR_UTC = 18;
+const SCS_START_DAY = 0;
 const SCS_HOUR_LENGTH = 4;
 
 
-const db_url = `mongodb://${process.env.MONGODB_USER}:${process.env.MONGODB_PASS}@${process.env.MONGODB_ADRESS}/`;
-// const db_url = `mongodb://localhost:27017/`;
-let client = new MongoClient(db_url);
+const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
+const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
+
+var client;
 
 
 // Lock for insertMatchHistory. Function waits unil false to run.
 let insertionRunning = false;
-
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -34,221 +31,6 @@ async function getPlayerId(playerName) {
     if (!res) return false;
     return res._id;
 }
-
-// Return all ship build ids matching the restrictions.
-async function getShipBuilds(restrictions) {
-    const matchCollection = client.db("mhtest").collection("Ships");
-    let query = {};
-    for (let i in restrictions) {
-        if (restrictions[i] == -1) continue;
-        if (i == 0) query['ShipModel'] = restrictions[i];
-        else query[`Loadout.${i - 1}`] = restrictions[i];
-    }
-
-    let results = matchCollection.find(query);
-    let out = [];
-    await results.forEach(doc => { out.push(doc._id) });
-    return out;
-}
-
-async function generateMatchQuery(filters) {
-    const shipItems = client.db("mhtest").collection("Items-Ships");
-    const playerCollection = client.db("mhtest").collection("Players");
-    let filterPipeline = [];
-
-    for (let filter of filters) {
-        if (filter.filterType == "Player") {
-            let searchName = filter.data;
-            let player = await playerCollection.findOne({ "Name": new RegExp(searchName, "i") });
-            let playerId = -2;
-            if (player) playerId = player._id;
-            let query = {
-                $match: {
-                    FlatPlayers: playerId
-                }
-            };
-            filterPipeline.push(query);
-        }
-        if (filter.filterType == "Ship") {
-            let searchName = filter.data;
-            let shipItem = await shipItems.findOne({ "Name": new RegExp(searchName, "i") });
-            let shipModel = -1;
-            if (shipItem) shipModel = shipItem._id;
-            let query = {
-                $match: {
-                    $or: [
-                        { Team_0_ShipModels: { $all: [shipModel] } },
-                        { Team_1_ShipModels: { $all: [shipModel] } }
-                    ]
-                }
-            };
-            filterPipeline.push(query);
-        }
-    }
-
-    return filterPipeline;
-}
-
-
-async function getMatches(filters, perspective, offset, count) {
-    const matchCollection = client.db("mhtest").collection("Matches");
-
-    let filterPipeline = await generateMatchQuery(filters);
-
-    let modelWinratePipeline = [
-        { "$unwind": {
-            path: "$ShipModels",
-            includeArrayIndex: "TeamIndex"}},
-        { "$unwind": {
-            path: "$ShipModels"
-        }},
-        { $group: {
-            _id: "$ShipModels",
-            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
-            // Losses: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 0, 1]} },
-            PlayedGames: { $sum: 1 }
-        }},
-        { $lookup: {
-            from: "Items-Ships",
-            localField: "_id",
-            foreignField: "_id",
-            as: "ShipItem"
-    }},
-    ];
-
-    let playerInfoPipeline = [
-        { $unwind: {
-            path: "$Players",
-            includeArrayIndex: "TeamIndex"}},
-        { $unwind: {
-            path: "$Players"
-        }},
-        { $unwind: {
-            path: "$Players"
-        }},
-        { $group: {
-            _id: "$Players",
-            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
-            PlayedGames: { $sum: 1 }
-        }},
-        { $sort: { "PlayedGames": -1 } },
-        { $limit: 5 },
-        { $lookup: {
-                from: "Players",
-                localField: "_id",
-                foreignField: "_id",
-                as: "PlayerData"
-        }},
-    ];
-
-    const pipeline = [
-        {$match: { TeamSize: 2 }},
-        {$match: { TeamCount: 2 }},
-        {$match: { GameMode: 2 }},
-
-        {
-            $facet: {
-                "playerInfo": playerInfoPipeline,
-                "winpickRate": modelWinratePipeline,
-                "stage1": [
-                    { "$group": { _id: null, count: { $sum: 1 } } }
-                ],
-                "stage2": [
-                    { "$sort": { "Timestamp": -1 } }, 
-                    { "$skip": offset }, 
-                    { "$limit": count },
-                    {
-                        $lookup: {
-                            from: "Players",
-                            localField: "FlatPlayers",
-                            foreignField: "_id",
-                            as: "PlayerInfo"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "PlayerEquipment",
-                            localField: "FlatSkills",
-                            foreignField: "_id",
-                            as: "LoadoutInfo"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Ships",
-                            localField: "FlatShips",
-                            foreignField: "_id",
-                            as: "ShipLoadouts"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Ships",
-                            localField: "ShipLoadouts.ShipModel",
-                            foreignField: "_id",
-                            as: "ShipItems"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Skills",
-                            localField: "LoadoutInfo.Skills",
-                            foreignField: "_id",
-                            as: "SkillItems"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Guns",
-                            localField: "ShipLoadouts.Loadout",
-                            foreignField: "_id",
-                            as: "GunItems"
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "Items-Maps",
-                            localField: "MapId",
-                            foreignField: "_id",
-                            as: "MapItem"
-                        }
-                    },
-                    {
-                        $project: {
-                            SubmitterIp: 0
-                        }
-                    }
-                ]
-            }
-        },
-        { $unwind: "$stage1" },
-        //output projection
-        {
-            $project: {
-                count: "$stage1.count",
-                data: "$stage2",
-                modelWinrates: "$winpickRate",
-                playerInfo: "$playerInfo"
-            }
-        }
-    ];
-
-    filterPipeline.forEach(q => {
-        // console.log(JSON.stringify(q));
-        pipeline.unshift(q);
-    });
-    // let aggCursor2 = await matchCollection.aggregate(pipeline).explain(true);
-    // console.log("__");
-    // console.log(JSON.stringify(aggCursor2));
-    // console.log("__");
-    let aggCursor = matchCollection.aggregate(pipeline);
-    // let aggCursor = matchCollection.find();
-    let result = {};
-    result = await aggCursor.next();
-    aggCursor.close();
-    return result;
-}
-
 
 async function submitRecord(record, ip) {
     if (!validateHistorySubmission(record)) {
@@ -359,7 +141,15 @@ async function updatePlayer(player) {
             Name: player.Name,
             Clan: player.Clan,
             MaxLevel: player.Level,
-            Levels: levels
+            Levels: levels,
+            MatchCount: 0,
+            MatchesWon: 0,
+            MatchesPlayer: [],
+            SkillRanking: {
+                Overall: {mu: 100, sigma: 50},
+                Pilot: {mu: 100, sigma: 50},
+                Crew: {mu: 100, sigma: 50}
+            }
         });
     }
     else {
@@ -372,11 +162,10 @@ async function updatePlayer(player) {
         }
         await playersCollection.updateOne(
             {_id: player.UserId},
-            {Levels: dbLevels, MaxLevel: Math.max(dbLevels)},
+            {$set: {Levels: dbLevels, MaxLevel: Math.max(dbLevels)}},
         )
     }
 }
-
 
 function sortShipLoadout(ship) {
     let sortedLoadout = [];
@@ -425,11 +214,38 @@ async function insertMatchHistory(record, ip) {
     const matchesCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
+    var ipCollection = client.db("mhtest").collection("Submitters");
+
+    let submissionDate = new Date();
+    let submissionHour = submissionDate.getUTCHours();
+    let submissionDay = submissionDate.getUTCDay();
+    let submissionTicks = submissionDate.getTime();
+
+    let submitter = await ipCollection.findOneAndUpdate(
+        {_id: ip},
+        {$set: {LastTimestamp: submissionTicks}, $inc: {SubmissionCount: 1}},
+        {upsert: true});
+
+    // Check so matches are not submitter too fast.
+    if (submitter.value != null && 
+        submissionTicks - submitter.value.LastTimestamp < MIN_SUBMISSION_INTERVAL_MS ) {
+        await ipCollection.updateOne(
+            {_id: ip},
+            {$inc: {FailedSubmissions: 1}});
+        return false;
+    }
 
     // Check if match has already been added.
     let match = await matchesCollection.findOne({ MatchId: record.MatchId });
+    
     if (match) {
-        // TODO: Check if record matches. If it does add vote.
+        if (!match.SubmitterIps.includes(ip)) {
+            match.SubmitterIps.push(ip);
+            await matchesCollection.updateOne(
+                {MatchId: record.MatchId},
+                {$set: {SubmitterIps: match.SubmitterIps}});
+        }
+
         return true;
     }
 
@@ -509,22 +325,30 @@ async function insertMatchHistory(record, ip) {
     let playersFull = playerCount == record.TeamSize * record.TeamCount * 4;
     let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
 
-    let submissionDate = new Date();
-    let submissionHour = submissionDate.getUTCHours();
-    let competitive = {
-        SCS: posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded,
-        Competitive: shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded,
-        HighLevel: avgPlayerLevel >= 30 && emptySlots <= 2
-    };
+    let matchTags = [];
+    if (record.Passworded)
+        matchTags.push('Passworded')
+    if (shipsFull)
+        matchTags.push('ShipsFull')
+    if (playersFull)
+        matchTags.push('PlayersFull')
+
+    if (submissionDay == SCS_START_DAY && posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded)
+        matchTags.push('SCS')
+    if (shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded)
+        matchTags.push('Competitive')
+    if (avgPlayerLevel >= 30 && emptySlots <= 2)
+        matchTags.push('HighLevel')
 
     // Insert the match.
     let newMatch = {
         ModVersion: record.ModVersion,
         SubmitterIp: ip,
+        SubmitterIps: [ip],
         Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
         SubmissionCount: 1,
-        CompetetiveTags: competitive,
+        MatchTags: matchTags,
         MatchId: record.MatchId,
         MapId: record.MapId,
         ShipsFull: shipsFull,
@@ -564,15 +388,6 @@ async function insertMatchHistory(record, ip) {
     return true;
 }
 
-
-function connect() {
-    return client.connect();
-}
-
-function close() {
-    return client.close();
-}
-
 function setMongoClient(clientIn) {
     client = clientIn;
 }
@@ -580,9 +395,6 @@ function setMongoClient(clientIn) {
 
 module.exports = {
     submitRecord,
-    getMatches,
-    setMongoClient,
-    connect,
-    close
+    setMongoClient
     // connect
 }

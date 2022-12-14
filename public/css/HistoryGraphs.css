@@ -6,7 +6,7 @@
 
 #matchHistory .content-area {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
     /* margin: auto; */
@@ -16,7 +16,7 @@
 
 #matchHistory .middle-area {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: nowrap;
     justify-content: left;
     /* margin: auto; */
@@ -24,12 +24,12 @@
 }
 
 #matchHistory .top-area {
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
     /* height: 300px; */
 }
 
 #matchHistory .left-area {
-    width: 400px;
+    min-width: 400px;
 }
 
 #matchHistory .right-area {
@@ -43,23 +43,19 @@
     position: relative;
 }
 
-#winpickChartContainer {
-    width: 500px;
-    height: 100%;
-}
 
 
-
-#ShipPopularityList {
+.ship-popularity-list {
     list-style: none;
     text-align: left;
-    margin: 0;
+    margin: 10px;
     padding: 0;
     vertical-align: top;
-    background-color: rgb(237, 237, 237);
+    /* background-color: rgb(237, 237, 237); */
     border: 1px solid;
     border-bottom: 0;
-    border-color: rgb(205, 210, 210);
+    border-color: var(--card-border);
+    background-color: var(--card-color-1);
 }
 
 .ship-popularity-element {
@@ -73,10 +69,6 @@
     padding: 5px;
 
     color: var(--text-light);
-}
-.ship-popularity-element > *{
-    /* padding-left: 5px; */
-    /* padding-right: 5px; */
 }
 
 .ship-popularity-element img {

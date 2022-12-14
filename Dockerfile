@@ -5,6 +5,7 @@ COPY package*.json ./
 RUN npm install
 COPY public /public
 COPY *.js ./
+COPY MatchHistory/* ./MatchHistory/
 COPY .env ./
 
 COPY entrypoint.sh /entrypoint.sh

@@ -1,0 +1,26 @@
+
+
+.player-infobox {
+    background-color: var(--card-color-1);
+    border: 1px solid var(--card-border);
+    margin: 10px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 400;
+    font-family: Helvetica, sans-serif;
+}
+
+.player-infobox .player-name, .player-infobox .clan-name {
+    font-size: 16px;
+}
+
+.player-infobox .charts {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.player-infobox .chart-container {
+    height: 180px;
+    width: 180px;
+}
