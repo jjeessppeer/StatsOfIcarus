@@ -5,11 +5,18 @@ const Joi = require('joi');
 const { MongoClient, ReturnDocument } = require("mongodb");
 var fs = require('fs');
 var http = require('http');
+
+const zlib = require('zlib');
+const util = require('util');
+const unzip = util.promisify(zlib.unzip);
+const inflate = util.promisify(zlib.inflate);
+
 const matchHistory = require("./matchHistory.js");
 const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
-const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
+const { HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA } = require("./RequestSchemas/HistoryRequest.js");
+const { MATCH_SUBMISSION_SCHEMA } = require("./RequestSchemas/MatchSubmit.js");
 
 
 const db_url = process.env.MONGODB_URL_STRING;
@@ -17,16 +24,23 @@ let mongoClient = new MongoClient(db_url);
 
 const MOD_VERSION_LATEST = "0.2.0";
 
-// var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
 const { assert } = require('console');
 const { nextTick } = require('process');
 
-var app = express()
+var app = express();
 
-// app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(bodyParser.json());
-app.use(express.json());
+app.use(express.json({limit: '100mb'}));
+app.use(express.urlencoded({
+    limit: '100mb', 
+    extended: true}));
+app.use(express.text({
+    limit: '100mb'}));
+// app.use(express.urlencoded({limit: "500mb"}))
+// app.use(express.urlencoded({
+//     limit: "50mb",
+//     extended: true
+// }))
 app.use(express.static('public'));
 
 app.get('/get_datasets', async function (req, res) {
@@ -54,16 +68,39 @@ app.get('/get_datasets', async function (req, res) {
 app.post('/submit_match_history', async function (req, res) {
     let ip = requestIp.getClientIp(req);
 
-    let validationResult = MATCH_SUBMISSION_SCHEMA.validate(req.body);
-    if (validationResult.error){
-        return res.status(400).send("Error submitting match history.");
+    if (req.body.ModVersion != MOD_VERSION_LATEST) {
+        return res.status(400).send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
+    }
+    
+    let alreadySubmitted = await matchHistory.matchAlreadySubmitted(req.body.MatchId);
+    if (alreadySubmitted) {
+        return res.status(400).send(`Match already submitted.`);
     }
 
-    if (req.body.ModVersion != MOD_VERSION_LATEST) {
-        return res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
+    var inflated = (await unzip(Buffer.from(req.body.GameData, 'base64'))).toString();
+    var gameDataObj = JSON.parse(inflated);
+    req.body.GameData = gameDataObj;
+
+    let validationResult = MATCH_SUBMISSION_SCHEMA.validate(req.body);
+    if (validationResult.error){
+        console.log(validationResult.error)
+        return res.status(400).send("Error submitting match history.");
     }
+    res.status(202).send();
     matchHistory.submitRecord(req.body, ip);
-    res.status("202").send();
+});
+
+app.get(
+    '/match/:matchId/details',
+    async function(req, res) {
+    console.log(req.params);
+    let details = await matchHistory.getMatchDetails(req.params.matchId);
+    if (!details) {
+        return res.status(404).send('Match not found.');
+    }
+    let inflated = await inflate(Buffer.from(details.GameData, 'base64'));
+    inflated = JSON.parse(inflated);
+    res.status(200).json(inflated);
 });
 
 app.post(

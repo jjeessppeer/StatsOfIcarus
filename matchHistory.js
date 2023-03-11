@@ -1,15 +1,17 @@
 const assert = require('assert');
+const LZString = require('lz-string');
+const zlib = require('zlib');
+const util = require('util');
+const deflate = util.promisify(zlib.deflate);
 
 const SCS_START_HOUR_UTC = 18;
 const SCS_START_DAY = 0;
 const SCS_HOUR_LENGTH = 4;
 
-
 const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
 const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
 
 var client;
-
 
 // Lock for insertMatchHistory. Function waits unil false to run.
 let insertionRunning = false;
@@ -33,11 +35,6 @@ async function getPlayerId(playerName) {
 }
 
 async function submitRecord(record, ip) {
-    if (!validateHistorySubmission(record)) {
-        console.log("Invalid match history.");
-        return false;
-    }
-
     // Wait until no concurrent insertion is running.
     while (insertionRunning) {
         await sleep(10);
@@ -50,75 +47,6 @@ async function submitRecord(record, ip) {
         console.log(err)
     } finally {
         insertionRunning = false;
-    }
-    return true;
-}
-
-function validateHistorySubmission(record) {
-    try {
-        assert(typeof record.ModVersion == "string");
-        assert(typeof record.MatchId == "string");
-        assert(typeof record.Passworded == "boolean");
-
-        assert(Number.isInteger(record.MapId));
-        assert(typeof record.MapName == "string");
-        assert(Number.isInteger(record.GameMode));
-        assert(Number.isInteger(record.TeamSize));
-        assert(Number.isInteger(record.TeamCount));
-        assert(record.TeamSize <= 4);
-        assert(record.TeamCount <= 4);
-
-        assert(Number.isInteger(record.Winner));
-        assert(Number.isInteger(record.MatchTime));
-        assert(Array.isArray(record.Scores));
-        assert(record.Scores.length == record.TeamCount);
-        for (let score of record.Scores) assert(Number.isInteger(score));
-
-        assert(Array.isArray(record.Ships));
-        assert(record.Ships.length <= record.TeamSize * record.TeamCount);
-        assert(record.Ships.length <= 8);
-        for (let ship of record.Ships) {
-            assert(typeof ship == 'object');
-            assert(Number.isInteger(ship.ShipModel));
-            assert(typeof ship.ShipName == "string");
-            assert(Number.isInteger(ship.Team));
-            assert(ship.Team <= 4);
-
-            assert(Array.isArray(ship.ShipLoadout));
-            assert(ship.ShipLoadout.length <= 6);
-            for (let gun of ship.ShipLoadout) {
-                assert(Number.isInteger(gun));
-            }
-
-            assert(Array.isArray(ship.SlotNames));
-            assert(ship.SlotNames.length <= 6);
-            for (let slotName of ship.SlotNames) {
-                assert(typeof slotName == "string");
-            }
-
-            assert(Array.isArray(ship.Players));
-            assert(ship.Players.length == 4);
-            for (let player of ship.Players) {
-                assert(player == null || typeof player == 'object');
-                if (player == null) continue;
-                assert(Number.isInteger(player.UserId));
-                assert(typeof player.Name == "string");
-                assert(typeof player.Clan == "string");
-                assert(Number.isInteger(player.Class));
-                assert(Number.isInteger(player.Level));
-                assert(Number.isInteger(player.MatchCount));
-                assert(Number.isInteger(player.MatchCountRecent));
-
-                assert(Array.isArray(player.Skills));
-                assert(player.Skills.length < 9);
-                for (let skill of player.Skills) {
-                    assert(Number.isInteger(skill));
-                }
-            }
-        }
-    } catch (err) {
-        console.log(err);
-        return false;
     }
     return true;
 }
@@ -210,12 +138,27 @@ async function getEquipmentId(player) {
     return res.insertedId;
 }
 
-async function insertMatchHistory(record, ip) {
+async function matchAlreadySubmitted(matchId) {
+    const matchesCollection = client.db("mhtest").collection("Matches");
+    let match = await matchesCollection.findOne({ MatchId: matchId });
+    if (match) {
+        return true;
+    }
+    return false;
+}
+
+async function getMatchDetails(docId) {
+    const matchesCollection = client.db("mhtest").collection("Matches");
+    let doc = await matchesCollection.findOne( {MatchId: docId} );
+    return doc;
+}
+
+async function insertMatchHistory(packet, ip) {
     const matchesCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
     var ipCollection = client.db("mhtest").collection("Submitters");
-
+    let record = packet.LobbyData;
     let submissionDate = new Date();
     let submissionHour = submissionDate.getUTCHours();
     let submissionDay = submissionDate.getUTCDay();
@@ -340,6 +283,11 @@ async function insertMatchHistory(record, ip) {
     if (avgPlayerLevel >= 30 && emptySlots <= 2)
         matchTags.push('HighLevel')
 
+    console.log("Compressing...")
+    let compressedGameData = await deflate(JSON.stringify(packet.GameData));
+    compressedGameData = compressedGameData.toString('base64');
+    console.log("Compressed.")
+
     // Insert the match.
     let newMatch = {
         ModVersion: record.ModVersion,
@@ -370,9 +318,15 @@ async function insertMatchHistory(record, ip) {
         FlatPlayers: flatPlayerIds,
         FlatShips: flatShipIds,
         FlatSkills: flatSkills,
-        FlatPlayerLevels: flatPlayerLevels
+        FlatPlayerLevels: flatPlayerLevels,
+        // GameData: {
+        //     GameShots: deflateJsonArr(packet.GameData.GameShots),
+        //     GameHits: deflateJsonArr(packet.GameData.GameHits),
+        // },
+        GameData: compressedGameData,
     }
-
+    
+    
     
 
     // Create some new fields to ease future filtering.
@@ -385,6 +339,19 @@ async function insertMatchHistory(record, ip) {
 
     await matchesCollection.insertOne(newMatch);
 
+
+    let curs = matchesCollection.aggregate([
+        { $match: {MatchId: record.MatchId} },
+        {
+          "$project": {
+            "size_bytes": { "$bsonSize": "$$ROOT" },
+            "size_KB": { "$divide": [{"$bsonSize": "$$ROOT"}, 1000] },
+            "size_MB": { "$divide": [{"$bsonSize": "$$ROOT"}, 1000000] }
+          }
+        }
+    ]);
+    let d = await curs.next();
+    console.log(d);
     return true;
 }
 
@@ -395,6 +362,8 @@ function setMongoClient(clientIn) {
 
 module.exports = {
     submitRecord,
+    matchAlreadySubmitted,
+    getMatchDetails,
     setMongoClient
     // connect
 }
