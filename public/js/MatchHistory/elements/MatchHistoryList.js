@@ -281,10 +281,14 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
 
       console.log(matchData.MapId);
     }
-    mapName = `
-    Elo: \n${Math.round(matchData.Ranking.Team1Ranking)} | ${Math.round(matchData.Ranking.Team2Ranking)}
-    \nOutcome: \n${(Math.round(matchData.Ranking.ExpectedOutcome * 100) / 100).toFixed(2)} | ${(Math.round(matchData.Ranking.ActualOutcome * 100) / 100).toFixed(2)}
-    \nDelta: \n${matchData.Ranking.Delta}`;
+
+    if (matchData.Ranking) {
+      mapName = `
+      Elo: \n${Math.round(matchData.Ranking.Team1Ranking)} | ${Math.round(matchData.Ranking.Team2Ranking)}
+      \nOutcome: \n${(Math.round(matchData.Ranking.ExpectedOutcome * 100) / 100).toFixed(2)} | ${(Math.round(matchData.Ranking.ActualOutcome * 100) / 100).toFixed(2)}
+      \nDelta: \n${matchData.Ranking.Delta}`;
+    }
+   
 
 
     this.querySelector(".info .map").textContent = `${mapName}\n${gameMode}`;
