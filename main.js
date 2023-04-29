@@ -9,12 +9,12 @@ const matchHistory = require("./matchHistory.js");
 const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
-const elo = require("./Elo/Elo.js");
+const elo = require("./Elo/EloHelper.js");
 const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
 
 
-const db_url = process.env.MONGODB_URL_STRING;
-let mongoClient = new MongoClient(db_url);
+const { MONGODB_URL_STRING } = require("./config.json");
+let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
 const MOD_VERSION_LATEST = "0.1.3";
 

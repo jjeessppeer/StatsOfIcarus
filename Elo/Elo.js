@@ -1,7 +1,7 @@
 
 const { ObjectID } = require("bson");
 
-const { getNewRankings } = require('./Elo/EloCalculator.js');
+const { getNewRankings } = require('./EloCalculator.js');
 const { getPlayerIdFromName } = require("./../MatchHistory/matchHistoryUtils.js");
 
 async function getPlayerEloData(client, playerId, ratingGroup = 'SCS') {

@@ -38,7 +38,7 @@ function getRankingDelta(t1Ranking, t2Ranking, t1Points, t2Points) {
     return { delta, expectedOutcome, actualOutcome };
 }
 
-function getTeamRanking(playerRankings) {
+function getTeamRanking(playerRankings, teamSize = 8, pilotWeight = 1, skipPlayers = []) {
     // TODO: test with geometric mean instead.
     let teamRanking = 0;
     // for (let i = 0; i < 4; i += 1) {

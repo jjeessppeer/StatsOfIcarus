@@ -145,7 +145,7 @@ async function updatePlayer(player) {
             MatchCount: 0,
             MatchesWon: 0,
             MatchesPlayer: [],
-            SkillRanking: {
+            ELORating: {
                 Overall: {mu: 100, sigma: 50},
                 Pilot: {mu: 100, sigma: 50},
                 Crew: {mu: 100, sigma: 50}
