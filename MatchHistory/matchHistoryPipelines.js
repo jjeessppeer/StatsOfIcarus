@@ -106,7 +106,8 @@ function playerInfoPipeline(playerId) {
               Clan: "$Clan",
               MatchCount: "$MatchCount",
               Levels: "$Levels",
-              SkillRatings: "$SkillRatings"
+              SkillRatings: "$SkillRatings",
+              ELORating: "$ELORating"
             }},
           ]
         }},
@@ -217,7 +218,12 @@ function recentMatchesPipeline(offset, count) {
             SubmitterIps: 0,
             SubmissionCount: 0,
             MatchId: 0,
-            _id: 0
+            _id: 0,
+            PlayerInfo: {
+              SkillRatings: 0,
+              ELORating: 0,
+              MatchesPlayed: 0
+            }
           }}
         ]
       }},

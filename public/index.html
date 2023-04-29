@@ -12,8 +12,9 @@
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap-4.3.1.min.js"></script>
   <script src="deps/lz-string-1.4.4.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <!-- <script src="deps/Chart-2.8.0.min.js"></script> -->
   <!-- <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script> -->
 
@@ -40,6 +41,7 @@
   <script src="js/MatchHistory/elements/MatchHistoryList.js"></script>
   <script src="js/MatchHistory/elements/PlayerShipInfo.js"></script>
   <script src="js/MatchHistory/elements/PlayerInfo.js"></script>
+  <script src="js/MatchHistory/elements/EloCard.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
   <link rel="stylesheet" href="css/HistorySearch.css">
@@ -47,6 +49,7 @@
   <link rel="stylesheet" href="css/PlayerShipRates.css">
   <link rel="stylesheet" href="css/MatchHistory/FancySearch.css">
   <link rel="stylesheet" href="css/MatchHistory/PlayerInfo.css">
+  <link rel="stylesheet" href="css/MatchHistory/EloCard.css">
 </head>
 
 <body>
@@ -79,6 +82,12 @@
           <a href="#matchHistory">
             <i class="fas fa-glasses"></i>
             Match history
+          </a>
+        </li>
+        <li id="leaderboardLink" data-show="#leaderboard">
+          <a href="#leaderboard">
+            <i class="fas fa-list-ol"></i>
+            Leaderboard
           </a>
         </li>
         <li id="shipBuilderLink" data-show="#shipBuilder">

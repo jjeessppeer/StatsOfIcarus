@@ -1,0 +1,30 @@
+.elo-group-select {
+    border: 0;
+    padding: 8px;
+    margin: 0;
+    /* font-size: 40px; */
+}
+
+.elo-top {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-evenly; */
+    justify-content: flex-end;
+}
+
+.elo-top > span:last-of-type {
+    margin-right: auto;
+}
+
+.elo-top > span {
+    padding-right: 15px;
+    font-size: 12px;
+}
+
+.chart-flex {
+    display: flex;
+}
+
+.chart-flex .chart-container {
+    flex-grow: 1;
+}

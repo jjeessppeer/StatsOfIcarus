@@ -6,7 +6,6 @@ class MatchHistoryList extends HTMLUListElement {
 
   addMatches(matches) {
     for (let match of matches) {
-      console.log(match.Tags)
       let overview = document.createElement('li', { is: 'match-history-entry' });
       overview.fillData(match);
       this.append(overview);
@@ -282,6 +281,12 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
 
       console.log(matchData.MapId);
     }
+    mapName = `
+    Elo: \n${Math.round(matchData.Ranking.Team1Ranking)} | ${Math.round(matchData.Ranking.Team2Ranking)}
+    \nOutcome: \n${(Math.round(matchData.Ranking.ExpectedOutcome * 100) / 100).toFixed(2)} | ${(Math.round(matchData.Ranking.ActualOutcome * 100) / 100).toFixed(2)}
+    \nDelta: \n${matchData.Ranking.Delta}`;
+
+
     this.querySelector(".info .map").textContent = `${mapName}\n${gameMode}`;
 
     let timeMinutes = Math.floor(matchData.MatchTime / 60);

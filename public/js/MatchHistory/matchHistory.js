@@ -166,6 +166,8 @@ function loadOverviewPerspective(response) {
 }
 
 function loadPlayerPerspective(response) {
+    console.log("loading player perpective")
+    console.log(response);
     let playerData = response.playerData;
     // Initialize ship rates card
     let t = document.createElement('div', {is: "player-ship-info-table"});
@@ -177,7 +179,15 @@ function loadPlayerPerspective(response) {
     document.querySelector('#matchHistory .left-area').append(infobox);
     infobox.initialize(playerData);
 
+    loadEloCard(playerData.PlayerInfo._id, 'Overall', playerData.PlayerInfo.Name);
     intializeMatchHistoryList(response.matches.Matches);
+
+}
+
+async function loadEloCard(playerId, rankingGroup, playerName) {
+    const eloCard = document.createElement('div', {is: 'elo-card'});
+    eloCard.initialize(playerId);
+    document.querySelector('#matchHistory .left-area').append(eloCard);
 
 }
 
