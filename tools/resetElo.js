@@ -54,11 +54,9 @@ async function start() {
         console.log("Connected.");
         await initializeELO(mongoClient);
         await rateAllMatches(mongoClient);
-        mongoClient.close();
 
     } finally {
-        // console.log("Disconnecting from db...");
-        // await matchHistory.close();
+        mongoClient.close();
     }
 }
 start().catch(console.dir);

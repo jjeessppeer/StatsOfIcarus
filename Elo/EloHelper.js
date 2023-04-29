@@ -6,9 +6,9 @@ const Elo = require('./EloCalculator.js');
 
 
 const ELO_CATEGORIES = {
-    'Overall': (match) => { return true; },
     'SCS': (match) => { return match.MatchTags.includes('SCS') },
-    'Competitive': (match) => { return match.MatchTags.includes('Competitive') }
+    'Competitive': (match) => { return match.MatchTags.includes('Competitive') },
+    'Overall': (match) => { return true; },
 }
 
 async function getPlayerELO(client, playerId, ratingGroup) {
@@ -30,10 +30,6 @@ async function getPlayerELO(client, playerId, ratingGroup) {
     return Elo.STARTING_ELO;
 }
 
-async function updatePlayerElo(client, playerId, newElo, ratingGroup) {
-
-}
-
 async function getPlayerRankings(client, match, ratingGroup) {
     const oldRankings = [];
     const playerIds = [];
@@ -51,10 +47,12 @@ async function getPlayerRankings(client, match, ratingGroup) {
 }
 
 async function processMatchAllCategories(client, match) {
+    let matchRankingInfo;
     for (const ratingGroup in ELO_CATEGORIES) {
         if (!ELO_CATEGORIES[ratingGroup](match)) continue;
-        await processMatch(client, match, ratingGroup);
+        matchRankingInfo = await processMatch(client, match, ratingGroup);
     }
+    return matchRankingInfo;
 }
 
 async function processMatch(client, match, ratingGroup) {
@@ -64,8 +62,7 @@ async function processMatch(client, match, ratingGroup) {
     if (match.Scores[0] + match.Scores[1] == 0) return false;
 
     const { oldRankings, playerIds } = await getPlayerRankings(client, match, ratingGroup);
-    const { rankings, delta, expectedOutcome, actualOutcome, teamDiff, teamRankings } = Elo.getNewRankings(oldRankings, match.Scores);
-
+    const [ rankings, delta, expectedOutcome, actualOutcome, teamDiff, teamRankings ] = Elo.getNewRankings(oldRankings, match.Scores);
     // Update database with new ranking
     // TODO: handle multiple ai players in same match.
     const playerCollection = client.db("mhtest").collection("Players");
@@ -95,7 +92,6 @@ async function processMatch(client, match, ratingGroup) {
     }
 
     const matchCollection = client.db("mhtest").collection("Matches");
-    console.log
     await matchCollection.updateOne(
         {_id: match._id},
         { $set: {Ranking: {
@@ -105,12 +101,6 @@ async function processMatch(client, match, ratingGroup) {
             Delta: delta
         }} }
     );
-
-
-    // mapName = `
-    // Elo: \n${Math.round(matchData.Ranking.Team1Ranking)} | ${Math.round(matchData.Ranking.Team2Ranking)}
-    // \nOutcome: \n${(Math.round(matchData.Ranking.ExpectedOutcome * 100) / 100).toFixed(2)} | ${(Math.round(matchData.Ranking.ActualOutcome * 100) / 100).toFixed(2)}
-    // \nDelta: \n${matchData.Ranking.Delta}`;
 }
 
 async function getPlayerEloData(client, playerId, ratingGroup = 'SCS') {

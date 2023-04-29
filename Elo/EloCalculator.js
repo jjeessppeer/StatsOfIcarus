@@ -13,24 +13,27 @@ function getNewRankings(rankings, points) {
 
     const {delta, expectedOutcome, actualOutcome} = getRankingDelta(team1Ranking, team2Ranking, team1Points, team2Points);
 
-    updateRanking(rankings[0], delta);
-    updateRanking(rankings[1], -delta);
-    return {
-        rankings,
+    const newTeam1Ranking =  updateRanking(rankings[0], delta);
+    const newTeam2Ranking = updateRanking(rankings[1], -delta);
+
+    return [
+        [newTeam1Ranking, newTeam2Ranking],
         delta,
         expectedOutcome,
         actualOutcome,
-        teamDiff: team1Ranking - team2Ranking,
-        teamRankings: [team1Ranking, team2Ranking]
-    };
+        team1Ranking - team2Ranking,
+        [team1Ranking, team2Ranking]
+    ];
 }
 
 function updateRanking(playerRankings, delta) {
     // TODO: fancier point distribution. 
     // Lower ranker player should gain more or lose less
+    let newRanking = [];
     for(let i = 0; i < 8; i += 1) {
-        playerRankings[i] += delta;
+        newRanking.push(playerRankings[i] + delta);
     }
+    return newRanking;
 }
 
 function getRankingDelta(t1Ranking, t2Ranking, t1Points, t2Points) {

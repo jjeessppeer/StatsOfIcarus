@@ -1,4 +1,5 @@
 const assert = require('assert');
+const Elo = require('./Elo/EloHelper.js');
 
 const SCS_START_HOUR_UTC = 18;
 const SCS_START_DAY = 0;
@@ -10,7 +11,6 @@ const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
 
 var client;
 
-
 // Lock for insertMatchHistory. Function waits unil false to run.
 let insertionRunning = false;
 
@@ -20,7 +20,7 @@ function sleep(ms) {
 
 function posModulo(a, b) {
     return ((a % b) + b) % b;
-  };
+};
 
 
 async function getPlayerId(playerName) {
@@ -33,11 +33,6 @@ async function getPlayerId(playerName) {
 }
 
 async function submitRecord(record, ip) {
-    if (!validateHistorySubmission(record)) {
-        console.log("Invalid match history.");
-        return false;
-    }
-
     // Wait until no concurrent insertion is running.
     while (insertionRunning) {
         await sleep(10);
@@ -50,75 +45,6 @@ async function submitRecord(record, ip) {
         console.log(err)
     } finally {
         insertionRunning = false;
-    }
-    return true;
-}
-
-function validateHistorySubmission(record) {
-    try {
-        assert(typeof record.ModVersion == "string");
-        assert(typeof record.MatchId == "string");
-        assert(typeof record.Passworded == "boolean");
-
-        assert(Number.isInteger(record.MapId));
-        assert(typeof record.MapName == "string");
-        assert(Number.isInteger(record.GameMode));
-        assert(Number.isInteger(record.TeamSize));
-        assert(Number.isInteger(record.TeamCount));
-        assert(record.TeamSize <= 4);
-        assert(record.TeamCount <= 4);
-
-        assert(Number.isInteger(record.Winner));
-        assert(Number.isInteger(record.MatchTime));
-        assert(Array.isArray(record.Scores));
-        assert(record.Scores.length == record.TeamCount);
-        for (let score of record.Scores) assert(Number.isInteger(score));
-
-        assert(Array.isArray(record.Ships));
-        assert(record.Ships.length <= record.TeamSize * record.TeamCount);
-        assert(record.Ships.length <= 8);
-        for (let ship of record.Ships) {
-            assert(typeof ship == 'object');
-            assert(Number.isInteger(ship.ShipModel));
-            assert(typeof ship.ShipName == "string");
-            assert(Number.isInteger(ship.Team));
-            assert(ship.Team <= 4);
-
-            assert(Array.isArray(ship.ShipLoadout));
-            assert(ship.ShipLoadout.length <= 6);
-            for (let gun of ship.ShipLoadout) {
-                assert(Number.isInteger(gun));
-            }
-
-            assert(Array.isArray(ship.SlotNames));
-            assert(ship.SlotNames.length <= 6);
-            for (let slotName of ship.SlotNames) {
-                assert(typeof slotName == "string");
-            }
-
-            assert(Array.isArray(ship.Players));
-            assert(ship.Players.length == 4);
-            for (let player of ship.Players) {
-                assert(player == null || typeof player == 'object');
-                if (player == null) continue;
-                assert(Number.isInteger(player.UserId));
-                assert(typeof player.Name == "string");
-                assert(typeof player.Clan == "string");
-                assert(Number.isInteger(player.Class));
-                assert(Number.isInteger(player.Level));
-                assert(Number.isInteger(player.MatchCount));
-                assert(Number.isInteger(player.MatchCountRecent));
-
-                assert(Array.isArray(player.Skills));
-                assert(player.Skills.length < 9);
-                for (let skill of player.Skills) {
-                    assert(Number.isInteger(skill));
-                }
-            }
-        }
-    } catch (err) {
-        console.log(err);
-        return false;
     }
     return true;
 }
@@ -145,11 +71,7 @@ async function updatePlayer(player) {
             MatchCount: 0,
             MatchesWon: 0,
             MatchesPlayer: [],
-            ELORating: {
-                Overall: {mu: 100, sigma: 50},
-                Pilot: {mu: 100, sigma: 50},
-                Crew: {mu: 100, sigma: 50}
-            }
+            ELORating: {}
         });
     }
     else {
@@ -384,6 +306,8 @@ async function insertMatchHistory(record, ip) {
 
 
     await matchesCollection.insertOne(newMatch);
+    await Elo.processMatchAllCategories(newMatch);
+
 
     return true;
 }
