@@ -1,5 +1,9 @@
 // TODO: special case AI player.
 
+
+
+const STARTING_ELO = 1000;
+
 function getNewRankings(rankings, points) {
     const team1Ranking = getTeamRanking(rankings[0]);
     const team2Ranking = getTeamRanking(rankings[1]);
@@ -16,7 +20,8 @@ function getNewRankings(rankings, points) {
         delta,
         expectedOutcome,
         actualOutcome,
-        teamDiff: team1Ranking - team2Ranking
+        teamDiff: team1Ranking - team2Ranking,
+        teamRankings: [team1Ranking, team2Ranking]
     };
 }
 
@@ -49,7 +54,7 @@ function getTeamRanking(playerRankings, teamSize = 8, pilotWeight = 1, skipPlaye
     //     else 
     //         teamRanking += playerRankings[i];
     // }
-    for (let i = 0; i < 4; i += 1) {
+    for (let i = 0; i < 8; i += 1) {
         teamRanking += playerRankings[i];
     }
     teamRanking /= 8;
@@ -57,5 +62,6 @@ function getTeamRanking(playerRankings, teamSize = 8, pilotWeight = 1, skipPlaye
 }
 
 module.exports = {
-    getNewRankings
+    getNewRankings,
+    STARTING_ELO
 }

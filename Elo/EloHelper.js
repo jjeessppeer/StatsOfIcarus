@@ -2,9 +2,13 @@
 // TODO: handle other team sizes than 2.
 const Elo = require('./EloCalculator.js');
 
-module.exports = {
-    processMatch,
-    getPlayerEloData
+
+
+
+const ELO_CATEGORIES = {
+    'Overall': (match) => { return true; },
+    'SCS': (match) => { return match.MatchTags.includes('SCS') },
+    'Competitive': (match) => { return match.MatchTags.includes('Competitive') }
 }
 
 async function getPlayerELO(client, playerId, ratingGroup) {
@@ -12,31 +16,55 @@ async function getPlayerELO(client, playerId, ratingGroup) {
     const player = await playerCollection.findOne(
         {_id: playerId}
     );
-    return player.ELORating[ratingGroup].ELOPoints;
+    if (ratingGroup in player.ELORating)
+        return player.ELORating[ratingGroup].ELOPoints;
+
+    // Add rating group with default values.
+    playerCollection.updateOne(
+        {_id: playerId},
+        { $set: {[`ELORating.${ratingGroup}`]: {
+            'ELOPoints': Elo.STARTING_ELO,
+            'Timeline': []
+        }}
+    });
+    return Elo.STARTING_ELO;
 }
 
-async function rateMatch(client, match, ratingGroup) {
-    const ELOPoints = [];
+async function updatePlayerElo(client, playerId, newElo, ratingGroup) {
+
+}
+
+async function getPlayerRankings(client, match, ratingGroup) {
+    const oldRankings = [];
     const playerIds = [];
     for (let teamIdx = 0; teamIdx < 2; teamIdx += 1) {
-        ELOPoints.push([]);
+        oldRankings.push([]);
         playerIds.push([]);
         for (let playerIdx = 0; playerIdx < 8; playerIdx += 1) {
             const playerId = match.FlatPlayers[teamIdx * 8 + playerIdx];
             const playerELO = await getPlayerELO(client, playerId, ratingGroup);
-            ELOPoints[teamIdx].push(playerELO);
+            oldRankings[teamIdx].push(playerELO);
             playerIds[teamIdx].push(playerIds);
         }
     }
-    return Elo.getNewRankings(ELOPoints, match.Scores);
+    return { oldRankings, playerIds };
 }
 
-async function processMatch(client, match, ratingGroup = 'Overall') {
+async function processMatchAllCategories(client, match) {
+    for (const ratingGroup in ELO_CATEGORIES) {
+        if (!ELO_CATEGORIES[ratingGroup](match)) continue;
+        await processMatch(client, match, ratingGroup);
+    }
+}
+
+async function processMatch(client, match, ratingGroup) {
     if (match.TeamSize != 2) return false;
     if (match.TeamCount != 2) return false;
     if (match.FlatPlayers.length != 16) return false;
     if (match.Scores[0] + match.Scores[1] == 0) return false;
-    const { rankings, delta, expectedOutcome, actualOutcome, teamDiff } = await rateMatch(client, match, ratingGroup)
+
+    const { oldRankings, playerIds } = await getPlayerRankings(client, match, ratingGroup);
+    const { rankings, delta, expectedOutcome, actualOutcome, teamDiff, teamRankings } = Elo.getNewRankings(oldRankings, match.Scores);
 
     // Update database with new ranking
     // TODO: handle multiple ai players in same match.
@@ -44,9 +72,10 @@ async function processMatch(client, match, ratingGroup = 'Overall') {
     for (let teamIdx = 0; teamIdx < 2; teamIdx += 1) {
         for (let playerIdx = 0; playerIdx < 8; playerIdx += 1) {
             const playerId = match.FlatPlayers[teamIdx * 8 + playerIdx];
+            const oldELO = oldRankings[teamIdx][playerIdx];
             const newELO = rankings[teamIdx][playerIdx];
+            const playerDelta = newELO - oldELO;
 
-            const setObj = {};
             await playerCollection.updateOne(
                 {_id: playerId},
                 {
@@ -55,7 +84,7 @@ async function processMatch(client, match, ratingGroup = 'Overall') {
                         MatchId: match._id,
                         Timestamp: match.Timestamp,
                         Points: newELO,
-                        Delta: (teamIdx == 0 ? delta : -delta),
+                        Delta: playerDelta,
                         TeamDiff: (teamIdx == 0 ? teamDiff : -teamDiff),
                         Expected: expectedOutcome,
                         Actual: actualOutcome
@@ -64,6 +93,24 @@ async function processMatch(client, match, ratingGroup = 'Overall') {
             );
         }
     }
+
+    const matchCollection = client.db("mhtest").collection("Matches");
+    console.log
+    await matchCollection.updateOne(
+        {_id: match._id},
+        { $set: {Ranking: {
+            TeamRankings: teamRankings,
+            ExpectedOutcome: expectedOutcome,
+            ActualOutcome: actualOutcome,
+            Delta: delta
+        }} }
+    );
+
+
+    // mapName = `
+    // Elo: \n${Math.round(matchData.Ranking.Team1Ranking)} | ${Math.round(matchData.Ranking.Team2Ranking)}
+    // \nOutcome: \n${(Math.round(matchData.Ranking.ExpectedOutcome * 100) / 100).toFixed(2)} | ${(Math.round(matchData.Ranking.ActualOutcome * 100) / 100).toFixed(2)}
+    // \nDelta: \n${matchData.Ranking.Delta}`;
 }
 
 async function getPlayerEloData(client, playerId, ratingGroup = 'SCS') {
@@ -124,4 +171,11 @@ async function getPlayerEloData(client, playerId, ratingGroup = 'SCS') {
     ]);
     let playerInfo = await aggregate.toArray();
     return playerInfo;
+}
+
+module.exports = {
+    processMatch,
+    processMatchAllCategories,
+    getPlayerEloData,
+    ELO_CATEGORIES
 }

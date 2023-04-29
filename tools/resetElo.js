@@ -1,7 +1,7 @@
 
 const { ObjectID } = require("bson");
 
-const { processMatch } = require('./../Elo/EloHelper.js');
+const { processMatchAllCategories, ELO_CATEGORIES } = require('./../Elo/EloHelper.js');
 
 const { MongoClient, ReturnDocument, Db } = require("mongodb");
 const CONFIG = require("./../config.json");
@@ -16,14 +16,14 @@ async function initializeELO(client) {
         { },
         {
             $set: { ELORating: {
-                'Overall': {
-                    'ELOPoints': 1000,
-                    'Timeline': []
-                },
-                'SCS': {
-                    'ELOPoints': 1000,
-                    'Timeline': []
-                }
+                // 'Overall': {
+                //     'ELOPoints': 1000,
+                //     'Timeline': []
+                // },
+                // 'SCS': {
+                //     'ELOPoints': 1000,
+                //     'Timeline': []
+                // }
             }} 
         });
     console.log(result);
@@ -31,17 +31,17 @@ async function initializeELO(client) {
 }
 
 // Update ratings with for given set of matches.
-async function rateAllMatches(client, category, filter = {}) {
+async function rateAllMatches(client) {
     const matchCollection = client.db("mhtest").collection("Matches");
     const cursor =  matchCollection.find(
-        filter
+        {}
     );
     let n = 1
     while (await cursor.hasNext()) {
         const match = await cursor.next();
         console.log(n, ' Processing ELO for ', match._id);
         n += 1;
-        await processMatch(client, match, category);
+        await processMatchAllCategories(client, match);
     }
 }
 
@@ -53,8 +53,7 @@ async function start() {
         await mongoClient.connect();
         console.log("Connected.");
         await initializeELO(mongoClient);
-        await rateAllMatches(mongoClient, 'Overall', {});
-        await rateAllMatches(mongoClient, 'SCS', { MatchTags: { $all: ['SCS'] } });
+        await rateAllMatches(mongoClient);
         mongoClient.close();
 
     } finally {
