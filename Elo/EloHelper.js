@@ -22,10 +22,14 @@ async function getPlayerELO(client, playerId, ratingGroup) {
     // Add rating group with default values.
     playerCollection.updateOne(
         {_id: playerId},
-        { $set: {[`ELORating.${ratingGroup}`]: {
-            'ELOPoints': Elo.STARTING_ELO,
-            'Timeline': []
-        }}
+        { 
+            $set: {[`ELORating.${ratingGroup}`]: {
+                'ELOPoints': Elo.STARTING_ELO,
+                'Timeline': []
+            }},
+            $push: {
+                'ELOCategories': ratingGroup
+            }
     });
     return Elo.STARTING_ELO;
 }

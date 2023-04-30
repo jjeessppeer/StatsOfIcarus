@@ -11,9 +11,6 @@ class EloCard extends HTMLDivElement {
                 <span>Ladder rank: <b class="ladder-text">#X</b></span>
                 <span>Matches: <b class="matches-text"></b></span>
                 <select class="elo-group-select">
-                    <option value="Overall">Overall</option>
-                    <option value="SCS" selected>SCS</option>
-                    <option value="Season 1">Season 1</option>
                 </select> 
             </div>
             <div class="chart-flex">
@@ -28,13 +25,24 @@ class EloCard extends HTMLDivElement {
             const rankingGroup = this.querySelector('.elo-group-select').value;
             this.requestDataUpdate(this.playerId, rankingGroup);
           });
-
     }
 
-    initialize(playerId) {
+    initialize(playerId, categories) {
         this.playerId = playerId;
+        for(const category of categories) {
+            this.addCategory(category);
+        }
         this.initializeChart();
-        this.requestDataUpdate(this.playerId, this.querySelector('.elo-group-select').value);
+        if (categories.length != 0) {
+            this.requestDataUpdate(this.playerId, this.querySelector('.elo-group-select').value);
+        }
+    }
+
+    addCategory(categoryTitle) {
+        const option = document.createElement('option');
+        option.value = categoryTitle;
+        option.text = categoryTitle;
+        this.querySelector('.elo-group-select').append(option);
     }
 
     async requestDataUpdate(playerId, rankingGroup) {

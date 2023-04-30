@@ -15,7 +15,8 @@ async function initializeELO(client) {
     const result = await playerCollection.updateMany(
         { },
         {
-            $set: { ELORating: {
+            $set: { 
+                ELORating: {
                 // 'Overall': {
                 //     'ELOPoints': 1000,
                 //     'Timeline': []
@@ -24,7 +25,9 @@ async function initializeELO(client) {
                 //     'ELOPoints': 1000,
                 //     'Timeline': []
                 // }
-            }} 
+                },
+                ELOCategories: []
+            } 
         });
     console.log(result);
     console.log("Done.");

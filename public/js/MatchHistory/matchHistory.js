@@ -179,14 +179,14 @@ function loadPlayerPerspective(response) {
     document.querySelector('#matchHistory .left-area').append(infobox);
     infobox.initialize(playerData);
 
-    loadEloCard(playerData.PlayerInfo._id, 'Overall', playerData.PlayerInfo.Name);
+    loadEloCard(playerData.PlayerInfo);
     intializeMatchHistoryList(response.matches.Matches);
 
 }
 
-async function loadEloCard(playerId, rankingGroup, playerName) {
+async function loadEloCard(playerInfo) {
     const eloCard = document.createElement('div', {is: 'elo-card'});
-    eloCard.initialize(playerId);
+    eloCard.initialize(playerInfo._id, playerInfo.ELOCategories);
     document.querySelector('#matchHistory .left-area').append(eloCard);
 
 }
