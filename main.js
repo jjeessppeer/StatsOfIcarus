@@ -20,11 +20,11 @@ const MOD_VERSION_LATEST = "0.1.3";
 
 // var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
-// const sqlite = require('better-sqlite3');
+const sqlite = require('better-sqlite3');
 const { assert } = require('console');
 const { nextTick } = require('process');
 
-// const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readonly: true });
+const data_db = new sqlite('databases/data_db.db', { fileMustExist: true, readonly: true });
 
 var app = express()
 
@@ -33,21 +33,21 @@ var app = express()
 app.use(express.json());
 app.use(express.static('public'));
 
-// app.get('/get_datasets', function (req, res) {
-//     let ip = requestIp.getClientIp(req);
-//     let datasets = {};
-//     // datasets.history = data_db.prepare("SELECT * FROM Match_History").all();
-//     datasets.gun_stats = data_db.prepare("SELECT * FROM Gun_stats").all();
-//     datasets.ammo_stats = data_db.prepare("SELECT * FROM Ammo_stats").all();
-//     datasets.damage_stats = data_db.prepare("SELECT * FROM Damage_types").all();
-//     datasets.tool_stats = data_db.prepare("SELECT * FROM Tool_stats").all();
-//     datasets.component_stats = data_db.prepare("SELECT * FROM Component_stats").all();
-//     datasets.ship_stats = data_db.prepare("SELECT * FROM Ship_Stats").all();
-//     datasets.map_data = data_db.prepare("SELECT * FROM Map_data").all();
-//     datasets.crosshair_data = data_db.prepare("SELECT * FROM Crosshair_data").all();
-//     datasets.ships_gun_angles = data_db.prepare("SELECT * FROM Ships_gun_angles").all();
-//     res.status("200").json(datasets);
-// });
+app.get('/get_datasets', function (req, res) {
+    let ip = requestIp.getClientIp(req);
+    let datasets = {};
+    // datasets.history = data_db.prepare("SELECT * FROM Match_History").all();
+    datasets.gun_stats = data_db.prepare("SELECT * FROM Gun_stats").all();
+    datasets.ammo_stats = data_db.prepare("SELECT * FROM Ammo_stats").all();
+    datasets.damage_stats = data_db.prepare("SELECT * FROM Damage_types").all();
+    datasets.tool_stats = data_db.prepare("SELECT * FROM Tool_stats").all();
+    datasets.component_stats = data_db.prepare("SELECT * FROM Component_stats").all();
+    datasets.ship_stats = data_db.prepare("SELECT * FROM Ship_Stats").all();
+    datasets.map_data = data_db.prepare("SELECT * FROM Map_data").all();
+    datasets.crosshair_data = data_db.prepare("SELECT * FROM Crosshair_data").all();
+    datasets.ships_gun_angles = data_db.prepare("SELECT * FROM Ships_gun_angles").all();
+    res.status("200").json(datasets);
+});
 
 app.post('/submit_match_history', async function (req, res) {
     let ip = requestIp.getClientIp(req);
