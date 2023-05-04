@@ -55,6 +55,10 @@ class EloCard extends HTMLDivElement {
             body: JSON.stringify({playerId: playerId, rankingGroup: rankingGroup})
         });
         let eloData = await response.json();
+        const ladderRank = eloData.LadderRank;
+        eloData = eloData.Timeline;
+
+        console.log(eloData)
         
         this.querySelector('.elo-text').textContent = eloData[eloData.length - 1].elo;
         let matches = 0;
@@ -62,7 +66,7 @@ class EloCard extends HTMLDivElement {
             matches += d.count;
         }
         this.querySelector('.matches-text').textContent = matches;
-        this.querySelector('.ladder-text').textContent = '#12';
+        this.querySelector('.ladder-text').textContent = `#${ladderRank}`;
 
 
         this.chart.data.datasets.pop();
