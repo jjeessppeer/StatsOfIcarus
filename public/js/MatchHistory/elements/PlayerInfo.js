@@ -29,7 +29,8 @@ class PlayerInfoBox extends HTMLDivElement {
   initialize(playerData){
     this.querySelector('.clan-name').textContent = playerData.PlayerInfo.Clan == "" ? "" : `[${playerData.PlayerInfo.Clan}]`;
     this.querySelector('.player-name').textContent = playerData.PlayerInfo.Name.substring(0, playerData.PlayerInfo.Name.length - 5);
-    this.querySelector('.match-count').textContent = `${playerData.PlayerInfo.MatchCount} matches recorded`;
+    // this.querySelector('.match-count').textContent = `${playerData.PlayerInfo.MatchCount} matches recorded`;
+    this.querySelector('.match-count').textContent = ``;
        
     this.initializePlayrateChart(playerData.Winrates);
     this.initializeWinrateChart(playerData.Winrates);
