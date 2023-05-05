@@ -1,5 +1,6 @@
 const assert = require('assert');
 const Elo = require('./Elo/EloHelper.js');
+const MatchTagger = require('../Server/MatchHistory/MatchTagger.js');
 
 const SCS_START_HOUR_UTC = 18;
 const SCS_START_DAY = 0;
@@ -247,20 +248,7 @@ async function insertMatchHistory(record, ip) {
     let playersFull = playerCount == record.TeamSize * record.TeamCount * 4;
     let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
 
-    let matchTags = [];
-    if (record.Passworded)
-        matchTags.push('Passworded')
-    if (shipsFull)
-        matchTags.push('ShipsFull')
-    if (playersFull)
-        matchTags.push('PlayersFull')
-
-    if (submissionDay == SCS_START_DAY && posModulo(submissionHour - SCS_START_HOUR_UTC, 24) <= SCS_HOUR_LENGTH && record.Passworded)
-        matchTags.push('SCS')
-    if (shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded)
-        matchTags.push('Competitive')
-    if (avgPlayerLevel >= 30 && emptySlots <= 2)
-        matchTags.push('HighLevel')
+    
 
     // Insert the match.
     let newMatch = {
@@ -270,7 +258,7 @@ async function insertMatchHistory(record, ip) {
         Passworded: record.Passworded,
         Timestamp: new Date().getTime(),
         SubmissionCount: 1,
-        MatchTags: matchTags,
+        MatchTags: [],
         MatchId: record.MatchId,
         MapId: record.MapId,
         ShipsFull: shipsFull,
@@ -294,6 +282,20 @@ async function insertMatchHistory(record, ip) {
         FlatSkills: flatSkills,
         FlatPlayerLevels: flatPlayerLevels
     }
+
+    if (record.Passworded)
+        newMatch.MatchTags.push('Passworded')
+    if (shipsFull)
+        newMatch.MatchTags.push('ShipsFull')
+    if (playersFull)
+        newMatch.MatchTags.push('PlayersFull')
+
+    if (MatchTagger.isSCS(newMatch))
+        newMatch.MatchTags.push('SCS')
+    if (shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded)
+        newMatch.MatchTags.push('Competitive')
+    if (avgPlayerLevel >= 30 && emptySlots <= 2)
+        newMatch.MatchTags.push('HighLevel')
 
     
 
