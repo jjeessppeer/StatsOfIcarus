@@ -53,14 +53,15 @@ async function rateAllMatches(client) {
         const categories = await processMatchAllCategories(client, match);
         // console.log(n, ' Processing ELO for ', match._id);
         process.stdout.write(n + "Processing ELO for " + match._id + "\r");
-        if (lastSnapshotTimestamp == -1) lastSnapshotTimestamp = match.Timestamp;
-        if (match.Timestamp - lastSnapshotTimestamp > LEADERBOARD_SNAPSHOT_INTERVAL) {
-            lastSnapshotTimestamp = match.Timestamp;
-            console.log("\nCreating leaderboard snapshot.\n");
-            for (const cat of categories) {
-                await createLeaderboardSnapshot(client, cat, lastSnapshotTimestamp)
-            }
-        }
+
+        // if (lastSnapshotTimestamp == -1) lastSnapshotTimestamp = match.Timestamp;
+        // if (match.Timestamp - lastSnapshotTimestamp > LEADERBOARD_SNAPSHOT_INTERVAL) {
+        //     lastSnapshotTimestamp = match.Timestamp;
+        //     console.log("\nCreating leaderboard snapshot.\n");
+        //     for (const cat of categories) {
+        //         await createLeaderboardSnapshot(client, cat, lastSnapshotTimestamp)
+        //     }
+        // }
 
     }
 }
@@ -72,7 +73,7 @@ async function start() {
         console.log("Connecting to db...")
         await mongoClient.connect();
         console.log("Connected.");
-        await resetLeaderboardDataset(mongoClient);
+        // await resetLeaderboardDataset(mongoClient);
         await initializeELO(mongoClient);
         await rateAllMatches(mongoClient);
 
