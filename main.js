@@ -97,12 +97,9 @@ app.post(
 
 app.post(
     '/player_rating',
+    schemaMiddleware(schemas.eloTimelineRequest),
     async function(req, res) {
-    // let requestValidation = MATCH_REQUEST_SCHEMA.validate(req.body);
-    // if (requestValidation.error){
-    //     return res.status(400).send();
-    // }
-    console.log(req.body.rankingGroup);
+        
     const eloTimeline = await elo.getPlayerEloData(mongoClient, req.body.playerId, req.body.rankingGroup);
     const ladderRank = await elo.getLeaderboardPosition(mongoClient, req.body.rankingGroup, req.body.playerId);
     res.status(200).json({Timeline: eloTimeline, LadderRank: ladderRank});
