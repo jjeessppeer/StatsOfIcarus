@@ -25,17 +25,12 @@ async function reclassifyTags(client) {
         const date = new Date(match.Timestamp);
         if (scs != oldSCS){
             console.log(scs, ": ", date.toLocaleTimeString(), " | ", date.getTimezoneOffset());
-            // console.log(date.toLocaleTimeString())
-            // console.log(date.toUTCString())
-            // console.log(date.getHours())
-            // console.log(date.getDay());
             if (scs) {
 
                 let res = await matchCollection.updateOne(
                     {_id: match._id},
                     { $push: {MatchTags: 'SCS'}}
                 );
-                console.log(res);
             }
             else {
                 await matchCollection.updateOne(
