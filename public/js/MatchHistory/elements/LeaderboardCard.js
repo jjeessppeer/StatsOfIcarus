@@ -50,6 +50,7 @@ class LeaderboardCard extends HTMLDivElement {
     async requestDataUpdate(rankingGroup, ladderPosition) {
         this.currentPosition = Math.max(ladderPosition, 0);
         this.currentGroup = rankingGroup;
+        this.querySelector('h5').textContent = `Leaderboard - ${this.currentGroup}`;
 
         let response = await fetch('/leaderboard_page', {
             method: 'POST',
