@@ -5,6 +5,10 @@ const Joi = require('joi');
 const { MongoClient, ReturnDocument } = require("mongodb");
 var fs = require('fs');
 var http = require('http');
+
+const schemaMiddleware = require('./SchemaValidation/middleware.js');
+const schemas = require('./SchemaValidation/schemas.js');
+
 const matchHistory = require("./matchHistory.js");
 const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
@@ -103,6 +107,22 @@ app.post(
     const ladderRank = await elo.getLeaderboardPosition(mongoClient, req.body.rankingGroup, req.body.playerId);
     res.status(200).json({Timeline: eloTimeline, LadderRank: ladderRank});
 });
+
+
+app.post(
+    '/leaderboard_page',
+    schemaMiddleware(schemas.leaderboardRequest),
+    async function(req, res) {
+    
+    const pageSize = 10;
+    const start = Math.floor(req.body.Position / pageSize) * pageSize;
+    let page = await elo.getLeaderboardPage(mongoClient, 'SCS', start, pageSize);
+    console.log(page);
+    console.log(req.body.Position);
+    res.status(200).json(page);
+});
+
+
 
 async function run() {
     try {

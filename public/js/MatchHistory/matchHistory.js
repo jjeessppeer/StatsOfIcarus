@@ -186,8 +186,10 @@ function loadPlayerPerspective(response) {
 
 async function loadEloCard(playerInfo) {
     const eloCard = document.createElement('div', {is: 'elo-card'});
-    eloCard.initialize(playerInfo._id, playerInfo.ELOCategories);
+    const eloCard2 = document.createElement('div', {is: 'leaderboard-card'});
     document.querySelector('#matchHistory .left-area').append(eloCard);
+    document.querySelector('#matchHistory .left-area').append(eloCard2);
+    eloCard.initialize(playerInfo._id, playerInfo.ELOCategories);
 
 }
 

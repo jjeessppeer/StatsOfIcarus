@@ -46,6 +46,8 @@ class EloCard extends HTMLDivElement {
     }
 
     async requestDataUpdate(playerId, rankingGroup) {
+        console.log('REQUESTING UPDATE')
+        console.log(rankingGroup)
         // TODO: request available ranking groups first.
         let response = await fetch('/player_rating', {
             method: 'POST',
@@ -77,6 +79,8 @@ class EloCard extends HTMLDivElement {
             borderColor: 'rgb(75, 192, 192)',
         });
         this.chart.update();
+
+        document.querySelector('.leaderboard-card').requestDataUpdate(rankingGroup, ladderRank)
     }
 
     initializeChart() {

@@ -1,0 +1,51 @@
+.leaderboard-card {
+    padding: 0;
+}
+
+.leaderboard-card .pagination {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
+.leaderboard-card .pagination button{
+    border: 1px solid black;
+}
+
+.leaderboard-card table {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.leaderboard-card table tr {
+    /* border: 1px solid black; */
+    border-bottom: 1px solid var(--card-border);
+    height: 30px;
+    /* display: flex;
+    justify-content: center;
+    flex-direction: column; */
+}
+
+
+.leaderboard-card table td:nth-child(1) {
+    font-weight: bold;
+    padding-left: 10px;
+    width: 40px;
+}
+.leaderboard-card table td:nth-child(2) {
+    padding-left: 10px;
+    width: 200px;
+}
+/* .leaderboard-card table td {
+    font-weight: bold;
+    width: 40px;
+} */
+
+.leaderboard-card ul span {
+    font-weight: bold;
+    /* display: inline-block;
+    height: 100%; */
+    vertical-align: middle;
+}

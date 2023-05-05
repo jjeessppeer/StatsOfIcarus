@@ -178,6 +178,32 @@ async function getLeaderboardPosition(client, ratingGroup, playerId) {
     return playerInfo.LadderRank;
 }
 
+async function getLeaderboardPage(client, ratingGroup, startPos, count) {
+    const playersCollection = client.db("mhtest").collection("Players");
+    const aggregate = playersCollection.aggregate([
+        { $setWindowFields: {
+            // partitionBy: ,
+            sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
+            output: {
+                LadderRank: {
+                    $rank: {}
+                }
+            }
+        }},
+        { $sort: {LadderRank: 1} },
+        { $skip: startPos},
+        { $limit: count },
+
+        { $project: {
+            LadderRank: 1,
+            Name: 1,
+            Points: `$ELORating.${ratingGroup}.ELOPoints`,
+        }}
+    ]);
+    const res = await aggregate.toArray();
+    return res;
+}
+
 async function getPlayerEloData(client, playerId, ratingGroup) {
     // const playerId = await getPlayerIdFromName(client, playerName);
     // await createLeaderboardSnapshot(client, ratingGroup, 1000)
@@ -248,5 +274,6 @@ module.exports = {
     getPlayerEloData,
     createLeaderboardSnapshot,
     getLeaderboardPosition,
+    getLeaderboardPage,
     ELO_CATEGORIES
 }
