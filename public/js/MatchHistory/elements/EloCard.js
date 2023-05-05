@@ -80,7 +80,7 @@ class EloCard extends HTMLDivElement {
         });
         this.chart.update();
 
-        document.querySelector('.leaderboard-card').requestDataUpdate(rankingGroup, ladderRank)
+        document.querySelector('.leaderboard-card').requestDataUpdate(rankingGroup, ladderRank - 1);
     }
 
     initializeChart() {

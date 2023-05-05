@@ -32,17 +32,23 @@ class LeaderboardCard extends HTMLDivElement {
           this.requestDataUpdate('scs', 1);
     }
 
-    addItem(rank, name, points) {
+    addItem(rank, name, points, highlight = false) {
         const li = document.createElement('tr');
         li.innerHTML = `
             <td class="ladder-rank">#${rank}</td>
             <td class="ladder-name">${name}</td>
             <td class="ladder-points">${points}pts</td>`;
+        li.classList.toggle('highlight', highlight);
         this.querySelector('table').append(li);
     }
 
+    setHighlightName(name) {
+        this.highlightName = name;
+        console.log("NAME: ", name);
+    }
+
     async requestDataUpdate(rankingGroup, ladderPosition) {
-        this.currentPosition = ladderPosition;
+        this.currentPosition = Math.max(ladderPosition, 0);
         this.currentGroup = rankingGroup;
 
         let response = await fetch('/leaderboard_page', {
@@ -52,13 +58,11 @@ class LeaderboardCard extends HTMLDivElement {
             },
             body: JSON.stringify({RatingGroup: this.currentGroup, Position: this.currentPosition})
         });
-        console.log(JSON.stringify({RatingGroup: this.currentGroup, Position: this.currentPosition}))
         let data = await response.json();
         this.querySelector('table').innerHTML = '';
         for (const playerRank of data) {
-            this.addItem(playerRank.LadderRank, playerRank.Name.slice(0, -5), playerRank.Points);
+            this.addItem(playerRank.LadderRank, playerRank.Name.slice(0, -5), playerRank.Points, playerRank.Name == this.highlightName);
         }
-        console.log(data);
     }
 
     lockInput() {

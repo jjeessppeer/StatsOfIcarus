@@ -38,14 +38,7 @@
     padding-left: 10px;
     width: 200px;
 }
-/* .leaderboard-card table td {
-    font-weight: bold;
-    width: 40px;
-} */
-
-.leaderboard-card ul span {
-    font-weight: bold;
-    /* display: inline-block;
-    height: 100%; */
-    vertical-align: middle;
+.leaderboard-card table tr.highlight {
+    background-color: var(--blue-2);
 }
+

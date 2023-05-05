@@ -116,9 +116,7 @@ app.post(
     
     const pageSize = 10;
     const start = Math.floor(req.body.Position / pageSize) * pageSize;
-    let page = await elo.getLeaderboardPage(mongoClient, 'SCS', start, pageSize);
-    console.log(page);
-    console.log(req.body.Position);
+    let page = await elo.getLeaderboardPage(mongoClient, req.body.RatingGroup, start, pageSize);
     res.status(200).json(page);
 });
 
