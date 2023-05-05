@@ -7,6 +7,7 @@ class LeaderboardCard extends HTMLDivElement {
         this.classList.add('leaderboard-card');
 
         this.innerHTML = `
+            <h5>Leaderboard</h5>
             <div>
                 <table>
                 </table>
@@ -37,7 +38,7 @@ class LeaderboardCard extends HTMLDivElement {
         li.innerHTML = `
             <td class="ladder-rank">#${rank}</td>
             <td class="ladder-name">${name}</td>
-            <td class="ladder-points">${points}pts</td>`;
+            <td class="ladder-points">${points}p</td>`;
         li.classList.toggle('highlight', highlight);
         this.querySelector('table').append(li);
     }
