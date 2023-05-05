@@ -38,7 +38,15 @@ function updateRanking(playerRankings, delta) {
 
 function getRankingDelta(t1Ranking, t2Ranking, t1Points, t2Points) {
     const expectedOutcome = 1 / (1 + Math.pow(10, (t2Ranking - t1Ranking) / DIFF_SCALE));
-    const actualOutcome = t1Points / (t1Points + t2Points);
+
+    // const actualOutcome = t1Points / (t1Points + t2Points);
+
+    let actualOutcome = 0.5;
+    if (t1Points == 5) actualOutcome = 1;
+    else if (t2Points == 5) actualOutcome = 0;
+    else {
+        actualOutcome = t1Points / (t1Points + t2Points);
+    }
 
     const delta = Math.ceil(K_VALUE * (actualOutcome - expectedOutcome));
 

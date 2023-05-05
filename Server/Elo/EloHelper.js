@@ -80,6 +80,8 @@ async function processMatch(client, match, ratingGroup) {
             const newELO = rankings[teamIdx][playerIdx];
             const playerDelta = newELO - oldELO;
 
+            if (playerId == -1) continue;
+
             await playerCollection.updateOne(
                 {_id: playerId},
                 {
