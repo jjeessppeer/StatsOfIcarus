@@ -17,7 +17,7 @@ const elo = require("./Elo/EloHelper.js");
 const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
 
 
-const { MONGODB_URL_STRING } = require("./config.json");
+const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
 const MOD_VERSION_LATEST = "0.1.3";

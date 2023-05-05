@@ -1,7 +1,7 @@
 
 const { ObjectID } = require("bson");
 
-const { processMatchAllCategories, ELO_CATEGORIES, createLeaderboardSnapshot } = require('./../Elo/EloHelper.js');
+const { processMatchAllCategories, ELO_CATEGORIES, createLeaderboardSnapshot } = require('../Server/Elo/EloHelper.js');
 
 const { MongoClient, ReturnDocument, Db } = require("mongodb");
 const CONFIG = require("./../config.json");
