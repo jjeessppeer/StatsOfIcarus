@@ -14,7 +14,7 @@ class LeaderboardCard extends HTMLDivElement {
             <div class="input-group pagination">
                 <div class="input-group-prepend">
                     <button class="btn btn-info back-button" type="button" data-delta="-1">🠔</button>
-                    <button class="btn btn-warn" type="button">1</button>
+                    <button class="btn btn-warn indicator-button" type="button" disabled>1</button>
                 </div>
                 <div class="input-group-append">
                     <button class="btn btn-info forward-button" type="button" data-delta="1">🠖</button>
@@ -44,7 +44,6 @@ class LeaderboardCard extends HTMLDivElement {
 
     setHighlightName(name) {
         this.highlightName = name;
-        console.log("NAME: ", name);
     }
 
     async requestDataUpdate(rankingGroup, ladderPosition) {
@@ -58,11 +57,13 @@ class LeaderboardCard extends HTMLDivElement {
             },
             body: JSON.stringify({RatingGroup: this.currentGroup, Position: this.currentPosition})
         });
+        
         let data = await response.json();
         this.querySelector('table').innerHTML = '';
         for (const playerRank of data) {
             this.addItem(playerRank.LadderRank, playerRank.Name.slice(0, -5), playerRank.Points, playerRank.Name == this.highlightName);
         }
+        this.querySelector('.indicator-button').textContent = Math.floor(this.currentPosition / LEADERBOARD_PAGE_SIZE) + 1;
     }
 
     lockInput() {
