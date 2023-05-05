@@ -1,8 +1,8 @@
 // TODO: special case AI player.
-
-
-
 const STARTING_ELO = 1000;
+const K_VALUE = 30;
+const DIFF_SCALE = 400
+
 
 function getNewRankings(rankings, points) {
     const team1Ranking = getTeamRanking(rankings[0]);
@@ -13,7 +13,7 @@ function getNewRankings(rankings, points) {
 
     const {delta, expectedOutcome, actualOutcome} = getRankingDelta(team1Ranking, team2Ranking, team1Points, team2Points);
 
-    const newTeam1Ranking =  updateRanking(rankings[0], delta);
+    const newTeam1Ranking = updateRanking(rankings[0], delta);
     const newTeam2Ranking = updateRanking(rankings[1], -delta);
 
     return [
@@ -37,11 +37,10 @@ function updateRanking(playerRankings, delta) {
 }
 
 function getRankingDelta(t1Ranking, t2Ranking, t1Points, t2Points) {
-    const expectedOutcome = 1 / (1 + Math.pow(10, (t1Ranking - t2Ranking) / 400));
+    const expectedOutcome = 1 / (1 + Math.pow(10, (t2Ranking - t1Ranking) / DIFF_SCALE));
     const actualOutcome = t1Points / (t1Points + t2Points);
-    
-    const k = 10;
-    const delta = Math.floor(k * (actualOutcome - expectedOutcome));
+
+    const delta = Math.ceil(K_VALUE * (actualOutcome - expectedOutcome));
 
     return { delta, expectedOutcome, actualOutcome };
 }

@@ -181,6 +181,7 @@ async function getLeaderboardPosition(client, ratingGroup, playerId) {
 async function getLeaderboardPage(client, ratingGroup, startPos, count) {
     const playersCollection = client.db("mhtest").collection("Players");
     const aggregate = playersCollection.aggregate([
+        { $match: { ELOCategories: ratingGroup} },
         { $setWindowFields: {
             // partitionBy: ,
             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
