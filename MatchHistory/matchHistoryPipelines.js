@@ -107,7 +107,7 @@ function playerInfoPipeline(playerId) {
               MatchCount: "$MatchCount",
               Levels: "$Levels",
               SkillRatings: "$SkillRatings",
-              ELORating: "$ELORating",
+              // ELORating: "$ELORating",
               ELOCategories: "$ELOCategories"
             }},
           ]
