@@ -308,7 +308,7 @@ async function insertMatchHistory(record, ip) {
 
 
     await matchesCollection.insertOne(newMatch);
-    await Elo.processMatchAllCategories(newMatch);
+    await Elo.processMatchAllCategories(client, newMatch);
 
 
     return true;
