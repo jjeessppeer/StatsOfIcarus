@@ -155,6 +155,7 @@ async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
 async function getLeaderboardPosition(client, ratingGroup, playerId) {
     const playersCollection = client.db("mhtest").collection("Players");
     const aggregate = playersCollection.aggregate([
+        { $match: { ELOCategories: ratingGroup, [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 } } },
         { $setWindowFields: {
             // partitionBy: ,
             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
@@ -183,7 +184,7 @@ async function getLeaderboardPosition(client, ratingGroup, playerId) {
 async function getLeaderboardPage(client, ratingGroup, startPos, count) {
     const playersCollection = client.db("mhtest").collection("Players");
     const aggregate = playersCollection.aggregate([
-        { $match: { ELOCategories: ratingGroup} },
+        { $match: { ELOCategories: ratingGroup, [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 } } },
         { $setWindowFields: {
             // partitionBy: ,
             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
