@@ -42,6 +42,7 @@ class EloCard extends HTMLDivElement {
         const option = document.createElement('option');
         option.value = categoryTitle;
         option.text = categoryTitle;
+        if (option.text == 'SCS') option.selected = 'selected';
         this.querySelector('.elo-group-select').append(option);
     }
 
