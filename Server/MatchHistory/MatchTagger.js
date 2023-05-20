@@ -20,7 +20,10 @@ function isSCS(match) {
 
     const SCS_HOUR = 20;
     const SCS_LENGTH = 3;
+    const SCS_DAY = 0;
     const date = new Date(match.Timestamp);
+
+    if(date.getDay() != SCS_DAY) return false;
 
     return dayTimeBetween(date, SCS_HOUR, 5, SCS_HOUR + SCS_LENGTH);
 }
