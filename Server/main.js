@@ -50,7 +50,7 @@ app.get('/get_datasets', function (req, res) {
     datasets.map_data = data_db.prepare("SELECT * FROM Map_data").all();
     datasets.crosshair_data = data_db.prepare("SELECT * FROM Crosshair_data").all();
     datasets.ships_gun_angles = data_db.prepare("SELECT * FROM Ships_gun_angles").all();
-    res.status("200").json(datasets);
+    res.status(200).json(datasets);
 });
 
 app.post('/submit_match_history', async function (req, res) {
@@ -65,7 +65,7 @@ app.post('/submit_match_history', async function (req, res) {
         return res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
     }
     matchHistory.submitRecord(req.body, ip);
-    res.status("202").send();
+    res.status(202).send();
 });
 
 app.post(
