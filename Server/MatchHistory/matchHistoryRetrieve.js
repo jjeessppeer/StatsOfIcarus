@@ -92,7 +92,8 @@ async function getRecentMatches(filters, page) {
     // console.log(JSON.stringify(await matchesAggregate2.explain(true)));
     // console.log('__')
     let matches = await matchesAggregate.next();
-    matches['TotalCount'] = await matchCollection.count();
+    if (matches) matches['TotalCount'] = await matchCollection.count();
+    else matches['TotalCount'] = 0;
     return matches;
 }
 

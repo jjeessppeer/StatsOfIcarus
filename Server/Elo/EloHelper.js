@@ -178,6 +178,8 @@ async function getLeaderboardPosition(client, ratingGroup, playerId) {
         }},
     ]);
     let playerInfo = await aggregate.next();
+    if (!playerInfo) return 0; 
+    
     return playerInfo.LadderRank;
 }
 
