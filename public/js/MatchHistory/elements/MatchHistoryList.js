@@ -81,6 +81,91 @@ class MatchHistoryDetails extends HTMLDivElement {
   }
 }
 
+class ShipCanvas extends HTMLCanvasElement {
+  constructor() {
+    super();
+    this.setAttribute("height", 250);
+    this.setAttribute("width", 250);
+    this.transform = [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1];
+  }
+
+  async drawShip(shipInfo, shipItem, gunItems) {
+    const gunPositions = shipItem.GunPositions;
+    const shipLoadout = shipInfo.Loadout;
+    const shipModel = shipInfo.ShipModel;
+    const canvas = this;
+    const ctx = canvas.getContext("2d");
+    const shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
+
+    // Find gun bounding rectangle.
+    let maxY, minY, minX, maxX;
+    for (let i = 0; i < gunPositions.length; i++) {
+      let [x, y] = gunPositions[i];
+      if (minX == undefined || x < minX) minX = x;
+      if (maxX == undefined || x > maxX) maxX = x;
+      if (minY == undefined || y < minY) minY = y;
+      if (maxY == undefined || y > maxY) maxY = y;
+      // break;
+    }
+    // maxX = toShipImageCoordinates([maxX, 0], shipModel, shipImage)[0];
+    // minX = toShipImageCoordinates([minX, 0], shipModel, shipImage)[0];
+    maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
+    minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
+
+    let centerX = shipImage.width / 2
+    // let centerX = (minX + maxX) / 2;
+    let centerY = (minY + maxY) / 2;
+
+    resetMatrix(this.transform);
+    translateMatrix(this.transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
+    zoomMatrixAround(this.transform, canvas.width / 2, canvas.height / 2, 0.5);
+    applyMatrix(ctx, this.transform);
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(shipImage, 0, 0);
+
+    const iconSize = 100;
+    // Spread close guns out from eachother 
+    let adjustedGunPositions = [];
+    for (let i = 0; i < gunPositions.length; i++) {
+      let pos = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
+      adjustedGunPositions.push(pos);
+    }
+    adjustedGunPositions = spreadGunPositions(adjustedGunPositions, iconSize);
+
+    // Draw gun icons.
+    for (let i = 0; i < shipLoadout.length; i++) {
+      let gunId = shipLoadout[i];
+      if (gunId == 0) continue;
+      let gunImage = await loadImageAsync(`/images/item-icons/item${gunId}.jpg`);
+
+      // let [cx, cy] = toShipImageCoordinates(adjustedGunPositions[i], shipModel, shipImage);
+      let [cx, cy] = adjustedGunPositions[i];
+      ctx.drawImage(gunImage, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
+
+      // let boxSize = 25;
+      // let [cx2, cy2] = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
+      // ctx.fillStyle = "red";
+      // ctx.beginPath();
+      // ctx.rect(cx2-boxSize/2, cy2-boxSize/2, boxSize, boxSize); 
+      // ctx.fill();
+      // ctx.stroke();
+
+      // ctx.beginPath();
+      // ctx.fillStyle = "black";
+      // ctx.font = "30px Arial"; 
+      // ctx.textAlign = "center"; 
+      // ctx.fillText(i, cx2, cy2+10); 
+      // ctx.stroke();
+
+    }
+  }
+}
+
 class ShipCrew extends HTMLDivElement {
   constructor() {
     super();
@@ -89,7 +174,6 @@ class ShipCrew extends HTMLDivElement {
     this.innerHTML = `
             <span>EMPTY SHIP</span>
             <div>
-                <canvas height="250" width="250"></canvas>
                 <ul>
                 <li></li>
                 <li></li>
@@ -98,12 +182,10 @@ class ShipCrew extends HTMLDivElement {
                 </ul>
             </div>
         `;
-    this.transform = [
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1];
 
 
+    this.shipCanvas = document.createElement('canvas', {is: 'ship-canvas'});
+    this.querySelector('div').prepend(this.shipCanvas);
   }
 
   async fillData(matchData, teamIdx, shipIdx) {
@@ -146,80 +228,7 @@ class ShipCrew extends HTMLDivElement {
 
     let shipInfo = getShipLoadout(matchData, matchData.Ships[teamIdx][shipIdx]);
     let shipItem = getShipItem(matchData, shipInfo.ShipModel);
-    let gunPositions = shipItem.GunPositions;
-    let shipLoadout = shipInfo.Loadout;
-    let shipModel = shipInfo.ShipModel;
-
-    let canvas = this.querySelector("canvas");
-    let ctx = canvas.getContext("2d");
-    let shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
-
-    // Find gun bounding rectangle.
-    let maxY, minY, minX, maxX;
-    for (let i = 0; i < gunPositions.length; i++) {
-      let [x, y] = gunPositions[i];
-      if (minX == undefined || x < minX) minX = x;
-      if (maxX == undefined || x > maxX) maxX = x;
-      if (minY == undefined || y < minY) minY = y;
-      if (maxY == undefined || y > maxY) maxY = y;
-      // break;
-    }
-    // maxX = toShipImageCoordinates([maxX, 0], shipModel, shipImage)[0];
-    // minX = toShipImageCoordinates([minX, 0], shipModel, shipImage)[0];
-    maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
-    minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
-
-    let centerX = shipImage.width / 2
-    // let centerX = (minX + maxX) / 2;
-    let centerY = (minY + maxY) / 2;
-
-    resetMatrix(this.transform);
-    // translateMatrix(this.transform, canvas.width/2 - , canvas.height/2 - shipImage.height/2);
-    // zoomMatrixAround(this.transform, canvas.width/2, canvas.height/2, 0.4);
-    translateMatrix(this.transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
-    zoomMatrixAround(this.transform, canvas.width / 2, canvas.height / 2, 0.5);
-    applyMatrix(ctx, this.transform);
-
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(shipImage, 0, 0);
-
-    let iconSize = 100;
-    // Spread close guns out from eachother 
-    let adjustedGunPositions = [];
-    for (let i = 0; i < gunPositions.length; i++) {
-      let pos = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
-      adjustedGunPositions.push(pos);
-    }
-    adjustedGunPositions = spreadGunPositions(adjustedGunPositions, iconSize);
-
-    // Draw gun icons.
-    for (let i = 0; i < shipLoadout.length; i++) {
-      let gunId = shipLoadout[i];
-      if (gunId == 0) continue;
-      let gunInfo = getGunItem(matchData, gunId);
-      let gunImage = await loadImageAsync(`/images/item-icons/${gunInfo.IconPath}`);
-
-      // let [cx, cy] = toShipImageCoordinates(adjustedGunPositions[i], shipModel, shipImage);
-      let [cx, cy] = adjustedGunPositions[i];
-      ctx.drawImage(gunImage, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
-
-      // let boxSize = 25;
-      // let [cx2, cy2] = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
-      // ctx.fillStyle = "red";
-      // ctx.beginPath();
-      // ctx.rect(cx2-boxSize/2, cy2-boxSize/2, boxSize, boxSize); 
-      // ctx.fill();
-      // ctx.stroke();
-
-      // ctx.beginPath();
-      // ctx.fillStyle = "black";
-      // ctx.font = "30px Arial"; 
-      // ctx.textAlign = "center"; 
-      // ctx.fillText(i, cx2, cy2+10); 
-      // ctx.stroke();
-
-    }
+    this.shipCanvas.drawShip(shipInfo, shipItem);
   }
 }
 
@@ -395,3 +404,4 @@ customElements.define('match-history-foldout', MatchHistoryFoldout, { extends: '
 customElements.define('match-history-details', MatchHistoryDetails, { extends: 'div' });
 customElements.define('match-history-shipcrew', ShipCrew, { extends: 'div' });
 customElements.define('player-nametag', PlayerNametag, { extends: 'li' });
+customElements.define('ship-canvas', ShipCanvas, { extends: 'canvas' });
