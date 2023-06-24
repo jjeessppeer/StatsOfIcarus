@@ -1,4 +1,4 @@
-require('dotenv').config()
+// require('dotenv').config()
 var express = require('express');
 const { checkSchema, validationResult, check } = require('express-validator');
 const Joi = require('joi');
@@ -16,6 +16,8 @@ const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
 const elo = require("./Elo/EloHelper.js");
 const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
 
+
+const shipStats = require('./ShipStats/ShipStats.js');
 
 const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
@@ -117,6 +119,45 @@ app.post(
     res.status(200).json(page);
 });
 
+app.post(
+    '/ship_loadouts',
+    async function(req, res) {
+    const dat = await shipStats.getShipLoadouts(mongoClient, req.body.ShipModel);
+    // console.log()
+    res.status(200).json(dat);
+});
+
+app.post(
+    '/ship_matchup_stats',
+    async function(req, res) {
+        const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
+        // console.log()
+        res.status(200).json(dat);
+});
+
+app.get(
+    '/game-item/:itemType/:itemId',
+    async function(req, res) {
+        const itemType = req.params.itemType;
+        const itemId = Number(req.params.itemId);
+        let collection; 
+        if (itemType === 'gun') 
+            collection = mongoClient.db("mhtest").collection("Items-Guns");
+        else if (itemType === 'ship') 
+            collection = mongoClient.db("mhtest").collection("Items-Ships");
+        else {
+            res.status(404).end();
+            return;
+        }
+
+        const item = await collection.findOne({_id: itemId});
+        if (item) {
+            res.status(200).json(item);
+            return;
+        }
+        res.status(404).end();
+    }
+)
 
 
 async function run() {

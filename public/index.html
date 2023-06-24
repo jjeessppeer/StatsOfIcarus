@@ -7,7 +7,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Dependencies -->
+  <!-- <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script> -->
+
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <script type="module" src="main.js"></script>
+  
   <script src="deps/jquery-3.4.1.min.js"></script>
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap-4.3.1.min.js"></script>
@@ -52,6 +60,10 @@
   <link rel="stylesheet" href="css/MatchHistory/PlayerInfo.css">
   <link rel="stylesheet" href="css/MatchHistory/EloCard.css">
   <link rel="stylesheet" href="css/MatchHistory/LeaderboardCard.css">
+
+  <link rel="stylesheet" href="React/ShipStats/LoadoutOverview.css">
+
+
 </head>
 
 <body>
@@ -151,7 +163,6 @@
         <br>
         <div class="content-area">
           <div class="left-area">
-            <ul class="ship-popularity-list"></ul>
           </div>
           
           <div class="middle-area">
