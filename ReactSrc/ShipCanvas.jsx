@@ -8,7 +8,6 @@ export class ShipCanvas extends React.Component {
     this.state = {
       shipModel: props.shipModel,
       shipLoadout: props.shipLoadout,
-      gunPositions: props.gunPositions,
       transform: [
         1, 0, 0,
         0, 1, 0,
@@ -19,7 +18,7 @@ export class ShipCanvas extends React.Component {
   }
 
   componentDidMount() {
-    this.drawShip(this.state.shipModel, this.state.shipLoadout, this.state.gunPositions, this.state.transform);
+    this.drawShip(this.state.shipModel, this.state.shipLoadout, this.state.transform);
     // this.timerId = setInterval(() => this.tick(), 1000);
   }
 
@@ -27,14 +26,18 @@ export class ShipCanvas extends React.Component {
   //   clearInterval(this.timerId);
   // }
 
-  componentDidUpdate() {
-    this.drawShip(this.state.shipModel, this.state.shipLoadout, this.state.gunPositions, this.state.transform);
-  }
+  // componentDidUpdate() {
+  //   this.drawShip(this.state.shipModel, this.state.shipLoadout, this.state.transform);
+  // }
 
-  async drawShip(shipModel, shipLoadout, gunPositions, transform) {
+  async drawShip(shipModel, shipLoadout, transform) {
     const canvas = this.canvasRef.current;
     const ctx = canvas.getContext("2d");
     const shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
+
+    const shipItemRaw = await fetch(`/game-item/ship/${shipModel}`);
+    const shipItem = await shipItemRaw.json();
+    const gunPositions = shipItem.GunPositions;
 
     // Find gun bounding rectangle.
     let maxY, minY, minX, maxX;

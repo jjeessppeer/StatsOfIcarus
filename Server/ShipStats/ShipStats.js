@@ -1,22 +1,4 @@
-function generateSearchArray() {
-
-}
-
-function generateMatchupPermutations() {
-
-}
-
-function getModelRates(modelId) {
-
-}
-
-function getShipLoadoutRates() {
-
-}
-
-function getLoadoutCounterRates() {
-
-}
+// TODO: use elo to generate weighted performence data.
 
 function gunPosIdString(gunIdx, shipModel, gunId, teamIdx, shipIdx) {
     // const idStr = `T${teamIdx}S${shipIdx}G${gunIdx}M${shipModel}L${gunId}`;
