@@ -6,18 +6,47 @@ import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats, loadoutStringToCanv
 
 
 export class ShipLoadoutInfoList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      groupingSettings: {
+        ignoredGunIndexes: {
+          0: true,
+          1: true,
+          2: false,
+          3: false,
+          4: false,
+          5: false
+        }
+      }
+    }
+  }
+
+  groupingSettingsChanged = (groupingSettings) => {
+    console.log("SETTINGS SCHANGEID");
+    console.log(groupingSettings);
+    this.setState({
+      groupingSettings: groupingSettings
+    });
+  }
+
   render() {
     const componentArray = [
     ]
+    const mergedLoadoutInfos = mergeLoadoutInfos(
+      this.props.loadoutInfos, 
+      this.state.groupingSettings);
+
+    const totalShipGames = this.props.loadoutInfos.reduce((partialSum, a) => partialSum + a.PlayedGames, 0);
     const page = 0;
     const pageSize = 20;
-    for (const loadoutInfo of this.props.loadoutInfos) {
-      componentArray.push(<ShipLoadoutInfo loadoutInfo={loadoutInfo}></ShipLoadoutInfo>);
+    for (const loadoutInfo of mergedLoadoutInfos) {
+      componentArray.push(<ShipLoadoutInfo loadoutInfo={loadoutInfo} totalShipGames={totalShipGames}></ShipLoadoutInfo>);
       if (componentArray.length == pageSize) break;
     }
     return (
       <ul className="ship-loadout-list">
-        <LoadoutGroupingSettings></LoadoutGroupingSettings>
+        <LoadoutGroupingSettings settings={this.state.groupingSettings} settingsChanged={this.groupingSettingsChanged}></LoadoutGroupingSettings>
         {componentArray}
       </ul>
     )
@@ -29,14 +58,11 @@ export class ShipLoadoutInfo extends React.Component {
   constructor(props) {
     super(props);
 
-    const canvasData = loadoutStringToCanvasData(this.props.loadoutInfo._id)
-
     this.state = {
       loadout: JSON.parse(this.props.loadoutInfo._id),
       loadedMatchups: false,
       matchupStats: [],
       matchupsExpanded: false,
-      canvasData: canvasData
     }
   }
 
@@ -73,35 +99,42 @@ export class ShipLoadoutInfo extends React.Component {
   render() {
     const rateProps = {
       picks: this.props.loadoutInfo.PlayedGames,
-      totalPicks: this.props.loadoutInfo.TotalGames,
-      matches: 4,
-      totalMatches: 5,
       wins: this.props.loadoutInfo.Wins
     };
-    const pickRate = rateProps.picks / rateProps.totalPicks;
+    const pickRate = rateProps.picks / this.props.totalShipGames;
     const matchRate = rateProps.matches / rateProps.totalMatches;
     const winRate = rateProps.wins / rateProps.picks;
+
+    function toPercentage(n, tot) {
+      return Math.round(100 * n / tot);
+    }
+
+    
+    const canvasData = loadoutStringToCanvasData(this.props.loadoutInfo._id)
 
 
     return (
       <li className={"ship-loadout-info" + (this.state.matchupsExpanded ? " expanded" : "")}>
         <div className="info-card">
           <div className='content'>
-            <ShipCanvas {...this.state.canvasData} width='150' height='250'></ShipCanvas>
-            <div>hello</div>
+            <ShipCanvas {...canvasData} width='150' height='250'></ShipCanvas>
             <div>
               <table className="ship-rates">
                 <tr>
                   <td>Pick rate:</td>
-                  <td>{pickRate * 100}% [{rateProps.picks}]</td>
+                  <td>{toPercentage(this.props.loadoutInfo.PlayedGames, this.props.totalShipGames)}% [{this.props.loadoutInfo.PlayedGames}]</td>
                 </tr>
                 <tr>
                   <td>Win rate: </td>
-                  <td>{winRate * 100}% [{rateProps.wins}]</td>
+                  <td>{toPercentage(this.props.loadoutInfo.Wins, this.props.loadoutInfo.PlayedGames)}% [{this.props.loadoutInfo.Wins}]</td>
                 </tr>
                 <tr>
-                  <td>Match rate: </td>
-                  <td>{matchRate * 100}% [{rateProps.matches}]</td>
+                  <td>Performance: </td>
+                  <td>-</td>
+                </tr>
+                <tr>
+                  <td>Mirror rate: </td>
+                  <td>{toPercentage(this.props.loadoutInfo.Mirrors, this.props.loadoutInfo.PlayedGames)}% [{this.props.loadoutInfo.Mirrors}]</td>
                 </tr>
               </table>
             </div>

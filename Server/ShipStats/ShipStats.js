@@ -1,28 +1,42 @@
 // TODO: use elo to generate weighted performence data.
 
-function gunPosIdString(gunIdx, shipModel, gunId, teamIdx, shipIdx) {
-    // const idStr = `T${teamIdx}S${shipIdx}G${gunIdx}M${shipModel}L${gunId}`;
-    // return idStr;
-    let loadoutObj;
-    if (teamIdx != undefined && shipIdx != undefined) {
-        loadoutObj = {T: teamIdx, S: shipIdx, G: gunIdx, model: shipModel, gun: gunId};
-    }
-    else {
-        loadoutObj = {G: gunIdx, model: shipModel, gun: gunId};
-    }
-    return JSON.stringify(loadoutObj);
-}
+// function gunPosIdObj(gunIdx, shipModel, gunId, teamIdx, shipIdx) {
+//     // const idStr = `T${teamIdx}S${shipIdx}G${gunIdx}M${shipModel}L${gunId}`;
+//     // return idStr;
+//     let loadoutObj;
+//     if (teamIdx != undefined && shipIdx != undefined) {
+//         loadoutObj = {T: teamIdx, S: shipIdx, G: gunIdx, model: shipModel, gun: gunId};
+//     }
+//     else {
+//         loadoutObj = {G: gunIdx, model: shipModel, gun: gunId};
+//     }
+//     return JSON.stringify(loadoutObj);
+// }
 
 function generateSearchStrings(target, teamIdx, shipIdx) {
+    // const tags = [];
+    // tags.push(JSON.stringify(loadoutSearchObj(teamIdx, shipIdx, target.Model)));
+    // for (const gunIdx in target.Guns) {
+    //     tags.push(JSON.stringify(loadoutSearchObj(teamIdx, shipIdx, undefined, Number(gunIdx), target.Guns[gunIdx])));
+    // }
+    // return tags;
+    const tags = generateSearchTagArr(target, teamIdx, shipIdx);
+    for (let i = 0; i < tags.length; i++) {
+        tags[i] = JSON.stringify(tags[i]);
+    } 
+    return tags;
+}
+
+function generateSearchTagArr(target, teamIdx, shipIdx) {
     const tags = [];
-    tags.push(loadoutSearchTag(teamIdx, shipIdx, target.Model));
+    tags.push(loadoutSearchObj(teamIdx, shipIdx, target.Model));
     for (const gunIdx in target.Guns) {
-        tags.push(loadoutSearchTag(teamIdx, shipIdx, undefined, Number(gunIdx), target.Guns[gunIdx]));
+        tags.push(loadoutSearchObj(teamIdx, shipIdx, undefined, Number(gunIdx), target.Guns[gunIdx]));
     }
     return tags;
 }
 
-function loadoutSearchTag(teamIdx, shipIdx, modelId, gunIdx, gunId) {
+function loadoutSearchObj(teamIdx, shipIdx, modelId, gunIdx, gunId) {
     const loadoutObj = {};
     if (teamIdx != undefined) loadoutObj['T'] = teamIdx;
     if (shipIdx != undefined) loadoutObj['S'] = shipIdx;
@@ -33,7 +47,8 @@ function loadoutSearchTag(teamIdx, shipIdx, modelId, gunIdx, gunId) {
         loadoutObj['G'] = gunIdx;
         loadoutObj['gun'] = gunId;
     }
-    return JSON.stringify(loadoutObj);
+    // return JSON.stringify(loadoutObj);
+    return loadoutObj;
 }
 
 async function getShipMatchupStats(client, targetShip = { Model: 16}) {
@@ -112,37 +127,69 @@ async function getShipMatchupStats(client, targetShip = { Model: 16}) {
     // console.log(JSON.stringify(exp));
 
     let result = await agg.toArray();
-    console.log(result.length);
-    for (let i = 0; i < 5; i++) {
-        console.log(result[i]);
-    }
+    // console.log(result.length);
+    // for (let i = 0; i < 5; i++) {
+    //     console.log(result[i]);
+    // }
     return result;
 }
 
 async function getShipLoadouts(client, shipModel = 16) {
     const matchCollection = client.db("mhtest").collection("Matches");
     const pipeline = [
+        { $match: {TeamSize: 2, TeamCount: 2, ShipsFull: true}},
         { $match: {"ShipLoadoutsModels.Model": shipModel}},
+
+
+        { $addFields: {
+            MainShipLoadout: "$ShipLoadoutsModels",
+        }},
         { "$unwind": {
-            path: "$ShipLoadoutsModels",
-            includeArrayIndex: "ShipIndex"
+            path: "$MainShipLoadout",
         }},
+        { $match: { "MainShipLoadout.Model": shipModel }},
 
-        { $match: { "ShipLoadoutsModels.Model": shipModel }},
+        { $addFields: {
+            OtherTeamStartIdx: {$cond: [{$eq: ["$MainShipLoadout.TeamIdx", 0]}, 2, 0]},
+        }},
+        { $addFields: {
+            OtherShipLoadout1: { $arrayElemAt: ["$ShipLoadoutsModels", {$add: ["$OtherTeamStartIdx", 0]}]},
+            OtherShipLoadout2: { $arrayElemAt: ["$ShipLoadoutsModels", {$add: ["$OtherTeamStartIdx", 1]}]},
 
-        { $facet: {
-            "Count": [ { "$group": { _id: null, count: { $sum: 1 } } } ],
-            "LoadoutStats": [
+        }},
+        
+
+
+        // { $addFields: {
+        //     OtherTeamStartIdx: {$cond: [{$eq: ["$ShipLoadoutsModels.TeamIdx", 0]}, 0, 1]}
+        // }},
+        // { $project: {
+        //     OtherShipLoadout1: { $arrayElemAt: ["$ShipLoadoutsModels", {$add: ["$OtherTeamStartIdx", 0]}]},
+        //     OtherShipLoadout2: { $arrayElemAt: ["$ShipLoadoutsModels", {$add: ["$OtherTeamStartIdx", 1]}]},
+        // }},
+
+        // { $facet: {
+        //     "Count": [ { "$group": { _id: null, count: { $sum: 1 } } } ],
+        //     "LoadoutStats": [
               { $group: {
-                _id: "$ShipLoadoutsModels.Loadout",
-                Wins: { $sum: {$cond: [{$eq: ["$ShipLoadoutsModels.TeamIdx", "$Winner"]}, 1, 0]} },
-                PlayedGames: { $sum: 1 }
-              }}
-            ]
-        }},
+                _id: "$MainShipLoadout.Loadout",
+                Wins: { $sum: {$cond: [{$eq: ["$MainShipLoadout.TeamIdx", "$Winner"]}, 1, 0]} },
+                PlayedGames: { $sum: 1 },
+                Mirrors: { $sum: { $cond: [ 
+                    {$or: [
+                        {$eq: ["$OtherShipLoadout1.Model", "$MainShipLoadout.Model"]},
+                        {$eq: ["$OtherShipLoadout2.Model", "$MainShipLoadout.Model"]}
+                    ]}, 
+                    1, 0]
+                }},
+                // Mirrors1: { $sum: { $cond: [{$eq: ["$OtherShipLoadout1.Model", "$MainShipLoadout.Model"]}, 1, 0] }},
+                // Mirrors2: { $sum: { $cond: [{$eq: ["$OtherShipLoadout2.Model", "$MainShipLoadout.Model"]}, 1, 0] }},
+              }},
+        //     ]
+        // }},
 
-        {$unwind: '$LoadoutStats'},
-        {$sort: {"LoadoutStats.PlayedGames": -1}}
+        // {$unwind: '$LoadoutStats'},
+        {$sort: {"PlayedGames": -1}}
     ]
 
     const agg = matchCollection.aggregate(pipeline);
@@ -152,9 +199,12 @@ async function getShipLoadouts(client, shipModel = 16) {
     // console.log(agg)
     const result = await agg.toArray();
     console.log(result.length);
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
         console.log(result[i]);
     }
+    // const r = result[0];
+    // console.log("Main\n", r.MainShipLoadout, "\nOTHER1\n", r.OtherShipLoadout1, "\n", r.OtherShipLoadout2 ,"\n");
+    // console.log(r.OtherTeamStartIdx, " | t:", r.MainShipLoadout.TeamIdx, " w:" ,r.Winner);
     return result;
     
 
@@ -163,5 +213,8 @@ async function getShipLoadouts(client, shipModel = 16) {
 
 module.exports = {
     getShipLoadouts,
-    getShipMatchupStats
+    getShipMatchupStats,
+    generateSearchStrings,
+    generateSearchTagArr,
+    loadoutSearchObj
 }

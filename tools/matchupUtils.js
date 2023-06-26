@@ -4,7 +4,7 @@ const { ObjectID } = require("bson");
 const { MongoClient, ReturnDocument, Db } = require("mongodb");
 const { MONGODB_URL_STRING } = require("./../config.json");
 const mongoClient = new MongoClient(MONGODB_URL_STRING);
-const { getShipLoadouts, getShipMatchupStats } = require('./../Server/ShipStats/ShipStats.js');
+const { getShipLoadouts, getShipMatchupStats, generateSearchStrings, loadoutSearchObj, generateSearchTagArr } = require('./../Server/ShipStats/ShipStats.js');
 
 async function addHelperData(client) {
     const matchCollection = client.db("mhtest").collection("Matches");
@@ -37,25 +37,25 @@ async function addHelperData(client) {
                 const guns = shipInfo.Loadout;
                 const shipModel = shipInfo.ShipModel;
 
-                shipLoadoutIdStrings.push(loadoutIdString(shipModel, guns));
+                
+                // shipLoadoutIdStrings.push(loadoutIdString(shipModel, guns));
+                shipLoadoutIdStrings.push(JSON.stringify(generateSearchTagArr({Model: shipModel, Guns: guns})));
                 shipLoadoutModels.push(shipModel);
 
-                shipLoadoutsFull.push(loadoutSearchTag(teamIdx, shipIdx, shipModel));
-                shipLoadout.push(loadoutSearchTag(undefined, undefined, shipModel));
+                shipLoadoutsFull.push(JSON.stringify(loadoutSearchObj(teamIdx, shipIdx, shipModel)));
+                shipLoadout.push(JSON.stringify(loadoutSearchObj(undefined, undefined, shipModel)));
                 for (let gunIdx = 0; gunIdx < guns.length; gunIdx += 1) {
-                    const posStr = gunPosIdString(gunIdx, shipModel, guns[gunIdx], teamIdx, shipIdx);
-                    // shipLoadoutsFull.push(posStr);
-                    shipLoadoutsFull.push(loadoutSearchTag(teamIdx, shipIdx, undefined, gunIdx, guns[gunIdx]));
-                    // shipLoadout.push(gunPosIdString(gunIdx, shipModel, guns[gunIdx]));
-                    shipLoadout.push(loadoutSearchTag(undefined, undefined, undefined, gunIdx, guns[gunIdx]));
+                    shipLoadoutsFull.push(JSON.stringify(loadoutSearchObj(teamIdx, shipIdx, undefined, gunIdx, guns[gunIdx])));
+                    shipLoadout.push(JSON.stringify(loadoutSearchObj(undefined, undefined, undefined, gunIdx, guns[gunIdx])));
                 }
                 shipModelLoadout.push({
                     TeamIdx: teamIdx,
                     ShipIdx: shipIdx,
                     Model: shipModel, 
-                    Loadout: loadoutIdString(shipModel, guns), 
-                    Tags: shipLoadout});
-
+                    Loadout: JSON.stringify(generateSearchTagArr({Model: shipModel, Guns: guns})), 
+                    Tags: shipLoadout}
+                );
+                // console.log(JSON.stringify(generateSearchStrings({Model: shipModel, Guns: guns})))
             }
         }
 
@@ -84,10 +84,9 @@ async function start() {
         console.log("Connecting to db...")
         await mongoClient.connect();
         console.log("Connected.");
-        // await resetLeaderboardDataset(mongoClient);
-        // await addHelperData(mongoClient);
+        await addHelperData(mongoClient);
         // await getShipWinrates(mongoClient);
-        await getShipLoadouts(mongoClient);
+        // await getShipLoadouts(mongoClient);
         // await getShipMatchupStats(mongoClient);
 
     } finally {

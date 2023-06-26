@@ -5,20 +5,22 @@ export class ShipCanvas extends React.Component {
   }
   constructor(props) {
     super(props);
-    this.state = {
-      shipModel: props.shipModel,
-      shipLoadout: props.shipLoadout,
-      transform: [
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1]
-    };
+    // this.state = {
+    //   shipModel: props.shipModel,
+    //   shipLoadout: props.shipLoadout,
+    //   transform: [
+    //     1, 0, 0,
+    //     0, 1, 0,
+    //     0, 0, 1]
+    // };
     this.canvasRef = React.createRef();
-
   }
 
   componentDidMount() {
-    this.drawShip(this.state.shipModel, this.state.shipLoadout, this.state.transform);
+    this.drawShip(this.props.shipModel, this.props.shipLoadout, [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1]);
     // this.timerId = setInterval(() => this.tick(), 1000);
   }
 
@@ -26,14 +28,18 @@ export class ShipCanvas extends React.Component {
   //   clearInterval(this.timerId);
   // }
 
-  // componentDidUpdate() {
-  //   this.drawShip(this.state.shipModel, this.state.shipLoadout, this.state.transform);
-  // }
+  componentDidUpdate() {
+    this.drawShip(this.props.shipModel, this.props.shipLoadout, [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1]);
+  }
 
   async drawShip(shipModel, shipLoadout, transform) {
     const canvas = this.canvasRef.current;
     const ctx = canvas.getContext("2d");
     const shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
+
 
     const shipItemRaw = await fetch(`/game-item/ship/${shipModel}`);
     const shipItem = await shipItemRaw.json();
@@ -59,13 +65,14 @@ export class ShipCanvas extends React.Component {
     let centerY = (minY + maxY) / 2;
 
     resetMatrix(transform);
+    applyMatrix(ctx, transform);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     translateMatrix(transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
     zoomMatrixAround(transform, canvas.width / 2, canvas.height / 2, 0.5);
     applyMatrix(ctx, transform);
 
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(shipImage, 0, 0);
 
     const iconSize = 100;

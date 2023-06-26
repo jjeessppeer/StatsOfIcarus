@@ -30,9 +30,9 @@ async function getLoadoutStats() {
 async function start() {
     console.log("FETCHING SHIP LOADOUTS");
     const loadoutListFull = await getLoadoutList(67);
-    const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
-    console.log(loadoutListMerged)
-    await getLoadoutStats();
+    // const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
+    // console.log(loadoutListMerged)
+    // await getLoadoutStats();
 
 
 
@@ -40,10 +40,12 @@ async function start() {
     const domContainer = document.querySelector('#matchHistory .right-area');
     const root = ReactDOM.createRoot(domContainer);
     const rateProps = { picks: 10, totalPicks: 20, matches: 4, totalMatches: 5, wins: 7 };
-    const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListMerged })
+    const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
     root.render(el);
 }
-start();
+
+setTimeout(start, 400);
+// start();
 // console.log(el)
 // el.setState({shipModel: 14});
 
