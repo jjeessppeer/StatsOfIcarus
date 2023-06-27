@@ -1,0 +1,105 @@
+.info-card {
+    border: 1px solid;
+    border-color: var(--card-border);
+    background-color: var(--card-color-1);
+    margin: 10px;
+    padding: 5px;
+    color: var(--text-light);
+}
+
+.ship-loadout-list {
+    list-style-type: none;
+}
+
+.ship-rates {
+    /* background-color: red; */
+    /* height: 100px; */
+}
+.ship-rates tr {
+    /* background-color: red; */
+    height: 29px;
+}
+
+.ship-overview {
+    width: 300px;
+}
+
+.ship-overview-title {
+    display: flex;
+    flex-direction: row;
+}
+
+.ship-overview img {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+
+}
+
+.ship-overview-name {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+}
+
+.ship-loadout-info {
+    padding: 0;
+    width: 700px;
+}
+.ship-loadout-info .content {
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
+.ship-loadout-info .info-card {
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.loadout-matchup-foldout {
+    margin-top: 0;
+    width: 75%;
+    display: none;
+}
+
+.ship-loadout-info.expanded .loadout-matchup-foldout {
+    display: block;
+}
+
+.expand-button-bar {
+    display: flex;
+    flex-direction: row;
+}
+
+.loadout-expand-button {
+    border-top: 1px solid;
+    border-right: 1px solid;
+    padding: 5px;
+    cursor: pointer;
+    border-color: var(--card-border);
+    flex-grow: 1;
+}
+
+.loadout-expand-button i{
+    /* transform: rotate(180deg); */
+}
+
+.loadout-matchup-box:not(:first-child) {
+    border-top: 1px solid;
+    border-color: var(--card-border);
+    /* display: flex; */
+    /* flex-direction: row; */
+
+}
+
+.loadout-matchup-box {
+    /* border-top: 1px solid; */
+    /* border-color: var(--card-border); */
+    display: flex;
+    flex-direction: row;
+    /* padding: 5px; */
+
+}
