@@ -1,9 +1,16 @@
+import '/js/MatchHistory/elements/FancySearch.js';
+import '/js/MatchHistory/elements/MatchHistoryList.js';
+import '/js/MatchHistory/elements/ShipPopularity.js';
+import '/js/MatchHistory/elements/PlayerShipInfo.js';
+import '/js/MatchHistory/elements/PlayerInfo.js';
+import '/js/MatchHistory/elements/EloCard.js';
+import '/js/MatchHistory/elements/LeaderboardCard.js';
 
 var search_mode = 0;
 
 var pickwinrateChart;
 
-const SKILL_ORDER = [
+export const SKILL_ORDER = [
     "Rubber Mallet",
     "Fail-safe Kit",
     "Pipe Wrench",
@@ -35,7 +42,7 @@ const SKILL_ORDER = [
     "Impact Bumpers",
     "Tar Barrel"
 ];
-var ship_image_srcs2 = {
+export const ship_image_srcs2 = {
     70: "images/ship-images/corsair_gundeck_small.png",
     67: "images/ship-images/crusader_gundeck_small.png",
     14: "images/ship-images/galleon_gundeck_small.png",
@@ -51,11 +58,11 @@ var ship_image_srcs2 = {
     97: "images/ship-images/storm_gundeck_small.png" 
 };
 
-const game_modes = {
+export const game_modes = {
     2: "Deathmatch"
 }
 
-const SHIP_ITEMS = {
+export const SHIP_ITEMS = {
     11: {Name: "Goldfish", Id: 11},
     12: {Name: "Junker", Id: 12},
     13: {Name: "Squid", Id: 13},
@@ -71,7 +78,7 @@ const SHIP_ITEMS = {
     97: {Name: "Stormbreaker", Id: 97},
 }
 
-const CLASS_COLORS = {
+export const CLASS_COLORS = {
     "Pilot": 'rgb(85, 135, 170)',
     "Gunner": 'rgb(167, 76, 18)',
     "Engineer": 'rgb(189, 137, 45)'
@@ -256,51 +263,7 @@ function updateMatchHistoryList(matchHistory){
 
 // TODO: Make these functions fetch and cache data instead of resending with every match record.
 
-function getShipLoadout(matchRecord, shipLoadoutId) {
-    for (let ship of matchRecord.ShipLoadouts) {
-        if (ship._id == shipLoadoutId) return ship;
-    }
-    throw "No ship with specified id found";
-}
 
-function getPlayerInfo(matchRecord, playerId) {
-    for (let player of matchRecord.PlayerInfo) {
-        if (player._id == playerId) {
-            return player;
-        }
-    }
-    console.log("No player " + playerId);
-    console.log(matchRecord);
-    throw "No player with specified id found " + playerId;
-}
-
-function getLoadoutInfo(matchRecord, loadoutId) {
-    for (let loadout of matchRecord.LoadoutInfo) {
-        if (loadout._id == loadoutId) return loadout;
-    }
-    throw "No loadout with specified id found";
-}
-
-function getSkillItem(matchRecord, skillId) {
-    for (let skill of matchRecord.SkillItems) {
-        if (skill._id == skillId) return skill;
-    }
-    throw "No skill with specified id found";
-}
-
-function getGunItem(matchRecord, gunId) {
-    for (let gun of matchRecord.GunItems) {
-        if (gun._id == gunId) return gun;
-    }
-    throw `No gun with specified id found: ${gunId}`;
-}
-
-function getShipItem(matchRecord, shipId) {
-    for (let ship of matchRecord.ShipItems) {
-        if (ship._id == shipId) return ship;
-    }
-    throw "No ship item with specified id found: " + shipId;
-}
 
 
 var ship_scales = {
@@ -339,13 +302,13 @@ var ship_offsets = {
 // pyra_gundeck_small
 // magnate_gundeck_small
 
-function toShipImageCoordinates(point, shipModel, shipImage) {
+export function toShipImageCoordinates(point, shipModel, shipImage) {
     return [
         point[0] * ship_scales[shipModel] + shipImage.width / 2, 
         point[1] * -ship_scales[shipModel] + ship_offsets[shipModel]]
 }
 
-function spreadGunPositions(gunPositions, iconSize, iterations=10) {
+export function spreadGunPositions(gunPositions, iconSize, iterations=10) {
     let adjustedPositions = [];
     const movementStrength = 1/10;
     for (let i = 0; i < gunPositions.length; i++) {
@@ -375,3 +338,6 @@ function spreadGunPositions(gunPositions, iconSize, iterations=10) {
     if (iterations > 1) adjustedPositions = spreadGunPositions(adjustedPositions, iconSize, iterations-1);
     return adjustedPositions;
 }
+
+
+initializeMatchHistory();

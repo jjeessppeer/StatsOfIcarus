@@ -1,3 +1,5 @@
+import { game_modes, SKILL_ORDER, ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
+
 class MatchHistoryList extends HTMLUListElement {
   constructor() {
     super();
@@ -99,6 +101,11 @@ class ShipCanvas extends HTMLCanvasElement {
     const canvas = this;
     const ctx = canvas.getContext("2d");
     const shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
+
+    // console.log("SHIPCANVAS");
+    // console.log(shipModel);
+    // console.log(JSON.stringify(shipLoadout));
+    // console.log(JSON.stringify(gunPositions));
 
     // Find gun bounding rectangle.
     let maxY, minY, minX, maxX;
@@ -394,6 +401,52 @@ class PlayerNametag extends HTMLLIElement {
     let roleImages = { 1: "pilot.png", 2: "engineer.png", 4: "gunner.png", 5: "neutral.png" };
     this.querySelector("img").src = `images/class-icons/${roleImages[playerClass]}`;
   }
+}
+
+function getShipLoadout(matchRecord, shipLoadoutId) {
+  for (let ship of matchRecord.ShipLoadouts) {
+      if (ship._id == shipLoadoutId) return ship;
+  }
+  throw "No ship with specified id found";
+}
+
+function getPlayerInfo(matchRecord, playerId) {
+  for (let player of matchRecord.PlayerInfo) {
+      if (player._id == playerId) {
+          return player;
+      }
+  }
+  console.log("No player " + playerId);
+  console.log(matchRecord);
+  throw "No player with specified id found " + playerId;
+}
+
+function getLoadoutInfo(matchRecord, loadoutId) {
+  for (let loadout of matchRecord.LoadoutInfo) {
+      if (loadout._id == loadoutId) return loadout;
+  }
+  throw "No loadout with specified id found";
+}
+
+function getSkillItem(matchRecord, skillId) {
+  for (let skill of matchRecord.SkillItems) {
+      if (skill._id == skillId) return skill;
+  }
+  throw "No skill with specified id found";
+}
+
+function getGunItem(matchRecord, gunId) {
+  for (let gun of matchRecord.GunItems) {
+      if (gun._id == gunId) return gun;
+  }
+  throw `No gun with specified id found: ${gunId}`;
+}
+
+function getShipItem(matchRecord, shipId) {
+  for (let ship of matchRecord.ShipItems) {
+      if (ship._id == shipId) return ship;
+  }
+  throw "No ship item with specified id found: " + shipId;
 }
 
 

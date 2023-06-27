@@ -1,3 +1,5 @@
+import { SHIP_ITEMS } from '/js/MatchHistory/matchHistory.js';
+
 class FancySearchbar extends HTMLDivElement {
   constructor() {
     super();
@@ -53,6 +55,13 @@ class FancySearchbar extends HTMLDivElement {
     });
     this.querySelector(".search-button").addEventListener('click', () => this.createSearchEvent());
 
+    
+    this.playerCategory = this.addCategory("Search Player", [{
+      icon: `images/item-icons/item1182.jpg`,
+      type: "Player",
+      name: ""
+    }]);
+
     let shipListItems = [];
     for (let shipId in SHIP_ITEMS) {
       let item = {
@@ -63,12 +72,8 @@ class FancySearchbar extends HTMLDivElement {
       }
       shipListItems.push(item);
     }
-    // this.addCategory("Ship", shipListItems);
-    this.playerCategory = this.addCategory("Search Player", [{
-      icon: `images/item-icons/item1182.jpg`,
-      type: "Player",
-      name: ""
-    }]);
+    this.addCategory("Ship", shipListItems);
+
     this.addCategory("Recent Searches", [
       // { icon: `images/item-icons/ship123123123.jpg`, name: "recent1" },
       // { icon: `images/item-icons/ship123123123.jpg`, name: "recent2" },

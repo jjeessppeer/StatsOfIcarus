@@ -1,3 +1,5 @@
+import { CLASS_COLORS } from '/js/MatchHistory/matchHistory.js';
+
 class PlayerInfoBox extends HTMLDivElement {
   constructor() {
     super();

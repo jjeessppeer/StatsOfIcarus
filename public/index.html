@@ -43,14 +43,9 @@
   <script src="js/mapSpawns.js"></script>
   <script src="js/shipBuilder.js"></script>
   <script src="js/shipBuilderTranslations.js"></script>
-  <script src="js/MatchHistory/matchHistory.js"></script>
-  <script src="js/MatchHistory/elements/FancySearch.js"></script>
-  <script src="js/MatchHistory/elements/ShipPopularity.js"></script>
-  <script src="js/MatchHistory/elements/MatchHistoryList.js"></script>
-  <script src="js/MatchHistory/elements/PlayerShipInfo.js"></script>
-  <script src="js/MatchHistory/elements/PlayerInfo.js"></script>
-  <script src="js/MatchHistory/elements/EloCard.js"></script>
-  <script src="js/MatchHistory/elements/LeaderboardCard.js"></script>
+
+  <script type="module" src="js/MatchHistory/matchHistory.js"></script>
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
   <link rel="stylesheet" href="css/HistorySearch.css">
@@ -1179,7 +1174,6 @@
       // Load datasets
       loadDatasetsFromServer();
 
-      initializeMatchHistory();
 
     });
 
