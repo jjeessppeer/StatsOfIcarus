@@ -191,7 +191,7 @@ class FancySearchbar extends HTMLDivElement {
       // Only show recent searches if nothing is typed.
       return searchText == "";
     }
-    if (category.name == "Full list") {
+    if (category.name == "Full match history") {
       return searchText == "";
       // return true;
     }
