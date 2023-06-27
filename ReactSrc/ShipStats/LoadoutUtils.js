@@ -1,3 +1,95 @@
+// Guns are indexed differently in game internals and ui.
+const SHIP_GUN_IDX_MAP = {
+    11: { // Goldfish
+        0: 1,
+        1: 2,
+        2: 0,
+        3: 3
+    },
+    12: { // Junker
+        0: 3,
+        1: 4,
+        2: 0,
+        3: 2,
+        4: 1
+    },
+    13: { // Squid
+        0: 0,
+        1: 1,
+        2: 2
+    },
+    14: { // Galleon
+        0: 5,
+        1: 0,
+        2: 1,
+        3: 2,
+        4: 3,
+        5: 4
+    },
+    15: { // Spire
+        0: 2,
+        1: 3,
+        2: 1,
+        3: 0
+    },
+    16: { // Pyramidion
+        0: 2,
+        1: 3,
+        2: 1,
+        3: 0
+    },
+    19: { // Mobula
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4
+    },
+    64: { // Magnate
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5
+    },
+    67: { // Crusader
+        0: 0,
+        1: 1,
+        2: 5,
+        3: 4,
+        4: 2,
+        5: 3
+      },
+      69: { // Judgement
+        0: 0,
+        1: 3,
+        2: 2,
+        3: 1,
+        4: 4
+      },
+      70: { // Corsair
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5
+      },
+      82: { // Shrike
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3
+      },
+      97: { // Stormbreaker
+        0: 0,
+        1: 1,
+        2: 2,
+        3: 3
+      }
+  }
+
 export function mapLoadoutId(loadoutString, options) {
     const loadoutObj = JSON.parse(loadoutString);
     // const pattern = {
@@ -10,13 +102,22 @@ export function mapLoadoutId(loadoutString, options) {
     // const mappedIdObj = [{ model: loadoutObj.M }];
     // console.log(loadoutString);
 
-    const outObj = [];
+    const outObj = [loadoutObj[0]];
+    const model = loadoutObj[0].model;
 
     for (const part of loadoutObj) {
-        if (part.G != undefined && options.ignoredGunIndexes[part.G] === true) continue;
-        // if (part.model != undefined)
-        outObj.push(part);
+        if (part.G != undefined) {
+            let mappedIdx = part.G;
+            if (SHIP_GUN_IDX_MAP[model] != undefined) mappedIdx = SHIP_GUN_IDX_MAP[model][part.G];
+            if ( options.ignoredGunIndexes[mappedIdx] == true ) continue;
+            outObj.push(part);
+
+        }
+        // if (part.G != undefined && options.ignoredGunIndexes[part.G] === true) continue;
+        // // if (part.model != undefined)
+        // outObj.push(part);
     }
+    // console.log(outObj)
 
     return JSON.stringify(outObj);
 

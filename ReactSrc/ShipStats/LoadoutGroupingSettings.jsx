@@ -1,5 +1,7 @@
 
 
+
+
 export class LoadoutGroupingSettings extends React.Component {
   constructor(props) {
     super(props);
@@ -59,10 +61,10 @@ export class LoadoutGroupingSettings extends React.Component {
       <div className="loadout-grouping-settings">
         <h5>Loadout grouping</h5>
         <div>
-          Minimum matches <input type="number" defaultValue={10}></input>
+          Minimum matches <input type="number" defaultValue={10} disabled></input>
         </div>
         <div>
-          <label>Mirrored loadouts <input type="checkbox"></input></label>
+          <label>Mirrored loadouts <input type="checkbox" disabled></input></label>
         </div>
         <div>
           Guns:

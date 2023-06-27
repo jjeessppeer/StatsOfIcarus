@@ -5,6 +5,8 @@ import { LoadoutGroupingSettings } from '/React/ShipStats/LoadoutGroupingSetting
 import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats, loadoutStringToCanvasData } from '/React/ShipStats/LoadoutUtils.js';
 
 
+
+
 export class ShipLoadoutInfoList extends React.Component {
   constructor(props) {
     super(props);
@@ -117,7 +119,7 @@ export class ShipLoadoutInfo extends React.Component {
       <li className={"ship-loadout-info" + (this.state.matchupsExpanded ? " expanded" : "")}>
         <div className="info-card">
           <div className='content'>
-            <ShipCanvas {...canvasData} width='150' height='250'></ShipCanvas>
+            <ShipCanvas {...canvasData} width='250' height='250'></ShipCanvas>
             <div>
               <table className="ship-rates">
                 <tr>
