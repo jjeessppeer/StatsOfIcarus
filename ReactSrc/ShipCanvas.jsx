@@ -1,3 +1,6 @@
+import { ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
+
+
 export class ShipCanvas extends React.Component {
   static defaultProps = {
     height: 250,
