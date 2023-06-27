@@ -37,11 +37,11 @@ async function start() {
 
 
 
-    const domContainer = document.querySelector('#matchHistory .right-area');
-    const root = ReactDOM.createRoot(domContainer);
-    const rateProps = { picks: 10, totalPicks: 20, matches: 4, totalMatches: 5, wins: 7 };
-    const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
-    root.render(el);
+    // const domContainer = document.querySelector('#matchHistory .right-area');
+    // const root = ReactDOM.createRoot(domContainer);
+    // const rateProps = { picks: 10, totalPicks: 20, matches: 4, totalMatches: 5, wins: 7 };
+    // const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
+    // root.render(el);
 }
 
 setTimeout(start, 400);
