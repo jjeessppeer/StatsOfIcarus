@@ -15,21 +15,21 @@ async function getLoadoutList(shipModel) {
     return res
 }
 
-async function getLoadoutStats() {
-    const rawRes = await fetch('/ship_matchup_stats', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ TargetShip: { Model: 16 } })
-    });
-    const res = await rawRes.json();
-    return res;
-}
+// async function getLoadoutStats() {
+//     const rawRes = await fetch('/ship_matchup_stats', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({ TargetShip: { Model: 16 } })
+//     });
+//     const res = await rawRes.json();
+//     return res;
+// }
 
 async function start() {
     console.log("FETCHING SHIP LOADOUTS");
-    const loadoutListFull = await getLoadoutList(67);
+    const loadoutListFull = await getLoadoutList(97);
     // const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
     // console.log(loadoutListMerged)
     // await getLoadoutStats();

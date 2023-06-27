@@ -63,8 +63,8 @@ async function addHelperData(client) {
             {_id: match._id},
             { $set: {
                 ShipLoadoutsSearchFull: shipLoadoutsFull,
-                ShipLoadoutsSearchIndividual: shipLoadoutsIndividual,
-                ShipLoadoutsIdStrings: shipLoadoutIdStrings,
+                // ShipLoadoutsSearchIndividual: shipLoadoutsIndividual,
+                // ShipLoadoutsIdStrings: shipLoadoutIdStrings,
                 ShipLoadoutsModels: shipModelLoadout,
                 // Ship
             }});
