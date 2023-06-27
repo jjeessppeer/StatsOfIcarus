@@ -7,7 +7,6 @@ import '/js/MatchHistory/elements/EloCard.js';
 import '/js/MatchHistory/elements/LeaderboardCard.js';
 
 var search_mode = 0;
-
 var pickwinrateChart;
 
 export const SKILL_ORDER = [
@@ -42,6 +41,7 @@ export const SKILL_ORDER = [
     "Impact Bumpers",
     "Tar Barrel"
 ];
+
 export const ship_image_srcs2 = {
     70: "images/ship-images/corsair_gundeck_small.png",
     67: "images/ship-images/crusader_gundeck_small.png",
@@ -92,21 +92,19 @@ const DEFAULT_QUERY = {
 function initializeMatchHistory(){
     let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
     document.getElementById('matchHistorySearch').append(searchbar);
-    searchbar.addEventListener('search', evt => getMatchHistoryData(evt.detail));
+    searchbar.addEventListener('search', evt => executeSearch(evt.detail));
 
     searchbar.querySelector('.filter-button').addEventListener('click', evt => {
         let search = evt.target.parentElement.parentElement;
         search.classList.toggle('filters-open');
     });
 
-    document.getElementById('loadMoreMatchesButton').addEventListener('click', requestNextMatchHistoryPage)
-
     let urlQuery = getUrlQuery();
     if (urlQuery != undefined) {
-        getMatchHistoryData(urlQuery);
+        executeSearch(urlQuery);
     }
     else {
-        getMatchHistoryData(DEFAULT_QUERY);
+        executeSearch(DEFAULT_QUERY);
     }
 }
 
@@ -135,15 +133,20 @@ async function requestNextMatchHistoryPage(evt) {
     evt.target.disabled = false;
 }
 
-async function getMatchHistoryData(query) {
+async function executeSearch(query) {
+    console.log("SEARCH__");
+    console.log(query);
     // Clear old graphics
     clearMatchHistoryDisplay();
     
-    // Request data
-    let res = await asyncPostRequest('/match_history_search', query);
-    let response = JSON.parse(res.response);
+    const responseRaw = await fetch('/match_history_search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(query)});
+    const response = await responseRaw.json();
 
     current_match_filters = response.modifiedQuery.filters;
+    console.log(current_match_filters)
 
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
     if (window.location.hash.substr(1).split("?")[0] == "matchHistory"){
@@ -156,8 +159,7 @@ async function getMatchHistoryData(query) {
     search.setText(response.perspective.name);
     if (response.perspective.type == 'Overview'){
         search.setText("");
-    } 
-
+    }
     // Update graphics with recieved data
     if (query.perspective.type == "Overview") {
         loadOverviewPerspective(response);
@@ -213,9 +215,10 @@ function clearMatchHistoryDisplay() {
         '.player-ship-info-table',
         '.ship-popularity-list',
         '.match-history-list',
-        '.player-infobox'
+        '.player-infobox',
+        '.load-more-matches-button'
     ];
-    CLEAR_QUERIES.forEach(q => document.querySelectorAll(q).forEach(el => el.remove()))
+    CLEAR_QUERIES.forEach(q => document.querySelectorAll(q).forEach(el => el.remove()));
 }
 
 
@@ -223,6 +226,10 @@ function intializeMatchHistoryList(matches, matchCount=0) {
     let ul = document.createElement('ul', {is: 'match-history-list'});
     ul.addMatches(matches);
     document.querySelector("#matchHistory .right-area").prepend(ul);
+
+    const loadModeBtn = document.createElement('button', {is: 'load-more-matches-button'});
+    loadModeBtn.addEventListener('click', requestNextMatchHistoryPage)
+    document.querySelector("#matchHistory .right-area").append(loadModeBtn);
 }
 
 

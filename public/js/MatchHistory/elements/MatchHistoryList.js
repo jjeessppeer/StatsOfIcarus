@@ -366,6 +366,14 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
   }
 }
 
+class LoadMoreButton extends HTMLButtonElement {
+  constructor() {
+    super();
+    this.classList.add('load-more-matches-button');
+    this.innerHTML = 'Show Older';
+  }
+}
+
 class PlayerNametag extends HTMLLIElement {
   constructor() {
     super();
@@ -458,3 +466,4 @@ customElements.define('match-history-details', MatchHistoryDetails, { extends: '
 customElements.define('match-history-shipcrew', ShipCrew, { extends: 'div' });
 customElements.define('player-nametag', PlayerNametag, { extends: 'li' });
 customElements.define('ship-canvas', ShipCanvas, { extends: 'canvas' });
+customElements.define('load-more-matches-button', LoadMoreButton, { extends: 'button' });
