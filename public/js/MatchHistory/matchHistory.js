@@ -6,8 +6,8 @@ import '/js/MatchHistory/elements/PlayerInfo.js';
 import '/js/MatchHistory/elements/EloCard.js';
 import '/js/MatchHistory/elements/LeaderboardCard.js';
 
-var search_mode = 0;
-var pickwinrateChart;
+import { ShipLoadoutInfoList } from '/React/ShipStats/LoadoutInfo.js';
+import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats } from '/React/ShipStats/LoadoutUtils.js';
 
 export const SKILL_ORDER = [
     "Rubber Mallet",
@@ -138,18 +138,18 @@ async function executeSearch(query) {
     console.log(query);
     // Clear old graphics
     clearMatchHistoryDisplay();
-    
-    const responseRaw = await fetch('/match_history_search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(query)});
-    const response = await responseRaw.json();
-
-    current_match_filters = response.modifiedQuery.filters;
-    console.log(current_match_filters)
+    const perspective = query.perspective.type;
+    let response;
+    if (perspective == 'Overview' || perspective == 'Player') {
+        response = await executeHistoryQuery(query);
+    }
+    if (perspective == 'Ship') {
+        response = await executeShipQuery(query);
+    }
+    console.log(response);
 
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
-    if (window.location.hash.substr(1).split("?")[0] == "matchHistory"){
+    if (window.location.hash.substring(1).split("?")[0] == "matchHistory"){
         setUrlParam(encodedQuery);
         if (response.perspective.type == 'Overview') setUrlParam();
     }
@@ -160,6 +160,41 @@ async function executeSearch(query) {
     if (response.perspective.type == 'Overview'){
         search.setText("");
     }
+}
+
+
+let reactRoot;
+async function executeShipQuery(query) {
+    const rawRes = await fetch('/ship_loadouts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ShipModel: 16 })
+    });
+    const loadoutListFull = await rawRes.json();
+    // const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
+    // console.log(loadoutListMerged)
+    // await getLoadoutStats();
+
+    const rootDiv = document.querySelector('#matchHistory .right-area');
+    if (reactRoot == undefined) reactRoot = ReactDOM.createRoot(rootDiv);
+
+    // const root = ReactDOM.createRoot(domContainer);
+    const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
+    reactRoot.render(el);
+}
+
+async function executeHistoryQuery(query) {
+    const responseRaw = await fetch('/match_history_search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(query)});
+    const response = await responseRaw.json();
+
+    current_match_filters = response.modifiedQuery.filters;
+    console.log(current_match_filters)
+
     // Update graphics with recieved data
     if (query.perspective.type == "Overview") {
         loadOverviewPerspective(response);
@@ -167,6 +202,7 @@ async function executeSearch(query) {
     else if (query.perspective.type == "Player") {
         loadPlayerPerspective(response);
     }
+    return response;
 }
 
 function loadOverviewPerspective(response) {
@@ -201,14 +237,15 @@ async function loadEloCard(playerInfo) {
     eloCard.initialize(playerInfo._id, playerInfo.ELOCategories);
 
     leaderboardCard.setHighlightName(playerInfo.Name);
-
 }
 
-function loadShipPerspective(response) {
 
-}
 
 function clearMatchHistoryDisplay() {
+
+    if (reactRoot != undefined) reactRoot.unmount();
+    reactRoot = undefined;
+    
     current_match_page = 0;
     current_match_filters = [];
     const CLEAR_QUERIES = [
