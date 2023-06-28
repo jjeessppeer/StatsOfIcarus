@@ -146,22 +146,23 @@ async function executeSearch(query) {
     if (perspective == 'Ship') {
         response = await executeShipQuery(query);
     }
+    console.log("__RESPONSE__")
     console.log(response);
 
+    const resposeQuery = response.modifiedQuery;
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
     if (window.location.hash.substring(1).split("?")[0] == "matchHistory"){
         setUrlParam(encodedQuery);
-        if (response.perspective.type == 'Overview') setUrlParam();
+        if (resposeQuery.perspective.type == 'Overview') setUrlParam();
     }
 
     //Update search field based on recieved data.
     let search = document.querySelector('.fancy-search');
-    search.setText(response.perspective.name);
-    if (response.perspective.type == 'Overview'){
+    search.setText(resposeQuery.perspective.name);
+    if (resposeQuery.perspective.type == 'Overview'){
         search.setText("");
     }
 }
-
 
 let reactRoot;
 async function executeShipQuery(query) {
@@ -170,9 +171,10 @@ async function executeShipQuery(query) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ShipModel: 16 })
+        body: JSON.stringify(query)
     });
-    const loadoutListFull = await rawRes.json();
+    const response = await rawRes.json();
+    const loadoutListFull = response.loadoutList;
     // const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
     // console.log(loadoutListMerged)
     // await getLoadoutStats();
@@ -183,6 +185,7 @@ async function executeShipQuery(query) {
     // const root = ReactDOM.createRoot(domContainer);
     const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
     reactRoot.render(el);
+    return response;
 }
 
 async function executeHistoryQuery(query) {
@@ -268,7 +271,6 @@ function intializeMatchHistoryList(matches, matchCount=0) {
     loadModeBtn.addEventListener('click', requestNextMatchHistoryPage)
     document.querySelector("#matchHistory .right-area").append(loadModeBtn);
 }
-
 
 function initializePopularityList(shipRateData) {
     let modelWinrates = shipRateData.ModelWinrates;

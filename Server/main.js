@@ -1,4 +1,5 @@
 // require('dotenv').config()
+
 var express = require('express');
 const { checkSchema, validationResult, check } = require('express-validator');
 const Joi = require('joi');
@@ -119,12 +120,22 @@ app.post(
     res.status(200).json(page);
 });
 
+
+const {processHistoryQuery, generateMatchFilterPipeline} = require('./MatchHistory/HistoryFilter.js');
 app.post(
     '/ship_loadouts',
     async function(req, res) {
-    const dat = await shipStats.getShipLoadouts(mongoClient, req.body.ShipModel);
-    // console.log()
-    res.status(200).json(dat);
+            
+    const collection = mongoClient.db("mhtest").collection("Items-Ships");
+    const item = await collection.findOne({Name: req.body.perspective.name});
+    
+    const queryResponse = await processHistoryQuery(mongoClient, req.body);
+    const filterPipeline = await generateMatchFilterPipeline(mongoClient, queryResponse.modifiedQuery.filters);
+    const loadoutList = await shipStats.getShipLoadouts(mongoClient, item._id, filterPipeline);
+
+    queryResponse.loadoutList = loadoutList;
+
+    res.status(200).json(queryResponse);
 });
 
 app.post(

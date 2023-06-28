@@ -5,8 +5,6 @@ import { LoadoutGroupingSettings } from '/React/ShipStats/LoadoutGroupingSetting
 import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats, loadoutStringToCanvasData } from '/React/ShipStats/LoadoutUtils.js';
 
 
-
-
 export class ShipLoadoutInfoList extends React.Component {
   constructor(props) {
     super(props);
@@ -15,10 +13,10 @@ export class ShipLoadoutInfoList extends React.Component {
         ignoredGunIndexes: {
           0: true,
           1: true,
-          2: false,
-          3: false,
-          4: false,
-          5: false
+          2: true,
+          3: true,
+          4: true,
+          5: true
         }
       }
     }
@@ -115,12 +113,20 @@ export class ShipLoadoutInfo extends React.Component {
     const canvasData = loadoutStringToCanvasData(this.props.loadoutInfo._id)
 
 
+    const eR = this.props.loadoutInfo.ExpectedOutcome / this.props.loadoutInfo.PlayedGames;
+    const aR = this.props.loadoutInfo.ActualOutcome / this.props.loadoutInfo.PlayedGames;
+    const f1 = 1/2 * (aR/eR);
+    const f2 = 1/2 * (1 + (aR - eR) / (1 - eR));
+    let f3;
+    if (aR > eR) f3 = f2;
+    else f3 = f1; 
+
     return (
       <li className={"ship-loadout-info" + (this.state.matchupsExpanded ? " expanded" : "")}>
         <div className="info-card">
           <div className='content'>
             <ShipCanvas {...canvasData} width='250' height='250'></ShipCanvas>
-            <div>
+            <div className="text-area">
               <table className="ship-rates">
                 <tr>
                   <td>Pick rate:</td>
@@ -131,16 +137,21 @@ export class ShipLoadoutInfo extends React.Component {
                   <td>{toPercentage(this.props.loadoutInfo.Wins, this.props.loadoutInfo.PlayedGames)}% [{this.props.loadoutInfo.Wins}]</td>
                 </tr>
                 <tr>
-                  <td>Performance: </td>
-                  <td>-</td>
+                  <td>Elo adjusted:</td>
+                  <td>{toPercentage(f3, 1)}%</td>
                 </tr>
                 <tr>
                   <td>Mirror rate: </td>
                   <td>{toPercentage(this.props.loadoutInfo.Mirrors, this.props.loadoutInfo.PlayedGames)}% [{this.props.loadoutInfo.Mirrors}]</td>
                 </tr>
               </table>
+              {this.props.loadoutInfo.OriginalIds.length > 1 && 
+                <div className="bottom-text">
+                  Contains stats from {this.props.loadoutInfo.OriginalIds.length} unique loadouts.
+                </div>
+              }
+              
             </div>
-
           </div>
           <div className='expand-button-bar'>
             <LoadoutExpandButton onExpand={this.toggleDetailFoldout} name={'Enemy matchups'}></LoadoutExpandButton>

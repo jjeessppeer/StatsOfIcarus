@@ -134,9 +134,10 @@ async function getShipMatchupStats(client, targetShip = { Model: 16}) {
     return result;
 }
 
-async function getShipLoadouts(client, shipModel = 16) {
+async function getShipLoadouts(client, shipModel, filterPipeline=[]) {
     const matchCollection = client.db("mhtest").collection("Matches");
     const pipeline = [
+        ...filterPipeline,
         { $match: {TeamSize: 2, TeamCount: 2, ShipsFull: true}},
         { $match: {"ShipLoadoutsModels.Model": shipModel}},
 
@@ -155,8 +156,19 @@ async function getShipLoadouts(client, shipModel = 16) {
         { $addFields: {
             OtherShipLoadout1: { $arrayElemAt: ["$ShipLoadoutsModels", {$add: ["$OtherTeamStartIdx", 0]}]},
             OtherShipLoadout2: { $arrayElemAt: ["$ShipLoadoutsModels", {$add: ["$OtherTeamStartIdx", 1]}]},
-
         }},
+
+        { $addFields: {
+            MainTeamActualOutcome: { $cond:[{ $eq: ["$MainShipLoadout.TeamIdx", 0] }, 
+                '$Ranking.ActualOutcome', 
+                { $subtract: [1, '$Ranking.ActualOutcome']}
+            ]},
+            MainTeamExpectedOutcome: { $cond:[{ $eq: ["$MainShipLoadout.TeamIdx", 0] }, 
+                '$Ranking.ExpectedOutcome', 
+                { $subtract: [1, '$Ranking.ExpectedOutcome']}
+            ]},
+        }},
+        
         
 
 
@@ -182,6 +194,8 @@ async function getShipLoadouts(client, shipModel = 16) {
                     ]}, 
                     1, 0]
                 }},
+                ActualOutcome: { $sum: '$MainTeamActualOutcome'},
+                ExpectedOutcome: { $sum: '$MainTeamExpectedOutcome'},
                 // Mirrors1: { $sum: { $cond: [{$eq: ["$OtherShipLoadout1.Model", "$MainShipLoadout.Model"]}, 1, 0] }},
                 // Mirrors2: { $sum: { $cond: [{$eq: ["$OtherShipLoadout2.Model", "$MainShipLoadout.Model"]}, 1, 0] }},
               }},
@@ -191,6 +205,7 @@ async function getShipLoadouts(client, shipModel = 16) {
         // {$unwind: '$LoadoutStats'},
         {$sort: {"PlayedGames": -1}}
     ]
+    console.log(JSON.stringify(pipeline, null, 2));
 
     const agg = matchCollection.aggregate(pipeline);
     // const exp = await agg.explain();

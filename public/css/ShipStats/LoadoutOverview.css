@@ -54,6 +54,16 @@
     flex-direction: row;
 }
 
+.ship-loadout-info .text-area {
+    display: flex;
+    flex-direction: column;
+}
+
+.ship-loadout-info .bottom-text {
+    margin-top: auto;
+    font-size: 12px;
+}
+
 .ship-loadout-info .info-card {
     margin-bottom: 0;
     padding: 0;
