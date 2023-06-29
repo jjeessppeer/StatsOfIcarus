@@ -86,31 +86,52 @@ async function getShipMatchupStats(client, targetShip = { Model: 16}) {
             { $ne: ['$OtherShip.ShipIdx', '$MainShip.ShipIdx']}
         ]}}},
 
+        { $addFields: {
+            ActualOutcome: { $cond:[{ $eq: ["$MainShip.TeamIdx", 0] }, 
+                '$Ranking.ActualOutcome', 
+                { $subtract: [1, '$Ranking.ActualOutcome']}
+            ]},
+            ExpectedOutcome: { $cond:[{ $eq: ["$MainShip.TeamIdx", 0] }, 
+                '$Ranking.ExpectedOutcome', 
+                { $subtract: [1, '$Ranking.ExpectedOutcome']}
+            ]},
+        }},
+
         { "$group": { 
             _id: '$OtherShip.Loadout',
             count: {$sum: 1},
             PlayedVs: { $sum: {$cond: [{$ne: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]}, 1, 0]} },
             PlayedWith: { $sum: {$cond: [{$eq: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]}, 1, 0]} },
 
-            WinsVS: { $sum: {$cond: [{ $and: [
+            WinsVs: { $sum: {$cond: [{ $and: [
                 {$ne: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]},
                 {$eq: ["$MainShip.TeamIdx", "$Winner"]}
             ]}, 1, 0]}},
-
-            // LostVS: { $sum: {$cond: [{ $and: [
-            //     {$ne: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]},
-            //     {$ne: ["$MainShip.TeamIdx", "$Winner"]}
-            // ]}, 1, 0]}},
 
             WinsWith: { $sum: {$cond: [{ $and: [
                 {$eq: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]},
                 {$eq: ["$MainShip.TeamIdx", "$Winner"]}
             ]}, 1, 0]}},
 
-            // LossesWith: { $sum: {$cond: [{ $and: [
-            //     {$eq: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]},
-            //     {$ne: ["$MainShip.TeamIdx", "$Winner"]}
-            // ]}, 1, 0]}},
+            ExpectedOutcomeVs: { $sum: {$cond: [
+                {$ne: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]}, 
+                '$ExpectedOutcome', 0
+            ]}},
+
+            ExpectedOutcomeWith: { $sum: {$cond: [
+                {$eq: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]}, 
+                '$ExpectedOutcome', 0
+            ]}},
+
+            ActualOutcomeVs: { $sum: {$cond: [
+                {$ne: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]}, 
+                '$ActualOutcome', 0
+            ]}},
+
+            ActualOutcomeWith: { $sum: {$cond: [
+                {$eq: ["$MainShip.TeamIdx", "$OtherShip.TeamIdx"]}, 
+                '$ActualOutcome', 0
+            ]}},
 
             // Losses: { $sum: {$cond: [{$eq: ["$MainShip.TeamIdx", "$Winner"]}, 0, 1]} },
             // Wins: { $sum: {$cond: [{$eq: ["$MainShip.TeamIdx", "$Winner"]}, 1, 0]} },

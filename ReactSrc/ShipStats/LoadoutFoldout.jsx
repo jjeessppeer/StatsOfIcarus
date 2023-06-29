@@ -1,5 +1,5 @@
 import { ShipCanvas } from '/React/ShipCanvas.js';
-import { loadoutStringToCanvasData } from '/React/ShipStats/LoadoutUtils.js';
+import { loadoutStringToCanvasData, eloWinrate } from '/React/ShipStats/LoadoutUtils.js';
 
 export class LoadoutInfoFoldout extends React.Component {
     render() {
@@ -23,8 +23,11 @@ export class LoadoutInfoFoldout extends React.Component {
 
 
 class LoadoutMatchup extends React.Component {
+    
     render() {
-        
+        function toPercentage(n, tot) {
+            return Math.round(100 * n / tot);
+        }
         console.log("RENDERING MATCHUPTHING")
         const p = { shipModel: 16, shipLoadout: [] }
         const canvasData = loadoutStringToCanvasData(this.props._id);
@@ -34,7 +37,7 @@ class LoadoutMatchup extends React.Component {
                 <div>
                     <div>Matchup played: {this.props.PlayedVs}</div>
                     <div>Win rate: {Math.round(100 * this.props.WinsVs / this.props.PlayedVs)}%</div>
-                    <div>Elo adjusted performance: *todo*</div>
+                    <div>Elo adjusted: {toPercentage(eloWinrate(this.props.ExpectedOutcomeVs, this.props.ActualOutcomeVs, this.props.PlayedVs), 1)}%</div>
                 </div>
             </div>
         )

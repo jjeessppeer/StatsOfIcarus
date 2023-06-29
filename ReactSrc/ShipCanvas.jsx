@@ -31,12 +31,12 @@ export class ShipCanvas extends React.Component {
   //   clearInterval(this.timerId);
   // }
 
-  componentDidUpdate() {
-    this.drawShip(this.props.shipModel, this.props.shipLoadout, [
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1]);
-  }
+  // componentDidUpdate() {
+  //   this.drawShip(this.props.shipModel, this.props.shipLoadout, [
+  //     1, 0, 0,
+  //     0, 1, 0,
+  //     0, 0, 1]);
+  // }
 
   async drawShip(shipModel, shipLoadout, transform) {
     const canvas = this.canvasRef.current;

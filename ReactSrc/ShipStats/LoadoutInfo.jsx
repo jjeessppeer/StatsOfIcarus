@@ -1,59 +1,7 @@
 import { ShipCanvas } from '/React/ShipCanvas.js';
-// import { LoadoutInfoFoldout } from './LoadoutFoldout';
 import { LoadoutInfoFoldout } from './LoadoutFoldout.js';
-import { LoadoutGroupingSettings } from '/React/ShipStats/LoadoutGroupingSettings.js';
 import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats, loadoutStringToCanvasData } from '/React/ShipStats/LoadoutUtils.js';
 
-
-export class ShipLoadoutInfoList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      groupingSettings: {
-        ignoredGunIndexes: {
-          0: true,
-          1: true,
-          2: true,
-          3: true,
-          4: true,
-          5: true
-        }
-      }
-    }
-  }
-
-  groupingSettingsChanged = (groupingSettings) => {
-    console.log("SETTINGS SCHANGEID");
-    console.log(groupingSettings);
-    this.setState({
-      groupingSettings: groupingSettings
-    });
-  }
-
-  render() {
-    const componentArray = [
-    ]
-    const mergedLoadoutInfos = mergeLoadoutInfos(
-      this.props.loadoutInfos, 
-      this.state.groupingSettings);
-
-    const totalShipGames = this.props.loadoutInfos.reduce((partialSum, a) => partialSum + a.PlayedGames, 0);
-    const page = 0;
-    const pageSize = 20;
-    for (const loadoutInfo of mergedLoadoutInfos) {
-      componentArray.push(<ShipLoadoutInfo loadoutInfo={loadoutInfo} totalShipGames={totalShipGames}></ShipLoadoutInfo>);
-      if (componentArray.length == pageSize) break;
-    }
-    return (
-      <ul className="ship-loadout-list">
-        <LoadoutGroupingSettings settings={this.state.groupingSettings} settingsChanged={this.groupingSettingsChanged}></LoadoutGroupingSettings>
-        {componentArray}
-      </ul>
-    )
-  }
-}
-
-// Render your React component instead
 export class ShipLoadoutInfo extends React.Component {
   constructor(props) {
     super(props);
@@ -68,9 +16,6 @@ export class ShipLoadoutInfo extends React.Component {
 
   toggleDetailFoldout = async (e) => {
     console.log("TOGGLE FOLDOT")
-    // console.log(this);
-    // console.log(e);
-
 
     let matchupStats = this.state.matchupStats;
     if (!this.state.loadedMatchups) matchupStats = await this.loadMatchups();
@@ -90,8 +35,19 @@ export class ShipLoadoutInfo extends React.Component {
       },
       body: JSON.stringify({ TargetShip: { Model: this.state.loadout[0].model } })
     });
+    console.log(this.state.loadout);
     const matchupStats = await rawRes.json();
-    const mergedMatchupStats = mergeMatchupStats(matchupStats);
+    const groupingSettings = {
+      ignoredGunIndexes: {
+        0: true,
+        1: true,
+        2: true,
+        3: true,
+        4: true,
+        5: true
+      }
+    };
+    const mergedMatchupStats = mergeMatchupStats(matchupStats, groupingSettings);
     return mergedMatchupStats;
     // this.setState({matchupStats: mergedMatchupStats});
   }
@@ -109,7 +65,6 @@ export class ShipLoadoutInfo extends React.Component {
       return Math.round(100 * n / tot);
     }
 
-    
     const canvasData = loadoutStringToCanvasData(this.props.loadoutInfo._id)
 
 

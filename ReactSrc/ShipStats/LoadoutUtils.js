@@ -127,9 +127,19 @@ export function mapLoadoutId(loadoutString, options) {
 
 }
 
+export function eloWinrate(expectedOutcome, actualOutcome, playedGames){
+    const eR = expectedOutcome / playedGames;
+    const aR = actualOutcome / playedGames;
+    const f1 = 1/2 * (aR/eR);
+    const f2 = 1/2 * (1 + (aR - eR) / (1 - eR));
+    let f3;
+    if (aR > eR) f3 = f2;
+    else f3 = f1; 
+    return f3;
+}
+
 export function mergeLoadoutInfos(loadoutInfos, options) {
     const mergedLoadoutInfoMap = {};
-    console.log(loadoutInfos)
     for (const loadoutInfo of loadoutInfos) {
         const loadoutId = mapLoadoutId(loadoutInfo._id, options);
         if (mergedLoadoutInfoMap[loadoutId] == undefined) {
@@ -163,35 +173,22 @@ export function mergeLoadoutInfos(loadoutInfos, options) {
     mergedLoadoutInfos.sort((a, b) => {
         const C = 50;
         const m = 0.2;
-        const e1 = eloWinrate(b);
-        const e2 = eloWinrate(a);
+        const e1 = eloWinrate(b.ExpectedOutcome, b.ActualOutcome, b.PlayedGames);
+        const e2 = eloWinrate(a.ExpectedOutcome, a.ActualOutcome, a.PlayedGames);
+        // const e2 = eloWinrate(a);
         const w1 = (C*m + e1 * b.PlayedGames ) / (C + b.PlayedGames);
         const w2 = (C*m + e2 * a.PlayedGames ) / (C + a.PlayedGames);
         return w1 - w2;
-
-        function eloWinrate(loadoutInfo){
-            const eR = loadoutInfo.ExpectedOutcome / loadoutInfo.PlayedGames;
-            const aR = loadoutInfo.ActualOutcome / loadoutInfo.PlayedGames;
-            const f1 = 1/2 * (aR/eR);
-            const f2 = 1/2 * (1 + (aR - eR) / (1 - eR));
-            let f3;
-            if (aR > eR) f3 = f2;
-            else f3 = f1; 
-            return f3;
-        }
-        
     });
-    // console.log("LOADOUTS");
-    // console.log(mergedLoadoutInfos);
-    // console.log(mergedLoadoutInfoMap);
     return mergedLoadoutInfos;
 }
 
-export function mergeMatchupStats(loadoutStatsArr) {
+export function mergeMatchupStats(loadoutStatsArr, options) {
     const mergedLoadoutStatsMap = {};
-
+    console.log("MERGING STATS");
+    console.log(options)
     for (const loadoutStats of loadoutStatsArr) {
-        const loadoutId = mapLoadoutId(loadoutStats._id);
+        const loadoutId = mapLoadoutId(loadoutStats._id, options);
         if (mergedLoadoutStatsMap[loadoutId] == undefined) {
             mergedLoadoutStatsMap[loadoutId] = {
                 _id: loadoutId,
@@ -199,15 +196,19 @@ export function mergeMatchupStats(loadoutStatsArr) {
                 PlayedVs: 0,
                 PlayedWith: 0,
                 WinsVs: 0,
-                WinsWith: 0
+                WinsWith: 0,
+                ActualOutcomeVs: 0,
+                ExpectedOutcomeVs: 0
             }
         }
         const mergedLoadoutStats = mergedLoadoutStatsMap[loadoutId];
         mergedLoadoutStats.count += loadoutStats.count;
         mergedLoadoutStats.PlayedVs += loadoutStats.PlayedVs;
         mergedLoadoutStats.PlayedWith += loadoutStats.PlayedWith;
-        mergedLoadoutStats.WinsVs += loadoutStats.WinsVS;
+        mergedLoadoutStats.WinsVs += loadoutStats.WinsVs;
         mergedLoadoutStats.WinsWith += loadoutStats.WinsWith;
+        mergedLoadoutStats.ExpectedOutcomeVs += loadoutStats.ExpectedOutcomeVs;
+        mergedLoadoutStats.ActualOutcomeVs += loadoutStats.ActualOutcomeVs;
     }
 
     const mergedLoadoutStats = Object.values(mergedLoadoutStatsMap);

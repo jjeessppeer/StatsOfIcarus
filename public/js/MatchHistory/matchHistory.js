@@ -6,7 +6,7 @@ import '/js/MatchHistory/elements/PlayerInfo.js';
 import '/js/MatchHistory/elements/EloCard.js';
 import '/js/MatchHistory/elements/LeaderboardCard.js';
 
-import { ShipLoadoutInfoList } from '/React/ShipStats/LoadoutInfo.js';
+import { ShipLoadoutInfoList } from '/React/ShipStats/LoadoutInfoList.js';
 import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats } from '/React/ShipStats/LoadoutUtils.js';
 
 export const SKILL_ORDER = [
