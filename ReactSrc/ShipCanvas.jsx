@@ -70,6 +70,8 @@ export class ShipCanvas extends React.Component {
     resetMatrix(transform);
     applyMatrix(ctx, transform);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    
     translateMatrix(transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
     zoomMatrixAround(transform, canvas.width / 2, canvas.height / 2, 0.5);
     applyMatrix(ctx, transform);
@@ -78,6 +80,13 @@ export class ShipCanvas extends React.Component {
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(shipImage, 0, 0);
 
+
+    const inverseTransform = getInvertedMatrix(transform);
+    const localMin = transformPointMatrix(0, 0, inverseTransform);
+    const localMax = transformPointMatrix(canvas.width, canvas.height, inverseTransform);
+
+    // const localX = []
+
     const iconSize = 100;
     // Spread close guns out from eachother 
     let adjustedGunPositions = [];
@@ -85,8 +94,11 @@ export class ShipCanvas extends React.Component {
       let pos = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
       adjustedGunPositions.push(pos);
     }
-    adjustedGunPositions = spreadGunPositions(adjustedGunPositions, iconSize);
-
+    adjustedGunPositions = spreadGunPositions(
+      adjustedGunPositions, iconSize, 10, 
+      [localMin[0], localMax[0]], [localMin[1], localMax[1]]
+    );
+    console.log(adjustedGunPositions);
     // Draw gun icons.
     for (let i = 0; i < shipLoadout.length; i++) {
       let gunId = shipLoadout[i];

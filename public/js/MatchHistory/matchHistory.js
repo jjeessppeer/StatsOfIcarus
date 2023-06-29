@@ -175,6 +175,7 @@ async function executeShipQuery(query) {
     });
     const response = await rawRes.json();
     const loadoutListFull = response.loadoutList;
+    initializePopularityList(response.shipsWinrates);
     // const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
     // console.log(loadoutListMerged)
     // await getLoadoutStats();
@@ -185,6 +186,7 @@ async function executeShipQuery(query) {
     // const root = ReactDOM.createRoot(domContainer);
     const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
     reactRoot.render(el);
+    initializePopularityList(response.shipsWinrates);
     return response;
 }
 
@@ -354,7 +356,7 @@ export function toShipImageCoordinates(point, shipModel, shipImage) {
         point[1] * -ship_scales[shipModel] + ship_offsets[shipModel]]
 }
 
-export function spreadGunPositions(gunPositions, iconSize, iterations=10) {
+export function spreadGunPositions(gunPositions, iconSize, iterations=10, xRange, yRange) {
     let adjustedPositions = [];
     const movementStrength = 1/10;
     for (let i = 0; i < gunPositions.length; i++) {
@@ -378,6 +380,17 @@ export function spreadGunPositions(gunPositions, iconSize, iterations=10) {
                 pos[0] -= vectorNorm[0] * iconSize * movementStrength;
                 pos[1] -= vectorNorm[1] * iconSize * movementStrength;
             }
+
+            if (xRange != undefined) {
+                // Push icons away from borders
+                const xMin = xRange[0];
+                const xMax = xRange[1];
+                const d1 = Math.min(xMax-iconSize - pos[0], 0);
+                const d2 = Math.max(xMin+iconSize - pos[0], 0);
+                pos[0] += d1/5;
+                pos[0] += d2/5;
+            }
+
         }
         adjustedPositions.push(pos);
     }
