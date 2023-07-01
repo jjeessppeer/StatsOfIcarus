@@ -181,21 +181,26 @@ export function filterLoadoutArray(loadoutArr, options) {
     return filteredLoadoutInfos;
 }
 
-export function mergeLoadoutInfos(loadoutInfos, options) {
-    const mergedLoadoutInfoMap = {};
-    for (const loadoutInfo of loadoutInfos) {
-        const loadoutId = mapLoadoutId(loadoutInfo._id, options);
-        if (mergedLoadoutInfoMap[loadoutId] == undefined)
-            mergedLoadoutInfoMap[loadoutId] = {
+export function mergeLoadoutArray(loadoutArr, options) {
+    const mergedMap = {};
+    for (const ld of loadoutArr) {
+        const loadoutId = mapLoadoutId(ld._id, options);
+        if (mergedMap[loadoutId] == undefined)
+            mergedMap[loadoutId] = {
                 OriginalIds: [],
                 _id: loadoutId
             };
 
-        const mergedloadoutInfo = mergedLoadoutInfoMap[loadoutId];
-        mergedloadoutInfo.OriginalIds.push(loadoutInfo._id);
-        mergeSumObjects(mergedloadoutInfo, loadoutInfo, ['_id', 'OriginalIds']);
+        const mergedInfo = mergedMap[loadoutId];
+        mergedInfo.OriginalIds.push(ld._id);
+        mergeSumObjects(mergedInfo, ld, ['_id', 'OriginalIds']);
     }
-    const mergedLoadoutInfos = Object.values(mergedLoadoutInfoMap);
+    const mergedArr = Object.values(mergedMap);
+    return mergedArr;
+}
+
+export function mergeLoadoutInfos(loadoutInfos, options) {
+    const mergedLoadoutInfos = mergeLoadoutArray(loadoutInfos, options);
     // mergedLoadoutInfos.sort((a, b) => b.PlayedGames - a.PlayedGames);
     // mergedLoadoutInfos.sort((a, b) => {
     //     const C = 100;
@@ -218,48 +223,9 @@ export function mergeLoadoutInfos(loadoutInfos, options) {
 }
 
 export function mergeMatchupStats(loadoutStatsArr, options) {
-    const mergedLoadoutStatsMap = {};
-
-    for (const loadoutStats of loadoutStatsArr) {
-        const loadoutId = mapLoadoutId(loadoutStats._id, options);
-        if (mergedLoadoutStatsMap[loadoutId] == undefined)
-            mergedLoadoutStatsMap[loadoutId] = {
-                _id: loadoutId,
-                OriginalIds: []
-            };
-
-        const mergedLoadoutStats = mergedLoadoutStatsMap[loadoutId];
-        mergedLoadoutStats.OriginalIds.push(loadoutStats._id);
-        mergeSumObjects(mergedLoadoutStats, loadoutStats, ['_id', 'OriginalIds']);
-    }
-    // for (const loadoutStats of loadoutStatsArr) {
-    //     const loadoutId = mapLoadoutId(loadoutStats._id, options);
-    //     if (mergedLoadoutStatsMap[loadoutId] == undefined) {
-    //         mergedLoadoutStatsMap[loadoutId] = {
-    //             _id: loadoutId,
-    //             count: 0,
-    //             PlayedVs: 0,
-    //             PlayedWith: 0,
-    //             WinsVs: 0,
-    //             WinsWith: 0,
-    //             ActualOutcomeVs: 0,
-    //             ExpectedOutcomeVs: 0
-    //         }
-    //     }
-    //     const mergedLoadoutStats = mergedLoadoutStatsMap[loadoutId];
-    //     mergedLoadoutStats.count += loadoutStats.count;
-    //     mergedLoadoutStats.PlayedVs += loadoutStats.PlayedVs;
-    //     mergedLoadoutStats.PlayedWith += loadoutStats.PlayedWith;
-    //     mergedLoadoutStats.WinsVs += loadoutStats.WinsVs;
-    //     mergedLoadoutStats.WinsWith += loadoutStats.WinsWith;
-    //     mergedLoadoutStats.ExpectedOutcomeVs += loadoutStats.ExpectedOutcomeVs;
-    //     mergedLoadoutStats.ActualOutcomeVs += loadoutStats.ActualOutcomeVs;
-    // }
-
-    const mergedLoadoutStats = Object.values(mergedLoadoutStatsMap);
+    const mergedLoadoutStats = mergeLoadoutArray(loadoutStatsArr, options);
     mergedLoadoutStats.sort((a, b) => b.count - a.count);
     return mergedLoadoutStats;
-
 }
 
 export function loadoutStringToCanvasData(loadoutString) {
