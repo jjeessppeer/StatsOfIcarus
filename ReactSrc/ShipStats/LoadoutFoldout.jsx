@@ -1,18 +1,73 @@
 import { ShipCanvas } from '/React/ShipCanvas.js';
 import { loadoutStringToCanvasData, eloWinrate } from '/React/ShipStats/LoadoutUtils.js';
+import { mergeMatchupStats } from '/React/ShipStats/LoadoutUtils.js';
+import { LoadoutGroupingSettings } from '/React/ShipStats/LoadoutGroupingSettings.js';
 
 export class LoadoutInfoFoldout extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            groupingSettings: {
+                ignoredGunIndexes: {
+                  0: true,
+                  1: true,
+                  2: true,
+                  3: true,
+                  4: true,
+                  5: true
+                }
+                // ignoredGunIndexes: {
+                //   0: false,
+                //   1: false,
+                //   2: false,
+                //   3: false,
+                //   4: false,
+                //   5: false
+                // }
+              }
+        }
+    }
     render() {
         const matchupComponents = [];
-        for (const s of this.props.matchupStats) {
-            matchupComponents.push(<LoadoutMatchup {...s}></LoadoutMatchup>);
-            // console.log(s);
+        
+        const mergedMatchupStats = mergeMatchupStats(this.props.matchupStats, this.state.groupingSettings);
+        for (const s of mergedMatchupStats) {
+            const enemyMode = this.props.foldoutMode == 'Enemy matchups';
+            const PlayedGames = enemyMode ? s.PlayedVs : s.PlayedWith;
+            const wins = enemyMode ? s.WinsVs : s.WinsWith;
+            const winrate = wins / PlayedGames;
+            const ExpectedOutcome = enemyMode ? s.ExpectedOutcomeVs : s.ExpectedOutcomeWith;
+            const ActualOutcome = enemyMode ? s.ActualOutcomeVs : s.ActualOutcomeWith;
+            const elorate = enemyMode ? 
+                eloWinrate(s.ExpectedOutcomeVs, s.ActualOutcomeVs, PlayedGames) :
+                eloWinrate(s.ExpectedOutcomeWith, s.ActualOutcomeWith, PlayedGames);
+            const props = {_id: s._id, PlayedGames, wins, elorate, ExpectedOutcome, ActualOutcome};
+            if (PlayedGames != 0){
+                matchupComponents.push(<LoadoutMatchup key={s._id} {...props} foldoutMode={this.props.foldoutMode}></LoadoutMatchup>);
+            }
         }
+
+        matchupComponents.sort((a, b) => {
+            a = a.props;
+            b = b.props;
+            const C = 10;
+            const m = 0.35;
+            const e1 = eloWinrate(b.ExpectedOutcome, b.ActualOutcome, b.PlayedGames);
+            const e2 = eloWinrate(a.ExpectedOutcome, a.ActualOutcome, a.PlayedGames);
+            // const e2 = eloWinrate(a);
+            const w1 = (C*m + e1 * b.PlayedGames ) / (C + b.PlayedGames);
+            const w2 = (C*m + e2 * a.PlayedGames ) / (C + a.PlayedGames);
+            return w1 - w2;
+        });
+
+        // const 
+        const colorClass = this.props.foldoutMode == 'Enemy matchups' ? 'enemy' : 'ally';
 
         // Fetch matchups
         // merge according to settings
         return (
-            <div className="loadout-matchup-foldout info-card">
+            <div className={`loadout-matchup-foldout info-card ${colorClass}`}>
+                {/* <LoadoutGroupingSettings settings={groupingSettings}></LoadoutGroupingSettings> */}
                 {matchupComponents}
                 {/* <LoadoutMatchup></LoadoutMatchup> */}
                 {/* <LoadoutMatchup></LoadoutMatchup> */}
@@ -28,16 +83,24 @@ class LoadoutMatchup extends React.Component {
         function toPercentage(n, tot) {
             return Math.round(100 * n / tot);
         }
-        console.log("RENDERING MATCHUPTHING")
-        const p = { shipModel: 16, shipLoadout: [] }
+        // console.log(this.props.foldoutMode)
+        // const enemyMode = this.props.foldoutMode == 'Enemy matchups';
+        // const played = enemyMode ? this.props.PlayedVs : this.props.PlayedWith;
+        // const wins = enemyMode ? this.props.WinsVs : this.props.WinsWith;
+        // const winrate = wins / played;
+        // const elorate = enemyMode ? 
+        //     eloWinrate(this.props.ExpectedOutcomeVs, this.props.ActualOutcomeVs, played) :
+        //     eloWinrate(this.props.ExpectedOutcomeWith, this.props.ActualOutcomeWith, played);
+        
+
         const canvasData = loadoutStringToCanvasData(this.props._id);
         return (
             <div className="loadout-matchup-box">
-                <ShipCanvas {...canvasData} width="100"></ShipCanvas>
+                <ShipCanvas {...canvasData} width="175"></ShipCanvas>
                 <div>
-                    <div>Matchup played: {this.props.PlayedVs}</div>
-                    <div>Win rate: {Math.round(100 * this.props.WinsVs / this.props.PlayedVs)}%</div>
-                    <div>Elo adjusted: {toPercentage(eloWinrate(this.props.ExpectedOutcomeVs, this.props.ActualOutcomeVs, this.props.PlayedVs), 1)}%</div>
+                    <div>{this.props.enemyMode ? 'Matchup' : 'Team comp'} played: {this.props.PlayedGames}</div>
+                    <div>Win rate: {toPercentage(this.props.wins, this.props.PlayedGames)}% [{this.props.wins}]</div>
+                    <div>Elo adjusted: {toPercentage(this.props.elorate, 1)}%</div>
                 </div>
             </div>
         )

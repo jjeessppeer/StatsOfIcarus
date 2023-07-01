@@ -132,8 +132,10 @@ app.post(
     const queryResponse = await processHistoryQuery(mongoClient, req.body);
     const filterPipeline = await generateMatchFilterPipeline(mongoClient, queryResponse.modifiedQuery.filters);
     const loadoutList = await shipStats.getShipLoadouts(mongoClient, item._id, filterPipeline);
+    const shipsWinrates = await shipStats.getShipsWinrates(mongoClient, filterPipeline);
 
     queryResponse.loadoutList = loadoutList;
+    queryResponse.shipsWinrates = shipsWinrates;
 
     res.status(200).json(queryResponse);
 });

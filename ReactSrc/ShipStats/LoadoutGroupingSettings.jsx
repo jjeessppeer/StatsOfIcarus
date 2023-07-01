@@ -1,47 +1,24 @@
 
+import {GunDropdown, GunSelectionRow} from '/React/GunDropdown.js'
+
 
 
 
 export class LoadoutGroupingSettings extends React.Component {
   constructor(props) {
     super(props);
-    // this.state = {
-    //   ignoredGunIndexes: {
-    //     0: false,
-    //     1: false,
-    //     2: false,
-    //     3: false,
-    //     4: false,
-    //     5: false
-    //   }
-    // }
   }
 
-  // settingsChanged = () => {
-  //   this.props.onChange(this.state);
-  // }
-
   gunToggled = (idx, active) => {
-    // console.log(idx, ': ', active);
-
     const settings = JSON.parse(JSON.stringify(this.props.settings));
     settings.ignoredGunIndexes[idx] = active;
     this.props.settingsChanged(settings);
-    // this.setState((prevState) => ({
-    //   ...prevState,
-    //   ignoredGunIndexes: {
-    //     ...prevState.ignoredGunIndexes,
-    //     [idx]: active
-    //   }
-    // }));
-    // if (active) {
-    //   this.state.ignoredGuns.push(idx);
-    // }
-    // else {
-    //   this.state.
-    // }
-    
-    // this.props.settingsChanged(JSON.parse(JSON.stringify(this.state)));
+  }
+
+  gunSelectionChanged = (idx, itemId) => {
+    const settings = JSON.parse(JSON.stringify(this.props.settings));
+    settings.gunSelections[idx-1] = itemId;
+    this.props.settingsChanged(settings);
   }
 
   render() {
@@ -56,18 +33,19 @@ export class LoadoutGroupingSettings extends React.Component {
         </GunToggle>
       );
     }
-
+    // public\images\item-icons\item114.jpg
     return (
       <div className="loadout-grouping-settings">
         <h5>Loadout grouping</h5>
-        <div>
+        {/* <div>
           Minimum matches <input type="number" defaultValue={10} disabled></input>
         </div>
         <div>
           <label>Mirrored loadouts <input type="checkbox" disabled></input></label>
-        </div>
+        </div> */}
+        <GunSelectionRow selections={this.props.settings.gunSelections} handleChange={this.gunSelectionChanged}></GunSelectionRow>
         <div>
-          Guns:
+          Ignored gun slots:
           {gunToggles}
         </div>
       </div>

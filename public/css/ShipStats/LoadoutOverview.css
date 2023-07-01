@@ -73,6 +73,16 @@
     margin-top: 0;
     width: 75%;
     display: none;
+    border-left: 5px var(--red-3) solid;
+    border-top: 0;
+}
+
+.loadout-matchup-foldout.enemy {
+    border-left: 5px var(--red-3) solid;
+}
+
+.loadout-matchup-foldout.ally {
+    border-left: 5px var(--blue-3) solid;
 }
 
 .ship-loadout-info.expanded .loadout-matchup-foldout {
@@ -86,15 +96,19 @@
 
 .loadout-expand-button {
     border-top: 1px solid;
-    border-right: 1px solid;
+    border-left: 1px solid;
     padding: 5px;
     cursor: pointer;
     border-color: var(--card-border);
     flex-grow: 1;
 }
 
-.loadout-expand-button i{
-    /* transform: rotate(180deg); */
+.loadout-expand-button:first-child {
+    border-left: 0;
+}
+
+.loadout-expand-button.active i{
+    transform: rotate(180deg);
 }
 
 .loadout-matchup-box:not(:first-child) {
@@ -110,6 +124,7 @@
     /* border-color: var(--card-border); */
     display: flex;
     flex-direction: row;
+    padding: 5px;
     /* padding: 5px; */
 
 }

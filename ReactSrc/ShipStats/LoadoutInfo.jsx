@@ -11,21 +11,41 @@ export class ShipLoadoutInfo extends React.Component {
       loadedMatchups: false,
       matchupStats: [],
       matchupsExpanded: false,
+      matchupGroupingSettings: {
+        // ignoredGunIndexes: {
+        //   0: true,
+        //   1: true,
+        //   2: true,
+        //   3: true,
+        //   4: true,
+        //   5: true
+        // }
+        ignoredGunIndexes: {
+          0: false,
+          1: false,
+          2: false,
+          3: false,
+          4: false,
+          5: false
+        }
+      }
     }
   }
 
-  toggleDetailFoldout = async (e) => {
-    console.log("TOGGLE FOLDOT")
-
+  toggleDetailFoldout = async (name) => {
     let matchupStats = this.state.matchupStats;
     if (!this.state.loadedMatchups) matchupStats = await this.loadMatchups();
-    console.log(matchupStats);
+
+    const enemyModePrev = this.state.foldoutMode == 'Enemy matchups';
+    const enemyModeNext = name == 'Enemy matchups';
+    const expand = (enemyModeNext != enemyModePrev || !this.state.matchupsExpanded);
+
     this.setState((state, props) => ({
       matchupStats: matchupStats,
-      matchupsExpanded: !state.matchupsExpanded
+      matchupsExpanded: expand,
+      foldoutMode: name
     }));
   }
-
 
   async loadMatchups() {
     const rawRes = await fetch('/ship_matchup_stats', {
@@ -33,22 +53,10 @@ export class ShipLoadoutInfo extends React.Component {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ TargetShip: { Model: this.state.loadout[0].model } })
+      body: JSON.stringify({ TargetShip: this.state.loadout })
     });
-    console.log(this.state.loadout);
     const matchupStats = await rawRes.json();
-    const groupingSettings = {
-      ignoredGunIndexes: {
-        0: true,
-        1: true,
-        2: true,
-        3: true,
-        4: true,
-        5: true
-      }
-    };
-    const mergedMatchupStats = mergeMatchupStats(matchupStats, groupingSettings);
-    return mergedMatchupStats;
+    return matchupStats;
     // this.setState({matchupStats: mergedMatchupStats});
   }
 
@@ -67,6 +75,7 @@ export class ShipLoadoutInfo extends React.Component {
 
     const canvasData = loadoutStringToCanvasData(this.props.loadoutInfo._id)
 
+    // const mergedMatchupStats = mergeMatchupStats(matchupStats, this.state.matchupGroupingSettings);
 
     const eR = this.props.loadoutInfo.ExpectedOutcome / this.props.loadoutInfo.PlayedGames;
     const aR = this.props.loadoutInfo.ActualOutcome / this.props.loadoutInfo.PlayedGames;
@@ -76,17 +85,18 @@ export class ShipLoadoutInfo extends React.Component {
     if (aR > eR) f3 = f2;
     else f3 = f1; 
 
+    const enemyMode = this.state.foldoutMode == 'Enemy matchups';
+    const expanded = this.state.matchupsExpanded;
+    const b1State = enemyMode && expanded;
+    const b2State = !enemyMode && expanded;
+
     return (
       <li className={"ship-loadout-info" + (this.state.matchupsExpanded ? " expanded" : "")}>
         <div className="info-card">
           <div className='content'>
-            <ShipCanvas {...canvasData} width='250' height='250'></ShipCanvas>
+            <ShipCanvas {...canvasData} width='175' height='250'></ShipCanvas>
             <div className="text-area">
               <table className="ship-rates">
-                <tr>
-                  <td>Pick rate:</td>
-                  <td>{toPercentage(this.props.loadoutInfo.PlayedGames, this.props.totalShipGames)}% [{this.props.loadoutInfo.PlayedGames}]</td>
-                </tr>
                 <tr>
                   <td>Win rate: </td>
                   <td>{toPercentage(this.props.loadoutInfo.Wins, this.props.loadoutInfo.PlayedGames)}% [{this.props.loadoutInfo.Wins}]</td>
@@ -94,6 +104,10 @@ export class ShipLoadoutInfo extends React.Component {
                 <tr>
                   <td>Elo adjusted:</td>
                   <td>{toPercentage(f3, 1)}%</td>
+                </tr>
+                <tr>
+                  <td>Pick rate:</td>
+                  <td>{toPercentage(this.props.loadoutInfo.PlayedGames, this.props.totalShipGames)}% [{this.props.loadoutInfo.PlayedGames}]</td>
                 </tr>
                 <tr>
                   <td>Mirror rate: </td>
@@ -109,25 +123,31 @@ export class ShipLoadoutInfo extends React.Component {
             </div>
           </div>
           <div className='expand-button-bar'>
-            <LoadoutExpandButton onExpand={this.toggleDetailFoldout} name={'Enemy matchups'}></LoadoutExpandButton>
-            <LoadoutExpandButton onExpand={this.toggleDetailFoldout} name={'Ally synergies'}></LoadoutExpandButton>
+            <LoadoutExpandButton onExpand={this.toggleDetailFoldout} name={'Enemy matchups'} active={b1State}></LoadoutExpandButton>
+            <LoadoutExpandButton onExpand={this.toggleDetailFoldout} name={'Ally synergies'} active={b2State}></LoadoutExpandButton>
             {/* <LoadoutExpandButton onExpand={this.toggleTab} name={'Strong with'}></LoadoutExpandButton> */}
             {/* <LoadoutExpandButton onExpand={this.toggleTab} name={'Weak with'}></LoadoutExpandButton> */}
           </div>
         </div>
 
-        <LoadoutInfoFoldout matchupStats={this.state.matchupStats}></LoadoutInfoFoldout>
+        <LoadoutInfoFoldout foldoutMode={this.state.foldoutMode} matchupStats={this.state.matchupStats}></LoadoutInfoFoldout>
       </li>
 
     )
   }
 }
 
-function LoadoutExpandButton(props) {
-  return (
-    <div class="loadout-expand-button" onClick={props.onExpand}>
-      {props.name}
-      <i class="fas fa-chevron-down"></i>
-    </div>
-  )
+class LoadoutExpandButton extends React.Component {
+  onExpand = () => {
+    this.props.onExpand(this.props.name);
+  }
+  render() {
+    return (
+      <div class={`loadout-expand-button ${this.props.active ? 'active' : ''}`} onClick={this.onExpand}>
+        {this.props.name}
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    )
+  }
+  
 }

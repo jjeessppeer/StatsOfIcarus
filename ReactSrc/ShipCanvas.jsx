@@ -98,7 +98,6 @@ export class ShipCanvas extends React.Component {
       adjustedGunPositions, iconSize, 10, 
       [localMin[0], localMax[0]], [localMin[1], localMax[1]]
     );
-    console.log(adjustedGunPositions);
     // Draw gun icons.
     for (let i = 0; i < shipLoadout.length; i++) {
       let gunId = shipLoadout[i];

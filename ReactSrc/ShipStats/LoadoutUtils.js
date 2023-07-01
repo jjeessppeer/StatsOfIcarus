@@ -1,5 +1,5 @@
 // Guns are indexed differently in game internals and ui.
-const SHIP_GUN_IDX_MAP = {
+export const SHIP_GUN_IDX_MAP = {
     11: { // Goldfish
         0: 1,
         1: 2,
@@ -60,35 +60,35 @@ const SHIP_GUN_IDX_MAP = {
         3: 4,
         4: 2,
         5: 3
-      },
-      69: { // Judgement
+    },
+    69: { // Judgement
         0: 0,
         1: 3,
         2: 2,
         3: 1,
         4: 4
-      },
-      70: { // Corsair
+    },
+    70: { // Corsair
         0: 0,
         1: 1,
         2: 2,
         3: 3,
         4: 4,
         5: 5
-      },
-      82: { // Shrike
+    },
+    82: { // Shrike
         0: 0,
         1: 1,
         2: 2,
         3: 3
-      },
-      97: { // Stormbreaker
+    },
+    97: { // Stormbreaker
         0: 0,
         1: 1,
         2: 2,
         3: 3
-      }
-  }
+    }
+}
 
 export function mapLoadoutId(loadoutString, options) {
     const loadoutObj = JSON.parse(loadoutString);
@@ -100,7 +100,7 @@ export function mapLoadoutId(loadoutString, options) {
         if (part.G != undefined) {
             let mappedIdx = part.G;
             if (SHIP_GUN_IDX_MAP[model] != undefined) mappedIdx = SHIP_GUN_IDX_MAP[model][part.G];
-            if ( options.ignoredGunIndexes[mappedIdx] == true ) continue;
+            if (options.ignoredGunIndexes[mappedIdx] == true) continue;
             outObj.push(part);
 
         }
@@ -127,39 +127,73 @@ export function mapLoadoutId(loadoutString, options) {
 
 }
 
-export function eloWinrate(expectedOutcome, actualOutcome, playedGames){
+export function eloWinrate(expectedOutcome, actualOutcome, playedGames) {
     const eR = expectedOutcome / playedGames;
     const aR = actualOutcome / playedGames;
-    const f1 = 1/2 * (aR/eR);
-    const f2 = 1/2 * (1 + (aR - eR) / (1 - eR));
+    const f1 = 1 / 2 * (aR / eR);
+    const f2 = 1 / 2 * (1 + (aR - eR) / (1 - eR));
     let f3;
     if (aR > eR) f3 = f2;
-    else f3 = f1; 
+    else f3 = f1;
     return f3;
+}
+
+function mergeSumObjects(obj1, obj2, ignoreKeys = []) {
+    for (const [key, value] of Object.entries(obj2)) {
+        if (ignoreKeys.includes(key)) continue;
+        if (obj1[key] == undefined) {
+            obj1[key] = 0;
+        }
+        obj1[key] += value;
+    }
+    return obj1;
+}
+
+
+export function filterLoadoutArray(loadoutArr, options) {
+    function hasGunInSlot(parts, gunId, slot) {
+        const model = parts[0].model;
+        const mappedSlot = SHIP_GUN_IDX_MAP[model][slot];
+        for (const part of parts) {
+            const mappedGun = SHIP_GUN_IDX_MAP[model][part.G];
+            if (mappedGun == slot && part.gun == gunId) {
+                console.log(JSON.stringify(parts));
+                console.log("things: ", slot, mappedSlot, part.G, gunId, part.gun);
+                return true;
+            }
+        }
+        return false;
+    }
+    const filteredLoadoutInfos = [];
+    function loadoutMatches(parts, gunSelections) {
+        for (let i = 0; i < 6; i++) {
+            const gunId = gunSelections[i];
+            if (gunId == -1 || gunId == -2) continue;
+            if (!hasGunInSlot(parts, gunId, i)) return false;
+        }
+        return true;
+    }
+    for (const l of loadoutArr) {
+        const parts = JSON.parse(l._id);
+        if (!loadoutMatches(parts, options.gunSelections)) continue;
+        filteredLoadoutInfos.push(l);
+    }
+    return filteredLoadoutInfos;
 }
 
 export function mergeLoadoutInfos(loadoutInfos, options) {
     const mergedLoadoutInfoMap = {};
     for (const loadoutInfo of loadoutInfos) {
         const loadoutId = mapLoadoutId(loadoutInfo._id, options);
-        if (mergedLoadoutInfoMap[loadoutId] == undefined) {
+        if (mergedLoadoutInfoMap[loadoutId] == undefined)
             mergedLoadoutInfoMap[loadoutId] = {
-                _id: loadoutId,
-                PlayedGames: 0,
-                Wins: 0,
-                Mirrors: 0,
-                ActualOutcome: 0,
-                ExpectedOutcome: 0,
-                OriginalIds: []
-            }
-        }
+                OriginalIds: [],
+                _id: loadoutId
+            };
+
         const mergedloadoutInfo = mergedLoadoutInfoMap[loadoutId];
-        mergedloadoutInfo.PlayedGames += loadoutInfo.PlayedGames;
-        mergedloadoutInfo.Wins += loadoutInfo.Wins;
-        mergedloadoutInfo.Mirrors += loadoutInfo.Mirrors;
-        mergedloadoutInfo.ExpectedOutcome += loadoutInfo.ExpectedOutcome;
-        mergedloadoutInfo.ActualOutcome += loadoutInfo.ActualOutcome;
         mergedloadoutInfo.OriginalIds.push(loadoutInfo._id);
+        mergeSumObjects(mergedloadoutInfo, loadoutInfo, ['_id', 'OriginalIds']);
     }
     const mergedLoadoutInfos = Object.values(mergedLoadoutInfoMap);
     // mergedLoadoutInfos.sort((a, b) => b.PlayedGames - a.PlayedGames);
@@ -176,8 +210,8 @@ export function mergeLoadoutInfos(loadoutInfos, options) {
         const e1 = eloWinrate(b.ExpectedOutcome, b.ActualOutcome, b.PlayedGames);
         const e2 = eloWinrate(a.ExpectedOutcome, a.ActualOutcome, a.PlayedGames);
         // const e2 = eloWinrate(a);
-        const w1 = (C*m + e1 * b.PlayedGames ) / (C + b.PlayedGames);
-        const w2 = (C*m + e2 * a.PlayedGames ) / (C + a.PlayedGames);
+        const w1 = (C * m + e1 * b.PlayedGames) / (C + b.PlayedGames);
+        const w2 = (C * m + e2 * a.PlayedGames) / (C + a.PlayedGames);
         return w1 - w2;
     });
     return mergedLoadoutInfos;
@@ -185,36 +219,45 @@ export function mergeLoadoutInfos(loadoutInfos, options) {
 
 export function mergeMatchupStats(loadoutStatsArr, options) {
     const mergedLoadoutStatsMap = {};
-    console.log("MERGING STATS");
-    console.log(options)
+
     for (const loadoutStats of loadoutStatsArr) {
         const loadoutId = mapLoadoutId(loadoutStats._id, options);
-        if (mergedLoadoutStatsMap[loadoutId] == undefined) {
+        if (mergedLoadoutStatsMap[loadoutId] == undefined)
             mergedLoadoutStatsMap[loadoutId] = {
                 _id: loadoutId,
-                count: 0,
-                PlayedVs: 0,
-                PlayedWith: 0,
-                WinsVs: 0,
-                WinsWith: 0,
-                ActualOutcomeVs: 0,
-                ExpectedOutcomeVs: 0
-            }
-        }
+                OriginalIds: []
+            };
+
         const mergedLoadoutStats = mergedLoadoutStatsMap[loadoutId];
-        mergedLoadoutStats.count += loadoutStats.count;
-        mergedLoadoutStats.PlayedVs += loadoutStats.PlayedVs;
-        mergedLoadoutStats.PlayedWith += loadoutStats.PlayedWith;
-        mergedLoadoutStats.WinsVs += loadoutStats.WinsVs;
-        mergedLoadoutStats.WinsWith += loadoutStats.WinsWith;
-        mergedLoadoutStats.ExpectedOutcomeVs += loadoutStats.ExpectedOutcomeVs;
-        mergedLoadoutStats.ActualOutcomeVs += loadoutStats.ActualOutcomeVs;
+        mergedLoadoutStats.OriginalIds.push(loadoutStats._id);
+        mergeSumObjects(mergedLoadoutStats, loadoutStats, ['_id', 'OriginalIds']);
     }
+    // for (const loadoutStats of loadoutStatsArr) {
+    //     const loadoutId = mapLoadoutId(loadoutStats._id, options);
+    //     if (mergedLoadoutStatsMap[loadoutId] == undefined) {
+    //         mergedLoadoutStatsMap[loadoutId] = {
+    //             _id: loadoutId,
+    //             count: 0,
+    //             PlayedVs: 0,
+    //             PlayedWith: 0,
+    //             WinsVs: 0,
+    //             WinsWith: 0,
+    //             ActualOutcomeVs: 0,
+    //             ExpectedOutcomeVs: 0
+    //         }
+    //     }
+    //     const mergedLoadoutStats = mergedLoadoutStatsMap[loadoutId];
+    //     mergedLoadoutStats.count += loadoutStats.count;
+    //     mergedLoadoutStats.PlayedVs += loadoutStats.PlayedVs;
+    //     mergedLoadoutStats.PlayedWith += loadoutStats.PlayedWith;
+    //     mergedLoadoutStats.WinsVs += loadoutStats.WinsVs;
+    //     mergedLoadoutStats.WinsWith += loadoutStats.WinsWith;
+    //     mergedLoadoutStats.ExpectedOutcomeVs += loadoutStats.ExpectedOutcomeVs;
+    //     mergedLoadoutStats.ActualOutcomeVs += loadoutStats.ActualOutcomeVs;
+    // }
 
     const mergedLoadoutStats = Object.values(mergedLoadoutStatsMap);
     mergedLoadoutStats.sort((a, b) => b.count - a.count);
-    console.log("MATCHUPS");
-    console.log(mergedLoadoutStats);
     return mergedLoadoutStats;
 
 }
