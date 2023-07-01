@@ -100,7 +100,8 @@ export function mapLoadoutId(loadoutString, options) {
         if (part.G != undefined) {
             let mappedIdx = part.G;
             if (SHIP_GUN_IDX_MAP[model] != undefined) mappedIdx = SHIP_GUN_IDX_MAP[model][part.G];
-            if (options.ignoredGunIndexes[mappedIdx] == true) continue;
+            // if (options.ignoredGunIndexes[mappedIdx] == true) continue;
+            if (options.gunSelections[mappedIdx] == -2) continue;
             outObj.push(part);
 
         }
