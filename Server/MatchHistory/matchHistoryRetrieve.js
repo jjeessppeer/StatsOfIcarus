@@ -26,7 +26,6 @@ function setMongoClient(clientIn) {
 
 async function matchHistorySearch(query) {
     let responseData = {
-        perspective: query.perspective,
         originalQuery: JSON.parse(JSON.stringify(query)),
         modifiedQuery: query
     };
@@ -49,7 +48,7 @@ async function matchHistorySearch(query) {
         if (playerId) {
             let playerData = await getPlayerInfo(query.perspective.name, filterPipeline);
             responseData.playerData = playerData;
-            responseData.perspective.name = playerData.PlayerInfo.Name;
+            query.perspective.name = playerData.PlayerInfo.Name;
         }
     }
     if (query.perspective.type == 'Overview'){

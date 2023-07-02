@@ -1,9 +1,15 @@
+import '/js/MatchHistory/elements/FancySearch.js';
+import '/js/MatchHistory/elements/MatchHistoryList.js';
+import '/js/MatchHistory/elements/ShipPopularity.js';
+import '/js/MatchHistory/elements/PlayerShipInfo.js';
+import '/js/MatchHistory/elements/PlayerInfo.js';
+import '/js/MatchHistory/elements/EloCard.js';
+import '/js/MatchHistory/elements/LeaderboardCard.js';
 
-var search_mode = 0;
+import { ShipLoadoutInfoList } from '/React/ShipStats/LoadoutInfoList.js';
+import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats } from '/React/ShipStats/LoadoutUtils.js';
 
-var pickwinrateChart;
-
-const SKILL_ORDER = [
+export const SKILL_ORDER = [
     "Rubber Mallet",
     "Fail-safe Kit",
     "Pipe Wrench",
@@ -35,7 +41,8 @@ const SKILL_ORDER = [
     "Impact Bumpers",
     "Tar Barrel"
 ];
-var ship_image_srcs2 = {
+
+export const ship_image_srcs2 = {
     70: "images/ship-images/corsair_gundeck_small.png",
     67: "images/ship-images/crusader_gundeck_small.png",
     14: "images/ship-images/galleon_gundeck_small.png",
@@ -51,11 +58,11 @@ var ship_image_srcs2 = {
     97: "images/ship-images/storm_gundeck_small.png" 
 };
 
-const game_modes = {
+export const game_modes = {
     2: "Deathmatch"
 }
 
-const SHIP_ITEMS = {
+export const SHIP_ITEMS = {
     11: {Name: "Goldfish", Id: 11},
     12: {Name: "Junker", Id: 12},
     13: {Name: "Squid", Id: 13},
@@ -71,7 +78,7 @@ const SHIP_ITEMS = {
     97: {Name: "Stormbreaker", Id: 97},
 }
 
-const CLASS_COLORS = {
+export const CLASS_COLORS = {
     "Pilot": 'rgb(85, 135, 170)',
     "Gunner": 'rgb(167, 76, 18)',
     "Engineer": 'rgb(189, 137, 45)'
@@ -85,21 +92,19 @@ const DEFAULT_QUERY = {
 function initializeMatchHistory(){
     let searchbar = document.createElement('div', { is: 'fancy-searchbar' });
     document.getElementById('matchHistorySearch').append(searchbar);
-    searchbar.addEventListener('search', evt => getMatchHistoryData(evt.detail));
+    searchbar.addEventListener('search', evt => executeSearch(evt.detail));
 
     searchbar.querySelector('.filter-button').addEventListener('click', evt => {
         let search = evt.target.parentElement.parentElement;
         search.classList.toggle('filters-open');
     });
 
-    document.getElementById('loadMoreMatchesButton').addEventListener('click', requestNextMatchHistoryPage)
-
     let urlQuery = getUrlQuery();
     if (urlQuery != undefined) {
-        getMatchHistoryData(urlQuery);
+        executeSearch(urlQuery);
     }
     else {
-        getMatchHistoryData(DEFAULT_QUERY);
+        executeSearch(DEFAULT_QUERY);
     }
 }
 
@@ -128,28 +133,72 @@ async function requestNextMatchHistoryPage(evt) {
     evt.target.disabled = false;
 }
 
-async function getMatchHistoryData(query) {
+async function executeSearch(query) {
+    console.log("SEARCH__");
+    console.log(query);
     // Clear old graphics
     clearMatchHistoryDisplay();
-    
-    // Request data
-    let res = await asyncPostRequest('/match_history_search', query);
-    let response = JSON.parse(res.response);
+    const perspective = query.perspective.type;
+    let response;
+    if (perspective == 'Overview' || perspective == 'Player') {
+        response = await executeHistoryQuery(query);
+    }
+    if (perspective == 'Ship') {
+        response = await executeShipQuery(query);
+    }
+    console.log("__RESPONSE__")
+    console.log(response);
 
-    current_match_filters = response.modifiedQuery.filters;
-
+    const resposeQuery = response.modifiedQuery;
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
-    if (window.location.hash.substr(1).split("?")[0] == "matchHistory"){
+    if (window.location.hash.substring(1).split("?")[0] == "matchHistory"){
         setUrlParam(encodedQuery);
-        if (response.perspective.type == 'Overview') setUrlParam();
+        if (resposeQuery.perspective.type == 'Overview') setUrlParam();
     }
 
     //Update search field based on recieved data.
     let search = document.querySelector('.fancy-search');
-    search.setText(response.perspective.name);
-    if (response.perspective.type == 'Overview'){
+    search.setText(resposeQuery.perspective.name);
+    if (resposeQuery.perspective.type == 'Overview'){
         search.setText("");
-    } 
+    }
+}
+
+let reactRoot;
+async function executeShipQuery(query) {
+    const rawRes = await fetch('/ship_loadouts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(query)
+    });
+    const response = await rawRes.json();
+    const loadoutListFull = response.loadoutList;
+    initializePopularityList(response.shipsWinrates);
+    // const loadoutListMerged = mergeLoadoutInfos(loadoutListFull);
+    // console.log(loadoutListMerged)
+    // await getLoadoutStats();
+
+    const rootDiv = document.querySelector('#matchHistory .right-area');
+    if (reactRoot == undefined) reactRoot = ReactDOM.createRoot(rootDiv);
+
+    // const root = ReactDOM.createRoot(domContainer);
+    const el = React.createElement(ShipLoadoutInfoList, { loadoutInfos: loadoutListFull })
+    reactRoot.render(el);
+    initializePopularityList(response.shipsWinrates);
+    return response;
+}
+
+async function executeHistoryQuery(query) {
+    const responseRaw = await fetch('/match_history_search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(query)});
+    const response = await responseRaw.json();
+
+    current_match_filters = response.modifiedQuery.filters;
+    console.log(current_match_filters)
 
     // Update graphics with recieved data
     if (query.perspective.type == "Overview") {
@@ -158,6 +207,7 @@ async function getMatchHistoryData(query) {
     else if (query.perspective.type == "Player") {
         loadPlayerPerspective(response);
     }
+    return response;
 }
 
 function loadOverviewPerspective(response) {
@@ -192,23 +242,25 @@ async function loadEloCard(playerInfo) {
     eloCard.initialize(playerInfo._id, playerInfo.ELOCategories);
 
     leaderboardCard.setHighlightName(playerInfo.Name);
-
 }
 
-function loadShipPerspective(response) {
 
-}
 
 function clearMatchHistoryDisplay() {
+
+    if (reactRoot != undefined) reactRoot.unmount();
+    reactRoot = undefined;
+    
     current_match_page = 0;
     current_match_filters = [];
     const CLEAR_QUERIES = [
         '.player-ship-info-table',
         '.ship-popularity-list',
         '.match-history-list',
-        '.player-infobox'
+        '.player-infobox',
+        '.load-more-matches-button'
     ];
-    CLEAR_QUERIES.forEach(q => document.querySelectorAll(q).forEach(el => el.remove()))
+    CLEAR_QUERIES.forEach(q => document.querySelectorAll(q).forEach(el => el.remove()));
 }
 
 
@@ -216,8 +268,11 @@ function intializeMatchHistoryList(matches, matchCount=0) {
     let ul = document.createElement('ul', {is: 'match-history-list'});
     ul.addMatches(matches);
     document.querySelector("#matchHistory .right-area").prepend(ul);
-}
 
+    const loadModeBtn = document.createElement('button', {is: 'load-more-matches-button'});
+    loadModeBtn.addEventListener('click', requestNextMatchHistoryPage)
+    document.querySelector("#matchHistory .right-area").append(loadModeBtn);
+}
 
 function initializePopularityList(shipRateData) {
     let modelWinrates = shipRateData.ModelWinrates;
@@ -256,51 +311,7 @@ function updateMatchHistoryList(matchHistory){
 
 // TODO: Make these functions fetch and cache data instead of resending with every match record.
 
-function getShipLoadout(matchRecord, shipLoadoutId) {
-    for (let ship of matchRecord.ShipLoadouts) {
-        if (ship._id == shipLoadoutId) return ship;
-    }
-    throw "No ship with specified id found";
-}
 
-function getPlayerInfo(matchRecord, playerId) {
-    for (let player of matchRecord.PlayerInfo) {
-        if (player._id == playerId) {
-            return player;
-        }
-    }
-    console.log("No player " + playerId);
-    console.log(matchRecord);
-    throw "No player with specified id found " + playerId;
-}
-
-function getLoadoutInfo(matchRecord, loadoutId) {
-    for (let loadout of matchRecord.LoadoutInfo) {
-        if (loadout._id == loadoutId) return loadout;
-    }
-    throw "No loadout with specified id found";
-}
-
-function getSkillItem(matchRecord, skillId) {
-    for (let skill of matchRecord.SkillItems) {
-        if (skill._id == skillId) return skill;
-    }
-    throw "No skill with specified id found";
-}
-
-function getGunItem(matchRecord, gunId) {
-    for (let gun of matchRecord.GunItems) {
-        if (gun._id == gunId) return gun;
-    }
-    throw `No gun with specified id found: ${gunId}`;
-}
-
-function getShipItem(matchRecord, shipId) {
-    for (let ship of matchRecord.ShipItems) {
-        if (ship._id == shipId) return ship;
-    }
-    throw "No ship item with specified id found: " + shipId;
-}
 
 
 var ship_scales = {
@@ -339,13 +350,13 @@ var ship_offsets = {
 // pyra_gundeck_small
 // magnate_gundeck_small
 
-function toShipImageCoordinates(point, shipModel, shipImage) {
+export function toShipImageCoordinates(point, shipModel, shipImage) {
     return [
         point[0] * ship_scales[shipModel] + shipImage.width / 2, 
         point[1] * -ship_scales[shipModel] + ship_offsets[shipModel]]
 }
 
-function spreadGunPositions(gunPositions, iconSize, iterations=10) {
+export function spreadGunPositions(gunPositions, iconSize, iterations=10, xRange, yRange) {
     let adjustedPositions = [];
     const movementStrength = 1/10;
     for (let i = 0; i < gunPositions.length; i++) {
@@ -369,9 +380,23 @@ function spreadGunPositions(gunPositions, iconSize, iterations=10) {
                 pos[0] -= vectorNorm[0] * iconSize * movementStrength;
                 pos[1] -= vectorNorm[1] * iconSize * movementStrength;
             }
+
+            if (xRange != undefined) {
+                // Push icons away from borders
+                const xMin = xRange[0];
+                const xMax = xRange[1];
+                const d1 = Math.min(xMax-iconSize - pos[0], 0);
+                const d2 = Math.max(xMin+iconSize - pos[0], 0);
+                pos[0] += d1/5;
+                pos[0] += d2/5;
+            }
+
         }
         adjustedPositions.push(pos);
     }
     if (iterations > 1) adjustedPositions = spreadGunPositions(adjustedPositions, iconSize, iterations-1);
     return adjustedPositions;
 }
+
+
+initializeMatchHistory();
