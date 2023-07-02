@@ -158,8 +158,6 @@ export function filterLoadoutArray(loadoutArr, options) {
         for (const part of parts) {
             const mappedGun = SHIP_GUN_IDX_MAP[model][part.G];
             if (mappedGun == slot && part.gun == gunId) {
-                console.log(JSON.stringify(parts));
-                console.log("things: ", slot, mappedSlot, part.G, gunId, part.gun);
                 return true;
             }
         }
@@ -167,6 +165,8 @@ export function filterLoadoutArray(loadoutArr, options) {
     }
     const filteredLoadoutInfos = [];
     function loadoutMatches(parts, gunSelections) {
+        const model = Number(parts[0].model);
+        if (options.modelFilter != -1 && options.modelFilter != model) return false;
         for (let i = 0; i < 6; i++) {
             const gunId = gunSelections[i];
             if (gunId == -1 || gunId == -2) continue;

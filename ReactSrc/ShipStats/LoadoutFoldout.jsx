@@ -1,6 +1,6 @@
 import { ShipCanvas } from '/React/ShipCanvas.js';
 import { loadoutStringToCanvasData, eloWinrate } from '/React/ShipStats/LoadoutUtils.js';
-import { mergeMatchupStats } from '/React/ShipStats/LoadoutUtils.js';
+import { mergeMatchupStats, filterLoadoutArray } from '/React/ShipStats/LoadoutUtils.js';
 import { LoadoutGroupingSettings } from '/React/ShipStats/LoadoutGroupingSettings.js';
 
 export class LoadoutInfoFoldout extends React.Component {
@@ -8,29 +8,39 @@ export class LoadoutInfoFoldout extends React.Component {
         super(props);
         this.state = {
             groupingSettings: {
+                gunSelections: [-2, -2, -2, -2, -2, -2],
                 ignoredGunIndexes: {
-                  0: true,
-                  1: true,
-                  2: true,
-                  3: true,
-                  4: true,
-                  5: true
-                }
-                // ignoredGunIndexes: {
-                //   0: false,
-                //   1: false,
-                //   2: false,
-                //   3: false,
-                //   4: false,
-                //   5: false
-                // }
+                  0: false,
+                  1: false,
+                  2: false,
+                  3: false,
+                  4: false,
+                  5: false
+                },
+                sortingDisabled: true,
+                modelFilterEnabled: true,
+                modelFilter: -1
               }
         }
     }
+
+    groupingSettingsChanged = (groupingSettings) => {
+        if (groupingSettings.modelFilter == -1) {
+            groupingSettings.gunSelections = [-2, -2, -2, -2, -2, -2]
+        }
+        if (groupingSettings.modelFilter != -1 && 
+            this.state.groupingSettings.modelFilter != groupingSettings.modelFilter) {
+                groupingSettings.gunSelections = [-1, -1, -1, -1, -1, -1]
+            }
+        this.setState({
+          groupingSettings: groupingSettings
+        });
+      }
+
     render() {
         const matchupComponents = [];
-        
-        const mergedMatchupStats = mergeMatchupStats(this.props.matchupStats, this.state.groupingSettings);
+        const filteredMatchupStats = filterLoadoutArray(this.props.matchupStats, this.state.groupingSettings);
+        const mergedMatchupStats = mergeMatchupStats(filteredMatchupStats, this.state.groupingSettings);
         for (const s of mergedMatchupStats) {
             const enemyMode = this.props.foldoutMode == 'Enemy matchups';
             const PlayedGames = enemyMode ? s.PlayedVs : s.PlayedWith;
@@ -67,6 +77,7 @@ export class LoadoutInfoFoldout extends React.Component {
         // merge according to settings
         return (
             <div className={`loadout-matchup-foldout info-card ${colorClass}`}>
+                <LoadoutGroupingSettings settings={this.state.groupingSettings} settingsChanged={this.groupingSettingsChanged}></LoadoutGroupingSettings>
                 {/* <LoadoutGroupingSettings settings={groupingSettings}></LoadoutGroupingSettings> */}
                 {matchupComponents}
                 {/* <LoadoutMatchup></LoadoutMatchup> */}

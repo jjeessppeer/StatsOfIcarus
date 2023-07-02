@@ -15,12 +15,15 @@ export class ShipLoadoutInfoList extends React.Component {
           3: false,
           4: false,
           5: false
-        }
+        },
+        modelFilter: -1,
+        modelFilterEnabled: false
       }
     }
   }
 
   groupingSettingsChanged = (groupingSettings) => {
+    console.log(groupingSettings);
     this.setState({
       groupingSettings: groupingSettings
     });

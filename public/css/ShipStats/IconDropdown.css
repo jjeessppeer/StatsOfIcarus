@@ -6,8 +6,8 @@
 }
 
 .icon-dropdown img{
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
     border: 1px solid black;
     border-radius: 3px;
@@ -28,6 +28,7 @@
 
 .icon-dropdown.expanded .dropdown-content {
     display: block;
+    z-index: 10;
 }
 
 .icon-dropdown .dropdown-content {
@@ -35,7 +36,7 @@
     position: absolute;
     background-color: white;
     border: 1px solid black;
-    width: 200px;
+    width: 213px;
 }
 
 .icon-dropdown .dropdown-content img {

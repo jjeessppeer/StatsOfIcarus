@@ -32,7 +32,7 @@ export class GunSelectionRow extends React.Component {
 
     return (
       <div>
-        Guns:
+        Gun selection: 
         {gunDropdowns}
       </div>)
   }

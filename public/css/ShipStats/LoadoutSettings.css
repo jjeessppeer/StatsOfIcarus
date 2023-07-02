@@ -1,5 +1,11 @@
 .loadout-grouping-settings {
-    border: 1px solid black;
+    /* border: 1px solid black;
+    margin: 10px;
+    padding: 5px; */
+    color: black;
+    border: 1px solid;
+    border-color: var(--card-border);
+    background-color: var(--card-color-1);
     margin: 10px;
     padding: 5px;
 }
@@ -24,4 +30,10 @@
 
 .loadout-grouping-settings button.gun-toggle.active {
     background: #ff7070;
+}
+
+.loadout-matchup-foldout .loadout-grouping-settings {
+    border: 0;
+    margin: 0;
+    padding: 5px;
 }
