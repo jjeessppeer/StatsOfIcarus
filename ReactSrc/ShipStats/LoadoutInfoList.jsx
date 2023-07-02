@@ -37,7 +37,6 @@ export class ShipLoadoutInfoList extends React.Component {
     let model = -1;
     if (this.props.loadoutInfos[0])
       model = JSON.parse(this.props.loadoutInfos[0]._id)[0].model;
-    console.log("MODEL: ", model);
     const filteredLoadoutInfos = filterLoadoutArray(this.props.loadoutInfos, this.state.groupingSettings);
 
 

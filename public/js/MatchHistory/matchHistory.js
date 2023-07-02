@@ -134,8 +134,6 @@ async function requestNextMatchHistoryPage(evt) {
 }
 
 async function executeSearch(query) {
-    console.log("SEARCH__");
-    console.log(query);
     // Clear old graphics
     clearMatchHistoryDisplay();
     const perspective = query.perspective.type;
@@ -146,8 +144,6 @@ async function executeSearch(query) {
     if (perspective == 'Ship') {
         response = await executeShipQuery(query);
     }
-    console.log("__RESPONSE__")
-    console.log(response);
 
     const resposeQuery = response.modifiedQuery;
     let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
@@ -198,7 +194,6 @@ async function executeHistoryQuery(query) {
     const response = await responseRaw.json();
 
     current_match_filters = response.modifiedQuery.filters;
-    console.log(current_match_filters)
 
     // Update graphics with recieved data
     if (query.perspective.type == "Overview") {
@@ -216,8 +211,6 @@ function loadOverviewPerspective(response) {
 }
 
 function loadPlayerPerspective(response) {
-    console.log("loading player perpective")
-    console.log(response);
     let playerData = response.playerData;
     // Initialize ship rates card
     let t = document.createElement('div', {is: "player-ship-info-table"});
