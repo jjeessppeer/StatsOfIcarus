@@ -41,8 +41,8 @@ export class LoadoutInfoFoldout extends React.Component {
         const matchupComponents = [];
         const filteredMatchupStats = filterLoadoutArray(this.props.matchupStats, this.state.groupingSettings);
         const mergedMatchupStats = mergeMatchupStats(filteredMatchupStats, this.state.groupingSettings);
+        const enemyMode = this.props.foldoutMode == 'Enemy matchups';
         for (const s of mergedMatchupStats) {
-            const enemyMode = this.props.foldoutMode == 'Enemy matchups';
             const PlayedGames = enemyMode ? s.PlayedVs : s.PlayedWith;
             const wins = enemyMode ? s.WinsVs : s.WinsWith;
             const winrate = wins / PlayedGames;
@@ -61,13 +61,12 @@ export class LoadoutInfoFoldout extends React.Component {
             a = a.props;
             b = b.props;
             const C = 10;
-            const m = 0.35;
+            const m = (enemyMode ? 0.65 : 0.35);
             const e1 = eloWinrate(b.ExpectedOutcome, b.ActualOutcome, b.PlayedGames);
             const e2 = eloWinrate(a.ExpectedOutcome, a.ActualOutcome, a.PlayedGames);
-            // const e2 = eloWinrate(a);
             const w1 = (C*m + e1 * b.PlayedGames ) / (C + b.PlayedGames);
             const w2 = (C*m + e2 * a.PlayedGames ) / (C + a.PlayedGames);
-            return w1 - w2;
+            return (enemyMode ? w2 - w1 : w1 - w2);
         });
 
         // const 
@@ -109,7 +108,7 @@ class LoadoutMatchup extends React.Component {
             <div className="loadout-matchup-box">
                 <ShipCanvas {...canvasData} width="175"></ShipCanvas>
                 <div>
-                    <div>{this.props.enemyMode ? 'Matchup' : 'Team comp'} played: {this.props.PlayedGames}</div>
+                    <div>{this.props.foldoutMode == 'Enemy matchups' ? 'Matchup' : 'Team comp'} played: {this.props.PlayedGames}</div>
                     <div>Win rate: {toPercentage(this.props.wins, this.props.PlayedGames)}% [{this.props.wins}]</div>
                     <div>Elo adjusted: {toPercentage(this.props.elorate, 1)}%</div>
                 </div>

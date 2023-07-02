@@ -27,7 +27,6 @@ export class ShipLoadoutInfoList extends React.Component {
   }
 
   groupingSettingsChanged = (groupingSettings) => {
-    console.log(groupingSettings);
     this.setState({
       groupingSettings: groupingSettings
     });

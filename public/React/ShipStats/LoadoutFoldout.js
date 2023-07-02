@@ -38,8 +38,8 @@ export class LoadoutInfoFoldout extends React.Component {
     const matchupComponents = [];
     const filteredMatchupStats = filterLoadoutArray(this.props.matchupStats, this.state.groupingSettings);
     const mergedMatchupStats = mergeMatchupStats(filteredMatchupStats, this.state.groupingSettings);
+    const enemyMode = this.props.foldoutMode == 'Enemy matchups';
     for (const s of mergedMatchupStats) {
-      const enemyMode = this.props.foldoutMode == 'Enemy matchups';
       const PlayedGames = enemyMode ? s.PlayedVs : s.PlayedWith;
       const wins = enemyMode ? s.WinsVs : s.WinsWith;
       const winrate = wins / PlayedGames;
@@ -66,13 +66,12 @@ export class LoadoutInfoFoldout extends React.Component {
       a = a.props;
       b = b.props;
       const C = 10;
-      const m = 0.35;
+      const m = enemyMode ? 0.65 : 0.35;
       const e1 = eloWinrate(b.ExpectedOutcome, b.ActualOutcome, b.PlayedGames);
       const e2 = eloWinrate(a.ExpectedOutcome, a.ActualOutcome, a.PlayedGames);
-      // const e2 = eloWinrate(a);
       const w1 = (C * m + e1 * b.PlayedGames) / (C + b.PlayedGames);
       const w2 = (C * m + e2 * a.PlayedGames) / (C + a.PlayedGames);
-      return w1 - w2;
+      return enemyMode ? w2 - w1 : w1 - w2;
     });
 
     // const 
@@ -107,6 +106,6 @@ class LoadoutMatchup extends React.Component {
       className: "loadout-matchup-box"
     }, /*#__PURE__*/React.createElement(ShipCanvas, _extends({}, canvasData, {
       width: "175"
-    })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, this.props.enemyMode ? 'Matchup' : 'Team comp', " played: ", this.props.PlayedGames), /*#__PURE__*/React.createElement("div", null, "Win rate: ", toPercentage(this.props.wins, this.props.PlayedGames), "% [", this.props.wins, "]"), /*#__PURE__*/React.createElement("div", null, "Elo adjusted: ", toPercentage(this.props.elorate, 1), "%")));
+    })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", null, this.props.foldoutMode == 'Enemy matchups' ? 'Matchup' : 'Team comp', " played: ", this.props.PlayedGames), /*#__PURE__*/React.createElement("div", null, "Win rate: ", toPercentage(this.props.wins, this.props.PlayedGames), "% [", this.props.wins, "]"), /*#__PURE__*/React.createElement("div", null, "Elo adjusted: ", toPercentage(this.props.elorate, 1), "%")));
   }
 }

@@ -235,6 +235,19 @@ export function mergeLoadoutInfos(loadoutInfos, options) {
 export function mergeMatchupStats(loadoutStatsArr, options) {
     const mergedLoadoutStats = mergeLoadoutArray(loadoutStatsArr, options);
     mergedLoadoutStats.sort((a, b) => b.count - a.count);
+    // mergedLoadoutStats.sort((a, b) => {
+    //     return b.count - a.PlayedVs
+    // });
+    // mergedLoadoutStats.sort((a, b) => {
+    //     const C = 50;
+    //     const m = 0.65;
+    //     const e1 = eloWinrate(b.ExpectedOutcomeVs, b.ActualOutcomeVs, b.PlayedGamesVs);
+    //     const e2 = eloWinrate(a.ExpectedOutcomeVs, a.ActualOutcomeVs, a.PlayedGamesVs);
+    //     // const e2 = eloWinrate(a);
+    //     const w1 = (C * m + e1 * b.PlayedGamesVs) / (C + b.PlayedGamesVs);
+    //     const w2 = (C * m + e2 * a.PlayedGamesVs) / (C + a.PlayedGamesVs);
+    //     return w2 - w1;
+    // });
     return mergedLoadoutStats;
 }
 
