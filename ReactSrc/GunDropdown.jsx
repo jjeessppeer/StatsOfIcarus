@@ -26,7 +26,7 @@ export class GunSelectionRow extends React.Component {
     }
 
     const gunDropdowns = [];
-    for(let i = 0; i < 6; i++) {
+    for(let i = 0; i < this.props.gunCount; i++) {
       gunDropdowns.push(<GunDropdown idx={i+1} options={lightOptions} selectedOption={selectedOptions[i]} selectionChanged={this.selectionChanged}></GunDropdown>)
     }
 

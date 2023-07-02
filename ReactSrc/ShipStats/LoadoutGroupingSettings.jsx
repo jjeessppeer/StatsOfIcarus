@@ -1,12 +1,42 @@
 
 import { GunDropdown, GunSelectionRow } from '/React/GunDropdown.js';
 import { ShipDropdown } from '/React/ShipStats/ShipDropdown.js';
+import { getShipItem } from '/React/ShipStats/LoadoutUtils.js';
 
 
 
 export class LoadoutGroupingSettings extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      gunCount: 6
+    }
+  }
+
+
+
+  componentDidMount() {
+    this.updateGunCount();
+  }
+
+  componentDidUpdate() {
+    this.updateGunCount();
+  }
+
+  updateGunCount() {
+    const model = this.props.settings.modelFilter;
+    if (model != -1) {
+      this._asyncRequest = getShipItem(model).then(
+        shipItem => {
+          this._asyncRequest = null;
+          if (shipItem.gunCount != this.state.gunCount)
+            this.setState({ gunCount: shipItem.GunCount });
+        });
+    }
+    else {
+      if (6 != this.state.gunCount)
+        this.setState({ gunCount: 6 });
+    }
   }
 
   gunToggled = (idx, active) => {
@@ -32,7 +62,14 @@ export class LoadoutGroupingSettings extends React.Component {
 
   render() {
 
-    const showGunSelections = !this.props.settings.modelFilterEnabled || this.props.settings.modelFilter != -1
+    const showGunSelections = !this.props.settings.modelFilterEnabled || this.props.settings.modelFilter != -1;
+
+
+    // let gunCount = 6;
+    // if (this.props.settings.modelFilter != -1) {
+    //   const shipItem = await getShipItem(this.props.settings.modelFilter);
+    //   gunCount = shipItem.GunCount;
+    // }
     // const gunToggles = [];
     // for (let i = 0; i < 6; i++) {
     //   gunToggles.push(
@@ -58,7 +95,7 @@ export class LoadoutGroupingSettings extends React.Component {
             Ship: <ShipDropdown selectionChanged={this.shipSelectionChanged} selectedId={this.props.settings.modelFilter}></ShipDropdown>
           </div>}
         {showGunSelections &&
-          <GunSelectionRow selections={this.props.settings.gunSelections} handleChange={this.gunSelectionChanged}>
+          <GunSelectionRow gunCount={this.state.gunCount} selections={this.props.settings.gunSelections} handleChange={this.gunSelectionChanged}>
           </GunSelectionRow>}
 
         {/* <br></br> */}

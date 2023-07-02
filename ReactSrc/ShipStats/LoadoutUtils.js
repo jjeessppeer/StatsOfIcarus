@@ -90,6 +90,15 @@ export const SHIP_GUN_IDX_MAP = {
     }
 }
 
+
+const itemCacheShips = {};
+export async function getShipItem(model) {
+    if (itemCacheShips[model]) return itemCacheShips[model];
+    const shipItemRaw = await fetch(`/game-item/ship/${model}`);
+    const shipItem = await shipItemRaw.json();
+    return shipItem
+}
+
 export function mapLoadoutId(loadoutString, options) {
     const loadoutObj = JSON.parse(loadoutString);
 
