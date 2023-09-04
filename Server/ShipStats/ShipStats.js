@@ -36,10 +36,9 @@ function generateSearchStrings(target, teamIdx, shipIdx) {
 
 function generateSearchTagArr(target, teamIdx, shipIdx) {
     const tags = [];
-    // tags.push(JSON.stringify(loadoutSearchObj(teamIdx, shipIdx, target.Model)));
-    for (const loadoutObj in target) {
-        tags.push(loadoutSearchObj(teamIdx, shipIdx, loadoutObj.model, loadoutObj.G, loadoutObj.gun));
-        // tags.push(JSON.stringify(loadoutObj));
+    tags.push(loadoutSearchObj(teamIdx, shipIdx, target.Model));
+    for (const gunIdx in target.Guns) {
+        tags.push(loadoutSearchObj(teamIdx, shipIdx, undefined, Number(gunIdx), target.Guns[gunIdx]));
     }
     return tags;
 }
