@@ -15,6 +15,7 @@ const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
 const elo = require("./Elo/EloHelper.js");
+const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
 
 
@@ -106,6 +107,20 @@ app.post(
     const eloTimeline = await elo.getPlayerEloData(mongoClient, req.body.playerId, req.body.rankingGroup);
     const ladderRank = await elo.getLeaderboardPosition(mongoClient, req.body.rankingGroup, req.body.playerId);
     res.status(200).json({Timeline: eloTimeline, LadderRank: ladderRank});
+});
+
+app.post(
+    '/balance_lobby',
+    schemaMiddleware(schemas.lobbyBalance),
+    async function(req, res) {
+    const balancedTeams = await lobbyBalancer.generateBalancedTeams(
+        mongoClient, 
+        req.body.playerIds, 
+        req.body.randomness,
+        req.body.teamCount,
+        req.body.teamSize,
+        req.body.keepPilots);
+    res.status(200).json(balancedTeams);
 });
 
 
