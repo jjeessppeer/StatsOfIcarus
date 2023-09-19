@@ -265,8 +265,8 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
                 <div class="date">x days ago</div>
                 <div class="elo">
                   <div>
-                    <span class="blue-elo">123</span>
                     <span class="red-elo">321</span>
+                    <span class="blue-elo">123</span>
                   </div>
                   <div class="matchup-bar">
                     <div class="matchup-bar-left"></div>
@@ -318,8 +318,8 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
 
     this.querySelector(".info .map").innerHTML = `${mapName}<br>${gameMode}`;
 
-    this.querySelector(".info .elo .blue-elo").textContent = Math.round(matchData.Ranking.TeamRankings[0]);
-    this.querySelector(".info .elo .red-elo").textContent = Math.round(matchData.Ranking.TeamRankings[1]);
+    this.querySelector(".info .elo .red-elo").textContent = Math.round(matchData.Ranking.TeamRankings[0]);
+    this.querySelector(".info .elo .blue-elo").textContent = Math.round(matchData.Ranking.TeamRankings[1]);
 
     const outcome = matchData.Ranking.ExpectedOutcome;
     this.querySelector(".info .elo .matchup-bar-left").style.width = `${Math.ceil(50 * outcome)}%`;

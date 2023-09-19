@@ -203,12 +203,12 @@
 
 .match-history-entry .overview-table .info > .elo span.red-elo {
     color: var(--red-4);
-    text-align: left;
+    text-align: right;
 }
 
 .match-history-entry .overview-table .info > .elo span.blue-elo {
     color: var(--blue-4);
-    text-align: right;
+    text-align: left;
 }
 
 .match-history-entry .overview-table .info .matchup-bar {
@@ -224,7 +224,7 @@
     margin:0;
     margin-right:-4px;
     vertical-align:top;
-    background-color:var(--blue-4);
+    background-color:var(--red-4);
 }
 
 .match-history-entry .overview-table .info .matchup-bar-right {
@@ -235,7 +235,7 @@
     margin:0;
     margin-right:-4px;
     vertical-align:top;
-    background-color:var(--red-4);
+    background-color:var(--blue-4);
 }
 
 .match-history-entry.red-winner .overview-table .info .elo-delta {
