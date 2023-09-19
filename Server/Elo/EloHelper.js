@@ -10,6 +10,13 @@ const ELO_CATEGORIES = {
     'Overall': (match) => { return true; },
 }
 
+function getOldestAllowedPlayerTimestamp(ratingGroup) {
+    if (ratingGroup == 'Overall') return 0;
+    const currentTimestamp = new Date().getTime();
+    const oldestTimestamp = currentTimestamp - MAX_INACTIVITY_MS;
+    return oldestTimestamp;
+}
+
 async function getPlayerELO(client, playerId, ratingGroup) {
     const playerCollection = client.db("mhtest").collection("Players");
     const player = await playerCollection.findOne(
@@ -156,8 +163,7 @@ async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
 
 async function getLeaderboardPosition(client, ratingGroup, playerId) {
     const playersCollection = client.db("mhtest").collection("Players");
-    const currentTimestamp = new Date().getTime();
-    const oldestTimestamp = currentTimestamp - MAX_INACTIVITY_MS;
+    const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
     const aggregate = playersCollection.aggregate([
         { $match: { 
             ELOCategories: ratingGroup, 
@@ -193,8 +199,7 @@ async function getLeaderboardPosition(client, ratingGroup, playerId) {
 
 async function getLeaderboardPage(client, ratingGroup, startPos, count) {
     const playersCollection = client.db("mhtest").collection("Players");
-    const currentTimestamp = new Date().getTime();
-    const oldestTimestamp = currentTimestamp - MAX_INACTIVITY_MS;
+    const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
     const aggregate = playersCollection.aggregate([
         { $match: { 
             ELOCategories: ratingGroup, 
