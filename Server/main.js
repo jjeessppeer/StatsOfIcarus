@@ -24,7 +24,8 @@ const shipStats = require('./ShipStats/ShipStats.js');
 const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
-const MOD_VERSION_LATEST = "0.1.3";
+const MOD_VERSION_LATEST = "0.1.4";
+const MOD_VERSION_REQUIRED = "0.1.3";
 
 // var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
@@ -65,11 +66,16 @@ app.post('/submit_match_history', async function (req, res) {
         return res.status(400).send("Error submitting match history.");
     }
 
-    if (req.body.ModVersion != MOD_VERSION_LATEST) {
-        return res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
+    if (req.body.ModVersion != MOD_VERSION_REQUIRED) {
+        return res.status(400).send(`MatchHistoryMod version incompatible. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST})`);
     }
     matchHistory.submitRecord(req.body, ip);
-    res.status(202).send();
+
+    if (req.body.ModVersion != MOD_VERSION_LATEST) {
+        return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}`);
+    }
+
+    res.status(200).send();
 });
 
 app.post(
