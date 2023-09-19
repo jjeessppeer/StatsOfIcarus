@@ -262,9 +262,18 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
             <div class="info">
                 <div class="map">Misty Mutiny</div>
                 <div class="time">11m 14s</div>
-                <br>
-                <br>
                 <div class="date">x days ago</div>
+                <div class="elo">
+                  <div>
+                    <span class="blue-elo">123</span>
+                    <span class="red-elo">321</span>
+                  </div>
+                  <div class="matchup-bar">
+                    <div class="matchup-bar-left"></div>
+                    <div class="matchup-bar-right"></div>
+                  </div>
+                  <span class="elo-delta">delta</span>
+                </div>
             </div>
             <div class="tags">
             </div>
@@ -307,7 +316,15 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
    
 
 
-    this.querySelector(".info .map").textContent = `${mapName}\n${gameMode}`;
+    this.querySelector(".info .map").innerHTML = `${mapName}<br>${gameMode}`;
+
+    this.querySelector(".info .elo .blue-elo").textContent = Math.round(matchData.Ranking.TeamRankings[0]);
+    this.querySelector(".info .elo .red-elo").textContent = Math.round(matchData.Ranking.TeamRankings[1]);
+
+    const outcome = matchData.Ranking.ExpectedOutcome;
+    this.querySelector(".info .elo .matchup-bar-left").style.width = `${Math.ceil(50 * outcome)}%`;
+    this.querySelector(".info .elo .matchup-bar-right").style.width = `${Math.ceil(50 * (1 - outcome))}%`;
+    this.querySelector(".info .elo .elo-delta").textContent = `+${Math.abs(matchData.Ranking.Delta)}`;
 
     let timeMinutes = Math.floor(matchData.MatchTime / 60);
     let timeSeconds = matchData.MatchTime % 60;

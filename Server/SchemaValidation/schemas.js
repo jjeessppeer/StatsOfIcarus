@@ -18,7 +18,19 @@ const eloTimelineRequest = Joi.object({
         .required(),
 })
 
+const lobbyBalance = Joi.object({
+    playerIds: Joi.array()
+        .items(Joi.number().integer())
+        .max(16)
+        .required(),
+    randomness: Joi.number().required(),
+    keepPilots: Joi.bool().required(),
+    teamCount: Joi.number().integer().required(),
+    teamSize: Joi.number().integer().required()
+});
+
 module.exports = {
     leaderboardRequest,
-    eloTimelineRequest
+    eloTimelineRequest,
+    lobbyBalance
 }

@@ -6,6 +6,7 @@ const Joi = require('joi');
 const { MongoClient, ReturnDocument } = require("mongodb");
 var fs = require('fs');
 var http = require('http');
+const semver = require('semver')
 
 const schemaMiddleware = require('./SchemaValidation/middleware.js');
 const schemas = require('./SchemaValidation/schemas.js');
@@ -15,6 +16,7 @@ const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
 const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
 const elo = require("./Elo/EloHelper.js");
+const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA, PLAYER_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
 
 
@@ -24,6 +26,7 @@ const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
 const MOD_VERSION_LATEST = "0.1.3";
+const MOD_VERSION_REQUIRED = "0.1.3";
 
 // var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
@@ -64,11 +67,16 @@ app.post('/submit_match_history', async function (req, res) {
         return res.status(400).send("Error submitting match history.");
     }
 
-    if (req.body.ModVersion != MOD_VERSION_LATEST) {
-        return res.status("400").send(`MatchHistoryMod version incompatible. Required version ${MOD_VERSION_LATEST} (recieved ${req.body.ModVersion})`);
+    if (semver.satisfies(req.body.ModVersion, `=>${MOD_VERSION_REQUIRED}`)) {
+        return res.status(400).send(`MatchHistoryMod version incompatible. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST})`);
     }
     matchHistory.submitRecord(req.body, ip);
-    res.status(202).send();
+
+    if (semver.satisfies(req.body.ModVersion, `<${MOD_VERSION_LATEST}`)) {
+        return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}`);
+    }
+
+    res.status(200).send();
 });
 
 app.post(
@@ -106,6 +114,20 @@ app.post(
     const eloTimeline = await elo.getPlayerEloData(mongoClient, req.body.playerId, req.body.rankingGroup);
     const ladderRank = await elo.getLeaderboardPosition(mongoClient, req.body.rankingGroup, req.body.playerId);
     res.status(200).json({Timeline: eloTimeline, LadderRank: ladderRank});
+});
+
+app.post(
+    '/balance_lobby',
+    schemaMiddleware(schemas.lobbyBalance),
+    async function(req, res) {
+    const balancedTeams = await lobbyBalancer.generateBalancedTeams(
+        mongoClient, 
+        req.body.playerIds, 
+        req.body.randomness,
+        req.body.teamCount,
+        req.body.teamSize,
+        req.body.keepPilots);
+    res.status(200).json(balancedTeams);
 });
 
 
