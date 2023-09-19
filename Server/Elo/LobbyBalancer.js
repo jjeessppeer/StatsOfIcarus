@@ -5,6 +5,7 @@ function addPlayerToTeam(player, team) {
     team.balanceElo += player.balanceElo;
     team.realElo += player.realElo;
     team.playerNames.push(player.name);
+    team.playerElos.push(player.realElo);
     team.memberCount += 1;
 }
 
@@ -33,6 +34,7 @@ async function generateBalancedTeams(mongoClient, playerIds, randomness=100, tea
             realElo: 0,
             memberCount: 0,
             playerNames: [],
+            playerElos: []
         });
     }
 
@@ -40,14 +42,19 @@ async function generateBalancedTeams(mongoClient, playerIds, randomness=100, tea
     const playerCollection = mongoClient.db("mhtest").collection("Players");
     for (let i = 0; i < playerIds.length; i++) {
         const playerId = playerIds[i];
+        if (playerId == -1) continue; // ignore AI for lobby balance.
 
         const playerObj = await playerCollection.findOne( {_id: playerId} );
-        if (!playerObj) return [];
-        // console.log(playerObj.Name);
-        if (playerId == -1) continue; // ignore AI for lobby balance.
-        const eloPoints = playerObj.ELORating.Overall.ELOPoints;
-        const name = playerObj.Name.substring(0, playerObj.Name.length-5);
-        
+
+        let eloPoints, name;
+        if (playerObj) {
+            eloPoints = playerObj.ELORating.Overall.ELOPoints;
+            name = playerObj.Name.substring(0, playerObj.Name.length-5);
+        }
+        else {
+            eloPoints = 1000;
+            name = "Unknown Player";
+        }
         const elo_offset = Math.random() * 2 * randomness - randomness;
         const player = {
             name: name, 
