@@ -149,23 +149,100 @@
 
 /* Info box */
 .match-history-entry .overview-table .info {
-    width: 160px;
+    width: 140px;
     /* padding-top: 8px; */
     text-align: center;
-    vertical-align: top;
+    /* vertical-align: top; */
+    /* padding-left: 4px; */
+    /* padding-right: 4px; */
 
+    display: flex;
+    /* flex: 1; */
+    align-items: stretch;
+    flex-direction: column;
+    /* align-content: space-between; */
     
-    /* background-image: url("/images/item-icons/map6.png");
-    background-size:cover;
-    background-position: center;
-    background-color: #cccccc;
-    background-size: 284px 160px; */
+    /* justify-content: start; */
+    /* align-items: center; */
 
     font-size: 14px;
     color: #555e5e;
 }
+
+/* .match-history-entry .overview-table > .info {
+    padding-right: 5px;
+    padding-left: 5px;
+} */
+
+.match-history-entry.blue-winner .overview-table > .info {
+    border-right: 1px solid var(--blue-3);
+    border-left: 1px solid var(--blue-3);
+    border-top-color: var(--blue-3);
+}
+
+.match-history-entry.red-winner .overview-table > .info {
+    border-right: 1px solid var(--red-3);
+    border-left: 1px solid var(--red-3);
+    border-top-color: var(--red-3);
+}
+
 .match-history-entry .overview-table .info > div{
-    margin-top: 6px;
+    margin-top: 0px;
+}
+
+.match-history-entry .overview-table .info > .elo {
+    border-top: 1px solid;
+    margin-top: auto;
+    border-top-color: inherit;
+}
+
+.match-history-entry .overview-table .info > .elo span {
+    width: 40%;
+    display: inline-block;
+}
+
+.match-history-entry .overview-table .info > .elo span.red-elo {
+    color: var(--red-4);
+    text-align: left;
+}
+
+.match-history-entry .overview-table .info > .elo span.blue-elo {
+    color: var(--blue-4);
+    text-align: right;
+}
+
+.match-history-entry .overview-table .info .matchup-bar {
+    height: 5px;
+    /* margin-bottom: 10px; */
+}
+
+.match-history-entry .overview-table .info .matchup-bar-left {
+    display:inline-block;
+    width: 25%;
+    height:100%;
+    padding:0;
+    margin:0;
+    margin-right:-4px;
+    vertical-align:top;
+    background-color:var(--blue-4);
+}
+
+.match-history-entry .overview-table .info .matchup-bar-right {
+    display:inline-block;
+    width: 25%;
+    height:100%;
+    padding:0;
+    margin:0;
+    margin-right:-4px;
+    vertical-align:top;
+    background-color:var(--red-4);
+}
+
+.match-history-entry.red-winner .overview-table .info .elo-delta {
+    color: var(--red-4);
+}
+.match-history-entry.blue-winner .overview-table .info .elo-delta {
+    color: var(--blue-4);
 }
 
 .match-history-entry .overview-table .tags {
@@ -258,11 +335,13 @@
     border-bottom: 1px solid;
 }
 
-.match-history-entry.red-winner .overview-table > div:not(:last-child){
-    border-color: var(--red-4);
+.match-history-entry.red-winner .overview-table > div {
+    border-top-color: var(--red-4);
+    border-bottom-color: var(--red-4);
 }
-.match-history-entry.blue-winner .overview-table > div:not(:last-child){
-    border-color: var(--blue-4);
+.match-history-entry.blue-winner .overview-table > div {
+    border-top-color: var(--blue-4);
+    border-bottom-color: var(--blue-4);
 }
 
 .match-history-entry.red-winner .overview-table .expand-button{
