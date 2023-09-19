@@ -50,7 +50,7 @@ async function submitRecord(record, ip) {
     return true;
 }
 
-async function updatePlayer(player) {
+async function updatePlayer(player, timestamp) {
     const playersCollection = client.db("mhtest").collection("Players");
     let dbPlayer = await playersCollection.findOne({ _id: player.UserId });
 
@@ -72,7 +72,8 @@ async function updatePlayer(player) {
             MatchCount: 0,
             MatchesWon: 0,
             MatchesPlayer: [],
-            ELORating: {}
+            ELORating: {},
+            LastMatchTimestamp: timestamp
         });
     }
     else {
@@ -85,7 +86,11 @@ async function updatePlayer(player) {
         }
         await playersCollection.updateOne(
             {_id: player.UserId},
-            {$set: {Levels: dbLevels, MaxLevel: Math.max(dbLevels)}},
+            {$set: {
+                Levels: dbLevels, 
+                MaxLevel: Math.max(dbLevels),
+                LastMatchTimestamp: timestamp
+            }},
         )
     }
 }
@@ -183,6 +188,8 @@ async function insertMatchHistory(record, ip) {
     let playerLevels = [];
     let playerCount = 0;
 
+    const timestamp = new Date().getTime();
+
     // Initialize array structure.
     for (let i = 0; i < record.TeamCount; i++) {
         // Add a ship info array per team
@@ -227,7 +234,7 @@ async function insertMatchHistory(record, ip) {
                 continue;
             }
             playerCount += 1;
-            await updatePlayer(player);
+            await updatePlayer(player, timestamp);
             let equipmentId = await getEquipmentId(player);
 
             playerIds[team][shipIndex].push(player.UserId);
@@ -256,8 +263,7 @@ async function insertMatchHistory(record, ip) {
         SubmitterIp: ip,
         SubmitterIps: [ip],
         Passworded: record.Passworded,
-        Timestamp: new Date().getTime(),
-        SubmissionCount: 1,
+        Timestamp: timestamp,
         MatchTags: [],
         MatchId: record.MatchId,
         MapId: record.MapId,

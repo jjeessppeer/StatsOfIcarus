@@ -2,8 +2,7 @@
 // TODO: handle other team sizes than 2.
 const Elo = require('./EloCalculator.js');
 
-
-
+const MAX_INACTIVITY_MS = 1000 * 60 * 60 * 24 * 60;
 
 const ELO_CATEGORIES = {
     'SCS': (match) => { return match.MatchTags.includes('SCS') },
@@ -101,16 +100,19 @@ async function processMatch(client, match, ratingGroup) {
         }
     }
 
-    const matchCollection = client.db("mhtest").collection("Matches");
-    await matchCollection.updateOne(
-        {_id: match._id},
-        { $set: {Ranking: {
-            TeamRankings: teamRankings,
-            ExpectedOutcome: expectedOutcome,
-            ActualOutcome: actualOutcome,
-            Delta: delta
-        }} }
-    );
+    if (ratingGroup == 'Overall') {
+        const matchCollection = client.db("mhtest").collection("Matches");
+        await matchCollection.updateOne(
+            { _id: match._id },
+            { $set: {
+                Ranking: {
+                    TeamRankings: teamRankings,
+                    ExpectedOutcome: expectedOutcome,
+                    ActualOutcome: actualOutcome,
+                    Delta: delta
+            }}}
+        );
+    }
 }
 
 async function getLatestLeaderboardTimestamp() {
@@ -154,8 +156,14 @@ async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
 
 async function getLeaderboardPosition(client, ratingGroup, playerId) {
     const playersCollection = client.db("mhtest").collection("Players");
+    const currentTimestamp = new Date().getTime();
+    const oldestTimestamp = currentTimestamp - MAX_INACTIVITY_MS;
     const aggregate = playersCollection.aggregate([
-        { $match: { ELOCategories: ratingGroup, [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 } } },
+        { $match: { 
+            ELOCategories: ratingGroup, 
+            [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
+            LastMatchTimestamp: { $gt: oldestTimestamp }
+        }},
         { $setWindowFields: {
             // partitionBy: ,
             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
@@ -185,8 +193,14 @@ async function getLeaderboardPosition(client, ratingGroup, playerId) {
 
 async function getLeaderboardPage(client, ratingGroup, startPos, count) {
     const playersCollection = client.db("mhtest").collection("Players");
+    const currentTimestamp = new Date().getTime();
+    const oldestTimestamp = currentTimestamp - MAX_INACTIVITY_MS;
     const aggregate = playersCollection.aggregate([
-        { $match: { ELOCategories: ratingGroup, [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 } } },
+        { $match: { 
+            ELOCategories: ratingGroup, 
+            [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
+            LastMatchTimestamp: { $gt: oldestTimestamp }
+        } },
         { $setWindowFields: {
             // partitionBy: ,
             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
