@@ -60,6 +60,7 @@ async function getPlayerRankings(client, match, ratingGroup) {
 async function processMatchAllCategories(client, match) {
     let matchRankingInfo;
     let categories = [];
+    if (match.GameMode != 2 || match.TeamSize != 2 || match.TeamCount != 2) return [];
     for (const ratingGroup in ELO_CATEGORIES) {
         if (!ELO_CATEGORIES[ratingGroup](match)) continue;
         categories.push(ratingGroup);
