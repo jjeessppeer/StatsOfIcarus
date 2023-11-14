@@ -1,3 +1,5 @@
+import { game_modes, SKILL_ORDER, ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
+
 class MatchHistoryList extends HTMLUListElement {
   constructor() {
     super();
@@ -6,7 +8,6 @@ class MatchHistoryList extends HTMLUListElement {
 
   addMatches(matches) {
     for (let match of matches) {
-      console.log(match.Tags)
       let overview = document.createElement('li', { is: 'match-history-entry' });
       overview.fillData(match);
       this.append(overview);
@@ -82,6 +83,96 @@ class MatchHistoryDetails extends HTMLDivElement {
   }
 }
 
+class ShipCanvas extends HTMLCanvasElement {
+  constructor() {
+    super();
+    this.setAttribute("height", 250);
+    this.setAttribute("width", 250);
+    this.transform = [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1];
+  }
+
+  async drawShip(shipInfo, shipItem, gunItems) {
+    const gunPositions = shipItem.GunPositions;
+    const shipLoadout = shipInfo.Loadout;
+    const shipModel = shipInfo.ShipModel;
+    const canvas = this;
+    const ctx = canvas.getContext("2d");
+    const shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
+
+    // console.log("SHIPCANVAS");
+    // console.log(shipModel);
+    // console.log(JSON.stringify(shipLoadout));
+    // console.log(JSON.stringify(gunPositions));
+
+    // Find gun bounding rectangle.
+    let maxY, minY, minX, maxX;
+    for (let i = 0; i < gunPositions.length; i++) {
+      let [x, y] = gunPositions[i];
+      if (minX == undefined || x < minX) minX = x;
+      if (maxX == undefined || x > maxX) maxX = x;
+      if (minY == undefined || y < minY) minY = y;
+      if (maxY == undefined || y > maxY) maxY = y;
+      // break;
+    }
+    // maxX = toShipImageCoordinates([maxX, 0], shipModel, shipImage)[0];
+    // minX = toShipImageCoordinates([minX, 0], shipModel, shipImage)[0];
+    maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
+    minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
+
+    let centerX = shipImage.width / 2
+    // let centerX = (minX + maxX) / 2;
+    let centerY = (minY + maxY) / 2;
+
+    resetMatrix(this.transform);
+    translateMatrix(this.transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
+    zoomMatrixAround(this.transform, canvas.width / 2, canvas.height / 2, 0.5);
+    applyMatrix(ctx, this.transform);
+
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(shipImage, 0, 0);
+
+    const iconSize = 100;
+    // Spread close guns out from eachother 
+    let adjustedGunPositions = [];
+    for (let i = 0; i < gunPositions.length; i++) {
+      let pos = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
+      adjustedGunPositions.push(pos);
+    }
+    adjustedGunPositions = spreadGunPositions(adjustedGunPositions, iconSize);
+
+    // Draw gun icons.
+    for (let i = 0; i < shipLoadout.length; i++) {
+      let gunId = shipLoadout[i];
+      if (gunId == 0) continue;
+      let gunImage = await loadImageAsync(`/images/item-icons/item${gunId}.jpg`);
+
+      // let [cx, cy] = toShipImageCoordinates(adjustedGunPositions[i], shipModel, shipImage);
+      let [cx, cy] = adjustedGunPositions[i];
+      ctx.drawImage(gunImage, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
+
+      // let boxSize = 25;
+      // let [cx2, cy2] = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
+      // ctx.fillStyle = "red";
+      // ctx.beginPath();
+      // ctx.rect(cx2-boxSize/2, cy2-boxSize/2, boxSize, boxSize); 
+      // ctx.fill();
+      // ctx.stroke();
+
+      // ctx.beginPath();
+      // ctx.fillStyle = "black";
+      // ctx.font = "30px Arial"; 
+      // ctx.textAlign = "center"; 
+      // ctx.fillText(i, cx2, cy2+10); 
+      // ctx.stroke();
+
+    }
+  }
+}
+
 class ShipCrew extends HTMLDivElement {
   constructor() {
     super();
@@ -90,7 +181,6 @@ class ShipCrew extends HTMLDivElement {
     this.innerHTML = `
             <span>EMPTY SHIP</span>
             <div>
-                <canvas height="250" width="250"></canvas>
                 <ul>
                 <li></li>
                 <li></li>
@@ -99,12 +189,10 @@ class ShipCrew extends HTMLDivElement {
                 </ul>
             </div>
         `;
-    this.transform = [
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1];
 
 
+    this.shipCanvas = document.createElement('canvas', {is: 'ship-canvas'});
+    this.querySelector('div').prepend(this.shipCanvas);
   }
 
   async fillData(matchData, teamIdx, shipIdx) {
@@ -147,80 +235,7 @@ class ShipCrew extends HTMLDivElement {
 
     let shipInfo = getShipLoadout(matchData, matchData.Ships[teamIdx][shipIdx]);
     let shipItem = getShipItem(matchData, shipInfo.ShipModel);
-    let gunPositions = shipItem.GunPositions;
-    let shipLoadout = shipInfo.Loadout;
-    let shipModel = shipInfo.ShipModel;
-
-    let canvas = this.querySelector("canvas");
-    let ctx = canvas.getContext("2d");
-    let shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);
-
-    // Find gun bounding rectangle.
-    let maxY, minY, minX, maxX;
-    for (let i = 0; i < gunPositions.length; i++) {
-      let [x, y] = gunPositions[i];
-      if (minX == undefined || x < minX) minX = x;
-      if (maxX == undefined || x > maxX) maxX = x;
-      if (minY == undefined || y < minY) minY = y;
-      if (maxY == undefined || y > maxY) maxY = y;
-      // break;
-    }
-    // maxX = toShipImageCoordinates([maxX, 0], shipModel, shipImage)[0];
-    // minX = toShipImageCoordinates([minX, 0], shipModel, shipImage)[0];
-    maxY = toShipImageCoordinates([0, maxY], shipModel, shipImage)[1];
-    minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
-
-    let centerX = shipImage.width / 2
-    // let centerX = (minX + maxX) / 2;
-    let centerY = (minY + maxY) / 2;
-
-    resetMatrix(this.transform);
-    // translateMatrix(this.transform, canvas.width/2 - , canvas.height/2 - shipImage.height/2);
-    // zoomMatrixAround(this.transform, canvas.width/2, canvas.height/2, 0.4);
-    translateMatrix(this.transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
-    zoomMatrixAround(this.transform, canvas.width / 2, canvas.height / 2, 0.5);
-    applyMatrix(ctx, this.transform);
-
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(shipImage, 0, 0);
-
-    let iconSize = 100;
-    // Spread close guns out from eachother 
-    let adjustedGunPositions = [];
-    for (let i = 0; i < gunPositions.length; i++) {
-      let pos = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
-      adjustedGunPositions.push(pos);
-    }
-    adjustedGunPositions = spreadGunPositions(adjustedGunPositions, iconSize);
-
-    // Draw gun icons.
-    for (let i = 0; i < shipLoadout.length; i++) {
-      let gunId = shipLoadout[i];
-      if (gunId == 0) continue;
-      let gunInfo = getGunItem(matchData, gunId);
-      let gunImage = await loadImageAsync(`/images/item-icons/${gunInfo.IconPath}`);
-
-      // let [cx, cy] = toShipImageCoordinates(adjustedGunPositions[i], shipModel, shipImage);
-      let [cx, cy] = adjustedGunPositions[i];
-      ctx.drawImage(gunImage, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
-
-      // let boxSize = 25;
-      // let [cx2, cy2] = toShipImageCoordinates(gunPositions[i], shipModel, shipImage);
-      // ctx.fillStyle = "red";
-      // ctx.beginPath();
-      // ctx.rect(cx2-boxSize/2, cy2-boxSize/2, boxSize, boxSize); 
-      // ctx.fill();
-      // ctx.stroke();
-
-      // ctx.beginPath();
-      // ctx.fillStyle = "black";
-      // ctx.font = "30px Arial"; 
-      // ctx.textAlign = "center"; 
-      // ctx.fillText(i, cx2, cy2+10); 
-      // ctx.stroke();
-
-    }
+    this.shipCanvas.drawShip(shipInfo, shipItem);
   }
 }
 
@@ -247,9 +262,18 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
             <div class="info">
                 <div class="map">Misty Mutiny</div>
                 <div class="time">11m 14s</div>
-                <br>
-                <br>
                 <div class="date">x days ago</div>
+                <div class="elo">
+                  <div>
+                    <span class="red-elo">321</span>
+                    <span class="blue-elo">123</span>
+                  </div>
+                  <div class="matchup-bar">
+                    <div class="matchup-bar-left"></div>
+                    <div class="matchup-bar-right"></div>
+                  </div>
+                  <span class="elo-delta">delta</span>
+                </div>
             </div>
             <div class="tags">
             </div>
@@ -282,7 +306,25 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
 
       console.log(matchData.MapId);
     }
-    this.querySelector(".info .map").textContent = `${mapName}\n${gameMode}`;
+
+    // if (matchData.Ranking) {
+    //   mapName = `
+    //   Elo: \n${Math.round(matchData.Ranking.TeamRankings[0])} | ${Math.round(matchData.Ranking.TeamRankings[1])}
+    //   \nOutcome: \n${(Math.round(matchData.Ranking.ExpectedOutcome * 100) / 100).toFixed(2)} | ${(Math.round(matchData.Ranking.ActualOutcome * 100) / 100).toFixed(2)}
+    //   \nDelta: \n${matchData.Ranking.Delta}`;
+    // }
+   
+
+
+    this.querySelector(".info .map").innerHTML = `${mapName}<br>${gameMode}`;
+
+    this.querySelector(".info .elo .red-elo").textContent = Math.round(matchData.Ranking.TeamRankings[0]);
+    this.querySelector(".info .elo .blue-elo").textContent = Math.round(matchData.Ranking.TeamRankings[1]);
+
+    const outcome = matchData.Ranking.ExpectedOutcome;
+    this.querySelector(".info .elo .matchup-bar-left").style.width = `${Math.ceil(50 * outcome)}%`;
+    this.querySelector(".info .elo .matchup-bar-right").style.width = `${Math.ceil(50 * (1 - outcome))}%`;
+    this.querySelector(".info .elo .elo-delta").textContent = `+${Math.abs(matchData.Ranking.Delta)}`;
 
     let timeMinutes = Math.floor(matchData.MatchTime / 60);
     let timeSeconds = matchData.MatchTime % 60;
@@ -341,6 +383,14 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
   }
 }
 
+class LoadMoreButton extends HTMLButtonElement {
+  constructor() {
+    super();
+    this.classList.add('load-more-matches-button');
+    this.innerHTML = 'Show Older';
+  }
+}
+
 class PlayerNametag extends HTMLLIElement {
   constructor() {
     super();
@@ -378,6 +428,52 @@ class PlayerNametag extends HTMLLIElement {
   }
 }
 
+function getShipLoadout(matchRecord, shipLoadoutId) {
+  for (let ship of matchRecord.ShipLoadouts) {
+      if (ship._id == shipLoadoutId) return ship;
+  }
+  throw "No ship with specified id found";
+}
+
+function getPlayerInfo(matchRecord, playerId) {
+  for (let player of matchRecord.PlayerInfo) {
+      if (player._id == playerId) {
+          return player;
+      }
+  }
+  console.log("No player " + playerId);
+  console.log(matchRecord);
+  throw "No player with specified id found " + playerId;
+}
+
+function getLoadoutInfo(matchRecord, loadoutId) {
+  for (let loadout of matchRecord.LoadoutInfo) {
+      if (loadout._id == loadoutId) return loadout;
+  }
+  throw "No loadout with specified id found";
+}
+
+function getSkillItem(matchRecord, skillId) {
+  for (let skill of matchRecord.SkillItems) {
+      if (skill._id == skillId) return skill;
+  }
+  throw "No skill with specified id found";
+}
+
+function getGunItem(matchRecord, gunId) {
+  for (let gun of matchRecord.GunItems) {
+      if (gun._id == gunId) return gun;
+  }
+  throw `No gun with specified id found: ${gunId}`;
+}
+
+function getShipItem(matchRecord, shipId) {
+  for (let ship of matchRecord.ShipItems) {
+      if (ship._id == shipId) return ship;
+  }
+  throw "No ship item with specified id found: " + shipId;
+}
+
 
 customElements.define('match-history-list', MatchHistoryList, { extends: 'ul' });
 customElements.define('match-history-entry', MatchHistoryEntry, { extends: 'li' });
@@ -386,3 +482,5 @@ customElements.define('match-history-foldout', MatchHistoryFoldout, { extends: '
 customElements.define('match-history-details', MatchHistoryDetails, { extends: 'div' });
 customElements.define('match-history-shipcrew', ShipCrew, { extends: 'div' });
 customElements.define('player-nametag', PlayerNametag, { extends: 'li' });
+customElements.define('ship-canvas', ShipCanvas, { extends: 'canvas' });
+customElements.define('load-more-matches-button', LoadMoreButton, { extends: 'button' });

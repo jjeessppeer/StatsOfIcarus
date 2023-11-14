@@ -26,7 +26,6 @@ function setMongoClient(clientIn) {
 
 async function matchHistorySearch(query) {
     let responseData = {
-        perspective: query.perspective,
         originalQuery: JSON.parse(JSON.stringify(query)),
         modifiedQuery: query
     };
@@ -49,7 +48,7 @@ async function matchHistorySearch(query) {
         if (playerId) {
             let playerData = await getPlayerInfo(query.perspective.name, filterPipeline);
             responseData.playerData = playerData;
-            responseData.perspective.name = playerData.PlayerInfo.Name;
+            query.perspective.name = playerData.PlayerInfo.Name;
         }
     }
     if (query.perspective.type == 'Overview'){
@@ -92,7 +91,8 @@ async function getRecentMatches(filters, page) {
     // console.log(JSON.stringify(await matchesAggregate2.explain(true)));
     // console.log('__')
     let matches = await matchesAggregate.next();
-    matches['TotalCount'] = await matchCollection.count();
+    if (matches) matches['TotalCount'] = await matchCollection.count();
+    else matches['TotalCount'] = 0;
     return matches;
 }
 

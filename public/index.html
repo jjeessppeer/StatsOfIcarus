@@ -7,13 +7,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Dependencies -->
+  <!-- <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script> -->
+
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
   <script src="deps/jquery-3.4.1.min.js"></script>
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap-4.3.1.min.js"></script>
   <script src="deps/lz-string-1.4.4.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <!-- <script src="deps/Chart-2.8.0.min.js"></script> -->
   <!-- <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script> -->
 
@@ -34,12 +41,9 @@
   <script src="js/mapSpawns.js"></script>
   <script src="js/shipBuilder.js"></script>
   <script src="js/shipBuilderTranslations.js"></script>
-  <script src="js/MatchHistory/matchHistory.js"></script>
-  <script src="js/MatchHistory/elements/FancySearch.js"></script>
-  <script src="js/MatchHistory/elements/ShipPopularity.js"></script>
-  <script src="js/MatchHistory/elements/MatchHistoryList.js"></script>
-  <script src="js/MatchHistory/elements/PlayerShipInfo.js"></script>
-  <script src="js/MatchHistory/elements/PlayerInfo.js"></script>
+
+  <script type="module" src="js/MatchHistory/matchHistory.js"></script>
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
   <link rel="stylesheet" href="css/HistorySearch.css">
@@ -47,6 +51,14 @@
   <link rel="stylesheet" href="css/PlayerShipRates.css">
   <link rel="stylesheet" href="css/MatchHistory/FancySearch.css">
   <link rel="stylesheet" href="css/MatchHistory/PlayerInfo.css">
+  <link rel="stylesheet" href="css/MatchHistory/EloCard.css">
+  <link rel="stylesheet" href="css/MatchHistory/LeaderboardCard.css">
+  <link rel="stylesheet" href="css/ShipStats/IconDropdown.css">
+
+  <link rel="stylesheet" href="css/ShipStats/LoadoutOverview.css">
+  <link rel="stylesheet" href="css/ShipStats/LoadoutSettings.css">
+
+
 </head>
 
 <body>
@@ -81,6 +93,12 @@
             Match history
           </a>
         </li>
+        <!-- <li id="leaderboardLink" data-show="#leaderboard">
+          <a href="#leaderboard">
+            <i class="fas fa-list-ol"></i>
+            Leaderboard
+          </a>
+        </li> -->
         <li id="shipBuilderLink" data-show="#shipBuilder">
           <a href="#shipBuilder">
             <i class="fas fa-hammer"></i>
@@ -140,16 +158,12 @@
         <br>
         <div class="content-area">
           <div class="left-area">
-            <ul class="ship-popularity-list"></ul>
           </div>
           
           <div class="middle-area">
             <div class="top-area">
             </div>
             <div class="right-area">
-              <!-- <ul class="match-history-list" id="matchHistoryList">
-              </ul> -->
-              <button id="loadMoreMatchesButton">Show Older</button>
             </div>
           </div>
         </div>
@@ -1156,7 +1170,6 @@
       // Load datasets
       loadDatasetsFromServer();
 
-      initializeMatchHistory();
 
     });
 

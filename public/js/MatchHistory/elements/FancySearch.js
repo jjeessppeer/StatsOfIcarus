@@ -1,3 +1,5 @@
+import { SHIP_ITEMS } from '/js/MatchHistory/matchHistory.js';
+
 class FancySearchbar extends HTMLDivElement {
   constructor() {
     super();
@@ -53,32 +55,37 @@ class FancySearchbar extends HTMLDivElement {
     });
     this.querySelector(".search-button").addEventListener('click', () => this.createSearchEvent());
 
+    
+    
+
     let shipListItems = [];
     for (let shipId in SHIP_ITEMS) {
       let item = {
         icon: `images/item-icons/ship${shipId}.jpg`,
         name: SHIP_ITEMS[shipId].Name,
-        type: "Ship",
-        callback: "TODO"
+        type: "Ship"
       }
       shipListItems.push(item);
     }
-    // this.addCategory("Ship", shipListItems);
+
+    // this.addCategory("Recent Searches", [
+    //   // { icon: `images/item-icons/ship123123123.jpg`, name: "recent1" },
+    //   // { icon: `images/item-icons/ship123123123.jpg`, name: "recent2" },
+    //   // { icon: `images/item-icons/ship123123123.jpg`, name: "recent3" },
+    //   // { icon: `images/item-icons/ship123123123.jpg`, name: "recent4" },
+    // ]);
+    this.addCategory("Full match history", [{ 
+      icon: `images/item-icons/coopMap244.jpg`, 
+      type: "Overview",
+      name: "Full match history" 
+    }]);
+
+    this.addCategory("Ship", shipListItems);
+
     this.playerCategory = this.addCategory("Search Player", [{
       icon: `images/item-icons/item1182.jpg`,
       type: "Player",
       name: ""
-    }]);
-    this.addCategory("Recent Searches", [
-      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent1" },
-      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent2" },
-      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent3" },
-      // { icon: `images/item-icons/ship123123123.jpg`, name: "recent4" },
-    ]);
-    this.addCategory("Generic Info", [{ 
-      icon: `images/item-icons/coopMap244.jpg`, 
-      type: "Overview",
-      name: "Generic info" 
     }]);
 
     this.updateSuggestions();
@@ -170,11 +177,13 @@ class FancySearchbar extends HTMLDivElement {
     // Return weather an item should be shown in the suggestion box or not.
     let searchText = this.querySelector('input').value;
     if (category.name == "Search Player") {
-      return searchText != "";
+      return true
+      // return searchText != "";
     }
     if (category.name == "Ship") {
       // Show ships matching query unless its empty.
-      if (searchText == "") return false;
+      // return true
+      // if (searchText == "") return false;
       let match = item.name.match(new RegExp(searchText, "i"));
       return match != null;
     }
@@ -182,9 +191,9 @@ class FancySearchbar extends HTMLDivElement {
       // Only show recent searches if nothing is typed.
       return searchText == "";
     }
-    if (category.name == "Generic Info") {
-      // return searchText == "";
-      return true;
+    if (category.name == "Full match history") {
+      return searchText == "";
+      // return true;
     }
     return true;
   }

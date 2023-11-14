@@ -1,4 +1,4 @@
 #!/bin/sh
 
-node /pullDatabase.js
+node /tools/pullDatabase.js
 exec "$@"

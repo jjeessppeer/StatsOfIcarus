@@ -1,0 +1,44 @@
+.icon-dropdown {
+    position: relative;
+    display: inline-block;
+    user-select: none; 
+    margin: 1px;
+}
+
+.icon-dropdown img{
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    border: 1px solid black;
+    border-radius: 3px;
+}
+
+.icon-dropdown .dropdown-text{
+    position: absolute;
+    top: 25%;
+    left: 20%;
+    color: white;
+    transform: translateY(-50%) translateX(-50%);
+    cursor: pointer;
+}
+
+.icon-dropdown[selectedid="-1"] .dropdown-text{
+    color: black;
+}
+
+.icon-dropdown.expanded .dropdown-content {
+    display: block;
+    z-index: 10;
+}
+
+.icon-dropdown .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    width: 213px;
+}
+
+.icon-dropdown .dropdown-content img {
+    margin: 1px;
+}

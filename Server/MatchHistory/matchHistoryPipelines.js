@@ -1,6 +1,17 @@
 const utils = require("./matchHistoryUtils.js");
 
 
+
+function shipLoadoutRates() {
+  const shipIndex = 1;
+
+  const pipeline = [
+    {
+
+    }
+  ]
+}
+
 function playerWinratesPipeline(filterPipeline, playerId) {
   const pipeline = [
     ...filterPipeline,
@@ -106,7 +117,9 @@ function playerInfoPipeline(playerId) {
               Clan: "$Clan",
               MatchCount: "$MatchCount",
               Levels: "$Levels",
-              SkillRatings: "$SkillRatings"
+              SkillRatings: "$SkillRatings",
+              // ELORating: "$ELORating",
+              ELOCategories: "$ELOCategories"
             }},
           ]
         }},
@@ -213,35 +226,16 @@ function recentMatchesPipeline(offset, count) {
             as: "MapItem"
           }},
           { $project: {
-            ModVersion: 1,
-            MatchId: 1,
-            _id: 1,
-            
-            Ships: 1,
-            ShipLoadouts: 1,
-            Players: 1,
-            Skills: 1,
-            
-            GameMode: 1,
-            MapId: 1,
-            MatchTags: 1,
-            MatchTime: 1,
-            TeamCount: 1,
-            TeamSize: 1,
-            Scores: 1,
-            Winner: 1,
-            
-            LoadoutInfo: 1,
-            PlayerInfo: 1,
-            ShipNames: 1,
-            
-            MapItem: 1,
-            GunItems: 1,
-            ShipItems: 1,
-            SkillItems: 1,
-            // SubmitterIp: 0,
-            // SubmitterIps: 0,
-            // SubmissionCount: 0,
+            SubmitterIp: 0,
+            SubmitterIps: 0,
+            SubmissionCount: 0,
+            MatchId: 0,
+            _id: 0,
+            PlayerInfo: {
+              SkillRatings: 0,
+              ELORating: 0,
+              MatchesPlayed: 0
+            }
           }}
         ]
       }},
@@ -258,28 +252,28 @@ function recentMatchesPipeline(offset, count) {
 
 function modelPickWinRates(filterPipeline) {
   let pipeline = [
-      { "$unwind": {
-        path: "$ShipModels",
-        includeArrayIndex: "TeamIndex"}},
-      { "$unwind": {
-        path: "$ShipModels"
-      }},
-      { $facet: {
-        "Count": [ { "$group": { _id: null, count: { $sum: 1 } } } ],
-        "ModelWinrates": [
-          { $group: {
-            _id: "$ShipModels",
-            Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
-            // Losses: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 0, 1]} },
-            PlayedGames: { $sum: 1 }
-          }},
-          { $lookup: {
-            from: "Items-Ships",
-            localField: "_id",
-            foreignField: "_id",
-            as: "ShipItem"
-          }}
-        ]
+    { "$unwind": {
+      path: "$ShipModels",
+      includeArrayIndex: "TeamIndex"}},
+    { "$unwind": {
+      path: "$ShipModels"
+    }},
+    { $facet: {
+      "Count": [ { "$group": { _id: null, count: { $sum: 1 } } } ],
+      "ModelWinrates": [
+        { $group: {
+          _id: "$ShipModels",
+          Wins: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 1, 0]} },
+          // Losses: { $sum: {$cond: [{$eq: ["$TeamIndex", "$Winner"]}, 0, 1]} },
+          PlayedGames: { $sum: 1 }
+        }},
+        { $lookup: {
+          from: "Items-Ships",
+          localField: "_id",
+          foreignField: "_id",
+          as: "ShipItem"
+        }}
+      ]
     }},
     { $unwind: "$Count" },
     { $project: {
