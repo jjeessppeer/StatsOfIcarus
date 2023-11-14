@@ -4,6 +4,7 @@
     --tag-border-1: rgb(127, 53, 144);
 
     --background-color: #EAEAEA;
+    --medium-border: #9b9b9b;
     --card-border: #D2D2D2;
     --card-color-1: #F2F2F2;
     --card-color-2: #EDEDED;
@@ -61,7 +62,7 @@
     margin-bottom: 10px;
     width: 800px;
     border: 1px solid;
-    border-bottom: none;
+    /* border-bottom: none; */
     /* height: 1px; */
 }
 
@@ -324,14 +325,14 @@
     padding-bottom: 10px;
     cursor: pointer;
     border-left: 1px solid;
-    border-bottom: 1px solid;
+    /* border-bottom: 1px solid; */
 }
 
-.match-history-entry.open .overview-table .expand-button{
+/* .match-history-entry.open .overview-table .expand-button{
     border-bottom: none;
-}
+} */
 
-.match-history-entry .overview-table > div:not(:last-child){
+.match-history-entry.open .overview-table > div:not(:last-child){
     border-bottom: 1px solid;
 }
 
@@ -416,6 +417,7 @@
 /* ------------------------------ */
 /* ----- Match details view ----- */
 /* ------------------------------ */
+
 .match-history-entry .details {
     display: flex;
     flex-direction: row;
@@ -423,10 +425,13 @@
 
     justify-content: center;
 }
-
 .match-history-entry .details > div{
+    flex: 1;
+}
+
+.match-history-entry .details > div:first-child{
     /* margin: auto; */
-    border: 1px black solid;
+    border-right: 1px var(--medium-border) solid;
     /* flex: 0 0 auto; */
     /* flex-grow: 0; */
     /* flex: 0 */
@@ -445,8 +450,23 @@
     margin: 0;
 }
 
+.match-history-entry .details .shipcrew:not(:first-of-type){
+    box-sizing: border-box;
+    border-top: 1px var(--medium-border) solid;
+}
+
 .match-history-entry .details > div:last-child .shipcrew > div{
     flex-direction: row-reverse;
+}
+
+.match-history-entry .details .shipcrew > span {
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: bold;
+}
+
+.match-history-entry .details > div:not(:first-of-type) .shipcrew {
+    text-align: right;
 }
 
 
@@ -471,14 +491,17 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    flex: 1;
 }
 .match-history-entry .details .shipcrew li {
     height: 25%;
-    border: 1px black solid;
+    /* flex: 1; */
+    /* border: 1px var(--medium-border) solid;
     border-top: 0;
     border-right: 0;
-    border-left: 0;
-    width: 140px;
+    border-left: 0; */
+    border-top: 1px solid var(--medium-border);
+    /* width: 140px; */
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -486,9 +509,9 @@
     vertical-align: bottom;
     
 }
-.match-history-entry .details .shipcrew li:first-child {
-    border-top: 1px solid;
-}
+/* .match-history-entry .details .shipcrew li:first-child {
+    border-top: 1px solid var(--medium-border);
+} */
 
 .match-history-entry .details .shipcrew img {
     width: 20px;
