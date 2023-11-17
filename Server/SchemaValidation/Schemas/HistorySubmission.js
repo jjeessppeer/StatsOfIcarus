@@ -104,8 +104,8 @@ const LOBBY_DATA_SCHEMA = Joi.object({
 const MATCH_SUBMISSION_SCHEMA = Joi.object({
     ModVersion: Joi.string().required(),
     MatchId: Joi.string().required(),
-    LobbyData: Joi.object(LOBBY_DATA_SCHEMA).required(),
-    GameData: Joi.string().required()
+    LobbyData: LOBBY_DATA_SCHEMA.required(),
+    CompressedGunneryData: Joi.string().required()
 });
 
 
