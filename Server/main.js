@@ -18,7 +18,6 @@ const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
 const elo = require("./Elo/EloHelper.js");
 const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
-const { MATCH_SUBMISSION_SCHEMA } = require("./SchemaValidation/Schemas/HistorySubmission.js");
 
 const shipStats = require('./ShipStats/ShipStats.js');
 
@@ -64,27 +63,35 @@ app.get('/get_datasets', async function (req, res) {
             delete v._id;
         }
     }
-    console.log(datasets);
 
     res.status(200).json(datasets);
 });
 
-app.post('/submit_match_history', async function (req, res) {
+app.post(
+    '/submit_match_history', 
+    // schemaMiddleware(schemas.MATCH_SUBMISSION_SCHEMA),
+    async function (req, res) {
     let ip = requestIp.getClientIp(req);
 
-    let validationResult = MATCH_SUBMISSION_SCHEMA.validate(req.body);
-    if (validationResult.error){
-        return res.status(400).send("Error submitting match history.");
+    console.log("Match recieved");
+    let requestValidation = schemas.MATCH_SUBMISSION_SCHEMA.validate(req.body);
+    if (requestValidation.error){
+        console.log(requestValidation.error);
+        return res.status(400).send();
     }
+    console.log("Match OK");
+    // if (semver.satisfies(req.body.ModVersion, `=>${MOD_VERSION_REQUIRED}`)) {
+    //     return res.status(400).send(`MatchHistoryMod version incompatible. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST})`);
+    // }
+    // matchHistory.submitRecord(req.body, ip);
 
-    if (semver.satisfies(req.body.ModVersion, `=>${MOD_VERSION_REQUIRED}`)) {
-        return res.status(400).send(`MatchHistoryMod version incompatible. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST})`);
-    }
-    matchHistory.submitRecord(req.body, ip);
-
-    if (semver.satisfies(req.body.ModVersion, `<${MOD_VERSION_LATEST}`)) {
-        return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}`);
-    }
+    // if (semver.satisfies(req.body.ModVersion, `<${MOD_VERSION_LATEST}`)) {
+    //     return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}`);
+    // }
+    console.log("Match history recieved.");
+    var inflated = (await unzip(Buffer.from(req.body.CompressedGunneryData, 'base64'))).toString();
+    var gunneryData = JSON.parse(inflated);
+    console.log(gunneryData);
 
     res.status(200).send();
 });
