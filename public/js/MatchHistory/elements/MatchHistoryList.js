@@ -1,5 +1,5 @@
 import { game_modes, SKILL_ORDER, ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
-
+import '/js/MatchHistory/elements/GunnerTab.js';
 class MatchHistoryList extends HTMLUListElement {
   constructor() {
     super();
@@ -48,7 +48,8 @@ class MatchHistoryFoldout extends HTMLDivElement {
     // <li><button>Another button</button></li>
     this.innerHTML = `
             <ul>
-                <li><button>Overview</button></li>
+              <li><button class="selected">Overview</button></li>
+              <li><button>Gunning</button></li>
             </ul>
             <div class="content"></div>`;
     this.details = document.createElement('div', { is: 'match-history-details' });
@@ -318,13 +319,19 @@ class MatchHistoryEntryOverview extends HTMLDivElement {
 
     this.querySelector(".info .map").innerHTML = `${mapName}<br>${gameMode}`;
 
-    this.querySelector(".info .elo .red-elo").textContent = Math.round(matchData.Ranking.TeamRankings[0]);
-    this.querySelector(".info .elo .blue-elo").textContent = Math.round(matchData.Ranking.TeamRankings[1]);
-
-    const outcome = matchData.Ranking.ExpectedOutcome;
-    this.querySelector(".info .elo .matchup-bar-left").style.width = `${Math.ceil(50 * outcome)}%`;
-    this.querySelector(".info .elo .matchup-bar-right").style.width = `${Math.ceil(50 * (1 - outcome))}%`;
-    this.querySelector(".info .elo .elo-delta").textContent = `+${Math.abs(matchData.Ranking.Delta)}`;
+    if (matchData.Ranking) {
+      this.querySelector(".info .elo .red-elo").textContent = Math.round(matchData.Ranking.TeamRankings[0]);
+      this.querySelector(".info .elo .blue-elo").textContent = Math.round(matchData.Ranking.TeamRankings[1]);
+  
+      const outcome = matchData.Ranking.ExpectedOutcome;
+      this.querySelector(".info .elo .matchup-bar-left").style.width = `${Math.ceil(50 * outcome)}%`;
+      this.querySelector(".info .elo .matchup-bar-right").style.width = `${Math.ceil(50 * (1 - outcome))}%`;
+      this.querySelector(".info .elo .elo-delta").textContent = `+${Math.abs(matchData.Ranking.Delta)}`;
+    }
+    else {
+      this.querySelector(".info .elo").style.display = "none";
+    }
+    
 
     let timeMinutes = Math.floor(matchData.MatchTime / 60);
     let timeSeconds = matchData.MatchTime % 60;
