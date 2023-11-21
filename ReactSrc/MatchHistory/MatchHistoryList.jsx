@@ -6,8 +6,6 @@ export class MatchHistoryList extends React.Component {
     super(props);
   }
 
-  
-
   render() {
     const listElements = [];
     for (let match of this.props.matches) {
@@ -21,7 +19,6 @@ export class MatchHistoryList extends React.Component {
     )
   }
 }
-
 
 export class ListElement extends React.Component {
   constructor(props) {
@@ -45,8 +42,6 @@ export class ListElement extends React.Component {
       <li className={`match-history-entry ${this.props.Winner == 0 ? "red-winner" : "blue-winner"}`}>
         <Overview {...this.props} toggleFoldout={this.toggleFoldout}></Overview>
         {this.state.expanded ? <Foldout {...this.props}></Foldout> : undefined}
-        
-        
       </li>
     )
   }
