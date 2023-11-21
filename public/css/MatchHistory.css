@@ -275,14 +275,9 @@
 }
 
 /* Player list */
-.match-history-entry .overview-table .players {
-    text-align: left;
-    vertical-align: top;
-    /* padding: 0; */
-}
 
 .match-history-entry .overview-table .players > div {
-    float: right;
+    float: left;
     margin-right: 8px;
 }
 
