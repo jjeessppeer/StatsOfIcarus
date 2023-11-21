@@ -1,13 +1,11 @@
-import { game_modes, SKILL_ORDER, ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
+import { game_modes } from '/js/MatchHistory/matchHistory.js';
 import { getShipLoadout, getShipItem, getPlayerInfo, getLoadoutInfo } from '/js/MatchHistory/matchHistoryUtils.js';
 
-export class Overview extends React.Component {
+export class Overview extends React.PureComponent {
   constructor(props) {
     super(props);
   }
   render() {
-    console.log("RENDERING OVERVIEW");
-
     let mapName = "unknown map";
     let gameMode = "unknown game mode";
     if (this.props.MapItem[0]) {
