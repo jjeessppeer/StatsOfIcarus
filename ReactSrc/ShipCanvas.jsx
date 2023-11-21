@@ -39,6 +39,7 @@ export class ShipCanvas extends React.Component {
   // }
 
   async drawShip(shipModel, shipLoadout, transform) {
+    if (shipModel == -1) return;
     const canvas = this.canvasRef.current;
     const ctx = canvas.getContext("2d");
     const shipImage = await loadImageAsync(ship_image_srcs2[shipModel]);

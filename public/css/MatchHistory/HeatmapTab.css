@@ -1,0 +1,15 @@
+
+.heatmap-tab .map-container {
+    position: relative;
+}
+
+.heatmap-tab .map-image {
+    width: 400px;
+    height: 400px;
+}
+
+.heatmap-tab .heatmap {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
