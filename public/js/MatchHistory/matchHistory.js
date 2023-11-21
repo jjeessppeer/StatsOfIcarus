@@ -8,6 +8,7 @@ import '/js/MatchHistory/elements/LeaderboardCard.js';
 
 import { ShipLoadoutInfoList } from '/React/ShipStats/LoadoutInfoList.js';
 import { mergeLoadoutInfos, mapLoadoutId, mergeMatchupStats } from '/React/ShipStats/LoadoutUtils.js';
+import { MatchHistoryList } from '/React/MatchHistory/ListElement.js';
 
 export const SKILL_ORDER = [
     "Rubber Mallet",
@@ -256,15 +257,20 @@ function clearMatchHistoryDisplay() {
     CLEAR_QUERIES.forEach(q => document.querySelectorAll(q).forEach(el => el.remove()));
 }
 
-
+let mlReactRoot = undefined;
 function intializeMatchHistoryList(matches, matchCount=0) {
-    let ul = document.createElement('ul', {is: 'match-history-list'});
-    ul.addMatches(matches);
-    document.querySelector("#matchHistory .right-area").prepend(ul);
+    // let ul = document.createElement('ul', {is: 'match-history-list'});
+    // ul.addMatches(matches);
+    // document.querySelector("#matchHistory .right-area").prepend(ul);
 
-    const loadModeBtn = document.createElement('button', {is: 'load-more-matches-button'});
-    loadModeBtn.addEventListener('click', requestNextMatchHistoryPage)
-    document.querySelector("#matchHistory .right-area").append(loadModeBtn);
+    // const loadModeBtn = document.createElement('button', {is: 'load-more-matches-button'});
+    // loadModeBtn.addEventListener('click', requestNextMatchHistoryPage)
+    // document.querySelector("#matchHistory .right-area").append(loadModeBtn);
+
+    const domRoot = document.querySelector("#matchHistory .right-area");
+    mlReactRoot = ReactDOM.createRoot(domRoot);
+    const el = React.createElement(MatchHistoryList, { matches: matches });
+    mlReactRoot.render(el);
 }
 
 function initializePopularityList(shipRateData) {
