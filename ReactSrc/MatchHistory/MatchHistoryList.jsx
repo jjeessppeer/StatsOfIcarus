@@ -68,7 +68,6 @@ export class ListElement extends React.PureComponent {
   }
 
   render() {
-    console.log("ELEMENT RENDERING");
     return (
       <li className={`match-history-entry ${this.props.Winner == 0 ? "red-winner" : "blue-winner"}`}>
         <Overview {...this.props} toggleFoldout={this.toggleFoldout}></Overview>

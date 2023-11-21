@@ -18,7 +18,6 @@ export class Foldout extends React.PureComponent {
   }
 
   render() {
-    console.log("FOLDOUT RENDER")
     return (
       <div className="foldout">
         <ul>
