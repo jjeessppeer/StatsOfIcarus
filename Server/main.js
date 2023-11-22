@@ -38,10 +38,10 @@ const { assert } = require('console');
 const { nextTick } = require('process');
 
 var app = express()
-app.use(express.json({ limit: '100mb' }));
-app.use(express.text({ limit: '100mb' }));
+app.use(express.json({ limit: '30mb' }));
+app.use(express.text({ limit: '30mb' }));
 app.use(express.urlencoded({
-    limit: '100mb', 
+    limit: '30mb', 
     extended: true}));
 app.use(express.static('public'));
 
@@ -67,19 +67,57 @@ app.get('/get_datasets', async function (req, res) {
     res.status(200).json(datasets);
 });
 
+app.get(
+    '/match/:matchId/gunneryDetails',
+    async function(req, res) {
+    console.log(req.params);
+
+    const matchesCollection = mongoClient.db("mhtest").collection("Matches");
+    let agg = matchesCollection.aggregate([
+        {$match: {MatchId: req.params.matchId}},
+        {$project: {
+            GunneryData: 1
+        }}
+    ]);
+    let doc = await agg.next();
+    if (!doc) {
+        return res.status(404).send('Match not found.');
+
+    }
+    var inflated = (await unzip(Buffer.from(doc.GunneryData, 'base64'))).toString();
+    var gunneryData = JSON.parse(inflated);
+    res.status(200).json(gunneryData);
+});
+
+app.get(
+    '/match/:matchId/positionData',
+    async function(req, res) {
+    console.log(req.params);
+
+    const matchesCollection = mongoClient.db("mhtest").collection("Matches");
+    let agg = matchesCollection.aggregate([
+        {$match: {MatchId: req.params.matchId}},
+        {$project: {
+            PositionData: 1
+        }}
+    ]);
+    let doc = await agg.next();
+    if (!doc) {
+        return res.status(404).send('Match not found.');
+
+    }
+    var inflated = (await unzip(Buffer.from(doc.PositionData, 'base64'))).toString();
+    var positionData = JSON.parse(inflated);
+    res.status(200).json(positionData);
+});
+
 app.post(
     '/submit_match_history', 
-    // schemaMiddleware(schemas.MATCH_SUBMISSION_SCHEMA),
+    schemaMiddleware(schemas.MATCH_SUBMISSION_SCHEMA),
     async function (req, res) {
     let ip = requestIp.getClientIp(req);
 
     console.log("Match recieved");
-    let requestValidation = schemas.MATCH_SUBMISSION_SCHEMA.validate(req.body);
-    if (requestValidation.error){
-        console.log(requestValidation.error);
-        return res.status(400).send();
-    }
-    console.log("Match OK");
     // if (semver.satisfies(req.body.ModVersion, `=>${MOD_VERSION_REQUIRED}`)) {
     //     return res.status(400).send(`MatchHistoryMod version incompatible. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST})`);
     // }
@@ -89,9 +127,11 @@ app.post(
     //     return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}`);
     // }
     console.log("Match history recieved.");
-    var inflated = (await unzip(Buffer.from(req.body.CompressedGunneryData, 'base64'))).toString();
-    var gunneryData = JSON.parse(inflated);
-    console.log(gunneryData);
+    var inflated = (await unzip(Buffer.from(req.body.CompressedPositionData, 'base64'))).toString();
+    var positionData = JSON.parse(inflated);
+    console.log(positionData);
+    // TODO: validate sent data.
+    matchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip);
 
     res.status(200).send();
 });
