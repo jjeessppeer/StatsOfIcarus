@@ -2,7 +2,7 @@ export class Slider extends React.Component {
   static defaultProps = {
     min: 0,
     max: 100,
-    startValue: [0,100]
+    startValue: [0, 100]
   }
 
   constructor(props) {
@@ -23,26 +23,7 @@ export class Slider extends React.Component {
   }
 
   componentDidMount() {
-    let botRange = this.getAllowedPercentageRange('min');
-    let topRange = this.getAllowedPercentageRange('max');
-
-    let botP = this.mapToRange(this.state.value[0], this.state.range, botRange);
-    let topP = this.mapToRange(this.state.value[1], this.state.range, topRange);
-    this.setState({
-      botPercentage: botP,
-      topPercentage: topP
-    });
-  }
-
-  mapToRange(value, oldRange, newRange) {
-    const oldSpan = oldRange[1] - oldRange[0];
-    const newSpan = newRange[1] - newRange[0];
-    let oldNormalised = 0;
-    if (oldSpan != 0) {
-      oldNormalised = (value - oldRange[0]) / oldSpan;
-    }
-    const newValue = newRange[0] + newSpan * oldNormalised;
-    return newValue;
+    this.setValue(this.state.value);
   }
 
   startDrag = (evt, target) => {
@@ -50,12 +31,12 @@ export class Slider extends React.Component {
     let startVal;
     if (target == 'min') startVal = this.state.botPercentage;
     else startVal = this.state.topPercentage;
-    this.setState((oldState) => ({
+    this.setState({
       dragging: true,
       dragStartX: evt.pageX,
       dragStartPercentage: startVal,
       dragTarget: target
-    }));
+    });
   }
 
   getAllowedPercentageRange(target) {
@@ -71,6 +52,23 @@ export class Slider extends React.Component {
       min = this.state.botPercentage + botHandleWidth;
     }
     return [min, max];
+  }
+
+  setValue(value) {
+    const [min, max] = value;
+    const pixelWidth = this.containerRef.current.offsetWidth;
+    const topHandleWidth = this.maxHandle.current.offsetWidth / pixelWidth * 100;
+    const botHandleWidth = this.minHandle.current.offsetWidth / pixelWidth * 100;
+    let fullPercentage = 100 - topHandleWidth - botHandleWidth;
+    let b = min / (this.props.min + (this.props.max - this.props.min));
+    let t = max / (this.props.min + (this.props.max - this.props.min));
+    let botP = b * fullPercentage;
+    let topP = t * fullPercentage + topHandleWidth;
+    this.setState({
+      value: [min, max],
+      botPercentage: botP,
+      topPercentage: topP
+    });
   }
 
 
@@ -106,13 +104,17 @@ export class Slider extends React.Component {
     let t = (topP - topHandleWidth) / fullPercentage;
     let min = this.props.min + (this.props.max - this.props.min) * b;
     let max = this.props.min + (this.props.max - this.props.min) * t;
-    
+
     this.setState({
       botPercentage: botP,
       topPercentage: topP,
       value: [min, max]
-    });
+    }, this.valueChanged);
+  }
 
+  valueChanged = () => {
+    if (!this.props.valueChanged) return;
+    this.props.valueChanged(this.state.value);
   }
 
   render() {
@@ -153,14 +155,9 @@ export class SliderHandle extends React.PureComponent {
 
   render() {
     let style = { left: `${this.props.percentage}%` };
-    // if (this.props.handleType == 'max') {
-    //   style = {right: `${this.state.value}%`}
-    // }
     return (
       <div
         className="slider-handle"
-        // onMouseMove={this.mouseMove}
-        // onMouseOut={this.mouseOut}
         ref={this.props.handleRef}
         onMouseDown={(evt) => (this.props.startDrag(evt, this.props.handleType))}
         style={style}
