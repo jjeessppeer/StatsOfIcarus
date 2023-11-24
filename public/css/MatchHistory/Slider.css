@@ -1,0 +1,34 @@
+.slider-container {
+    width: 250px;
+    height: 50px;
+    background-color: red;
+    /* display: relative; */
+    position: relative;
+    /* display: inline-block; */
+    user-select: none;
+}
+
+.slider-container .slider-handle {
+    background-color: blue;
+    width: 10px;
+    height: 100%;
+    /* display: absolute; */
+    position: absolute;
+    border: 2px solid black;
+    /* top: 0; */
+    /* left: 0; */
+}
+
+.slider-handle {
+    cursor: col-resize;
+}
+
+.slider-container .slider-handle.left {
+    top: 0;
+    left: 0;
+}
+
+.slider-container .slider-handle.right {
+    top: 0;
+    right: 0;
+}
