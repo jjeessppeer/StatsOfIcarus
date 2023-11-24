@@ -1,5 +1,6 @@
 import { Overview } from '/React/MatchHistory/Overview.js';
 import { Foldout } from '/React/MatchHistory/Foldout.js';
+import { Slider } from '/React/Slider.js';
 
 export class MatchHistoryList extends React.Component {
   constructor(props) {
@@ -41,6 +42,7 @@ export class MatchHistoryList extends React.Component {
     }
     return (
       <div>
+        <Slider></Slider>
         <ul className="match-history-list">
           {listElements}
         </ul>

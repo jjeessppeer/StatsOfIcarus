@@ -7,7 +7,7 @@ export class Foldout extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      currentTabIdx: 0
+      currentTabIdx: 2
     }
 
     this.tabChanged = this.tabChanged.bind(this);
