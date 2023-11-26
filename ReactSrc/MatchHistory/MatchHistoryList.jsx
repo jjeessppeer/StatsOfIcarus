@@ -35,6 +35,10 @@ export class MatchHistoryList extends React.Component {
     }));
   }
 
+  valueChanged = (v) => {
+    console.log(v);
+  }
+
   render() {
     const listElements = [];
     for (let match of this.state.matches) {
@@ -42,7 +46,6 @@ export class MatchHistoryList extends React.Component {
     }
     return (
       <div>
-        <Slider></Slider>
         <ul className="match-history-list">
           {listElements}
         </ul>

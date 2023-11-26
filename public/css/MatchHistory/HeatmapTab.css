@@ -1,14 +1,38 @@
 
-.heatmap-tab .map-container {
+
+.heatmap-tab {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
+
+.heatmap-tab > .settings{
+    padding: 10px;
+    flex: 1;
+}
+
+.heatmap-tab > .settings .slider-container{
+    width: 100%;
+}
+
+.heatmap-tab > div{
+    /* padding-top: 10px; */
+    /* float: left; */
+    /* display: inline-block; */
+    /* vertical-align: top; */
+}
+
+.heatmap-container {
     position: relative;
 }
 
-.heatmap-tab .map-image {
-    width: 400px;
-    height: 400px;
-}
+/* .heatmap-container .map-image {
+    width: 990px;
+    height: 990px;
+} */
 
-.heatmap-tab .heatmap {
+.heatmap-container .heatmap {
     position: absolute;
     top: 0;
     left: 0;

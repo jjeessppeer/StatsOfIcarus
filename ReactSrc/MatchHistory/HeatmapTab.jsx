@@ -1,21 +1,70 @@
 
+import { Slider } from '/React/Slider.js';
+import { SliderTimelineBackground } from '/React/MatchHistory/SliderBackground.js';
+
 const MAP_IMAGES = {
   66: "images/map-images/Fjords.jpg",
   // 314: "Derelict"
-  80: "images/map-images/Paritan.jpg"
+  80: "images/map-images/Paritan.jpg",
+  289: "images/map-images/Thornholtjpg.jpg",
+  126: "images/map-images/Water_Hazard.jpg"
 }
 
 const MAP_SCALE = {
   66: 0.236,
   80: 472 / 1000,
+  126: 609/2000,
+
+  289: 472 / 1500,
 }
 
 const MAP_OFFSET = {
   // (-1014.6 : 2001.5) => (790, 586)
   // __: {x: __ - -__ * MAP_SCALE[__], z: __ + __ * MAP_SCALE[__]},
-  // __: {x: p_x - -w_x * MAP_SCALE[__], z: p_z + w_z * MAP_SCALE[__]},
+  // __: {x: p_x - w_x * MAP_SCALE[__], z: p_z + w_z * MAP_SCALE[__]},
   66: { x: 790 - -1014.6 * MAP_SCALE[66], z: 586 + 2001.5 * MAP_SCALE[66] },
-  80: { x: 166 - -942.5 * MAP_SCALE[80], z: 528 + -68.3 * MAP_SCALE[80] }
+  80: { x: 166 - -942.5 * MAP_SCALE[80], z: 528 + -68.3 * MAP_SCALE[80] },
+  126: {x: 220 - -2082.9 * MAP_SCALE[126], z: 308 + 2961.9 * MAP_SCALE[126]},
+
+  289: { x: 166 - -942.5 * MAP_SCALE[80]-300, z: 528 + -68.3 * MAP_SCALE[80] + 50 },
+}
+
+function positionToCanvasPixel(worldPoint, mapId, canvasWidth){
+  if (typeof worldPoint == 'string') 
+    worldPoint = JSON.parse(worldPoint);
+  const imageBaseWidth = 990;
+  const imageScale = canvasWidth / imageBaseWidth;
+  let offsets = MAP_OFFSET[mapId];
+  let pxPerMeter = MAP_SCALE[mapId];
+  if (!offsets) {
+    offsets = [0, 0];
+    pxPerMeter = 1;
+  }
+  const pixelPosition = [
+    (worldPoint[0] * pxPerMeter + offsets.x) * imageScale,
+    (-worldPoint[2] * pxPerMeter + offsets.z) * imageScale,
+    0.1
+  ];
+  return pixelPosition;
+}
+
+function getDeaths(positionData) {
+  // Return an array of the second ships died at and their team index.
+  const deaths = [];
+  for (const shipPositions of positionData) {
+    for (let i = 0; i < shipPositions.Position.length; i++) {
+      if (shipPositions.Dead[i]) {
+        deaths.push({
+          position: JSON.parse(shipPositions.Position[i]),
+          timestamp: shipPositions.Timestamp[i],
+          teamIdx: shipPositions.TeamIdx,
+          shipIdx: shipPositions.ShipIdx,
+        });
+      }
+    }
+  }
+  console.log(deaths);
+  return deaths;
 }
 
 
@@ -33,8 +82,7 @@ export class HeatmapTab extends React.Component {
 
 
   async fetchData() {
-    console.log(this.props.MapItem[0]);
-    console.log("MAP: " + this.props.MapId);
+    // console.log("MAP: " + this.props.MapId);
     const response = await fetch(`/match/${this.props.MatchId}/positionData`);
     if (response.status != 200) {
       this.setState({ loading: false, noData: true });
@@ -42,6 +90,8 @@ export class HeatmapTab extends React.Component {
     }
     const json = await response.json();
     console.log(json);
+    // TODO: filter out fake ships.
+
     this.setState({
       loading: false,
       noData: false,
@@ -57,9 +107,17 @@ export class HeatmapTab extends React.Component {
     if (this.state.noData) {
       return (<div>No position data for match.</div>)
     }
+    // console.log(this.props);
+    // console.log(getDeaths(this.state.shipPositions));
     return (
-      <div>
+      <div className="heatmap-tab">
         <Heatmap MapId={this.props.MapId} shipPositions={this.state.shipPositions} width={500} height={500}></Heatmap>
+        <div className='settings'>
+          Limit timespan
+          <Slider>
+            <SliderTimelineBackground matchTime={this.props.MatchTime} deaths={getDeaths(this.state.shipPositions)}></SliderTimelineBackground>
+          </Slider>
+        </div>
       </div>
     );
   }
@@ -77,20 +135,7 @@ class Heatmap extends React.Component {
   }
 
 
-  positionToCanvasPixel(position){
-    if (typeof position == 'string') 
-      position = JSON.parse(position);
-    const imageBaseWidth = 990;
-    const imageScale = this.props.width / imageBaseWidth;
-    const offsets = MAP_OFFSET[this.props.MapId];
-    const pxPerMeter = MAP_SCALE[this.props.MapId];
-    const pixelPosition = [
-      (position[0] * pxPerMeter + offsets.x) * imageScale,
-      (-position[2] * pxPerMeter + offsets.z) * imageScale,
-      0.1
-    ];
-    return pixelPosition;
-  }
+  
 
   getScaledPositions(positionData) {
     const positions = positionData.Position;
@@ -98,15 +143,30 @@ class Heatmap extends React.Component {
     const paths = [];
     let pixelPositions = [];
     for (let i = 0; i < positions.length; i++) {
-      pixelPositions.push(this.positionToCanvasPixel(positions[i]));
-      if (positionData.Dead != undefined && positionData.Dead[i]){
-        paths.push(pixelPositions.slice());
-        pixelPositions = [];
-      }
+      pixelPositions.push(positionToCanvasPixel(positions[i], this.props.MapId, this.props.width));
+      // if (positionData.Dead != undefined && positionData.Dead[i]){
+      //   paths.push(pixelPositions.slice());
+      //   pixelPositions = [];
+      // }
     }
     // console.log(positions[0] + " => " + pixelPositions[0]);
     paths.push(pixelPositions.slice());
     return paths;
+  }
+
+  getDeathPositions(positionData) {
+    const positions = positionData.Position;
+    const points = [];
+    const deaths = getDeaths(positionData);
+    for (const death of deaths) {
+      points.push(positionToCanvasPixel(death.position, this.props.MapId, this.props.width))
+    }
+    // for (let i = 0; i < positions.length; i++) {
+    //   if (positionData.Dead[i]){
+    //     points.push(positionToCanvasPixel(positions[i], this.props.MapId, this.props.width))
+    //   }
+    // }
+    return points;
   }
 
   drawSmoothCurve(points, ctx) {
@@ -117,16 +177,18 @@ class Heatmap extends React.Component {
     // this.heatmap = simpleheat(this.canvasRef.current);
 
     // const data = this.getScaledPositions(this.props.shipPositions);
-    console.log("MOUNTED")
     let scaledPositions = [];
+    const colors = ['red', 'orange', 'blue', 'cyan'];
+    let colorsI = [];
+    let a = 0;
     for (const positions of this.props.shipPositions) {
       const paths = this.getScaledPositions(positions)
       scaledPositions = scaledPositions.concat(paths);
-      console.log("Paths added")
-      console.log(paths)
-      console.log(scaledPositions)
+      for (let i = 0; i < paths.length; i++ ) {
+        colorsI.push(colors.push(colors[a]))
+      }
+      a += 1;
     }
-    console.log(scaledPositions);
 
     // console.log(data);
     // this.heatmap.data(data);
@@ -142,13 +204,27 @@ class Heatmap extends React.Component {
     const ctx = canvas.getContext("2d");
     ctx.globalCompositeOperation = 'source-over';
 
-    const colors = ['red', 'orange', 'blue', 'cyan'];
     let cIdx = 0;
 
     ctx.lineWidth = 2;
 
+    for (const p of this.getDeathPositions(this.props.shipPositions)){
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 10, 0, 2 * Math.PI);
+      ctx.fill();
+
+      ctx.fillStyle = 'black';
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 8, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    // for (const positionData of this.props.shipPositions) { 
+    // }
+    
+
     for (const points of scaledPositions) {
-      
+      break;
 
       // Curve type 1
       // if (points.length <= 1) continue;
@@ -213,9 +289,6 @@ class Heatmap extends React.Component {
 
   render() {
     let imgSrc = MAP_IMAGES[this.props.MapId];
-    console.log(MAP_IMAGES);
-    console.log(this.props.MapId);
-    console.log("MAPPO: " + imgSrc);
     if (imgSrc == undefined) {
       imgSrc = "images/map-images/Duel_at_Dawn.jpg";
     }

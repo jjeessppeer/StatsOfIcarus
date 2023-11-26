@@ -1,3 +1,5 @@
+// TODO: slider positoning can be vastly simplified by using css translation.
+
 export class Slider extends React.Component {
   static defaultProps = {
     min: 0,
@@ -31,6 +33,9 @@ export class Slider extends React.Component {
     let startVal;
     if (target == 'min') startVal = this.state.botPercentage;
     else startVal = this.state.topPercentage;
+    if (this.state.value[0] == this.state.value[1]) {
+      target = 'unknown';
+    }
     this.setState({
       dragging: true,
       dragStartX: evt.pageX,
@@ -43,14 +48,20 @@ export class Slider extends React.Component {
     const pixelWidth = this.containerRef.current.offsetWidth;
     const topHandleWidth = this.maxHandle.current.offsetWidth / pixelWidth * 100;
     const botHandleWidth = this.minHandle.current.offsetWidth / pixelWidth * 100;
-    let min = 0;
-    let max = 100 - topHandleWidth;
-    if (target == 'min') {
-      max = this.state.topPercentage - botHandleWidth;
-    }
-    else if (target == 'max') {
-      min = this.state.botPercentage + botHandleWidth;
-    }
+    let min = 0 - botHandleWidth / 2;
+    let max = 100 - topHandleWidth / 2;
+    if (target == 'min')
+      max = this.state.topPercentage;
+    else if (target == 'max')
+      min = this.state.botPercentage;
+    // let min = 0;
+    // let max = 100 - topHandleWidth;
+    // if (target == 'min') {
+    //   max = this.state.topPercentage - botHandleWidth;
+    // }
+    // else if (target == 'max') {
+    //   min = this.state.botPercentage + botHandleWidth;
+    // }
     return [min, max];
   }
 
@@ -62,8 +73,8 @@ export class Slider extends React.Component {
     let fullPercentage = 100 - topHandleWidth - botHandleWidth;
     let b = min / (this.props.min + (this.props.max - this.props.min));
     let t = max / (this.props.min + (this.props.max - this.props.min));
-    let botP = b * fullPercentage;
-    let topP = t * fullPercentage + topHandleWidth;
+    let botP = b * fullPercentage - botHandleWidth / 2;
+    let topP = t * fullPercentage + topHandleWidth * 1.5;
     this.setState({
       value: [min, max],
       botPercentage: botP,
@@ -79,36 +90,44 @@ export class Slider extends React.Component {
       this.setState({ dragging: false });
       return;
     }
-
+    
+    // TODO: move most of this to render.
     // Convert pixels to percentage.
     const pixelDelta = evt.pageX - this.state.dragStartX;
     const pixelWidth = this.containerRef.current.offsetWidth;
     const percentageDelta = pixelDelta / pixelWidth * 100;
-
     let newSliderPercentage = this.state.dragStartPercentage + percentageDelta;
 
+    // Allow for overlapping handles to be separated better.
+    let dragTarget = this.state.dragTarget;
+    if (this.state.dragTarget == 'unknown') {
+      if (percentageDelta <= 0) dragTarget = 'min';
+      else dragTarget = 'max';
+    }
+
     // Clamp percentage to allowed range.
-    let [minPercentage, maxPercentage] = this.getAllowedPercentageRange(this.state.dragTarget);
+    let [minPercentage, maxPercentage] = this.getAllowedPercentageRange(dragTarget);
     newSliderPercentage = Math.min(maxPercentage, newSliderPercentage);
     newSliderPercentage = Math.max(minPercentage, newSliderPercentage);
 
     // Convert percentage to input value.
     let botP = this.state.botPercentage;
     let topP = this.state.topPercentage;
-    if (this.state.dragTarget == 'min') botP = newSliderPercentage;
+    if (dragTarget == 'min') botP = newSliderPercentage;
     else topP = newSliderPercentage;
     const topHandleWidth = this.maxHandle.current.offsetWidth / pixelWidth * 100;
     const botHandleWidth = this.minHandle.current.offsetWidth / pixelWidth * 100;
-    let fullPercentage = 100 - topHandleWidth - botHandleWidth;
-    let b = botP / fullPercentage;
-    let t = (topP - topHandleWidth) / fullPercentage;
+    // let fullPercentage = 100 - topHandleWidth - botHandleWidth;
+    let fullPercentage = 100;
+    let b = (botP + botHandleWidth / 2) / fullPercentage;
+    let t = (topP + topHandleWidth / 2) / fullPercentage;
     let min = this.props.min + (this.props.max - this.props.min) * b;
     let max = this.props.min + (this.props.max - this.props.min) * t;
-
     this.setState({
       botPercentage: botP,
       topPercentage: topP,
-      value: [min, max]
+      value: [min, max],
+      dragTarget: dragTarget
     }, this.valueChanged);
   }
 
@@ -120,29 +139,20 @@ export class Slider extends React.Component {
   render() {
 
     return (
-      <div className="slider-container"
-        ref={this.containerRef}
-        onMouseMove={this.mouseMove}>
+      <div className="slider-container" ref={this.containerRef} onMouseMove={this.mouseMove}>
+        {this.props.children}
         <SliderHandle
           handleType={'min'}
           percentage={this.state.botPercentage}
           startDrag={this.startDrag}
           handleRef={this.minHandle}
-        ></SliderHandle>
+        />
         <SliderHandle
           handleType={'max'}
           percentage={this.state.topPercentage}
           startDrag={this.startDrag}
           handleRef={this.maxHandle}
-        ></SliderHandle>
-        {/* <SliderHandle isMax={true} range={[0, 100]} min={this.state.botVal} max={this.state.max}></SliderHandle> */}
-        {/* <div className="slider-handle left">
-
-        </div>
-        <div className="slider-handle right" onMouseMove={this.mouseMove}> */}
-
-        {/* </div> */}
-        {this.props.children}
+        />
       </div>
     );
   }
@@ -157,7 +167,7 @@ export class SliderHandle extends React.PureComponent {
     let style = { left: `${this.props.percentage}%` };
     return (
       <div
-        className="slider-handle"
+        className={"slider-handle " + (this.props.handleType)}
         ref={this.props.handleRef}
         onMouseDown={(evt) => (this.props.startDrag(evt, this.props.handleType))}
         style={style}
