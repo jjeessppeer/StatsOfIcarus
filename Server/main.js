@@ -102,7 +102,7 @@ app.get(
         }}
     ]);
     let doc = await agg.next();
-    if (!doc) {
+    if (!doc || !doc.PositionData) {
         return res.status(404).send('Match not found.');
 
     }
