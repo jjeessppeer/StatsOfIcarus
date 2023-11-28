@@ -14,7 +14,7 @@
     /* height: 100%; */
     height: 20px;
     top: 50%;
-    transform: translate(0, -50%);
+    transform: translate(-50%, -50%);
     border-radius: 100%;
     position: absolute;
     border: 2px solid black;
@@ -22,6 +22,20 @@
 
 .slider-handle {
     cursor: col-resize;
+    /* translate: () */
+}
+
+.slider-range {
+    height: 100%;
+    top: 0;
+    position: absolute;
+    background-color: rgba(0, 0, 0, .2);
+    border: 2px solid black;
+    border-top: 0;
+    border-bottom: 0;
+    margin-right: -2px;
+    margin-left: -2px;
+    cursor: grab;
 }
 
 .slider-background {

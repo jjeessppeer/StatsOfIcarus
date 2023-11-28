@@ -65,7 +65,7 @@ export class Heatmap extends React.Component {
     let cIdx = 0;
 
     ctx.lineWidth = 2;
-    console.log("Colors: ", colorsI);
+    // console.log("Colors: ", colorsI);
 
     for (const p of this.getDeathPositions(this.props.shipPositions)) {
       ctx.fillStyle = 'white';
