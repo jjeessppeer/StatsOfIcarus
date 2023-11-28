@@ -11,16 +11,9 @@ export class SliderTimelineBackground extends React.PureComponent {
   }
 
   render() {
-    // const matchMinutes = this.props.matchTime / 60;
-    const matchMinutes = 10;
+    const matchMinutes = this.props.matchTime / 60;
+    // const matchMinutes = 10;
     const notchWidth = 100 / matchMinutes;
-    // const style = {
-    //   background: `repeating-linear-gradient(90deg, 
-    //     #e66465, 
-    //     #e66465 calc(${notchWidth}% - 1.5px), 
-    //     #9198e5 calc(${notchWidth}% - 1.5px), 
-    //     #9198e5 ${notchWidth}%)`
-    // }
 
     const style = {
       background: `repeating-linear-gradient(90deg, 
@@ -31,15 +24,12 @@ export class SliderTimelineBackground extends React.PureComponent {
     }
 
     const deathMarkers = [];
-    console.log("NW: ", notchWidth);
-    console.log("Length: ", matchMinutes);
     for (const death of this.props.deaths) {
-      console.log("Death min: ", death.timestamp/1000/60);
-      const st = {
+      const markerStyle = {
         left: `${notchWidth*death.timestamp/1000/60}%`,
         "background-color": (death.teamIdx == 0 ? 'var(--red-4)' : 'var(--blue-4)'),
       }
-      deathMarkers.push(<div className="death-marker" style={st}></div>)
+      deathMarkers.push(<div className="death-marker" style={markerStyle}></div>)
     }
 
 

@@ -1,6 +1,6 @@
 import { MatchDetails } from "/React/MatchHistory/DetailsTab.js";
 import { GunnerTab } from "/React/MatchHistory/GunnerTab.js";
-import { HeatmapTab } from "/React/MatchHistory/HeatmapTab.js";
+import { HeatmapTab } from "/React/MatchHistory/HeatmapTab/HeatmapTab.js";
 import { clsx } from 'clsx';
 
 export class Foldout extends React.PureComponent {

@@ -4,14 +4,14 @@ export class Slider extends React.Component {
   static defaultProps = {
     min: 0,
     max: 100,
-    startValue: [0, 100]
+    startValue: undefined
   }
 
   constructor(props) {
     super(props);
     this.state = {
       range: [this.props.min, this.props.max],
-      value: this.props.startValue,
+      value: (this.props.startValue ? this.props.startValue : [this.props.min, this.props.max]),
       botPercentage: 0,
       topPercentage: 0,
       dragging: false,
