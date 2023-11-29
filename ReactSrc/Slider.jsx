@@ -60,7 +60,7 @@ export class Slider extends React.Component {
     // Convert pixels to percentage.
     const pixelDelta = evt.pageX - this.state.dragStartX;
     const pixelWidth = this.containerRef.current.offsetWidth;
-    const percentageDelta = pixelDelta / pixelWidth * 100;
+    let percentageDelta = pixelDelta / pixelWidth * 100;
 
     // Allow for overlapping handles to be separated.
     let dragTarget = this.state.dragTarget;
@@ -68,13 +68,21 @@ export class Slider extends React.Component {
       if (percentageDelta <= 0) dragTarget = 'min';
       else dragTarget = 'max';
     }
+    if (dragTarget == "both") {
+      if (this.state.botPercentage == 0) {
+        percentageDelta = Math.max(0, percentageDelta);
+      }
+      if (this.state.topPercentage == 100) {
+        percentageDelta = Math.min(0, percentageDelta);
+      }
+    }
 
     let botP = this.state.botPercentage;
     let topP = this.state.topPercentage;
     if (dragTarget == 'min' || dragTarget == 'both') botP += percentageDelta;
     if (dragTarget == 'max' || dragTarget == 'both') topP += percentageDelta;
-    botP = Math.min(Math.max(botP, 0), this.state.topPercentage);
-    topP = Math.min(Math.max(topP, this.state.botPercentage), 100);
+    botP = Math.min(Math.max(botP, 0), topP, 100);
+    topP = Math.min(Math.max(topP, botP, 0), 100);
 
     // Convert percentage to input value.
     let b = botP / 100;
