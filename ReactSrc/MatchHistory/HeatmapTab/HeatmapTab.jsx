@@ -4,6 +4,8 @@ import { SliderTimelineBackground } from '/React/MatchHistory/HeatmapTab/SliderB
 import { Heatmap } from '/React/MatchHistory/HeatmapTab/Heatmap.js';
 import { getDeaths, getEndTimestamp, filterPositonData, fixPositionData } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
 
+import { positionToCanvasPixel } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
+
 export class HeatmapTab extends React.Component {
   constructor(props) {
     super(props);
@@ -35,6 +37,10 @@ export class HeatmapTab extends React.Component {
     const positionData = fixPositionData(json, this.props);
     const endTimestamp = getEndTimestamp(positionData);
 
+    const mapItemFetch = await fetch(`/game-item/map/${this.props.MapId}`);
+    const mapItem = await mapItemFetch.json();
+    console.log("MAP: ", mapItem);
+
     const minutes = this.props.MatchTime / 60;
     const strengthScale = 10 / minutes;
 
@@ -45,6 +51,7 @@ export class HeatmapTab extends React.Component {
       timelineRange: [0, endTimestamp],
       maxTime: endTimestamp,
       heatmapStrength: 0.05 * strengthScale,
+      mapItem: mapItem
     });
   }
 
@@ -117,6 +124,7 @@ export class HeatmapTab extends React.Component {
       <div className="heatmap-tab">
         <Heatmap
           MapId={this.props.MapId}
+          mapItem={this.state.mapItem}
           shipPositions={filteredPos}
           width={500} height={500}
           heatmapRadius={this.state.heatmapRadius}

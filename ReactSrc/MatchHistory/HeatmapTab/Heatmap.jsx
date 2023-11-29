@@ -1,5 +1,5 @@
 
-import { getDeaths, positionToCanvasPixel, MAP_IMAGES } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
+import { getDeaths, positionToCanvasPixel } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
 import simpleheat from 'simpleheat';
 
 
@@ -15,7 +15,7 @@ export class Heatmap extends React.Component {
       let lastP;
       let startNewPath = true;
       for (let i = 0; i < shipPositions.Timestamp.length; i++) {
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width);
+        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width);
         if (startNewPath) {
           ctx.beginPath();
           ctx.moveTo(p[0][0], p[0][1]);
@@ -47,7 +47,7 @@ export class Heatmap extends React.Component {
     for (const shipPositions of positionData) {
       for (let i = 0; i < shipPositions.Timestamp.length; i++) {
         if (!shipPositions.Dead[i]) continue;
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width);
+        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width);
         ctx.beginPath();
         ctx.fillStyle = 'white';
         ctx.arc(p[0], p[1], 10, 0, 2 * Math.PI);
@@ -65,7 +65,7 @@ export class Heatmap extends React.Component {
     const heatmapData = [];
     for (const shipPositions of positionData) {
       for (let i = 0; i < shipPositions.Timestamp.length; i++) {
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width, this.props.heatmapStrength);
+        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width, this.props.heatmapStrength);
         heatmapData.push(p);
       }
     }
@@ -97,9 +97,7 @@ export class Heatmap extends React.Component {
     else if (this.props.canvasType == 'paths') {
       this.drawShipPaths(ctx, this.props.shipPositions);
       this.drawDeathPoints(ctx, this.props.shipPositions);  
-    }
-    // 
-    //   
+    } 
   }
 
   componentDidUpdate() {
@@ -111,10 +109,13 @@ export class Heatmap extends React.Component {
   }
 
   render() {
-    let imgSrc = MAP_IMAGES[this.props.MapId];
-    if (imgSrc == undefined) {
-      imgSrc = "images/map-images/Duel_at_Dawn.jpg";
-    }
+    // let imgSrc = MAP_IMAGES[this.props.MapId];
+    // console.log("MAP: ")
+    let imgSrc = `images/map-images/${this.props.mapItem.Name.replaceAll(' ', '_')}.jpg`;
+    console.log(imgSrc);
+    // if (imgSrc == undefined) {
+    //   imgSrc = "images/map-images/Duel_at_Dawn.jpg";
+    // }
 
     return (
       <div className="heatmap-container">

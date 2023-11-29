@@ -248,6 +248,8 @@ app.get('/game-item/:itemType/:itemId',
             collection = mongoClient.db("mhtest").collection("Items-Guns");
         else if (itemType === 'ship') 
             collection = mongoClient.db("mhtest").collection("Items-Ships");
+        else if (itemType === 'map')
+            collection = mongoClient.db("mhtest").collection("Items-Maps");
         else {
             res.status(404).end();
             return;
