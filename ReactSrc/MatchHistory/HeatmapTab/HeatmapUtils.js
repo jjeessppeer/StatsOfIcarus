@@ -25,7 +25,7 @@ const MAP_OFFSET = {
   289: { x: 166 - -942.5 * MAP_SCALE[80] - 300, z: 528 + -68.3 * MAP_SCALE[80] + 50 },
 }
 
-export function positionToCanvasPixel(worldPoint, mapId, canvasWidth) {
+export function positionToCanvasPixel(worldPoint, mapId, canvasWidth, value) {
   if (typeof worldPoint == 'string')
     worldPoint = JSON.parse(worldPoint);
   const imageBaseWidth = 990;
@@ -39,7 +39,7 @@ export function positionToCanvasPixel(worldPoint, mapId, canvasWidth) {
   const pixelPosition = [
     (worldPoint[0] * pxPerMeter + offsets.x) * imageScale,
     (-worldPoint[2] * pxPerMeter + offsets.z) * imageScale,
-    0.1
+    value
   ];
   return pixelPosition;
 }

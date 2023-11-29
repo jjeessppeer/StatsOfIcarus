@@ -1,63 +1,12 @@
 
 import { getDeaths, positionToCanvasPixel, MAP_IMAGES } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
+import simpleheat from 'simpleheat';
+
 
 export class Heatmap extends React.Component {
   constructor(props) {
     super(props);
     this.canvasRef = React.createRef();
-    this.canvasRef2 = React.createRef();
-  }
-
-
-  getPaths(shipPositions) {
-    const paths = [];
-    const positions = shipPositions.Position;
-    let currentPath;
-    for (let i = 0; i < positions.length; i++) {
-      if (i == 0 || shipPositions.Dead[i - 1]) {
-        paths.push([]);
-        currentPath = paths[paths.length - 1];
-      }
-      currentPath.push(positionToCanvasPixel(positions[i], this.props.MapId, this.props.width));
-      // pixelPositions.push(positionToCanvasPixel(positions[i], this.props.MapId, this.props.width));
-      // if (positionData.Dead != undefined && positionData.Dead[i]){
-      //   paths.push(pixelPositions.slice());
-      //   pixelPositions = [];
-      // }
-    }
-    return paths;
-  }
-
-  // getScaledPositions(positionData) {
-  //   const positions = positionData.Position;
-
-  //   const paths = [];
-  //   let pixelPositions = [];
-  //   for (let i = 0; i < positions.length; i++) {
-  //     pixelPositions.push(positionToCanvasPixel(positions[i], this.props.MapId, this.props.width));
-  //     // if (positionData.Dead != undefined && positionData.Dead[i]){
-  //     //   paths.push(pixelPositions.slice());
-  //     //   pixelPositions = [];
-  //     // }
-  //   }
-  //   // console.log(positions[0] + " => " + pixelPositions[0]);
-  //   paths.push(pixelPositions.slice());
-  //   return paths;
-  // }
-
-  getDeathPositions(positionData) {
-    const positions = positionData.Position;
-    const points = [];
-    const deaths = getDeaths(positionData);
-    for (const death of deaths) {
-      points.push(positionToCanvasPixel(death.position, this.props.MapId, this.props.width))
-    }
-    // for (let i = 0; i < positions.length; i++) {
-    //   if (positionData.Dead[i]){
-    //     points.push(positionToCanvasPixel(positions[i], this.props.MapId, this.props.width))
-    //   }
-    // }
-    return points;
   }
 
   drawShipPaths(ctx, positionData) {
@@ -112,13 +61,30 @@ export class Heatmap extends React.Component {
     }
   }
 
+  drawHeatmap(canvas, positionData) {
+    const heatmapData = [];
+    for (const shipPositions of positionData) {
+      for (let i = 0; i < shipPositions.Timestamp.length; i++) {
+        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width, 0.1);
+        heatmapData.push(p);
+      }
+    }
+
+    const heat = simpleheat(canvas);
+    heat.data(heatmapData);
+    heat.draw();
+
+  }
+
   redrawCanvas = () => {
-    const canvas = this.canvasRef2.current;
+    const canvas = this.canvasRef.current;
     const ctx = canvas.getContext("2d");
-    // ctx.reset();
     ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    ctx.save();
+    this.drawHeatmap(canvas, this.props.shipPositions);
+    ctx.restore();
     this.drawShipPaths(ctx, this.props.shipPositions);
     this.drawDeathPoints(ctx, this.props.shipPositions);    
   }
@@ -129,29 +95,6 @@ export class Heatmap extends React.Component {
 
   componentDidMount() {
     this.redrawCanvas();
-    return;
-    // this.heatmap = simpleheat(this.canvasRef.current);
-
-    // const data = this.getScaledPositions(this.props.shipPositions);
-
-
-    // console.log(data);
-    // this.heatmap.data(data);
-    // this.heatmap.max(1);
-    // this.heatmap.radius(10, 0)
-    // this.heatmap.gradient({
-    //   0: 'rgba(0, 0, 0, 0.1)', 
-    //   0.1: 'rgba(255, 0, 0, 0.1)', 
-    //   0.99: 'rgba(255, 0, 0, 0.1)'});
-    // this.heatmap.draw();
-
-
-    // for (const positionData of this.props.shipPositions) { 
-    // }
-
-
-
-
   }
 
   render() {
@@ -159,7 +102,6 @@ export class Heatmap extends React.Component {
     if (imgSrc == undefined) {
       imgSrc = "images/map-images/Duel_at_Dawn.jpg";
     }
-    // const imgSrc = `images/map-images/${}`
 
     return (
       <div className="heatmap-container">
@@ -171,7 +113,6 @@ export class Heatmap extends React.Component {
             height: `${this.props.height}px`
           }}></img>
         <canvas className="heatmap" width={this.props.width} height={this.props.height} ref={this.canvasRef}></canvas>
-        <canvas className="heatmap" width={this.props.width} height={this.props.height} ref={this.canvasRef2}></canvas>
       </div>
     )
   }
