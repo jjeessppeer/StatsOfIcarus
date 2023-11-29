@@ -2,7 +2,7 @@
 import { Slider } from '/React/Slider.js';
 import { SliderTimelineBackground } from '/React/MatchHistory/HeatmapTab/SliderBackground.js';
 import { Heatmap } from '/React/MatchHistory/HeatmapTab/Heatmap.js';
-import { getDeaths, getEndTimestamp, filterPositonData } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
+import { getDeaths, getEndTimestamp, filterPositonData, fixPositionData } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
 
 export class HeatmapTab extends React.Component {
   constructor(props) {
@@ -26,16 +26,15 @@ export class HeatmapTab extends React.Component {
       return;
     }
     const json = await response.json();
-    console.log(json);
+    const positionData = fixPositionData(json, this.props)
+    console.log(positionData);
     // TODO: filter out fake ships.
-
-    const endTimestamp = getEndTimestamp(json);
-    // console.log("ET0: ", endTimestamp);
+    const endTimestamp = getEndTimestamp(positionData);
 
     this.setState({
       loading: false,
       noData: false,
-      shipPositions: json,
+      shipPositions: positionData,
       timelineRange: [0, endTimestamp],
       maxTime: endTimestamp
     });
@@ -50,7 +49,7 @@ export class HeatmapTab extends React.Component {
 
   render() {
     if (this.state.loading) {
-      return (<div></div>);
+      return (<div>Loading...</div>);
     }
     if (this.state.noData) {
       return (<div>No position data for match.</div>);

@@ -73,7 +73,8 @@ export function getEndTimestamp(positionData) {
 
 export function filterPositonData(positionData, minT, maxT) {
   const out = JSON.parse(JSON.stringify(positionData));
-  for (const shipPositions of out) {
+  for (let s = 0; s < out.length; s++) {
+    const shipPositions = out[s];
     for (let i = 0; i < shipPositions.Timestamp.length; i++) {
       if (shipPositions.Timestamp[i] < minT || shipPositions.Timestamp[i] > maxT) {
         shipPositions.Dead.splice(i, 1);
@@ -88,8 +89,40 @@ export function filterPositonData(positionData, minT, maxT) {
   return out;
 }
 
-// export function fixPositionData(positionData) {
-//   // TODO: move to server side.
-//   const out = JSON.parse(JSON.stringify(positionData));
-//   return out;
-// }
+export function fixPositionData(positionData, matchData) {
+  // TODO: make generic for team size.
+  // TODO: move to server side.
+  const out = JSON.parse(JSON.stringify(positionData));
+  out.sort((a, b) => (a.Timestamp.length - b.Timestamp.length));
+  const removalIdxs = [];
+
+  // Get ships per team.
+  const teamShipCount = [0, 0];
+  for (let i = out.length - 1; i >= 0; i--) {
+    if (out[i].TeamIdx != 0 && out[i].TeamIdx != 1) {
+      removalIdxs.push(i);
+    }
+    else {
+      out[i].ShipIdx = teamShipCount[out[i].TeamIdx];
+      teamShipCount[out[i].TeamIdx] += 1;
+    }
+  }
+
+  // Remove the extra ships.
+  for (let i = 0; i < teamShipCount.length; i++) {
+    while (teamShipCount[i] > 2) {
+      const rmIdx = out.findIndex((el) => el.TeamIdx == i);
+      if (rmIdx == -1) break;
+      console.log(i);
+      teamShipCount[i]--;
+      removalIdxs.push(rmIdx);
+    }
+  }
+
+  // Execute removal.
+  removalIdxs.sort((a, b) => (b - a));
+  for (let i = removalIdxs.length -1; i >= 0; i--) {
+    out.splice(removalIdxs[i], 1);
+  }
+  return out;
+}
