@@ -16,8 +16,8 @@
     width: 100%;
 }
 
-.heatmap-tab > div{
-    /* padding-top: 10px; */
+.heatmap-tab .settings > div{
+    padding-bottom: 10px;
     /* float: left; */
     /* display: inline-block; */
     /* vertical-align: top; */
@@ -37,3 +37,40 @@
     top: 0;
     left: 0;
 }
+
+
+
+.heatmap-tab label {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.heatmap-tab label.red {
+    color: var(--red-4);
+}
+
+.heatmap-tab label.blue {
+    color: var(--blue-4);
+}
+
+.heatmap-tab label input {
+    margin-right: 3px;
+}
+
+.team-checkboxes {
+    display: flex;
+    flex-direction: row;
+}
+
+.team-checkboxes > input{
+    margin-right: 4px;
+}
+
+/* .team-checkboxes > input {
+    max-resolution: ;
+}
+
+.team-checkboxes > div {
+    display: inline-block;
+} */

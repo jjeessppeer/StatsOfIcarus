@@ -65,14 +65,21 @@ export class Heatmap extends React.Component {
     const heatmapData = [];
     for (const shipPositions of positionData) {
       for (let i = 0; i < shipPositions.Timestamp.length; i++) {
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width, 0.1);
+        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width, this.props.heatmapStrength);
         heatmapData.push(p);
       }
     }
-
     const heat = simpleheat(canvas);
+    heat.gradient({
+      0.08: 'blue',
+      0.6: 'cyan',
+      0.7: 'lime',
+      0.8: 'yellow',
+      1.0: 'red'
+    });
+    heat.radius(this.props.heatmapRadius, this.props.heatmapBlur);
     heat.data(heatmapData);
-    heat.draw();
+    heat.draw(0);
 
   }
 
@@ -82,11 +89,17 @@ export class Heatmap extends React.Component {
     ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.save();
-    this.drawHeatmap(canvas, this.props.shipPositions);
-    ctx.restore();
-    this.drawShipPaths(ctx, this.props.shipPositions);
-    this.drawDeathPoints(ctx, this.props.shipPositions);    
+    if (this.props.canvasType == 'heatmap') {
+      ctx.save();
+      this.drawHeatmap(canvas, this.props.shipPositions);
+      ctx.restore();
+    }
+    else if (this.props.canvasType == 'paths') {
+      this.drawShipPaths(ctx, this.props.shipPositions);
+      this.drawDeathPoints(ctx, this.props.shipPositions);  
+    }
+    // 
+    //   
   }
 
   componentDidUpdate() {

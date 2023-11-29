@@ -71,8 +71,13 @@ export function getEndTimestamp(positionData) {
   return timestampMax;
 }
 
-export function filterPositonData(positionData, minT, maxT) {
+export function filterPositonData(positionData, minT, maxT, enabledShips, enabledTeams) {
   const out = JSON.parse(JSON.stringify(positionData));
+  for (let s = out.length - 1; s >= 0; s--) {
+    if (enabledShips[out[s].TeamIdx * 2 + out[s].ShipIdx] && enabledTeams[out[s].TeamIdx]) continue;
+    out.splice(s, 1);
+  }
+
   for (let s = 0; s < out.length; s++) {
     const shipPositions = out[s];
     for (let i = 0; i < shipPositions.Timestamp.length; i++) {
@@ -96,33 +101,39 @@ export function fixPositionData(positionData, matchData) {
   out.sort((a, b) => (a.Timestamp.length - b.Timestamp.length));
   const removalIdxs = [];
 
-  // Get ships per team.
+  // Get ships per team and remove invalid teams.
   const teamShipCount = [0, 0];
   for (let i = out.length - 1; i >= 0; i--) {
     if (out[i].TeamIdx != 0 && out[i].TeamIdx != 1) {
       removalIdxs.push(i);
     }
     else {
-      out[i].ShipIdx = teamShipCount[out[i].TeamIdx];
       teamShipCount[out[i].TeamIdx] += 1;
     }
   }
 
-  // Remove the extra ships.
+  // Add the extra ships for removal.
   for (let i = 0; i < teamShipCount.length; i++) {
     while (teamShipCount[i] > 2) {
       const rmIdx = out.findIndex((el) => el.TeamIdx == i);
       if (rmIdx == -1) break;
-      console.log(i);
       teamShipCount[i]--;
       removalIdxs.push(rmIdx);
     }
   }
 
   // Execute removal.
-  removalIdxs.sort((a, b) => (b - a));
-  for (let i = removalIdxs.length -1; i >= 0; i--) {
+  removalIdxs.sort();
+  for (let i = removalIdxs.length - 1; i >= 0; i--) {
     out.splice(removalIdxs[i], 1);
   }
+
+  // Fix ship indexes.
+  const shipCount = [0, 0];
+  out.sort((a, b) => ((a.TeamIdx != b.TeamIdx ? a.TeamIdx - b.TeamIdx : a.ShipIdx - b.ShipIdx)));
+  for (let i = 0; i < out.length; i++) {
+    out[i].ShipIdx = shipCount[out[i].TeamIdx]++;
+  }
+
   return out;
 }
