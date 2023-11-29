@@ -60,22 +60,9 @@ export class Heatmap extends React.Component {
     return points;
   }
 
-  drawSmoothCurve(points, ctx) {
-
-  }
-
-  redrawCanvas = () => {
-
-    const canvas = this.canvasRef2.current;
-    const ctx = canvas.getContext("2d");
-    // ctx.reset();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  drawShipPaths(ctx, positionData) {
     const colors = ['red', 'orange', 'blue', 'cyan'];
-
-    // Draw ship paths
-    for (const shipPositions of this.props.shipPositions) {
+    for (const shipPositions of positionData) {
       let lastP;
       let startNewPath = true;
       for (let i = 0; i < shipPositions.Timestamp.length; i++) {
@@ -105,9 +92,10 @@ export class Heatmap extends React.Component {
         }
       }
     }
+  }
 
-    // Draw death points.
-    for (const shipPositions of this.props.shipPositions) {
+  drawDeathPoints(ctx, positionData) {
+    for (const shipPositions of positionData) {
       for (let i = 0; i < shipPositions.Timestamp.length; i++) {
         if (!shipPositions.Dead[i]) continue;
         const p = positionToCanvasPixel(shipPositions.Position[i], this.props.MapId, this.props.width);
@@ -122,21 +110,17 @@ export class Heatmap extends React.Component {
         ctx.fill();
       }
     }
+  }
 
+  redrawCanvas = () => {
+    const canvas = this.canvasRef2.current;
+    const ctx = canvas.getContext("2d");
+    // ctx.reset();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
-
-    // for (const p of this.getDeathPositions(this.props.shipPositions)) {
-    //   ctx.fillStyle = 'white';
-    //   ctx.beginPath();
-    //   ctx.arc(p[0], p[1], 10, 0, 2 * Math.PI);
-    //   ctx.fill();
-
-    //   ctx.fillStyle = 'black';
-    //   ctx.beginPath();
-    //   ctx.arc(p[0], p[1], 8, 0, 2 * Math.PI);
-    //   ctx.fill();
-    // }
+    this.drawShipPaths(ctx, this.props.shipPositions);
+    this.drawDeathPoints(ctx, this.props.shipPositions);    
   }
 
   componentDidUpdate() {
