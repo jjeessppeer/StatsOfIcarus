@@ -3,13 +3,17 @@ export const MAP_IMAGES = {
   // 314: "Derelict"
   80: "images/map-images/Paritan.jpg",
   289: "images/map-images/Thornholtjpg.jpg",
-  126: "images/map-images/Water_Hazard.jpg"
+  126: "images/map-images/Water_Hazard.jpg",
+  9: "images/map-images/Dunes.jpg",
+  // 9: "images/map-images/Duel_at_Dawn.jpg",
+
 }
 
 const MAP_SCALE = {
   66: 0.236,
   80: 472 / 1000,
   126: 609 / 2000,
+  9: 568 / 3000,
 
   289: 472 / 1500,
 }
@@ -21,6 +25,8 @@ const MAP_OFFSET = {
   66: { x: 790 - -1014.6 * MAP_SCALE[66], z: 586 + 2001.5 * MAP_SCALE[66] },
   80: { x: 166 - -942.5 * MAP_SCALE[80], z: 528 + -68.3 * MAP_SCALE[80] },
   126: { x: 220 - -2082.9 * MAP_SCALE[126], z: 308 + 2961.9 * MAP_SCALE[126] },
+  // 9: {x: 367 - -674 * MAP_SCALE[9], z: 631 + -716.2 * MAP_SCALE[9]},
+  9: {x: 22 - -2500 * MAP_SCALE[9], z: 22 + 2500 * MAP_SCALE[9]},
 
   289: { x: 166 - -942.5 * MAP_SCALE[80] - 300, z: 528 + -68.3 * MAP_SCALE[80] + 50 },
 }

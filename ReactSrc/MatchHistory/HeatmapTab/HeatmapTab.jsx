@@ -18,7 +18,8 @@ export class HeatmapTab extends React.Component {
       heatmapStrength: 0.05,
       enabledShips: [true, true, true, true],
       enabledTeams: [true, true],
-      canvasType: 'heatmap'
+      canvasType: 'heatmap',
+      mapItem: undefined
     }
 
     this.fetchData();

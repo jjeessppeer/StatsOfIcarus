@@ -1,12 +1,11 @@
 // require('dotenv').config()
 
 var express = require('express');
-const { checkSchema, validationResult, check } = require('express-validator');
 const Joi = require('joi');
 const { MongoClient, ReturnDocument } = require("mongodb");
 var fs = require('fs');
 var http = require('http');
-const semver = require('semver')
+const semver = require('semver');
 
 const schemaMiddleware = require('./SchemaValidation/middleware.js');
 const schemas = require('./SchemaValidation/schemas.js');
@@ -17,7 +16,7 @@ const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
 const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
 const elo = require("./Elo/EloHelper.js");
 const lobbyBalancer = require("./Elo/LobbyBalancer.js");
-const {HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA, MATCH_SUBMISSION_SCHEMA} = require("./MatchHistory/requestSchemas.js");
+const { HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA } = require("./MatchHistory/requestSchemas.js");
 
 const shipStats = require('./ShipStats/ShipStats.js');
 
@@ -45,6 +44,10 @@ app.use(express.urlencoded({
     extended: true}));
 app.use(express.static('public'));
 
+app.get('/mod', function(req, res) {
+    res.redirect('https://github.com/jjeessppeer/StatsOfIcarus/releases');
+});
+
 app.get('/get_datasets', async function (req, res) {
     let ip = requestIp.getClientIp(req);
     const db = mongoClient.db("testdb1");
@@ -67,8 +70,7 @@ app.get('/get_datasets', async function (req, res) {
     res.status(200).json(datasets);
 });
 
-app.get(
-    '/match/:matchId/gunneryDetails',
+app.get('/match/:matchId/gunneryDetails',
     async function(req, res) {
     console.log(req.params);
 
@@ -89,8 +91,7 @@ app.get(
     res.status(200).json(gunneryData);
 });
 
-app.get(
-    '/match/:matchId/positionData',
+app.get('/match/:matchId/positionData',
     async function(req, res) {
     console.log(req.params);
 
@@ -111,33 +112,50 @@ app.get(
     res.status(200).json(positionData);
 });
 
-app.post(
-    '/submit_match_history', 
-    schemaMiddleware(schemas.MATCH_SUBMISSION_SCHEMA),
+app.post('/submit_match_history', 
+    // schemaMiddleware(schemas.MATCH_SUBMISSION_SCHEMA),
     async function (req, res) {
     let ip = requestIp.getClientIp(req);
 
     console.log("Match recieved");
-    // if (semver.satisfies(req.body.ModVersion, `=>${MOD_VERSION_REQUIRED}`)) {
-    //     return res.status(400).send(`MatchHistoryMod version incompatible. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST})`);
-    // }
-    // matchHistory.submitRecord(req.body, ip);
+    let modVersion;
+    try {
+        modVersion = Joi.attempt(req.body.ModVersion, Joi.string().required());
+    }
+    catch (err) {
+        return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
+    }
 
-    // if (semver.satisfies(req.body.ModVersion, `<${MOD_VERSION_LATEST}`)) {
-    //     return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}`);
-    // }
-    console.log("Match history recieved.");
-    var inflated = (await unzip(Buffer.from(req.body.CompressedPositionData, 'base64'))).toString();
-    var positionData = JSON.parse(inflated);
-    console.log(positionData);
-    // TODO: validate sent data.
-    matchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip);
+    console.log("MODVER: ", modVersion);
 
-    res.status(200).send();
+    modVersion = semver.valid(modVersion);
+    if (modVersion == null) return;
+    if (semver.satisfies(modVersion, '>=1.0.0')) {
+        console.log("1.0")
+        const validationResult = schemas.MATCH_SUBMISSION_2.validate(req.body);
+        if (validationResult.error)
+            return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
+        // var inflated = (await unzip(Buffer.from(req.body.CompressedPositionData, 'base64'))).toString();
+        // var positionData = JSON.parse(inflated);
+        // console.log(positionData);
+        matchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip);
+        return res.status(200).send();
+    }
+    else if(semver.satisfies(modVersion, '>=0.1.3')) {
+        console.log("0.1")
+        const validationResult = schemas.MATCH_SUBMISSION_1.validate(req.body);
+        if (validationResult.error)
+            return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
+        // Upload 0.1 data.
+        matchHistory.submitRecord(req.body, false, false, ip);
+        console.log("MID: ", req.body.MatchId);
+        return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}\nUpdate on github or statsoficarus.xyz/mod`);
+    }
+
+    return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
 });
 
-app.post(
-    '/match_history_search',
+app.post('/match_history_search',
     async function(req, res) {
 
     let validationResult = HISTORY_SEARCH_SCHEMA.validate(req.body);
@@ -149,8 +167,7 @@ app.post(
     res.status(200).json(responseData);
 });
 
-app.post(
-    '/request_matches', 
+app.post('/request_matches', 
     async function(req, res) {
 
     let requestValidation = MATCH_REQUEST_SCHEMA.validate(req.body);
@@ -163,8 +180,7 @@ app.post(
     res.status(200).json(matches);
 });
 
-app.post(
-    '/player_rating',
+app.post('/player_rating',
     schemaMiddleware(schemas.eloTimelineRequest),
     async function(req, res) {
         
@@ -173,8 +189,7 @@ app.post(
     res.status(200).json({Timeline: eloTimeline, LadderRank: ladderRank});
 });
 
-app.post(
-    '/balance_lobby',
+app.post('/balance_lobby',
     schemaMiddleware(schemas.lobbyBalance),
     async function(req, res) {
     const balancedTeams = await lobbyBalancer.generateBalancedTeams(
@@ -188,8 +203,7 @@ app.post(
 });
 
 
-app.post(
-    '/leaderboard_page',
+app.post('/leaderboard_page',
     schemaMiddleware(schemas.leaderboardRequest),
     async function(req, res) {
     
@@ -201,8 +215,7 @@ app.post(
 
 
 const {processHistoryQuery, generateMatchFilterPipeline} = require('./MatchHistory/HistoryFilter.js');
-app.post(
-    '/ship_loadouts',
+app.post('/ship_loadouts',
     async function(req, res) {
             
     const collection = mongoClient.db("mhtest").collection("Items-Ships");
@@ -219,16 +232,14 @@ app.post(
     res.status(200).json(queryResponse);
 });
 
-app.post(
-    '/ship_matchup_stats',
+app.post('/ship_matchup_stats',
     async function(req, res) {
         const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
         // console.log()
         res.status(200).json(dat);
 });
 
-app.get(
-    '/game-item/:itemType/:itemId',
+app.get('/game-item/:itemType/:itemId',
     async function(req, res) {
         const itemType = req.params.itemType;
         const itemId = Number(req.params.itemId);

@@ -2,13 +2,8 @@ const assert = require('assert');
 const Elo = require('./Elo/EloHelper.js');
 const MatchTagger = require('../Server/MatchHistory/MatchTagger.js');
 
-const SCS_START_HOUR_UTC = 18;
-const SCS_START_DAY = 0;
-const SCS_HOUR_LENGTH = 4;
-
-
 const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
-const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
+const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 30 * 1000;
 
 var client;
 
@@ -18,11 +13,6 @@ let insertionRunning = false;
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-function posModulo(a, b) {
-    return ((a % b) + b) % b;
-};
-
 
 async function getPlayerId(playerName) {
     // TODO handle ps4 players?
@@ -173,7 +163,16 @@ async function insertMatchHistory(lobbyData, gunneryData, positionData, ip) {
                 {MatchId: lobbyData.MatchId},
                 {$set: {SubmitterIps: match.SubmitterIps}});
         }
-
+        if (!match.GunneryData && gunneryData) {
+            await matchesCollection.updateOne(
+                {MatchId: lobbyData.MatchId},
+                {$set: {GunneryData: gunneryData}});
+        }
+        if (!match.PositionData && positionData) {
+            await matchesCollection.updateOne(
+                {MatchId: lobbyData.MatchId},
+                {$set: {PositionData: positionData}});
+        }
         return true;
     }
 
