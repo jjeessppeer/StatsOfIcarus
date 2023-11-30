@@ -47,7 +47,14 @@ export class ShipCanvas extends React.Component {
 
     const shipItemRaw = await fetch(`/game-item/ship/${shipModel}`);
     const shipItem = await shipItemRaw.json();
-    const gunPositions = shipItem.GunPositions;
+    const gunPositions = [];
+
+    for (let i = 0; i < shipItem.GunCount; i++) {
+      const key = `gun-slot-${i+1}`;
+      const slot = shipItem.Slots[key];
+      const p = [slot.Position.X, slot.Position.Z];
+      gunPositions.push(p);
+    }
 
     // Find gun bounding rectangle.
     let maxY, minY, minX, maxX;

@@ -23,7 +23,7 @@ const shipStats = require('./ShipStats/ShipStats.js');
 const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
-const MOD_VERSION_LATEST = "0.2.0";
+const MOD_VERSION_LATEST = "1.0.0";
 const MOD_VERSION_REQUIRED = "0.1.3";
 
 const zlib = require('zlib');
@@ -33,8 +33,6 @@ const inflate = util.promisify(zlib.inflate);
 
 // var bodyParser = require("body-parser");
 var requestIp = require('request-ip');
-const { assert } = require('console');
-const { nextTick } = require('process');
 
 var app = express()
 app.use(express.json({ limit: '30mb' }));
@@ -202,7 +200,6 @@ app.post('/balance_lobby',
     res.status(200).json(balancedTeams);
 });
 
-
 app.post('/leaderboard_page',
     schemaMiddleware(schemas.leaderboardRequest),
     async function(req, res) {
@@ -234,36 +231,40 @@ app.post('/ship_loadouts',
 
 app.post('/ship_matchup_stats',
     async function(req, res) {
-        const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
-        // console.log()
-        res.status(200).json(dat);
+    const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
+    // console.log()
+    res.status(200).json(dat);
 });
 
 app.get('/game-item/:itemType/:itemId',
     async function(req, res) {
-        const itemType = req.params.itemType;
-        const itemId = Number(req.params.itemId);
-        let collection; 
-        if (itemType === 'gun') 
-            collection = mongoClient.db("mhtest").collection("Items-Guns");
-        else if (itemType === 'ship') 
-            collection = mongoClient.db("mhtest").collection("Items-Ships");
-        else if (itemType === 'map')
-            collection = mongoClient.db("mhtest").collection("Items-Maps");
-        else {
-            res.status(404).end();
-            return;
-        }
-
-        const item = await collection.findOne({_id: itemId});
-        if (item) {
-            res.status(200).json(item);
-            return;
-        }
+    const itemType = req.params.itemType;
+    const itemId = Number(req.params.itemId);
+    let collection; 
+    if (itemType === 'gun') 
+        collection = mongoClient.db("mhtest").collection("Items-Guns");
+    else if (itemType === 'ship') 
+        collection = mongoClient.db("mhtest").collection("Items-Ships");
+    else if (itemType === 'map')
+        collection = mongoClient.db("mhtest").collection("Items-Maps");
+    else {
         res.status(404).end();
+        return;
     }
-)
 
+    const item = await collection.findOne({_id: itemId});
+    if (item) {
+        res.status(200).json(item);
+        return;
+    }
+    res.status(404).end();
+});
+
+app.get('/gun-items', async function(req, res) {
+    collection = mongoClient.db("mhtest").collection("Items-Guns");
+    const guns = await collection.find({Usable: true}).toArray();
+    res.status(200).json(guns);
+});
 
 async function run() {
     try {
