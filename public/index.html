@@ -58,13 +58,14 @@
   <script src="js/utils.js"></script>
   <script src="js/docsapi.js"></script>
   <script src="js/scsTime.js"></script>
-  <script src="js/damageCalculations.js"></script>
+  <!-- <script src="js/damageCalculations.js"></script> -->
   <script src="js/aimCalculator.js"></script>
   <script src="js/mapSpawns.js"></script>
   <script src="js/shipBuilder.js"></script>
   <script src="js/shipBuilderTranslations.js"></script>
 
   <script type="module" src="js/MatchHistory/matchHistory.js"></script>
+  <script type="module" src="js/damageCalculations.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
@@ -81,6 +82,7 @@
   <link rel="stylesheet" href="css/ShipStats/LoadoutSettings.css">
   <link rel="stylesheet" href="css/MatchHistory/HeatmapTab.css">
   <link rel="stylesheet" href="css/MatchHistory/Slider.css">
+  <link rel="stylesheet" href="css/DamageCalculator.css">
 
 
 </head>
@@ -645,13 +647,16 @@
 
       <!-- Gunnery calculator -->
       <div id="damageCalculator" class="content-panel" style="display:block">
+        <div id="dcReactRoot">
+
+        </div>
         <h2>Damage numbers</h2>
         <div class="input-group">
           <div class="input-group-prepend small">
             <div class="input-group-text">Gun</div>
           </div>
           <select class="form-control" id="gunSelect" autocomplete="off">
-            <option>Artemis</option>
+            <!-- <option>Artemis</option>
             <option>Light Flak</option>
             <option>Gatling</option>
             <option>Flamethrower</option>
@@ -671,7 +676,7 @@
             <option>Heavy Carronade</option>
             <option>Lumberjack</option>
             <option>Minotaur</option>
-            <option>Nemesis</option>
+            <option>Nemesis</option> -->
           </select>
         </div>
 
@@ -1260,9 +1265,9 @@
     function datasetsLoaded() {
       datasets_loaded = true;
       $("#loadalert").slideUp();
-      initializeDamageCalculator();
-      initializeAimCalculator();
-      initializeShipBuilder();
+      // initializeDamageCalculator();
+      // initializeAimCalculator();
+      // initializeShipBuilder();
       initializeSpawns();
     }
     updateScsTime();

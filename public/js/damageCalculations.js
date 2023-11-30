@@ -1,16 +1,33 @@
+// import { DamageCalculator } from "./React/";
+import { DamageCalculator } from '/React/DamageCalculator/DamageCalculator.js';
 
 
+async function initializeDamageCalculator() {
 
-function initializeDamageCalculator() {
+    const gunsFetch = await fetch("/guns");
+    const gunItems = await gunsFetch.json();
+
+    gunItems.sort((a, b) => (a.Size != b.Size ? (a.Size < b.Size) : (a.Name > b.Name)));
+
+    const ammoFetch = await fetch("/ammos");
+    const ammoItems = await ammoFetch.json();
+
+    const rootDiv = document.querySelector('#dcReactRoot');
+    const reactRoot = ReactDOM.createRoot(rootDiv);
+    const el = React.createElement(DamageCalculator, { gunItems: gunItems, ammoItems: ammoItems });
+    reactRoot.render(el);
+    // const gunsFetch = await fetch("/guns");
+    // const gunItems = await gunsFetch.json();
+    // console.log(gunItems);
+    // updateDropdowns(gunItems);
+    return;
+
     // Bind events
+    
     $("#gunSelect,#ammoSelect,#buffedCheckbox,#armorUnitSelect,#hullUnitSelect,#balloonUnitSelect,#componentUnitSelect,#armedCheckbox,#ttkSelection,#directHitCheckbox").on("change", updateGunInfoTable);
-
-
-
     $("#distanceRange,#timeRange").on("input", updateGunInfoTable);
-
-
     $("#damageCalcCustomAmmoInput input").on("input", updateGunInfoTable);
+
     $("#damageCalcCustomAmmoInput input").on("input", exportCustomAmmo);
 
     $("#damageCalcCustomAmmoCheck").on("change", function(e){
@@ -24,22 +41,24 @@ function initializeDamageCalculator() {
             $("#damageCalcCustomAmmoInput").slideUp();
             $("#damageCalcAmmoInput").slideDown();
         }
-    })
+    });
+
+    
 
     // $("#distanceText").inputFilter(function (value) {
     //     console.log(this);
     //     return /^[\d]*?$/.test(value) && (!parseInt(value) || parseInt(value) < 100) //allow float in range 0 to 1, or nothing.
     //   });
     // Update table
-    updateGunInfoTable();
+    // updateGunInfoTable();
     // exportCustomAmmo();
     // importCustomAmmo(btoa("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"));
-    if (window.location.hash.substr(1).split("?")[0] == "damageCalculator" && getUrlParam(window.location.href)){
-        importCustomAmmo(getUrlParam(window.location.href));
-        $("#damageCalcCustomAmmoCheck").prop('checked', true);
-        $("#damageCalcCustomAmmoInput").show();
-        $("#damageCalcAmmoInput").hide();
-    }
+    // if (window.location.hash.substr(1).split("?")[0] == "damageCalculator" && getUrlParam(window.location.href)){
+    //     importCustomAmmo(getUrlParam(window.location.href));
+    //     $("#damageCalcCustomAmmoCheck").prop('checked', true);
+    //     $("#damageCalcCustomAmmoInput").show();
+    //     $("#damageCalcAmmoInput").hide();
+    // }
 }
 
 function exportCustomAmmo(){
@@ -484,3 +503,5 @@ function updateGunInfoTable() {
     $("#ttkTable").append(ttkTableContents);
 
 }
+
+initializeDamageCalculator();

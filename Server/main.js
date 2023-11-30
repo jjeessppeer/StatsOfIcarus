@@ -260,10 +260,20 @@ app.get('/game-item/:itemType/:itemId',
     res.status(404).end();
 });
 
-app.get('/gun-items', async function(req, res) {
+app.get('/guns', async function(req, res) {
     collection = mongoClient.db("mhtest").collection("Items-Guns");
     const guns = await collection.find({Usable: true}).toArray();
     res.status(200).json(guns);
+});
+
+app.get('/ammos', async function(req, res) {
+    collection = mongoClient.db("mhtest").collection("Items-Skills");
+    const ammos = await collection.find({SkillType: 2}).toArray();
+    res.status(200).json(ammos);
+})
+
+app.get('/maps', async function() {
+
 });
 
 async function run() {
