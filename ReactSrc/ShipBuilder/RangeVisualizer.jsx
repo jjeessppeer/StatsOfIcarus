@@ -16,8 +16,6 @@ export class RangeVisualizer extends React.PureComponent {
   }
 
   drawCanvas() {
-    console.log("RANGE VIS RENDERING")
-    console.log(this.props.shipItem)
     let canvas = this.canvasRef.current;
     let ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -118,7 +116,6 @@ export class RangeVisualizer extends React.PureComponent {
     let colors_tmp = [];
     for (let i = 0; i < this.props.shipItem.GunCount; i++) {
       const gunName = this.props.gunSelections[i];
-      console.log(this.props.selectedAmmos);
       let ammoItem = this.props.selectedAmmos[i];
       let ammoName;
       if (ammoItem) ammoName = ammoItem.Name;

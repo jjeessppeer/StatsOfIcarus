@@ -34,11 +34,9 @@ export class ShipBuilder extends React.PureComponent {
   }
 
   ammoChanged = (evt, idx) => {
-    console.log(evt.target.value);
     const selectedAmmos = [...this.state.selectedAmmos];
     const ammoItem = this.props.ammoItems.find(el => el.Name == evt.target.value);
     selectedAmmos[idx] = ammoItem;
-    console.log("AAMO CHANGED: ", selectedAmmos);
     this.setState({
       selectedAmmos: selectedAmmos
     });
@@ -182,7 +180,6 @@ class ShipInputGroup extends React.PureComponent {
 class WeaponSelector extends React.PureComponent {
   render() {
     const selectors = [];
-    console.log(this.props)
     for (let i = 0; i < this.props.selectedShip.GunCount; i++) {
       selectors.push(<GunAmmoSelector {...this.props} gunIndex={i}></GunAmmoSelector>)
     }
