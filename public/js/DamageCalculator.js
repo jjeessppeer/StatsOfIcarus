@@ -5,7 +5,7 @@ async function initializeDamageCalculator() {
     const gunsFetch = await fetch("/guns");
     const gunItems = await gunsFetch.json();
 
-    gunItems.sort((a, b) => (a.Size != b.Size ? (a.Size < b.Size) : (a.Name > b.Name)));
+    gunItems.sort((a, b) => (a.Size != b.Size ? (a.Size > b.Size) : (a.Name > b.Name)));
 
     const ammoFetch = await fetch("/ammos");
     const ammoItems = await ammoFetch.json();

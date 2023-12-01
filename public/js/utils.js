@@ -437,11 +437,16 @@ async function loadImagesAsync(imgSources) {
     return Promise.all(promises);
 }
 
+const imgCache = {};
 async function loadImageAsync(imgSrc) {
+    if (imgCache[imgSrc]) return imgCache[imgSrc];
     const promise = new Promise((resolve, reject) => {
         const img = new Image();
         img.src = imgSrc;
-        img.onload = () => resolve(img);
+        img.onload = () => {
+            imgCache[imgSrc] = img;
+            resolve(img)
+        };
     });
     return promise;
 }

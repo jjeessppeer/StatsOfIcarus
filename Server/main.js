@@ -272,6 +272,12 @@ app.get('/ammos', async function(req, res) {
     res.status(200).json(ammos);
 })
 
+app.get('/ships', async function(req, res) {
+    collection = mongoClient.db("mhtest").collection("Items-Ships");
+    const ships = await collection.find({Usable: true}).toArray();
+    res.status(200).json(ships);
+})
+
 app.get('/maps', async function() {
 
 });

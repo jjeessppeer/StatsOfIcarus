@@ -1,0 +1,47 @@
+.ship-builder .weapon-selector .input-group {
+    width: 420px;
+}
+
+.name-input {
+    width: 200px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.ship-select-group {
+    width:200px;
+}
+
+.import-group {
+    margin-bottom: 20px;
+}
+
+.ship-stats-box {
+    border-width: 3px;
+    border-style: solid;
+}
+
+.ship-stats-table {
+    margin-left:10px;
+    margin-top:10px;
+    margin-bottom:10px;
+    margin-right:10px;
+}
+
+.ship-stats-table .spacer {
+    height:10px;
+}
+
+.ship-builder .ship-canvas {
+    border: 3px solid black;
+}
+
+.ship-builder > .my-col {
+    margin-right: 5px;
+}
+
+.ship-renderer .off-canvas {
+    display: none;
+}

@@ -62,21 +62,15 @@ export class DamageCalculator extends React.PureComponent {
     }
     if (ammoItem == undefined) ammoItem = defaultAmmo;
 
-    function getAmmoEffect(effect) {
-      return 1 + (ammoItem.Effects[effect] ? ammoItem.Effects[effect].Strength : 0);
-    }
     
-    function getGunParam(param, defaultValue = 1) {
-      return (gunItem.Params[param] ? Number.parseFloat(gunItem.Params[param]) : defaultValue)
-    }
 
     // Calculate damage per shot.
     const damages = {}
-    const ammoDamageMod = getAmmoEffect("ModifyDamage");
-    const ammoDirectMod = getAmmoEffect("ModifyPrimaryDamage");
-    const ammoBurstMod = getAmmoEffect("ModifySecondaryDamage");
+    const ammoDamageMod = getAmmoEffect("ModifyDamage", ammoItem);
+    const ammoDirectMod = getAmmoEffect("ModifyPrimaryDamage", ammoItem);
+    const ammoBurstMod = getAmmoEffect("ModifySecondaryDamage", ammoItem);
     const buffMod = (this.state.buffEnabled ? 1.1 : 1);
-    const shots = getGunParam("iRaysPerShot", 1);
+    const shots = getGunParam("iRaysPerShot", gunItem, 1);
     for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type]) {
       damages[componentType] = {};
       const modifier = DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type][componentType];
@@ -90,18 +84,18 @@ export class DamageCalculator extends React.PureComponent {
       damages[componentType].total = damages[componentType].burst + damages[componentType].direct;
     }
 
-    const cooldownTime = gunItem.CooldownTime / getAmmoEffect("ModifyRateOfFire");
+    const cooldownTime = gunItem.CooldownTime / getAmmoEffect("ModifyRateOfFire", ammoItem);
     const reloadTime = gunItem.ReloadTime / (this.state.buffEnabled ? 1.1 : 1);
     // console.log("RT: ", reloadTime, )
-    const clipSize = Math.max(1, Math.round(gunItem.MaxAmmunition * getAmmoEffect("ModifyAmmoCount")));
+    const clipSize = Math.max(1, Math.round(gunItem.MaxAmmunition * getAmmoEffect("ModifyAmmoCount", ammoItem)));
     const secondsPerClip = Math.max((clipSize - 1) * cooldownTime, 1);
     const secondsPerCycle = secondsPerClip + reloadTime;
 
-    const range = gunItem.Range * getAmmoEffect("ModifyProjectileSpeed") * getAmmoEffect("ModifyLifetime");
-    const muzzleSpeed = getGunParam("fMuzzleSpeed", 1);
-    const armingDelay = getGunParam("fArmingDelay", 0) * getAmmoEffect("ModifyArmingTime");
+    const range = gunItem.Range * getAmmoEffect("ModifyProjectileSpeed", ammoItem) * getAmmoEffect("ModifyLifetime", ammoItem);
+    const muzzleSpeed = getGunParam("fMuzzleSpeed", gunItem, 1) * getAmmoEffect("ModifyProjectileSpeed", ammoItem);
+    const armingDelay = getGunParam("fArmingDelay", gunItem, 0) * getAmmoEffect("ModifyArmingTime", ammoItem);
     const armingDistance = muzzleSpeed * armingDelay;
-    const aoe = getGunParam("fShellBurstSize", 0) * getAmmoEffect("ModifyAreaOfEffect");
+    const aoe = getGunParam("fShellBurstSize", gunItem, 0) * getAmmoEffect("ModifyAreaOfEffect", ammoItem);
 
     // Damage scaling for the table rows.
     const perClipScale = clipSize;
@@ -294,3 +288,18 @@ const DAMAGE_MODIFIERS = {
 }
 
 
+export function getAmmoEffect(effect, ammoItem) {
+  try{
+    return 1 + (ammoItem.Effects[effect] ? ammoItem.Effects[effect].Strength : 0);
+  }
+  catch(e){}
+  return 1;
+}
+
+export function getGunParam(param, gunItem, defaultValue = 1) {
+  try {
+    return (gunItem.Params[param] ? Number.parseFloat(gunItem.Params[param]) : defaultValue)
+  }
+  catch(e){}
+  return defaultValue;
+}

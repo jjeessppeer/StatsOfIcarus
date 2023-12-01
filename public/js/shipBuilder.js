@@ -29,45 +29,58 @@ var ship_image_srcs = {
   "Squid": "images/ship-images/squid_gundeck_small.png",
   "Stormbreaker": "images/ship-images/storm_gundeck_small.png" 
 }
+let shipItems = [];
+let gunItems = [];
+let ammoItems = [];
+let activeShip = undefined;
 
-function initializeShipBuilder(){
-  if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
-    setTimeout(function(){ initializeShipBuilder(); }, 1000);
-    return;
-  }
+import { ShipBuilder } from '/React/ShipBuilder/ShipBuilder.js';
+async function initializeShipBuilder(){
+  console.log("SHIP BUILDER");
+
+  const shipFetch = await fetch("/ships");
+  const shipItems = await shipFetch.json();
+
+  const gunsFetch = await fetch("/guns");
+  const gunItems = await gunsFetch.json();
+
+  const ammoFetch = await fetch("/ammos");
+  const ammoItems = await ammoFetch.json();
+
+  const rootDiv = document.querySelector('#shipBuilderReactRoot');
+  const reactRoot = ReactDOM.createRoot(rootDiv);
+  const el = React.createElement(ShipBuilder, { shipItems, gunItems, ammoItems });
+  reactRoot.render(el);
+  return;
+  // if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && map_dataset)) {
+  //   setTimeout(function(){ initializeShipBuilder(); }, 1000);
+  //   return;
+  // }
 
   $("#angleImage").on('load', function(){
     var innerContent = $(this).parent();
     var outerContent = innerContent.parent();
     outerContent.scrollLeft((innerContent.width() - outerContent.width()) / 2);
-  })
+  });
 
   // Fill ship list
-  for (let i=0; i < ship_guns_dataset.getNOfRows(); i++){
-    let ship_name = ship_guns_dataset.getDatasetCell(i, 0);
-    if (ship_name == "Mobula")
-      $("#shipBuildShipSelection").append($("<option selected>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
+  for (let i=0; i < shipItems.length; i++){
+    let ship_name = shipItems[i].Name;
+    if (ship_name == "Mobula") {
+      activeShip = shipItems[i];
+      $("#shipBuildShipSelection").append($("<option selected>"+ ship_name +"</option>"));
+    }
     else
-      $("#shipBuildShipSelection").append($("<option>"+ ship_guns_dataset.getDatasetCell(i, 0) +"</option>"));
+      $("#shipBuildShipSelection").append($("<option>"+ ship_name +"</option>"));
   }
   
-
   $("#copyBuildLinkBtn").on("click", function(){
     copyToClipboard(window.location.href);
     this.innerHTML = "Copied to clipboard";
   });
 
-  // $("#shipBuilderDesCheck").on("change", function(){
-  //   console.log($("#shipBuilderDesCheck").is(":checked"))
-  //   if ($("#shipBuilderDesCheck").is(":checked"))
-  //     $("#buildDescriptionCol").show("slide", {direction: "left"}, 400);
-  //   else
-  //     $("#buildDescriptionCol").hide("slide", {direction: "left"}, 400);
-  // });
-
   $("#shipBuilderPvECheck").on("change", function(){
     crewRoleChanged();
-
     shipBuilderReloadShip();
     updateShipBuildImage(true);
     updateRangeVis();
@@ -206,7 +219,7 @@ function initializeShipBuilder(){
 
 function shipBuilderUpdateUrl(){
   $("#copyBuildLinkBtn").text("Copy build link");
-  setUrlParam("build_code="+shipBuilderGetExportCode());
+  // setUrlParam("build_code="+shipBuilderGetExportCode());
 }
 
 
@@ -511,22 +524,21 @@ function crewRoleChanged(){
 
 
 function shipBuilderReloadShip(){
+ship_builder_guns.fill("None");
+  const n_guns = activeShip.GunCount;
 
-  // $("#shipBuilderImage")[0].src = ship_image_srcs[ship_builder_ship];
-
-  ship_builder_guns.fill("None");
-  
-  let ship_data = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
-  let n_guns = parseInt(ship_data[1]);
   for (let i=0; i < n_guns; i++){
-    // console.log(gun_dataset.filterByString("PvE", "Mode"));
-    let available_guns = gun_dataset.filterByString(ship_data[14+i], "Weapon slot");
-    if (!$("#shipBuilderPvECheck").is(":checked"))
-      available_guns = available_guns.filterByString("PvP", "Mode");
+    const key = `gun-slot-${i+1}`;
+    const gunSlot = activeShip.Slots[key];
+    const pveEnabled = $("#shipBuilderPvECheck").is(":checked");
+    const available_guns = gunItems.filter(el => (el.Size == gunSlot.Size && (el.GameType & 1 || pveEnabled)));
+    available_guns.sort((a, b) => (a.Name > b.Name));
+
     let select = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(1)");
     select.empty();
-    for (let j=0; j < available_guns.getNOfRows(); j++){
-      select.append($("<option>"+available_guns.getDatasetCell(j, 1)+"</option>"));      
+    select.append($("<option>None</option>"));   
+    for (let j=0; j < available_guns.length; j++){
+      select.append($("<option value=>"+available_guns[j].Name+"</option>"));      
     }
     ship_builder_guns[i] = select.val();
   }
@@ -540,52 +552,56 @@ function shipBuilderReloadShip(){
       div.show();
   } 
 
-
-  for (let i=0; i < ammo_dataset.getNOfRows(); i++){
-    $("#weaponSelections > div > select:nth-of-type(2)").append($("<option>"+ammo_dataset.getDatasetCell(i, 1)+"</option>"));
+  const ammoSelects = $("#weaponSelections > div > select:nth-of-type(2)");
+  for (const el of ammoSelects) {
+    const ammoSelect = $(el);
+    ammoSelect.empty();
+    ammoSelect.append($("<option selected>Normal</option>"));
+    for (let i=0; i < ammoItems.length; i++){
+      ammoSelect.append($("<option>"+ammoItems[i].Name+"</option>"));
+    }
   }
+  
 
 
   // Update ship stats
-  let ship_stats = ship_dataset.filterByString(ship_builder_ship, "Ship Type");
-  $("#shipStatArmor").text(ship_stats.getFirstCellByTitle("Armor") + " hp");
-  $("#shipStatHull").text(ship_stats.getFirstCellByTitle("Hull Health") + " hp");
-  $("#shipStatSpeed").text(ship_stats.getFirstCellByTitle("Longitudinal Speed, (m/s)") + " m/s");
-  $("#shipStatAccel").text(ship_stats.getFirstCellByTitle("Longitudinal Acceleration, (m/s²)") + " m/s²");
-  $("#shipStatVertSpeed").text(ship_stats.getFirstCellByTitle("Vertical Speed, (m/s)") + " m/s");
-  $("#shipStatVertAccel").text(ship_stats.getFirstCellByTitle("Vertical Acceleration, (m/s²)") + " m/s²");
-  $("#shipStatTurnSpeed").text(ship_stats.getFirstCellByTitle("Turn Speed, (deg/s)") + " deg/s");
-  $("#shipStatTurnAccel").text(ship_stats.getFirstCellByTitle("Turn Acceleration,(deg/s²)") + " deg/s²");
-  $("#shipStatMass").text(ship_stats.getFirstCellByTitle("Mass, (t)") + " t");
+  // let ship_stats = ship_dataset.filterByString(ship_builder_ship, "Ship Type");
+  // $("#shipStatArmor").text(ship_stats.getFirstCellByTitle("Armor") + " hp");
+  // $("#shipStatHull").text(ship_stats.getFirstCellByTitle("Hull Health") + " hp");
+  // $("#shipStatSpeed").text(ship_stats.getFirstCellByTitle("Longitudinal Speed, (m/s)") + " m/s");
+  // $("#shipStatAccel").text(ship_stats.getFirstCellByTitle("Longitudinal Acceleration, (m/s²)") + " m/s²");
+  // $("#shipStatVertSpeed").text(ship_stats.getFirstCellByTitle("Vertical Speed, (m/s)") + " m/s");
+  // $("#shipStatVertAccel").text(ship_stats.getFirstCellByTitle("Vertical Acceleration, (m/s²)") + " m/s²");
+  // $("#shipStatTurnSpeed").text(ship_stats.getFirstCellByTitle("Turn Speed, (deg/s)") + " deg/s");
+  // $("#shipStatTurnAccel").text(ship_stats.getFirstCellByTitle("Turn Acceleration,(deg/s²)") + " deg/s²");
+  // $("#shipStatMass").text(ship_stats.getFirstCellByTitle("Mass, (t)") + " t");
   
 }
 
 var updateShipBuildImageLock = false;
 var updateShipBuildQueued = false;
 function updateShipBuildImage(resetPos=false, important=false){
-  if (!(gun_dataset && ammo_dataset && ship_dataset && ship_guns_dataset && component_dataset)) {
-    setTimeout(function(){ updateShipBuildImage(); }, 1000);
-    return;
-  }
   if (updateShipBuildQueued) updateShipBuildQueued = true;
   if (updateShipBuildImageLock) return;
   updateShipBuildImageLock = true;
 
-  let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
-  let n_guns = parseInt(data_row[1]);
+  // let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
+  let n_guns = activeShip.GunCount;
   let img_srcs = [ship_image_srcs[ship_builder_ship]];
   for (let i=0; i < n_guns; i++){
-    img_srcs.push("images/gun-images/icons/"+ship_builder_guns[i]+".jpg");
+    const gunItem = gunItems.find(el => el.Name == ship_builder_guns[i]);
+    if (gunItem)
+      img_srcs.push("images/item-icons/"+gunItem.IconPath);
   }
   let images = loadImages(img_srcs, () => {
-    redrawShipBuildImage(images, data_row, resetPos);
+    redrawShipBuildImage(images, resetPos);
     if (updateShipBuildQueued){
       updateShipBuildQueued = false;
       updateShipBuildImage(true);
     }});
 }
 
-function redrawShipBuildImage(images, data_row, resetPos=false){
+function redrawShipBuildImage(images, resetPos=false){
   let canvas = document.getElementById("shipBuilderCanvas");
   let ctx = canvas.getContext("2d");
   if (resetPos){
@@ -594,8 +610,6 @@ function redrawShipBuildImage(images, data_row, resetPos=false){
     zoomMatrixAround(builder_matrix, canvas.width/2, canvas.height/2, 0.8);
     applyMatrix(ctx, builder_matrix);
   }
-    
-
 
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -620,24 +634,26 @@ function redrawShipBuildImage(images, data_row, resetPos=false){
 
   // let data_row = ship_guns_dataset.filterByString(ship_builder_ship, "Ship").getDatasetRow(0);
 
-  let n_guns = parseInt(data_row[1]);
+  let n_guns = activeShip.GunCount;
 
   for (let i=0; i < n_guns; i++){
+    const key = `gun-slot-${i-1}`;
+    const gunSlot = activeShip.Slots[key];
+    const gunItem = gunItems.find(el => el.Name == ship_builder_guns[i]);
+    if (!gunItem) continue;
 
-    let gun_type = ship_builder_guns[i];
-    let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
-    let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
+    // let ammo_type = $("#weaponSelections > div:nth-of-type("+(i+1)+") > select:nth-of-type(2)").val();
+    // let gun_numbers = getGunNumbers(gun_type, ammo_type, false);
 
 
-    let gun_angle = gun_numbers.info.angle;
-
-    let angle = degToRad(-90 + parseFloat(data_row[2+i]));
+    let gun_angle = gunItem.MaxYaw;
+    let angle = degToRad(-90 + parseFloat(gunSlot.Angle));
     let right_angle = angle + degToRad(gun_angle);
     let left_angle = angle - degToRad(gun_angle);
 
     // let range = gun_numbers.info.range;
 
-    let [cx, cy] = pointStringToInts(data_row[8+i])
+    let [cx, cy] = [gunSlot.Position.X, gunSlot.Position.Z];
 
     //Draw position
     ctx.globalCompositeOperation = "source-over";
@@ -706,11 +722,7 @@ function redrawShipBuildImage(images, data_row, resetPos=false){
 }
 
 function updateRangeVis(){
-    if (!(gun_dataset && ammo_dataset && ship_dataset && map_dataset && component_dataset)) {
-      setTimeout(function(){ updateRangeVis(); }, 1000);
-      return;
-    }
-
+  return;
 
     // Range canvas
     let canvas = document.getElementById("rangeCanvas");
@@ -919,3 +931,5 @@ function angleVis(){
 
   }
 }
+
+initializeShipBuilder();

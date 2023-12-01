@@ -60,11 +60,12 @@
   <script src="js/scsTime.js"></script>
   <script src="js/aimCalculator.js"></script>
   <script src="js/mapSpawns.js"></script>
-  <script src="js/shipBuilder.js"></script>
+  <!-- <script src="js/shipBuilder.js"></script> -->
   <script src="js/shipBuilderTranslations.js"></script>
 
   <script type="module" src="js/MatchHistory/matchHistory.js"></script>
   <script type="module" src="js/DamageCalculator.js"></script>
+  <script type="module" src="js/shipBuilder.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
@@ -82,6 +83,7 @@
   <link rel="stylesheet" href="css/MatchHistory/HeatmapTab.css">
   <link rel="stylesheet" href="css/MatchHistory/Slider.css">
   <link rel="stylesheet" href="css/DamageCalculator.css">
+  <link rel="stylesheet" href="css/ShipBuilder.css">
 
 
 </head>
@@ -160,11 +162,6 @@
       </ul>
 
     </nav>
-    <div class="sticky">
-      <div id="loadalert" class="alert alert-info" style="display:block;">
-        <strong>Loading... </strong><span></span>
-      </div>
-    </div>
     <!-- Page Content  -->
     <div id="content" class="container-fluid">
 
@@ -198,6 +195,9 @@
       </div>
 
       <div id="shipBuilder" class="content-panel" style="display:none">
+        <div id="shipBuilderReactRoot">
+
+        </div>
         <h3>Ship builder</h3>
 
         <p>Build can be shared via the current URL or by copying and pasting in the textfield below and pressing
@@ -856,20 +856,6 @@
   </div>
 
   <script>
-    var datasets_loaded = false;
-
-    var match_dataset = null;
-    var gun_dataset = null;
-    var ammo_dataset = null;
-    var damage_dataset = null;
-    var ship_dataset = null;
-    var tool_dataset = null;
-    var component_dataset = null;
-    var crosshair_dataset = null;
-    var map_dataset = null;
-    var ship_guns_dataset = null;
-
-    var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
     $(document).ready(function () {
       
       $("#sidebar a").on("click", openPageFromUrl);
@@ -885,91 +871,18 @@
           DarkReader.disable();
           document.cookie = "dark_mode=false";
         }
-        updateShipBuildImage();
-        updateRangeVis();
-        updateArcPanel();
+        // updateRangeVis();
+        // updateArcPanel();
       });
       
-      // initializeMatchStatistics();
-      // console.log("COOKIE: ", getCookie("dark_mode")=="true")
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
       dark_mode_switch.trigger("change");
       $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
       
-      // Load datasets
-      loadDatasetsFromServer();
-
-
     });
 
-    function loadDatasetsFromServer(){
-      $("#loadalert span").text("Getting datasets");
 
-      // Load datasets from server. On timeout load from google.
-      httpxGetRequest("/get_datasets", function(){
-        if(datasets_loaded) return;
-        if (this.status == 200)
-        if (this.readyState == 4 && this.status == 200){
-          datasets_loaded = true;
-          let datasets = JSON.parse(this.response);
-          console.log(datasets);
-
-          ammo_dataset = jsonToDataset(datasets.ammo_stats,
-              ["Name","Alias","Rotation speed","Jitter","Clip size",
-              "AOE radius","AOE damage","Damage","Arming time","Rate of fire",
-              "Projectile speed","Fire modifier","Fire damage","Lift","Direct damage",
-              "Range","Rotational arcs"]);
-          
-          gun_dataset = jsonToDataset(datasets.gun_stats,
-              ["Name","Alias","Mode","Weapon slot","Damage type primary",
-              "Damage primary","Damage type secondary","Damage secondary",
-              "Rate of fire","Reload time","Magazine size","Fire primary",
-              "Fire secondary","Projectile speed","Range","Shell drop","AOE radius",
-              "Buckshot","Arming time","Side angle","Up angle","Down angle"]);
-          
-          ship_dataset = jsonToDataset(datasets.ship_stats, 
-              ["Ship Type","Armor","Armor Rebuild Value","Hull Health",
-              "Light Weapons","Heavy Weapons","Longitudinal Speed, (m/s)",
-              "Longitudinal Acceleration, (m/s²)","Turn Speed, (deg/s)",
-              "Turn Acceleration,(deg/s²)","Vertical Speed, (m/s)",
-              "Vertical Acceleration, (m/s²)","Mass, (t)"]);
-
-          damage_dataset = jsonToDataset(datasets.damage_stats, 
-              ["Name", "Balloon", "Hull", "Armor", "Components"]);
-          
-          component_dataset = jsonToDataset(datasets.component_stats, 
-              ["Name", "HP"]);
-
-          tool_dataset = jsonToDataset(datasets.tool_stats, 
-              ["Name", "Repair", "Rebuild", "Extinguish", "Fire immunity", "Cooldown"]);
-
-          crosshair_dataset = jsonToDataset(datasets.crosshair_data, 
-              ["Name", "Deg per pixel", "Start y", "Start x", "End x", "Image"]);
-
-          ship_guns_dataset = jsonToDataset(datasets.ships_gun_angles, 
-              ["Ship","N guns",
-              "Angle 1","Angle 2","Angle 3","Angle 4","Angle 5","Angle 6",
-              "Position 1","Position 2","Position 3","Position 4","Position 5","Position 6",
-              "Slot 1","Slot 2","Slot 3","Slot 4","Slot 5","Slot 6"]);
-
-          map_dataset = jsonToDataset(datasets.map_data, 
-              ["ID", "Name", "Mode", "Size", 
-              "Map Image", "Spawn Image", "Map Scale"]);
-          
-          console.log("Datasets loaded from server.");
-          datasetsLoaded();
-        }
-      });
-    }
-
-    function datasetsLoaded() {
-      datasets_loaded = true;
-      $("#loadalert").slideUp();
-      // initializeDamageCalculator();
-      // initializeAimCalculator();
-      // initializeShipBuilder();
-      initializeSpawns();
-    }
+    // initializeSpawns();
     updateScsTime();
 
     function openPageFromUrl() {
