@@ -1,5 +1,6 @@
 import { ShipCanvas } from "/React/ShipBuilder/ShipCanvas2.js";
 import { RangeVisualizer } from "/React/ShipBuilder/RangeVisualizer.js";
+import { GunAngleVisualizer } from "/React/ShipBuilder/GunAngleVisualizer.js";
 
 export class ShipBuilder extends React.PureComponent {
   constructor(props) {
@@ -109,6 +110,13 @@ export class ShipBuilder extends React.PureComponent {
             gunItems={this.props.gunItems}
             selectedAmmos={this.state.selectedAmmos}
             gunSelections={this.state.gunSelections}
+          />
+        </div>
+        <div className="my-col">
+          <GunAngleVisualizer
+            shipItem={this.state.selectedShip}
+            gunSelections={this.state.gunSelections}
+            gunItems={this.props.gunItems}
           />
         </div>
       </div>

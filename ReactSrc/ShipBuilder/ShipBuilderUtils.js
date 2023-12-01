@@ -1,4 +1,7 @@
 
+
+export const GUN_COLORS = ["#e6194B", "#f58231", "#3cb44b", "#4363d8", "#911eb4", "#808000"];
+
 export function getSortedGunSlots(shipItem) {
     const gunSlots = [];
     for (let i = 0; i < shipItem.GunCount; i++) {
