@@ -534,6 +534,10 @@ a.article:hover {
     position: relative;
 }
 
+#about a {
+    text-decoration: underline;
+}
+
 
 /* ---------------------------------------------------
     MEDIAQUERIES

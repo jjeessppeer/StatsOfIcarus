@@ -2,13 +2,8 @@ const assert = require('assert');
 const Elo = require('./Elo/EloHelper.js');
 const MatchTagger = require('../Server/MatchHistory/MatchTagger.js');
 
-const SCS_START_HOUR_UTC = 18;
-const SCS_START_DAY = 0;
-const SCS_HOUR_LENGTH = 4;
-
-
 const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
-const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 60 * 1000;
+const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 30 * 1000;
 
 var client;
 
@@ -19,11 +14,6 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function posModulo(a, b) {
-    return ((a % b) + b) % b;
-};
-
-
 async function getPlayerId(playerName) {
     // TODO handle ps4 players?
     const playersCollection = client.db("mhtest").collection("Players");
@@ -33,7 +23,7 @@ async function getPlayerId(playerName) {
     return res._id;
 }
 
-async function submitRecord(record, ip) {
+async function submitRecord(lobbyData, gunneryData, positionData, ip) {
     // Wait until no concurrent insertion is running.
     while (insertionRunning) {
         await sleep(10);
@@ -41,7 +31,7 @@ async function submitRecord(record, ip) {
 
     insertionRunning = true;
     try {
-        await insertMatchHistory(record, ip);
+        await insertMatchHistory(lobbyData, gunneryData, positionData, ip);
     } catch (err) {
         console.log(err)
     } finally {
@@ -138,7 +128,7 @@ async function getEquipmentId(player) {
     return res.insertedId;
 }
 
-async function insertMatchHistory(record, ip) {
+async function insertMatchHistory(lobbyData, gunneryData, positionData, ip) {
     const matchesCollection = client.db("mhtest").collection("Matches");
     const playersCollection = client.db("mhtest").collection("Players");
     const shipsCollection = client.db("mhtest").collection("Ships");
@@ -164,16 +154,25 @@ async function insertMatchHistory(record, ip) {
     }
 
     // Check if match has already been added.
-    let match = await matchesCollection.findOne({ MatchId: record.MatchId });
+    let match = await matchesCollection.findOne({ MatchId: lobbyData.MatchId });
     
     if (match) {
         if (!match.SubmitterIps.includes(ip)) {
             match.SubmitterIps.push(ip);
             await matchesCollection.updateOne(
-                {MatchId: record.MatchId},
+                {MatchId: lobbyData.MatchId},
                 {$set: {SubmitterIps: match.SubmitterIps}});
         }
-
+        if (!match.GunneryData && gunneryData) {
+            await matchesCollection.updateOne(
+                {MatchId: lobbyData.MatchId},
+                {$set: {GunneryData: gunneryData}});
+        }
+        if (!match.PositionData && positionData) {
+            await matchesCollection.updateOne(
+                {MatchId: lobbyData.MatchId},
+                {$set: {PositionData: positionData}});
+        }
         return true;
     }
 
@@ -191,7 +190,7 @@ async function insertMatchHistory(record, ip) {
     const timestamp = new Date().getTime();
 
     // Initialize array structure.
-    for (let i = 0; i < record.TeamCount; i++) {
+    for (let i = 0; i < lobbyData.TeamCount; i++) {
         // Add a ship info array per team
         shipIds.push([]);
         shipNames.push([]);
@@ -203,7 +202,7 @@ async function insertMatchHistory(record, ip) {
         playerSkills.push([]);
         playerLevels.push([]);
 
-        for (let j = 0; j < record.TeamSize; j++) {
+        for (let j = 0; j < lobbyData.TeamSize; j++) {
             // Add a player info array per ship
             playerIds[i].push([]);
             playerSkills[i].push([]);
@@ -212,8 +211,8 @@ async function insertMatchHistory(record, ip) {
     }
 
     // Load ships and players into arrays
-    for (let i = 0; i < record.Ships.length; i++) {
-        let ship = record.Ships[i];
+    for (let i = 0; i < lobbyData.Ships.length; i++) {
+        let ship = lobbyData.Ships[i];
         let team = ship.Team;
         let shipIndex = shipCounters[team] + 0;
         shipCounters[team] += 1;
@@ -251,30 +250,30 @@ async function insertMatchHistory(record, ip) {
     let avgPlayerLevel = flatPlayerLevels.reduce((partialSum, a) => partialSum + a, 0) / flatPlayerLevels.length;
     avgPlayerLevel = Math.ceil(avgPlayerLevel);
 
-    let shipsFull = record.Ships.length == record.TeamSize * record.TeamCount;
-    let playersFull = playerCount == record.TeamSize * record.TeamCount * 4;
-    let emptySlots = record.TeamSize * record.TeamCount * 4 - playerCount;
+    let shipsFull = lobbyData.Ships.length == lobbyData.TeamSize * lobbyData.TeamCount;
+    let playersFull = playerCount == lobbyData.TeamSize * lobbyData.TeamCount * 4;
+    let emptySlots = lobbyData.TeamSize * lobbyData.TeamCount * 4 - playerCount;
 
     
 
     // Insert the match.
     let newMatch = {
-        ModVersion: record.ModVersion,
+        ModVersion: lobbyData.ModVersion,
         SubmitterIp: ip,
         SubmitterIps: [ip],
-        Passworded: record.Passworded,
+        Passworded: lobbyData.Passworded,
         Timestamp: timestamp,
         MatchTags: [],
-        MatchId: record.MatchId,
-        MapId: record.MapId,
+        MatchId: lobbyData.MatchId,
+        MapId: lobbyData.MapId,
         ShipsFull: shipsFull,
         PlayersFull: playersFull,
-        MatchTime: record.MatchTime,
-        GameMode: record.GameMode,
-        TeamSize: record.TeamSize,
-        TeamCount: record.TeamCount,
-        Winner: record.Winner,
-        Scores: record.Scores,
+        MatchTime: lobbyData.MatchTime,
+        GameMode: lobbyData.GameMode,
+        TeamSize: lobbyData.TeamSize,
+        TeamCount: lobbyData.TeamCount,
+        Winner: lobbyData.Winner,
+        Scores: lobbyData.Scores,
         AvgPlayerLevel: avgPlayerLevel,
         Ships: shipIds,
         ShipModels: shipModels,
@@ -286,10 +285,12 @@ async function insertMatchHistory(record, ip) {
         FlatPlayers: flatPlayerIds,
         FlatShips: flatShipIds,
         FlatSkills: flatSkills,
-        FlatPlayerLevels: flatPlayerLevels
+        FlatPlayerLevels: flatPlayerLevels,
+        GunneryData: gunneryData,
+        PositionData: positionData
     }
 
-    if (record.Passworded)
+    if (lobbyData.Passworded)
         newMatch.MatchTags.push('Passworded')
     if (shipsFull)
         newMatch.MatchTags.push('ShipsFull')
@@ -298,7 +299,7 @@ async function insertMatchHistory(record, ip) {
 
     if (MatchTagger.isSCS(newMatch))
         newMatch.MatchTags.push('SCS')
-    if (shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && record.Passworded)
+    if (shipsFull && emptySlots <= 1 && avgPlayerLevel >= 30 && lobbyData.Passworded)
         newMatch.MatchTags.push('Competitive')
     if (avgPlayerLevel >= 30 && emptySlots <= 2)
         newMatch.MatchTags.push('HighLevel')
@@ -316,6 +317,16 @@ async function insertMatchHistory(record, ip) {
     await matchesCollection.insertOne(newMatch);
     await Elo.processMatchAllCategories(client, newMatch);
 
+    // let doc = await matchesCollection.findOne({MatchId: lobbyData.MatchId});
+    let s = await matchesCollection.aggregate([
+        { $match: {MatchId: lobbyData.MatchId} },
+        {$project: {
+            MatchId: 1,
+            object_size: { $bsonSize: "$$ROOT"}
+        }}
+    ])
+    let doc = await s.next();
+    console.log(doc);
 
     return true;
 }

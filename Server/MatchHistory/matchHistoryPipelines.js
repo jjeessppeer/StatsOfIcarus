@@ -226,16 +226,32 @@ function recentMatchesPipeline(offset, count) {
             as: "MapItem"
           }},
           { $project: {
-            SubmitterIp: 0,
-            SubmitterIps: 0,
-            SubmissionCount: 0,
-            MatchId: 0,
             _id: 0,
+            GameMode: 1,
+            GunItems: 1,
+            LoadoutInfo: 1,
+            MapId: 1,
+            MatchId: 1,
+            MapItem: 1,
+            MatchTags: 1,
+            MatchTime: 1,
             PlayerInfo: {
-              SkillRatings: 0,
-              ELORating: 0,
-              MatchesPlayed: 0
-            }
+              _id: 1,
+              Name: 1
+            },
+            Players: 1,
+            Ranking: 1,
+            Scores: 1,
+            Ships: 1,
+            ShipItems: 1,
+            ShipLoadouts: 1,
+            ShipNames: 1,
+            SkillItems: 1,
+            Skills: 1,
+            TeamCount: 1,
+            TeamSize: 1,
+            Timestamp: 1,
+            Winner: 1
           }}
         ]
       }},

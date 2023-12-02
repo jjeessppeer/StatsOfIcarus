@@ -1,4 +1,4 @@
-import { SHIP_ITEMS } from '/js/MatchHistory/matchHistory.js';
+import { SHIP_ITEMS } from '/js/constants.js';
 
 class FancySearchbar extends HTMLDivElement {
   constructor() {

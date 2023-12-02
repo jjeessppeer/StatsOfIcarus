@@ -1,4 +1,4 @@
-import { CLASS_COLORS } from '/js/MatchHistory/matchHistory.js';
+import { CLASS_COLORS } from '/js/constants.js';
 
 class PlayerInfoBox extends HTMLDivElement {
   constructor() {

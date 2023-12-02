@@ -105,7 +105,8 @@ const MATCH_SUBMISSION_SCHEMA = Joi.object({
     ModVersion: Joi.string().required(),
     MatchId: Joi.string().required(),
     LobbyData: LOBBY_DATA_SCHEMA.required(),
-    CompressedGunneryData: Joi.string().required()
+    CompressedGunneryData: Joi.string().required(),
+    CompressedPositionData: Joi.string().required()
 });
 
 

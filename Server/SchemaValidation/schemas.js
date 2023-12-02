@@ -1,5 +1,6 @@
 const Joi = require('joi'); 
-const { MATCH_SUBMISSION_SCHEMA } = require("./Schemas/HistorySubmission.js");
+const MATCH_SUBMISSION_1 = require("./Schemas/HistorySubmission_1.3.js");
+const MATCH_SUBMISSION_2 = require("./Schemas/HistorySubmission_2.0.js");
 
 const leaderboardRequest = Joi.object({
     RatingGroup: Joi.string()
@@ -34,5 +35,6 @@ module.exports = {
     leaderboardRequest,
     eloTimelineRequest,
     lobbyBalance,
-    MATCH_SUBMISSION_SCHEMA
+    MATCH_SUBMISSION_1: MATCH_SUBMISSION_1.MATCH_SUBMISSION_SCHEMA,
+    MATCH_SUBMISSION_2: MATCH_SUBMISSION_2.MATCH_SUBMISSION_SCHEMA,
 }

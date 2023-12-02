@@ -1,0 +1,18 @@
+.damage-calculator > label {
+    display: block;
+    margin: 0;
+}
+
+.damage-calculator > label input{
+    margin-right: 4px;
+}
+
+.damage-calculator .gun-table, .damage-table {
+    width: 800px;
+    table-layout:fixed;
+}
+
+.damage-calculator .damage-cell span {
+    color: gray;
+    margin-left: 2px;
+}

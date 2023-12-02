@@ -130,11 +130,11 @@
     border-radius: 4px;
 }
 
-.match-history-entry .overview-table .matchup-table .red-team img{
+.match-history-entry .overview-table .matchup-table div:nth-of-type(1) img{
     border-color: #c6443e;
 }
 
-.match-history-entry .overview-table .matchup-table .blue-team img{
+.match-history-entry .overview-table .matchup-table div:nth-of-type(3) img{
     border-color: rgb(66, 149, 198);
 }
 
@@ -275,14 +275,9 @@
 }
 
 /* Player list */
-.match-history-entry .overview-table .players {
-    text-align: left;
-    vertical-align: top;
-    /* padding: 0; */
-}
 
 .match-history-entry .overview-table .players > div {
-    float: right;
+    float: left;
     margin-right: 8px;
 }
 
@@ -361,9 +356,7 @@
 /* ----------------------------- */
 
 .match-history-entry .foldout {
-    display: none;
     padding-top: 5px;
-    /* border-top: 1px solid; */
 }
 
 .match-history-entry.red-winner .foldout {
@@ -371,10 +364,6 @@
 }
 .match-history-entry.blue-winner .foldout {
     background-color: var(--blue-3);
-}
-
-.match-history-entry.open .foldout {
-    display: block;
 }
 
 .match-history-entry .foldout .content{
@@ -404,6 +393,7 @@
     border: 1px solid;
     border-bottom: none;
     width: 200px;
+    outline: 0;
 }
 .match-history-entry.red-winner .foldout button {
     background-color: var(--red-2);
@@ -412,6 +402,10 @@
 .match-history-entry.blue-winner .foldout button {
     background-color: var(--blue-2);
     border-color: var(--blue-4);
+}
+
+.match-history-entry .foldout button.selected {
+    background-color: var(--background-color);
 }
 
 /* ------------------------------ */
@@ -460,14 +454,14 @@
 }
 
 .match-history-entry .details .shipcrew > span {
-    padding-left: 10px;
-    padding-right: 10px;
+    /* padding-left: 10px;
+    padding-right: 10px; */
     font-weight: bold;
 }
 
-.match-history-entry .details > div:not(:first-of-type) .shipcrew {
+/* .match-history-entry .details > div:not(:first-of-type) .shipcrew {
     text-align: right;
-}
+} */
 
 
 .match-history-entry .details .shipcrew > div > *{

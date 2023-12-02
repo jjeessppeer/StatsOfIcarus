@@ -7,42 +7,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script> -->
-
+  <script type="importmap">
+    {
+      "imports": {
+        "clsx": "https://cdn.jsdelivr.net/npm/clsx@2.0.0/dist/clsx.mjs",
+        "simpleheat": "https://cdn.jsdelivr.net/npm/simpleheat@0.4.0/+esm"
+      }
+    }
+  </script>
 
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <script src="deps/jquery-3.4.1.min.js"></script>
-  <script src="deps/popper.min.js"></script>
-  <script src="deps/bootstrap-4.3.1.min.js"></script>
-  <script src="deps/lz-string-1.4.4.min.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script> -->
+  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+  <!-- <script src="https://unpkg.com/recharts@2.9.3/umd/Recharts.js"></script> -->
+
+  <script src=" https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/darkreader@4.9.69/darkreader.min.js"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-  <!-- <script src="deps/Chart-2.8.0.min.js"></script> -->
-  <!-- <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script> -->
-
-
-  <script src="deps/darkreader-4.9.22.js"></script>
-  <script src="deps/jquery-ui-1.12.1.min.js"></script>
   
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
     crossorigin="anonymous">
-  <link rel="stylesheet" href="deps/jquery-ui-1.12.1.min.css">
-  <link rel="stylesheet" href="deps/bootstrap-4.3.1.min.css">
+  <link rel="stylesheet" href=" https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   
   <script src="js/utils.js"></script>
-  <script src="js/docsapi.js"></script>
-  <script src="js/scsTime.js"></script>
-  <script src="js/damageCalculations.js"></script>
-  <script src="js/aimCalculator.js"></script>
-  <script src="js/mapSpawns.js"></script>
-  <script src="js/shipBuilder.js"></script>
-  <script src="js/shipBuilderTranslations.js"></script>
-
   <script type="module" src="js/MatchHistory/matchHistory.js"></script>
+  <script type="module" src="js/DamageCalculator.js"></script>
+  <script type="module" src="js/shipBuilder.js"></script>
+  <script type="module" src="js/TournamentRandomizer.js"></script>
+  <script type="module" src="js/SpawnMaps.js"></script>
+  <script type="module" src="js/scsTime.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
@@ -54,9 +49,14 @@
   <link rel="stylesheet" href="css/MatchHistory/EloCard.css">
   <link rel="stylesheet" href="css/MatchHistory/LeaderboardCard.css">
   <link rel="stylesheet" href="css/ShipStats/IconDropdown.css">
+  <link rel="stylesheet" href="css/TournamentGenerator.css">
 
   <link rel="stylesheet" href="css/ShipStats/LoadoutOverview.css">
   <link rel="stylesheet" href="css/ShipStats/LoadoutSettings.css">
+  <link rel="stylesheet" href="css/MatchHistory/HeatmapTab.css">
+  <link rel="stylesheet" href="css/MatchHistory/Slider.css">
+  <link rel="stylesheet" href="css/DamageCalculator.css">
+  <link rel="stylesheet" href="css/ShipBuilder.css">
 
 
 </head>
@@ -73,8 +73,6 @@
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
         </div>
         <div>
-          <!-- Latest update: <a href="https://discordapp.com/channels/99903812700999680/562361262340833290/737086849822097420" style="color: blue;">
-            <u>2020-07-27</u></a> -->
         </div>
         <br>
         <div id="scsTime">
@@ -86,43 +84,34 @@
       </div>
 
       <ul class="list-unstyled components">
-
         <li id="matchHistoryLink" data-show="#matchHistory">
           <a href="#matchHistory">
             <i class="fas fa-glasses"></i>
             Match history
           </a>
         </li>
-        <!-- <li id="leaderboardLink" data-show="#leaderboard">
-          <a href="#leaderboard">
-            <i class="fas fa-list-ol"></i>
-            Leaderboard
-          </a>
-        </li> -->
         <li id="shipBuilderLink" data-show="#shipBuilder">
           <a href="#shipBuilder">
             <i class="fas fa-hammer"></i>
             Ship builder
           </a>
         </li>
-
         <li id="damageCalculatorLink" data-show="#damageCalculator">
           <a href="#damageCalculator" class="active">
             <i class="fas fa-bomb"></i>
             Damage calculator
           </a>
         </li>
-
-        <li id="projectileArcsLink" data-show="#projectileArcs">
-          <a href="#projectileArcs">
-            <i class="fas fa-meteor"></i>
-            Projectile arcs
+        <li id="mapSpawnsLink" data-show="#spawns">
+          <a href="#spawns">
+            <i class="fas fa-map"></i>
+            Spawns
           </a>
         </li>
-        <li id="mapSpawnsLink" data-show="#maps">
-          <a href="#maps">
-            <i class="fas fa-map"></i>
-            Maps
+        <li id="mapRandomizerLink" data-show="#mapRandomizer">
+          <a href="#mapRandomizer">
+            <i class="fas fa-random"></i>
+            Map randomizer
           </a>
         </li>
         <li id="aboutLink" data-show="#about">
@@ -131,15 +120,8 @@
             About
           </a>
         </li>
-
       </ul>
-
     </nav>
-    <div class="sticky">
-      <div id="loadalert" class="alert alert-info" style="display:block;">
-        <strong>Loading... </strong><span></span>
-      </div>
-    </div>
     <!-- Page Content  -->
     <div id="content" class="container-fluid">
 
@@ -168,1087 +150,95 @@
           </div>
         </div>
 
-
-
       </div>
 
       <div id="shipBuilder" class="content-panel" style="display:none">
-        <h3>Ship builder</h3>
-
-        <p>Build can be shared via the current URL or by copying and pasting in the textfield below and pressing
-          import/export.</p>
-        <div class="input-group">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Import build</div>
-          </div>
-          <input type="text" id="shipBuildImportText" class="form-control" placeholder="" autocomplete="off">
-          <div class="input-group-append">
-            <button id="shipBuildImportButton" class="btn btn-info" type="button">Import</button>
-            <button id="shipBuildExportButton" class="btn btn-primary" type="button">Export</button>
-          </div>
-        </div>
-
-        <br>
-
-        <div class="my-col" id="shipLoadoutGroup">
-          <div>
-            <div class="my-col">
-              <input type="text" id="shipBuildName" class="form-control" placeholder="Build Name" autocomplete="off"
-                style="width:200px;margin-bottom:5px;font-weight:bold;">
-              <div class="input-group" style="width:200px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Ship</div>
-                </div>
-                <select class="form-control" id="shipBuildShipSelection" autocomplete="off">
-                  <!-- <option>Mobula</option>       -->
-                </select>
-              </div>
-            </div>
-            <div class="my-col">
-              <div class="input-group">
-                <!-- <div class="input-group-prepend"> -->
-                  <button id="copyBuildLinkBtn" class="btn btn-info" type="button">Copy build link</button>
-                <!-- </div> -->
-                <!-- <div class="input-group-append">
-                  <button id="buildSubmitButton" class="btn btn-primary" type="button">Submit to database</button>
-                </div> -->
-              </div>
-            </div>
-          </div>
-
-
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="shipBuilderPvECheck" autocomplete="off">
-            <label class="form-check-label" for="shipBuilderPvECheck">Use PvE equipment</label>
-          </div>
-          <!-- <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="shipBuilderDesCheck" autocomplete="off">
-            <label class="form-check-label" for="shipBuilderDesCheck">Show description</label>
-          </div> -->
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="staminaCheck" autocomplete="off">
-            <label class="form-check-label" for="staminaCheck">Show gunner stamina arcs</label>
-          </div>
-
-
-          <div class="my-col" id="buildDescriptionCol" style="width:320px;height:410px;display:none;">
-            <!-- <div class="form-group"> -->
-            <b>Description</b>
-            <textarea class="form-control" id="buildDescriptionArea" style="height:75%" autocomplete="off"></textarea>
-            <p>Share link will get large if you use description. To share consider uploading build to database instead.</p>
-            <!-- </div> -->
-          </div>
-          <div class="my-col">
-
-
-            <div id="weaponSelections">
-              <b>Ship Loadout</b>
-
-
-              <div class="input-group" style="width:420px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Weapon 1</div>
-                </div>
-                <select class="form-control" id="shipBuildGun1" autocomplete="off"></select>
-                <select class="form-control" autocomplete="off"></select>
-              </div>
-              <!-- <br> -->
-              <div class="input-group" style="width:420px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Weapon 2</div>
-                </div>
-                <select class="form-control" id="shipBuildGun2" autocomplete="off"></select>
-                <select class="form-control" autocomplete="off"></select>
-              </div>
-              <!-- <br> -->
-              <div class="input-group" style="width:420px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Weapon 3</div>
-                </div>
-                <select class="form-control" id="shipBuildGun3" autocomplete="off"></select>
-                <select class="form-control" autocomplete="off"></select>
-              </div>
-              <!-- <br> -->
-              <div class="input-group" style="width:420px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Weapon 4</div>
-                </div>
-                <select class="form-control" id="shipBuildGun4" autocomplete="off"></select>
-                <select class="form-control" autocomplete="off"></select>
-              </div>
-              <!-- <br> -->
-              <div class="input-group" style="width:420px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Weapon 5</div>
-                </div>
-                <select class="form-control" id="shipBuildGun5" autocomplete="off"></select>
-                <select class="form-control" autocomplete="off"></select>
-              </div>
-              <!-- <br> -->
-              <div class="input-group" style="width:420px;">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">Weapon 6</div>
-                </div>
-                <select class="form-control" id="shipBuildGun6" autocomplete="off"></select>
-                <select class="form-control" autocomplete="off"></select>
-              </div>
-            </div>
-
-            <div id="crewLoadouts">
-              <b>Crew Loadouts</b>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Noclass.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Pilot.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Gunner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Engineer.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Noclass.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Spyglass.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Claw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Vent.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Chute.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Tar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Sail.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Kerosene.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Claw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Vent.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Chute.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Tar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Sail.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Hydrogen.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Spyglass.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Rangefinder.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Claw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Kerosene.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Moonshine.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Hydrogen.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Vent.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Chute.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Bumpers.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Tar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Sail.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Mallet.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Mallet.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Spanner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Pipe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Buff.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Spanner.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Mallet.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Spanner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Pipe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Buff.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Extinguisher.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Mallet.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Spanner.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Pipe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Failsafe.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Extinguisher.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Chemspray.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Buff.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Charged.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Normal.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Heavy.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Burst.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Greased.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Charged.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Extended.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Greased.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Normal.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Heavy.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Burst.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Greased.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Charged.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Extended.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/Lesmok.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/Normal.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Lochnagar.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Heavy.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Incendiary.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Burst.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Greased.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Lesmok.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Heatsink.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Charged.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/Extended.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/MechanizedRebuild.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/MechanizedRebuild.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/SalvoNeutralizer.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/CombustionDampener.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/AdvancedDynaBuff.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/StaticTurret.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/ComponentDisruption.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/LightningDraw.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/LightningDraw.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/ConcussiveBlast.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/MineEjection.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/GigatonBlast.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/ProximalDetonation.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/CataclysmRounds.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-                <div>
-                  <button role="button" type="button" class="btn btn-outline-secondary" data-toggle="dropdown">
-                    <img src="images/loadout-images/EngineStabilization.jpg" width="35" height="35" class="rounded">
-                  </button>
-                  <div class="dropdown-menu">
-                    <a class="dropdown-item"><img src="images/loadout-images/EngineStabilization.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/RushingDrift.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/OversurgeRam.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/AirHorn.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/EnhancedEnvelope.jpg" width="40" height="40"></button></a>
-                    <a class="dropdown-item"><img src="images/loadout-images/TarBomb.jpg" width="40" height="40"></button></a>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-
-
-        <div class="my-col img-canvas-container" id="shipContainer">
-          <b>Drag or scroll to pan or zoom image.</b>
-          <br>
-          <canvas id="shipBuilderCanvas" width="600" height="600" style="border-style:solid;">Your browser does not
-            support the HTML5 canvas tag.</canvas>
-          <canvas id="shipBuilderCanvasOffscreen" width="600" height="600" style="display:none">Your browser does not
-            support the HTML5 canvas tag.</canvas>
-        </div>
-
-        <div class="my-col">
-          <b>Ship stats</b>
-          <div style="border-width:3px;border-style:solid;">
-            <table id="shipStatTable" style="margin-left:10px;margin-top:10px;margin-bottom:10px;margin-right:10px;">
-              <tr>
-                <th>Armor: </th>
-                <td id="shipStatArmor"></td>
-              </tr>
-              <tr>
-                <th>Hull: </th>
-                <td id="shipStatHull"></td>
-              </tr>
-              <tr style="height:10px;"></tr>
-              <tr>
-                <th>Speed: </th>
-                <td id="shipStatSpeed"></td>
-              </tr>
-              <tr>
-                <th>Acceleration: </th>
-                <td id="shipStatAccel"></td>
-              </tr>
-              <tr style="height:10px;"></tr>
-              <tr>
-                <th>Vert Speed: </th>
-                <td id="shipStatVertSpeed"></td>
-              </tr>
-              <tr>
-                <th>Vert Acceleration: </th>
-                <td id="shipStatVertAccel"></td>
-              </tr>
-              <tr style="height:10px;"></tr>
-              <tr>
-                <th>Turn Speed: </th>
-                <td id="shipStatTurnSpeed"></td>
-              </tr>
-              <tr>
-                <th>Turn Acceleration:&nbsp;&nbsp;</th>
-                <td id="shipStatTurnAccel"></td>
-              </tr>
-              <tr style="height:10px;"></tr>
-              <tr>
-                <th>Mass: </th>
-                <td id="shipStatMass"></td>
-              </tr>
-            </table>
-          </div>
-        
-        </div>
-
-
-
-        <br>
-        <div class="my-col">
-          <h3>Range Visualization</h3>
-          
-          <br>
-
-          <canvas id="rangeCanvas" width="600" height="600">Your browser does not support the HTML5 canvas tag.</canvas>
-          <!-- <br> -->
-          <!-- <div id="rangeMapContainer" class="img-canvas-container">
-            <img id="rangeImage" class='img' src="images/helm-images/Dunes.jpg" width="400" height="400" />
-            <canvas id="rangeCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
-            <canvas id="rangeCanvasOffscreen" width="400" height="400" style="display:none">Your browser does not
-              support the HTML5 canvas tag.</canvas>
-          </div> -->
-
-          <!-- <img class='img' src="images/ship-images/legend.png" width="114" height="179" /> -->
-
-        </div>
-
-        <!-- <br> -->
-        <div class="my-col">
-          <h3>Gun Angle Visualization</h3>
-          <br>
-          <div class="angle_image_window">
-            <div class="img-canvas-container">
-              <img id="angleImage" class='img' src="" width="1650" height="720" />
-              <canvas id="angleCanvas" width="1650" height="720">Your browser does not support the HTML5 canvas tag.</canvas>
-              <!-- <canvas id="rangeCanvasOffscreen" width="1650" height="720" style="display:none">Your browser does not
-                support the HTML5 canvas tag.</canvas> -->
-            </div>
-          </div>
-        </div>
-        
-
-        <br>
-
-        <br>
-
-
-      </div>
-
-
-      <!-- Gunnery calculator -->
-      <div id="damageCalculator" class="content-panel" style="display:block">
-        <h2>Damage numbers</h2>
-        <div class="input-group">
-          <div class="input-group-prepend small">
-            <div class="input-group-text">Gun</div>
-          </div>
-          <select class="form-control" id="gunSelect" autocomplete="off">
-            <option>Artemis</option>
-            <option>Light Flak</option>
-            <option>Gatling</option>
-            <option>Flamethrower</option>
-            <option>Light Carronade</option>
-            <option>Harpoon</option>
-            <option>Flare</option>
-            <option>Mercury</option>
-            <option>Mortar</option>
-            <option>Banshee</option>
-            <option>Mine</option>
-            <option>Hades</option>
-            <option>Aten Lens Array [Mk. S]</option>
-            <option>Tempest [Mk. S]</option>
-            <option>Heavy Flak Mk. I</option>
-            <option>Heavy Flak Mk. II</option>
-            <option>Hwacha</option>
-            <option>Heavy Carronade</option>
-            <option>Lumberjack</option>
-            <option>Minotaur</option>
-            <option>Nemesis</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <div class="input-group-prepend small">
-            <div class="input-group-text">Ammo</div>
-          </div>
-          <select class="form-control" id="ammoSelect" autocomplete="off">
-            <option>Normal</option>
-            <option>Lochnagar</option>
-            <option>Heavy</option>
-            <option>Incendiary</option>
-            <option>Burst</option>
-            <option>Greased</option>
-            <option>Lesmok</option>
-            <option>Heatsink</option>
-            <option>Charged</option>
-            <option>Extended</option>
-          </select>
-        </div>
-
-
-        <div id="damageCalcCustomAmmoInput" style="display:none">
-          <h5>Custom ammo</h5>
-          <p>Enter values as multipliers, ie. 1.1 is +10%, 0.9 is -10%.</p>
-
-          <div class="my-col">
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Damage</div>
-              </div>
-              <input type="text" id="customAmmoInputDamage" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Rate of Fire</div>
-              </div>
-              <input type="text" id="customAmmoInputROF" class="form-control" placeholder="" autocomplete="off" value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Clip size</div>
-              </div>
-              <input type="text" id="customAmmoInputClipSize" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Direct damage</div>
-              </div>
-              <input type="text" id="customAmmoInputDirectDmg" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">AoE damage</div>
-              </div>
-              <input type="text" id="customAmmoInputAoEDamage" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-
-          </div>
-          <!-- <br> -->
-          <div class="my-col">
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Projectile speed</div>
-              </div>
-              <input type="text" id="customAmmoInputSpeed" class="form-control" placeholder="" autocomplete="off" value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Arming time</div>
-              </div>
-              <input type="text" id="customAmmoInputArmingTime" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Range</div>
-              </div>
-              <input type="text" id="customAmmoInputRange" class="form-control" placeholder="" autocomplete="off" value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Jitter</div>
-              </div>
-              <input type="text" id="customAmmoInputArmingJitter" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">AoE radius</div>
-              </div>
-              <input type="text" id="customAmmoInputAoERadius" class="form-control" placeholder="" autocomplete="off"
-                value="1">
-            </div>
-          </div>
-
-          <div class="my-col">
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Rotation speed</div>
-              </div>
-              <input type="text" id="customAmmoInputArmingRotationSpeed" class="form-control" placeholder=""
-                autocomplete="off" value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Rotational arcs</div>
-              </div>
-              <input type="text" id="customAmmoInputArmingRotationalArcs" class="form-control" placeholder=""
-                autocomplete="off" value="1">
-            </div>
-
-            <br>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Fire modifier</div>
-              </div>
-              <input type="text" id="customAmmoInputArmingRotationalFireChance" class="form-control" placeholder=""
-                autocomplete="off" value="1">
-            </div>
-            <div class="input-group" style="width:200px;">
-              <div class="input-group-prepend medium">
-                <div class="input-group-text">Fire damage</div>
-              </div>
-              <input type="text" id="customAmmoInputArmingRotationalFireDamage" class="form-control" placeholder=""
-                autocomplete="off" value="0">
-            </div>
-          </div>
-
-
-        </div>
-
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="damageCalcCustomAmmoCheck" autocomplete="off">
-          <label class="form-check-label" for="damageCalcCustomAmmoCheck">Use custom ammo</label>
-        </div>
-
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="buffedCheckbox" autocomplete="off">
-          <label class="form-check-label" for="buffedCheckbox">Buffed</label>
-        </div>
-        
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="directHitCheckbox" autocomplete="off" checked>
-          <label class="form-check-label" for="directHitCheckbox">Direct hit</label>
-        </div>
-
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="armedCheckbox" autocomplete="off" checked>
-          <label class="form-check-label" for="armedCheckbox">Armed</label>
-        </div>
-
-        <div id="laserExtras" style="display:none">
-          <div class="form-group form-row align-items-center">
-            <label for="distanceRange">Target distance: &nbsp; </label>
-            <div>
-              <input type="range" min="0" max="1000" step="10" class="form-control-range" id="distanceRange"
-                data-textfield="#distanceText">
-            </div>
-            <div class="col-sm-1">
-              <input type="text" class="form-control" placeholder="[0-1123]" id="distanceText" disabled>
-            </div>
-          </div>
-
-          <div class="form-group form-row align-items-center">
-            <label for="distanceRange">Time shooting: &nbsp; &nbsp;</label>
-            <div>
-              <input type="range" min="0" max="1000" step="0.5" class="form-control-range" id="timeRange"
-                data-textfield="#timeText">
-            </div>
-            <div class="col-sm-1">
-              <input type="text" class="form-control" placeholder="[0-1123]" id="timeText" disabled>
-            </div>
-          </div>
-        </div>
-
-
-        <table id="gunTable" class="fixed table table-bordered">
-          <tr>
-            <th>Range (m)</th>
-            <th>Arming distance (m)</th>
-            <th>Seconds / clip (s)</th>
-            <th>Reload time (s)</th>
-            <th>Clip size</th>
-            <th>AOE (m)</th>
-          </tr>
-          <tbody id="gunContent"></tbody>
-        </table>
-
-        <table id="damageTotalTable" class="fixed fist-wide table table-bordered">
-          <tr>
-            <th class="medium">Damage (primary + secondary)</th>
-            <th class="medium">
-              Armor
-              <br>
-              <select id="armorUnitSelect" class="form-control" autocomplete="off">
-                <option>HP</option>
-                <option>Mallets</option>
-                <option>Galleon A.</option>
-                <option>Pyramidion A.</option>
-                <option>Stormbreaker A.</option>
-              </select>
-            </th>
-            <th class="medium">
-              Hull
-              <br>
-              <select id="hullUnitSelect" class="form-control" autocomplete="off">
-                <option>HP</option>
-                <option>Galleon H.</option>
-                <option>Pyramidion H.</option>
-                <option>Stormbreaker H.</option>
-              </select>
-            </th>
-            <th class="medium">
-              Balloon
-              <br>
-              <select id="balloonUnitSelect" class="form-control" autocomplete="off">
-                <option>HP</option>
-                <option>B. Mallets</option>
-                <option>Balloons</option>
-              </select>
-            </th>
-            <th class="medium">
-              Component
-              <br>
-              <select id="componentUnitSelect" class="form-control" autocomplete="off">
-                <option>HP</option>
-                <option>Mallets</option>
-                <option>Light Guns</option>
-                <option>Heavy Guns</option>
-                <option>Light Engines</option>
-                <option>Heavy Engines</option>
-              </select>
-            </th>
-          </tr>
-          <tbody id="damageTableContent"></tbody>
-        </table>
-
-
-        <h4>Time to kill (armor broken)</h4>
-        <div class="input-group">
-          <div class="input-group-prepend small">
-            <div class="input-group-text">Ship</div>
-          </div>
-          <select class="form-control" id="ttkSelection" autocomplete="off">
-            <option>Goldfish</option>
-            <option>Junker</option>
-            <option>Squid</option>
-            <option>Galleon</option>
-            <option>Spire</option>
-            <option selected>Pyramidion</option>
-            <option>Mobula</option>
-            <option>Magnate</option>
-            <option>Crusader</option>
-            <option>Judgement</option>
-            <option>Corsair</option>
-            <option>Shrike</option>
-            <option>Stormbreaker</option>
-          </select>
-        </div>
-        <br>
-        <table id="ttkTable" class="table table-bordered">
-          <tr><td>shots</td><td id="ttkShots">x</td></tr>
-          <tr><td>clips</td><td id="ttkClips">x</td></tr>
-          <tr><td>seconds</td><td id="ttkSeconds">x</td> </tr>
-        </table>
-
-      </div>
-
-      <!-- Arc calculator -->
-      <div id="projectileArcs" class="content-panel" style="display:none">
-        <h1>Projectile arcs and aiming</h1>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Gun</div>
-              </div>
-              <select class="form-control" id="arcGunSelect" autocomplete="off">
-                <option>Lumberjack</option>
-                <!-- <option>Hades</option> -->
-                <option>Heavy Flak Mk. II</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Ammo</div>
-              </div>
-              <select class="form-control" id="arcAmmoSelect" autocomplete="off">
-                <option>Normal</option>
-                <option>Lochnagar</option>
-                <option>Heavy</option>
-                <option>Incendiary</option>
-                <option>Burst</option>
-                <option>Greased</option>
-                <option>Lesmok</option>
-                <option>Heatsink</option>
-                <option>Charged</option>
-                <option>Extended</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Map</div>
-              </div>
-              <select class="form-control" id="arcMapSelect" autocomplete="off">
-                <option>Battle on the Dunes</option>
-                <option selected>Northern Fjords</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <!-- <h5>Drag the points on either of the first images to change altitudes and distances.</h5>¨ -->
-
-        <div class="sbs-container">
-          <div id="mapContainer" class="img-canvas-container sbs-column">
-            <b>Select ship positions (distance)</b>
-            <br>
-            <img id="mapImage" class='img' src="images/map-images/Fjords.jpg" width="400" height="400" />
-            <canvas id="mapCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
-          </div>
-
-          <div class="sbs-column">
-            <b>Projectile arc side view. Height changeable.</b>
-            <br>
-            <canvas id="arcCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
-              Your browser does not support the HTML5 canvas tag.</canvas>
-          </div>
-        </div>
-
-
-        <div class="sbs-container">
-          <div class="sbs-column">
-
-            <b>Gunner view, aim with the red line</b>
-            <br>
-            <div id="gunContainer" class="img-canvas-container column">
-              <img id="gunImage" class='img' src="images/gun-images/lumberjack.jpg" width="334" height="400" />
-              <canvas id="gunCanvas" width="334" height="400">
-                Your browser does not support the HTML5 canvas tag.</canvas>
-            </div>
-          </div>
-
-          <div class="sbs-column">
-            <b>Data</b>
-            <table id="arcDataTable" class="fixed table table-bordered">
-              <tr>
-                <th class="medium">Time to hit</th>
-                <td id="arcTableTime">10m</td>
-              </tr>
-              <tr>
-                <th class="medium">Distance</th>
-                <td id="arcTableDistance">10s</td>
-              </tr>
-              <tr>
-                <th class="medium">Aim angle over target</th>
-                <td id="arcTableAngleRel">10</td>
-              </tr>
-              <tr>
-                <th class="medium">Aim angle over horizon</th>
-                <td id="arcTableAngleAbs">10</td>
-              </tr>
-            </table>
-          </div>
+        <div id="shipBuilderReactRoot">
         </div>
       </div>
 
-      <div id="maps" class="content-panel" style="display:none">
-        <h2>Maps</h2>
+      <div id="damageCalculator" class="content-panel" style="display:none">
+        <div id="dcReactRoot">
+        </div>
+      </div>
+
+      <div id="spawns" class="content-panel" style="display:none">
+        
+        <h2>Spawn points</h2>
         <div class="input-group" style="width:250px;">
           <div class="input-group-prepend">
             <div class="input-group-text">Map</div>
           </div>
           <select class="form-control" id="spawnMapSelect" autocomplete="off">
           </select>
+          <img id="spawnImage" src="/images/spawn-images/2v2DM_CanyonAmbush.jpg" width="700" height="700">
         </div>
+      </div>
 
-        <img id="spawnImage" src="" width="700" height="700">
-        <p>Credit to Nerdhector and Richard for creating spawn position images.</p>
-        <br>
-        <h3>Tournament randomizer</h3>
-        <div style="max-width:650px;border:solid;padding:10px;">
-          <b>Game Modes</b><br>
-          <div id="mapModes">
-            <div class="form-check" style="display: inline-block;width:180px;">
-              <input type="checkbox" class="form-check-input" id="mapModeDeathmatch" autocomplete="off" checked>
-              <label class="form-check-label" for="mapModeDeathmatch">Deathmatch</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:180px;">
-              <input type="checkbox" class="form-check-input" id="mapModeBrawl" autocomplete="off">
-              <label class="form-check-label" for="mapModeBrawl">Brawl</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:180px;">
-              <input type="checkbox" class="form-check-input" id="mapModeVIP" autocomplete="off">
-              <label class="form-check-label" for="mapModeVIP">VIP Deathmatch</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:180px;">
-              <input type="checkbox" class="form-check-input" id="mapModeKotH" autocomplete="off">
-              <label class="form-check-label" for="mapModeKotH">King of the Hill</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:180px;">
-              <input type="checkbox" class="form-check-input" id="mapModeCK" autocomplete="off">
-              <label class="form-check-label" for="mapModeCK">Crazy King</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:180px;">
-              <input type="checkbox" class="form-check-input" id="mapModeCB" autocomplete="off">
-              <label class="form-check-label" for="mapModeCB">Crazy Brawl</label>
-            </div>
-          </div>
-          <br>
-          <b>Lobby size (ships per side)</b><br>
-          <div id="mapSizes">
-            <div class="form-check" style="display: inline-block;width:90px;">
-              <input type="radio" name="mapSizeRadios" class="form-check-input" id="mapSize1Check" autocomplete="off">
-              <label class="form-check-label" for="mapSize1Check">1</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:90px;">
-              <input type="radio" name="mapSizeRadios" class="form-check-input" id="mapSize2Check" autocomplete="off" checked>
-              <label class="form-check-label" for="mapSize2Check">2</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:90px;">
-              <input type="radio" name="mapSizeRadios"  class="form-check-input" id="mapSize3Check" autocomplete="off">
-              <label class="form-check-label" for="mapSize3Check">3</label>
-            </div>
-            <div class="form-check" style="display: inline-block;width:90px;">
-              <input type="radio" name="mapSizeRadios"  class="form-check-input" id="mapSize4Check" autocomplete="off">
-              <label class="form-check-label" for="mapSize4Check">4</label>
-            </div>
-          </div>
-          
-          <br>
-          <b>Map Pool</b><br>
-          <div id="tournamentMapPool"></div>
-        </div>
-        <div class="input-group" style="width:160px;">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Map set size</div>
-          </div>
-          <input type="text" id="mapSetSize" class="form-control" placeholder="" autocomplete="off" value="5">
-        </div>
+      <div id="mapRandomizer" class="content-panel" style="display:none">
+        <div id="mapsReactRoot">
 
-        <button id="generateMapSetBtn" class="btn btn-primary" style="width:160px;">Generate map set</button>
-        <br><br>
-        <div id="tournamentMapSet" style="border:solid;padding:10px;max-width:220px;min-height:300px">
-          1. 
         </div>
-
       </div>
 
       <!-- About -->
       <div id="about" class="content-panel" style="display:none">
-        <h3>About</h3>
-        <p>
-          Database with most stats can be found here: <a href="https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing">https://docs.google.com/spreadsheets/d/1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g/edit?usp=sharing</a>.
-          <br>If you are interested in the match history database you can contact me about it.</br>
-        </p>
-        
-        <p>Send me a message on discord or an email if you have some kind of input related to the site Jesper#8148, jjeessppeer@gmail.com </p>
+        <h4>Source code</h4>
+        Website: <a href="https://github.com/jjeessppeer/StatsOfIcarus">https://github.com/jjeessppeer/StatsOfIcarus</a>
+        <br>
+        Match history mod: <a href="https://github.com/jjeessppeer/MatchHistoryMod">https://github.com/jjeessppeer/MatchHistoryMod</a>
+        <br>
+        Data dump mod: <a href="https://github.com/jjeessppeer/GoioInfoDumpMod">https://github.com/jjeessppeer/GoioInfoDumpMod</a>
+        <br>
+        <br>
+        <h4>Contact</h4>
+          Send me a message on discord or an email if you have some kind of input related to the site.
+          <br>
+          GitHub: <a href="https://github.com/jjeessppeer/">https://github.com/jjeessppeer/</a>
+          <br>
+          Email: jjeessppeer@gmail.com
+          <br>
+          Discord: <a href="https://discordapp.com/users/224944294350422018">jesper4</a>
       </div>
 
 
     </div>
-
-
   </div>
 
   <script>
-    var datasets_loaded = false;
-
-    var match_dataset = null;
-    var gun_dataset = null;
-    var ammo_dataset = null;
-    var damage_dataset = null;
-    var ship_dataset = null;
-    var tool_dataset = null;
-    var component_dataset = null;
-    var crosshair_dataset = null;
-    var map_dataset = null;
-    var ship_guns_dataset = null;
-
-    var google_sheet_id = "1Oo1-3ad5_8srmHnc_sUpxgF11kxsapyGs8ogd5cR46g";
-    $(document).ready(function () {
-      
-      $("#sidebar a").on("click", openPageFromUrl);
-
+    document.addEventListener('DOMContentLoaded', () => {
+      DarkReader.setFetchMethod(window.fetch);
+      document.querySelectorAll("#sidebar a").forEach(el => el.addEventListener('click', openPageFromUrl));
       // Setup dark mode
-      let dark_mode_switch = $("#darkModeSwitch");
-      dark_mode_switch.on("change", function() {
-        if (this.checked){
-          DarkReader.enable({brightness: 100, contrast: 100});
+      let dark_mode_switch = document.getElementById("darkModeSwitch");
+      dark_mode_switch.addEventListener("change", function () {
+        if (this.checked) {
+          DarkReader.enable({ brightness: 100, contrast: 100 });
           document.cookie = "dark_mode=true";
         }
-        else{
+        else {
           DarkReader.disable();
           document.cookie = "dark_mode=false";
         }
-        updateShipBuildImage();
-        updateRangeVis();
-        updateArcPanel();
       });
-      
-      // initializeMatchStatistics();
-      // console.log("COOKIE: ", getCookie("dark_mode")=="true")
-      dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
-      dark_mode_switch.trigger("change");
-      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
-      
-      // Load datasets
-      loadDatasetsFromServer();
+      dark_mode_switch.checked = getCookie("dark_mode") == "true";
+      dark_mode_switch.dispatchEvent(new InputEvent('change'));
 
-
+      const activeTabLink = document.querySelector("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a");
+      if (activeTabLink) activeTabLink.dispatchEvent(new Event('click'));
+      else document.querySelector("#sidebar [data-show='#matchHistory'] > a").dispatchEvent(new Event('click'));
     });
 
-    function loadDatasetsFromServer(){
-      $("#loadalert span").text("Getting datasets");
-
-      // Load datasets from server. On timeout load from google.
-      httpxGetRequest("/get_datasets", function(){
-        if(datasets_loaded) return;
-        if (this.status == 200)
-        if (this.readyState == 4 && this.status == 200){
-          datasets_loaded = true;
-          let datasets = JSON.parse(this.response);
-          console.log(datasets);
-
-          ammo_dataset = jsonToDataset(datasets.ammo_stats,
-              ["Name","Alias","Rotation speed","Jitter","Clip size",
-              "AOE radius","AOE damage","Damage","Arming time","Rate of fire",
-              "Projectile speed","Fire modifier","Fire damage","Lift","Direct damage",
-              "Range","Rotational arcs"]);
-          
-          gun_dataset = jsonToDataset(datasets.gun_stats,
-              ["Name","Alias","Mode","Weapon slot","Damage type primary",
-              "Damage primary","Damage type secondary","Damage secondary",
-              "Rate of fire","Reload time","Magazine size","Fire primary",
-              "Fire secondary","Projectile speed","Range","Shell drop","AOE radius",
-              "Buckshot","Arming time","Side angle","Up angle","Down angle"]);
-          
-          ship_dataset = jsonToDataset(datasets.ship_stats, 
-              ["Ship Type","Armor","Armor Rebuild Value","Hull Health",
-              "Light Weapons","Heavy Weapons","Longitudinal Speed, (m/s)",
-              "Longitudinal Acceleration, (m/s²)","Turn Speed, (deg/s)",
-              "Turn Acceleration,(deg/s²)","Vertical Speed, (m/s)",
-              "Vertical Acceleration, (m/s²)","Mass, (t)"]);
-
-          damage_dataset = jsonToDataset(datasets.damage_stats, 
-              ["Name", "Balloon", "Hull", "Armor", "Components"]);
-          
-          component_dataset = jsonToDataset(datasets.component_stats, 
-              ["Name", "HP"]);
-
-          tool_dataset = jsonToDataset(datasets.tool_stats, 
-              ["Name", "Repair", "Rebuild", "Extinguish", "Fire immunity", "Cooldown"]);
-
-          crosshair_dataset = jsonToDataset(datasets.crosshair_data, 
-              ["Name", "Deg per pixel", "Start y", "Start x", "End x", "Image"]);
-
-          ship_guns_dataset = jsonToDataset(datasets.ships_gun_angles, 
-              ["Ship","N guns",
-              "Angle 1","Angle 2","Angle 3","Angle 4","Angle 5","Angle 6",
-              "Position 1","Position 2","Position 3","Position 4","Position 5","Position 6",
-              "Slot 1","Slot 2","Slot 3","Slot 4","Slot 5","Slot 6"]);
-
-          map_dataset = jsonToDataset(datasets.map_data, 
-              ["ID", "Name", "Mode", "Size", 
-              "Map Image", "Spawn Image", "Map Scale"]);
-          
-          console.log("Datasets loaded from server.");
-          datasetsLoaded();
-        }
-      });
-    }
-
-    function datasetsLoaded() {
-      datasets_loaded = true;
-      $("#loadalert").slideUp();
-      initializeDamageCalculator();
-      initializeAimCalculator();
-      initializeShipBuilder();
-      initializeSpawns();
-    }
-    updateScsTime();
-
-    function openPageFromUrl() {
-      let tab_href = $(this).attr('href').split("?")[0];
-      $("#sidebar a").removeClass("active");
-      $("#sidebar [data-show='"+tab_href+"'] > a").addClass("active");
-      var div = $(tab_href).show();
-      div.siblings("div").hide();
+    function openPageFromUrl(evt) {
+      const href = evt.target.hash;
+      const links = document.querySelectorAll("#sidebar a")
+      const activeLink = document.querySelector("#sidebar [data-show='"+href+"'] > a");
+      links.forEach(a => a.classList.remove('active'));
+      activeLink.classList.add('active');
+      const contentDivs = document.querySelectorAll("#content > .content-panel");
+      const activeDiv = document.querySelector(href);
+      contentDivs.forEach(div => div.style.display = 'none');
+      activeDiv.style.display = 'block';
     }
 
   </script>
