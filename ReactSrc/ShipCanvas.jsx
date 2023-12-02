@@ -1,5 +1,5 @@
 import { ship_image_srcs2 } from '/js/constants.js';
-import { toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/MatchHistoryUtils.js';
+import { toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistoryUtils.js';
 import * as matrix from '/js/MatrixMath.js';
 
 export class ShipCanvas extends React.Component {
