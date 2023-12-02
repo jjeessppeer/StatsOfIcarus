@@ -16,8 +16,9 @@ function updateScsTime(){
         hour: 'numeric',
         minute: 'numeric',
         second: 'numeric',
+        hour12: false
     }
-    formatter = new Intl.DateTimeFormat([], dateOptions);
+    const formatter = new Intl.DateTimeFormat([], dateOptions);
     const berlin_time = formatter.format(new Date());
     let timeDiff = secondsBetween(berlin_time, "20:00:00");
     
@@ -28,6 +29,9 @@ function updateScsTime(){
     }
     const timeStr = new Date(timeDiff * 1000).toISOString().substring(11, 19);
 
-    $("#scsTime").text(`SCS${sign}${timeStr}`);
-    setTimeout(updateScsTime, 1000);
+    const el = document.getElementById('scsTime');
+    el.textContent = `SCS${sign}${timeStr}`;
+    // setTimeout(updateScsTime, 1000);
 }
+updateScsTime();
+setInterval(updateScsTime, 1000)

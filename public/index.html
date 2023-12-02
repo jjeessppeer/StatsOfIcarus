@@ -37,13 +37,13 @@
   <link rel="stylesheet" href="deps/bootstrap-4.3.1.min.css">
   
   <script src="js/utils.js"></script>
-  <script src="js/scsTime.js"></script>
 
   <script type="module" src="js/MatchHistory/matchHistory.js"></script>
   <script type="module" src="js/DamageCalculator.js"></script>
   <script type="module" src="js/shipBuilder.js"></script>
   <script type="module" src="js/TournamentRandomizer.js"></script>
   <script type="module" src="js/SpawnMaps.js"></script>
+  <script type="module" src="js/scsTime.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
@@ -209,8 +209,7 @@
 
   <script>
     $(document).ready(function () {
-      
-      $("#sidebar a").on("click", openPageFromUrl);
+      document.querySelectorAll("#sidebar a").forEach(el => el.addEventListener('click', openPageFromUrl));
 
       // Setup dark mode
       let dark_mode_switch = $("#darkModeSwitch");
@@ -231,7 +230,6 @@
       
     });
 
-    updateScsTime();
 
     function openPageFromUrl() {
       let tab_href = $(this).attr('href').split("?")[0];
