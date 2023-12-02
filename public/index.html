@@ -21,15 +21,16 @@
   <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
   <!-- <script src="https://unpkg.com/recharts@2.9.3/umd/Recharts.js"></script> -->
 
-  <script src="deps/jquery-3.4.1.min.js"></script>
-  <script src="deps/popper.min.js"></script>
-  <script src="deps/bootstrap-4.3.1.min.js"></script>
+  <!-- <script src="deps/jquery-3.4.1.min.js"></script> -->
+  <!-- <script src="deps/jquery-ui-1.12.1.min.js"></script> -->
+  <!-- <script src="deps/popper.min.js"></script> -->
+  <!-- <script src="deps/bootstrap-4.3.1.min.js"></script> -->
+
   <script src="deps/lz-string-1.4.4.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   
   <script src="deps/darkreader-4.9.22.js"></script>
-  <script src="deps/jquery-ui-1.12.1.min.js"></script>
   
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
     crossorigin="anonymous">
@@ -208,35 +209,37 @@
   </div>
 
   <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll("#sidebar a").forEach(el => el.addEventListener('click', openPageFromUrl));
-
       // Setup dark mode
-      let dark_mode_switch = $("#darkModeSwitch");
-      dark_mode_switch.on("change", function() {
-        if (this.checked){
-          DarkReader.enable({brightness: 100, contrast: 100});
+      let dark_mode_switch = document.getElementById("darkModeSwitch");
+      dark_mode_switch.addEventListener("change", function () {
+        if (this.checked) {
+          DarkReader.enable({ brightness: 100, contrast: 100 });
           document.cookie = "dark_mode=true";
         }
-        else{
+        else {
           DarkReader.disable();
           document.cookie = "dark_mode=false";
         }
       });
-      
-      dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
-      dark_mode_switch.trigger("change");
-      $("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a").trigger("click");
-      
+      dark_mode_switch.checked = getCookie("dark_mode") == "true";
+      dark_mode_switch.dispatchEvent(new InputEvent('change'));
+
+      const activeTabLink = document.querySelector("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a");
+      if (activeTabLink) activeTabLink.dispatchEvent(new Event('click'));
     });
 
-
-    function openPageFromUrl() {
-      let tab_href = $(this).attr('href').split("?")[0];
-      $("#sidebar a").removeClass("active");
-      $("#sidebar [data-show='"+tab_href+"'] > a").addClass("active");
-      var div = $(tab_href).show();
-      div.siblings("div").hide();
+    function openPageFromUrl(evt) {
+      const href = evt.target.hash.split("?")[0];
+      const links = document.querySelectorAll("#sidebar a")
+      const activeLink = document.querySelector("#sidebar [data-show='"+href+"'] > a");
+      links.forEach(a => a.classList.remove('active'));
+      activeLink.classList.add('active');
+      const contentDivs = document.querySelectorAll("#content > .content-panel");
+      const activeDiv = document.querySelector(href);
+      contentDivs.forEach(div => div.style.display = 'none');
+      activeDiv.style.display = 'block';
     }
 
   </script>
