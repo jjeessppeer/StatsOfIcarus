@@ -1,0 +1,48 @@
+.tournmanent-randomizer {
+    width: 650px;
+    border: 3px solid black;
+    padding: 10px;
+}
+
+.tournmanent-randomizer > div {
+    margin-bottom: 10px;
+}
+
+.tournmanent-randomizer label {
+    margin: 0;
+    padding: 0;
+}
+
+.tournmanent-randomizer .mode-inputs label {
+    width: 140px;
+}
+
+.tournmanent-randomizer label {
+    width:70px;
+
+}
+
+.tournmanent-randomizer label input {
+    margin-right: 5px;
+}
+
+.tournmanent-randomizer .map-checks label {
+    width: 190px;
+}
+
+.tournmanent-randomizer .match-count {
+    width: 60px;
+}
+
+.tournmanent-randomizer .output-list {
+    border-top: 3px solid black;
+    margin-right: -10px;
+    margin-left: -10px;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.tournmanent-randomizer ul {
+    list-style: none;
+    padding: 0;
+}

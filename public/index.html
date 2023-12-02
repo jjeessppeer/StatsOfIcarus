@@ -56,16 +56,14 @@
   <link rel="stylesheet" href="deps/bootstrap-4.3.1.min.css">
   
   <script src="js/utils.js"></script>
-  <script src="js/docsapi.js"></script>
   <script src="js/scsTime.js"></script>
   <script src="js/aimCalculator.js"></script>
-  <script src="js/mapSpawns.js"></script>
-  <!-- <script src="js/shipBuilder.js"></script> -->
   <script src="js/shipBuilderTranslations.js"></script>
 
   <script type="module" src="js/MatchHistory/matchHistory.js"></script>
   <script type="module" src="js/DamageCalculator.js"></script>
   <script type="module" src="js/shipBuilder.js"></script>
+  <script type="module" src="js/mapSpawns.js"></script>
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/MatchHistory.css">
@@ -77,6 +75,7 @@
   <link rel="stylesheet" href="css/MatchHistory/EloCard.css">
   <link rel="stylesheet" href="css/MatchHistory/LeaderboardCard.css">
   <link rel="stylesheet" href="css/ShipStats/IconDropdown.css">
+  <link rel="stylesheet" href="css/TournamentGenerator.css">
 
   <link rel="stylesheet" href="css/ShipStats/LoadoutOverview.css">
   <link rel="stylesheet" href="css/ShipStats/LoadoutSettings.css">
@@ -120,12 +119,6 @@
             Match history
           </a>
         </li>
-        <!-- <li id="leaderboardLink" data-show="#leaderboard">
-          <a href="#leaderboard">
-            <i class="fas fa-list-ol"></i>
-            Leaderboard
-          </a>
-        </li> -->
         <li id="shipBuilderLink" data-show="#shipBuilder">
           <a href="#shipBuilder">
             <i class="fas fa-hammer"></i>
@@ -150,6 +143,12 @@
           <a href="#maps">
             <i class="fas fa-map"></i>
             Maps
+          </a>
+        </li>
+        <li id="mapRandomizerLink" data-show="#mapRandomizer">
+          <a href="#mapRandomizer">
+            <i class="fas fa-random"></i>
+            Map randomizer
           </a>
         </li>
         <li id="aboutLink" data-show="#about">
@@ -191,19 +190,17 @@
         </div>
 
       </div>
+
       <div id="shipBuilder" class="content-panel" style="display:none">
         <div id="shipBuilderReactRoot">
         </div>
       </div>
 
-      <!-- Gunnery calculator -->
       <div id="damageCalculator" class="content-panel" style="display:block">
         <div id="dcReactRoot">
         </div>
       </div>
 
-
-      <!-- Arc calculator -->
       <div id="projectileArcs" class="content-panel" style="display:none">
         <h1>Projectile arcs and aiming</h1>
         <div class="row row-margin">
@@ -310,6 +307,7 @@
       </div>
 
       <div id="maps" class="content-panel" style="display:none">
+        
         <h2>Maps</h2>
         <div class="input-group" style="width:250px;">
           <div class="input-group-prepend">
@@ -319,9 +317,9 @@
           </select>
         </div>
 
-        <img id="spawnImage" src="" width="700" height="700">
+        <!-- <img id="spawnImage" src="" width="700" height="700">
         <p>Credit to Nerdhector and Richard for creating spawn position images.</p>
-        <br>
+        <br> -->
         <h3>Tournament randomizer</h3>
         <div style="max-width:650px;border:solid;padding:10px;">
           <b>Game Modes</b><br>
@@ -389,6 +387,12 @@
           1. 
         </div>
 
+      </div>
+
+      <div id="mapRandomizer" class="content-panel" style="display:none">
+        <div id="mapsReactRoot">
+
+        </div>
       </div>
 
       <!-- About -->

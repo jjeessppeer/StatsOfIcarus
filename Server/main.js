@@ -278,8 +278,19 @@ app.get('/ships', async function(req, res) {
     res.status(200).json(ships);
 })
 
-app.get('/maps', async function() {
-
+app.get('/maps/:mode/:teams/:ships', async function(req, res) {
+    const mode = Number(req.params.mode);
+    const ships = Number(req.params.ships);
+    const teams = Number(req.params.teams);
+    if (!ships || !teams || !mode) return res.status(404).send();
+    collection = mongoClient.db("mhtest").collection("Items-Maps");
+    const maps = await collection.find({
+        GameMode: mode,
+        TeamSize: {$size: teams},
+        [`TeamSize.${teams-1}`]: ships,
+        Public: true
+    }).toArray();
+    res.status(200).json(maps);
 });
 
 async function run() {
