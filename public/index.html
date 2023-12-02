@@ -225,7 +225,7 @@
     });
 
     function openPageFromUrl(evt) {
-      const href = evt.target.hash.split("?")[0];
+      const href = evt.target.hash;
       const links = document.querySelectorAll("#sidebar a")
       const activeLink = document.querySelector("#sidebar [data-show='"+href+"'] > a");
       links.forEach(a => a.classList.remove('active'));

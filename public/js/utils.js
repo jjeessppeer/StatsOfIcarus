@@ -1,20 +1,3 @@
-function setUrlParam(param) {
-    let split_url = window.location.href.split("?");
-    if (param == undefined)
-        window.location.href = split_url[0];
-    else
-        window.location.href = split_url[0] + "?" + param;
-    // return split_url[0] + "?" + param;
-}
-
-function getUrlParam(url) {
-    if (!url) url = window.location.hash;
-    let split_url = url.split("?");
-    if (split_url.length > 0)
-        return split_url[1];
-    return false;
-}
-
 function updateQueryParams(urlParams) {
     const protocol = window.location.protocol;
     const host = window.location.host;
@@ -108,9 +91,6 @@ function laserAvgDamage(gun_data, ammo_data, distance, time) {
 
     // Avg damage per hit.
     let laser_damage_modifier = time_modifier * distance_modifier;
-    // console.log("Distance modifier: ", distance_modifier);
-    // console.log("Time modifier: ", time_modifier);
-    // console.log("Damage modifier: ", laser_damage_modifier);
     return laser_damage_modifier;
 
 

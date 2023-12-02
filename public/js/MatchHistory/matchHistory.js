@@ -27,20 +27,17 @@ function initializeMatchHistory(){
         search.classList.toggle('filters-open');
     });
 
-    let urlQuery = getUrlQuery();
-    if (urlQuery != undefined) {
-        executeSearch(urlQuery);
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    if (urlParams.has('search')) {
+        const compressed = urlParams.get('search');
+        const decoded = LZString.decompressFromEncodedURIComponent(compressed);
+        const parsedQuery = JSON.parse(decoded);
+        executeSearch(parsedQuery);   
     }
     else {
         executeSearch(DEFAULT_QUERY);
     }
-}
-
-function getUrlQuery() {
-    let urlparams = getUrlParam();
-    if (!urlparams) return undefined;
-    let query = JSON.parse(decodeURIComponent(urlparams));
-    return query;
 }
 
 async function executeSearch(query) {
@@ -56,10 +53,12 @@ async function executeSearch(query) {
     }
 
     const resposeQuery = response.modifiedQuery;
-    let encodedQuery = encodeURIComponent(JSON.stringify(response.originalQuery));
-    if (window.location.hash.substring(1).split("?")[0] == "matchHistory"){
-        setUrlParam(encodedQuery);
-        if (resposeQuery.perspective.type == 'Overview') setUrlParam();
+    if (window.location.hash == "#matchHistory"){
+        const queryString = JSON.stringify(response.originalQuery)
+        const encoded = LZString.compressToEncodedURIComponent(queryString);
+        const urlParams = new URLSearchParams();
+        urlParams.set('search', encoded);
+        updateQueryParams(urlParams);
     }
 
     //Update search field based on recieved data.
