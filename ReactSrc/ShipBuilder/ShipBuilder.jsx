@@ -1,25 +1,54 @@
 import { ShipCanvas } from "/React/ShipBuilder/ShipCanvas2.js";
 import { RangeVisualizer } from "/React/ShipBuilder/RangeVisualizer.js";
 import { GunAngleVisualizer } from "/React/ShipBuilder/GunAngleVisualizer.js";
+import { getSortedGunSlots } from '/React/ShipBuilder/ShipBuilderUtils.js'
 
 export class ShipBuilder extends React.PureComponent {
   constructor(props) {
     super(props);
 
     // Load state from url.
-    // console.log("LOADEDSTATE");
-    // console.log(window.location.hash.split('?')[1]);
+
 
     this.state = {
-      selectedShip: this.props.shipItems[0],
-      gunSelections: ["None", "None", "None", "None", "None", "None"],
-      selectedAmmos: [undefined, undefined, undefined, undefined, undefined, undefined],
+      name: "",
+      selectedShip: this.props.shipItems[0].Id,
+      gunSelections: [-1, -1, -1, -1, -1, -1],
+      selectedAmmos: [-1, -1, -1, -1, -1, -1],
+      pveEnabled: false,
       loadStateFromUrl: true
+    }
+
+    // Load state from url.
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    if (urlParams.has('build_code')) {
+      const buildCode = urlParams.get('build_code');
+      const decoded = LZString.decompressFromEncodedURIComponent(buildCode);
+      const loadedState = JSON.parse(decoded);
+      for (const key in loadedState) {
+        this.state[key] = loadedState[key];
+      }
     }
   }
 
-  getStateFromExportString = (str) => {
+  componentDidUpdate() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams();
+    urlParams.set('build_code', this.getExportString());
+    updateQueryParams(urlParams);
+  }
 
+  getExportString() {
+    let str = JSON.stringify({
+      name: this.state.name,
+      selectedShip: this.state.selectedShip,
+      gunSelections: this.state.gunSelections,
+      selectedAmmos: this.state.selectedAmmos,
+      pveEnabled: this.state.pveEnabled
+    });
+    let encoded = LZString.compressToEncodedURIComponent(str);
+    return encoded;
   }
 
   nameChanged = (evt) => {
@@ -31,7 +60,7 @@ export class ShipBuilder extends React.PureComponent {
   shipChanged = (evt) => {
     const shipItem = this.props.shipItems.find(el => el.Name == evt.target.value);
     this.setState({
-      selectedShip: shipItem
+      selectedShip: shipItem.Id
     });
   }
 
@@ -45,61 +74,53 @@ export class ShipBuilder extends React.PureComponent {
 
   ammoChanged = (evt, idx) => {
     const selectedAmmos = [...this.state.selectedAmmos];
-    const ammoItem = this.props.ammoItems.find(el => el.Name == evt.target.value);
-    selectedAmmos[idx] = ammoItem;
+    selectedAmmos[idx] = evt.target.value;
     this.setState({
       selectedAmmos: selectedAmmos
     });
   }
 
+  pveChanged = (evt) => {
+    this.setState({
+      pveEnabled: evt.target.checked
+    })
+  }
+
   render() {
-    // Get ship loadout.
-    const shipLoadout = [];
-    for (const gunName of this.state.gunSelections) {
-      if (gunName == "None") shipLoadout.push(-1);
-      else {
-        const gunItem = this.props.gunItems.find(el => el.Name == gunName);
-        shipLoadout.push(gunItem.Id);
-      }
-    }
-    const shipModel = this.state.selectedShip.Id;
+    const shipModel = this.state.selectedShip;
+    const selectedShipItem = this.props.shipItems.find(el => el.Id == this.state.selectedShip);
+    const selectedAmmoItems = this.state.selectedAmmos.map(ammoId => this.props.ammoItems.find(el => el.Id == ammoId));
+    const selectedGunItems = this.state.gunSelections.map(gunId => this.props.gunItems.find(el => el.Id == gunId));
 
     return (
       <div className="ship-builder">
         <h3>Ship builder</h3>
-
-        <p>Build can be shared via the current URL or by copying and pasting in the textfield below and pressing
-          import/export.</p>
-        <div class="input-group import-group">
-          <div class="input-group-prepend">
-            <div class="input-group-text">Import build</div>
-          </div>
-          <input type="text" class="form-control" placeholder="" />
-          <div class="input-group-append">
-            <button class="btn btn-info" type="button">Import</button>
-            <button class="btn btn-primary" type="button">Export</button>
-          </div>
-        </div>
+        <p>Build can be shared via the current URL.</p>
 
         <ShipInputGroup
           nameChanged={this.nameChanged}
           gunChanged={this.gunChanged}
           ammoChanged={this.ammoChanged}
           shipChanged={this.shipChanged}
+          pveChanged={this.pveChanged}
+          pveEnabled={this.state.pveEnabled}
           gunItems={this.props.gunItems}
           ammoItems={this.props.ammoItems}
           shipItems={this.props.shipItems}
-          selectedShip={this.state.selectedShip}
+          shipName={this.state.name}
+          selectedShipItem={selectedShipItem}
+          selectedGunItems={selectedGunItems}
+          selectedAmmoItems={selectedAmmoItems}
         />
         <div className="my-col">
           <b>Drag or scroll to pan or zoom image.</b>
           <br></br>
           <ShipCanvas width='600' height='600'
             movable={true}
-            shipItem={this.state.selectedShip}
+            shipItem={selectedShipItem}
             gunItems={this.props.gunItems}
-            selectedAmmos={this.state.selectedAmmos}
-            shipLoadout={shipLoadout}
+            selectedAmmos={selectedAmmoItems}
+            shipLoadout={this.state.gunSelections}
             shipModel={shipModel}
             adjustGunSpacing={false}
             renderGunArcs={true}
@@ -114,17 +135,15 @@ export class ShipBuilder extends React.PureComponent {
         <div className="my-col">
           <h3>Range Visualization</h3>
           <RangeVisualizer
-            shipItem={this.state.selectedShip}
-            gunItems={this.props.gunItems}
-            selectedAmmos={this.state.selectedAmmos}
-            gunSelections={this.state.gunSelections}
+            shipItem={selectedShipItem}
+            selectedGunItems={selectedGunItems}
+            selectedAmmoItems={selectedAmmoItems}
           />
         </div>
         <div className="my-col">
           <GunAngleVisualizer
-            shipItem={this.state.selectedShip}
-            gunSelections={this.state.gunSelections}
-            gunItems={this.props.gunItems}
+            shipItem={selectedShipItem}
+            selectedGunItems={selectedGunItems}
           />
         </div>
       </div>
@@ -139,14 +158,14 @@ class ShipInputGroup extends React.PureComponent {
   render() {
     const shipOptions = [];
     for (const shipItem of this.props.shipItems) {
-      shipOptions.push(<option>{shipItem.Name}</option>);
+      shipOptions.push(<option selected={shipItem.Id == this.props.selectedShipItem.Id}>{shipItem.Name}</option>);
     }
 
     return (
       <div className="ship-input my-col">
         <div>
           <div class="my-col">
-            <input type="text" class="form-control name-input" placeholder="Build Name" autocomplete="off" onChange={this.props.nameChanged} />
+            <input type="text" class="form-control name-input" placeholder="Build Name" onChange={this.props.nameChanged} value={this.props.shipName} />
             <div class="input-group ship-select-group">
               <div class="input-group-prepend">
                 <div class="input-group-text">Ship</div>
@@ -162,24 +181,28 @@ class ShipInputGroup extends React.PureComponent {
             </div>
           </div>
         </div>
-
-
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="shipBuilderPvECheck" autocomplete="off" />
-          <label class="form-check-label" for="shipBuilderPvECheck">Use PvE equipment</label>
+        <div>
+          <label>
+            <input type="checkbox" checked={this.props.pveEnabled} onChange={this.props.pveChanged} />
+            Use PvE equipment
+          </label>
         </div>
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="staminaCheck" autocomplete="off" />
-          <label class="form-check-label" for="staminaCheck">Show gunner stamina arcs</label>
+        <div>
+          <label>
+            <input type="checkbox" />
+            Show gunner stamina arcs
+          </label>
         </div>
-
 
         <WeaponSelector
           gunChanged={this.props.gunChanged}
           ammoChanged={this.props.ammoChanged}
           gunItems={this.props.gunItems}
           ammoItems={this.props.ammoItems}
-          selectedShip={this.props.selectedShip}
+          selectedShipItem={this.props.selectedShipItem}
+          selectedGunItems={this.props.selectedGunItems}
+          selectedAmmoItems={this.props.selectedAmmoItems}
+          pveEnabled={this.props.pveEnabled}
         />
 
       </div>
@@ -190,7 +213,7 @@ class ShipInputGroup extends React.PureComponent {
 class WeaponSelector extends React.PureComponent {
   render() {
     const selectors = [];
-    for (let i = 0; i < this.props.selectedShip.GunCount; i++) {
+    for (let i = 0; i < this.props.selectedShipItem.GunCount; i++) {
       selectors.push(<GunAmmoSelector {...this.props} gunIndex={i}></GunAmmoSelector>)
     }
     return (
@@ -215,15 +238,24 @@ class GunAmmoSelector extends React.PureComponent {
   }
 
   render() {
+    const selectedGunItem = this.props.selectedGunItems[this.props.gunIndex];
+    const selectedAmmoItem = this.props.selectedAmmoItems[this.props.gunIndex];
+    const gunId = selectedGunItem ? selectedGunItem.Id : -1;
+    const ammoId = selectedAmmoItem ? selectedAmmoItem.Id : -1;
+
+    const gunSlots = getSortedGunSlots(this.props.selectedShipItem);
+
     const gunOptions = [];
-    gunOptions.push(<option>None</option>);
+    gunOptions.push(<option value={-1} selected={gunId == -1}>None</option>);
     for (const gunItem of this.props.gunItems) {
-      gunOptions.push(<option>{gunItem.Name}</option>);
+      if (!this.props.pveEnabled && !(gunItem.GameType & 1)) continue;
+      if (gunItem.Size != gunSlots[this.props.gunIndex].Size) continue;
+      gunOptions.push(<option value={gunItem.Id} selected={gunId == gunItem.Id}>{gunItem.Name}</option>);
     }
     const ammoOptions = [];
-    ammoOptions.push(<option>None</option>);
+    ammoOptions.push(<option value={-1} selected={ammoId == -1}>None</option>);
     for (const ammoItem of this.props.ammoItems) {
-      ammoOptions.push(<option>{ammoItem.Name}</option>);
+      ammoOptions.push(<option value={ammoItem.Id} selected={ammoId == ammoItem.Id}>{ammoItem.Name}</option>);
     }
     return (
       <div class="input-group">

@@ -31,9 +31,8 @@ export class RangeVisualizer extends React.PureComponent {
     let side_range = 500;
     const gunSlots = getSortedGunSlots(this.props.shipItem);
     for (let i = 0; i < this.props.shipItem.GunCount; i++) {
-      const gunName = this.props.gunSelections[i];
-      const gunItem = this.props.gunItems.find(el => el.Name == gunName);
-      const ammoItem = this.props.selectedAmmos[i];
+      const gunItem = this.props.selectedGunItems[i];
+      const ammoItem = this.props.selectedAmmoItems[i];
       const gunSlot = gunSlots[i];
       if (!gunItem) continue;
 
@@ -115,13 +114,13 @@ export class RangeVisualizer extends React.PureComponent {
     let gun_descriptions = [];
     let colors_tmp = [];
     for (let i = 0; i < this.props.shipItem.GunCount; i++) {
-      const gunName = this.props.gunSelections[i];
-      let ammoItem = this.props.selectedAmmos[i];
+      const gunItem = this.props.selectedGunItems[i];
+      if (!gunItem) continue;
+      const ammoItem = this.props.selectedAmmoItems[i];
       let ammoName;
       if (ammoItem) ammoName = ammoItem.Name;
       else ammoName = "Normal";
-      if (gunName == "None") continue;
-      gun_descriptions.push(gunName + "(" + ammoName + ")");
+      gun_descriptions.push(gunItem.Name + "(" + ammoName + ")");
       colors_tmp.push(gun_colors[i])
     }
     ctx.textAlign = "left";
@@ -147,10 +146,9 @@ export class RangeVisualizer extends React.PureComponent {
     let cy = pad_top + scale * (size - size * (back_range / (front_range + back_range)));
 
     for (let i = 0; i < this.props.shipItem.GunCount; i++) {
-      const gunName = this.props.gunSelections[i];
-      if (gunName == "None") continue;
-      const gunItem = this.props.gunItems.find(el => el.Name == gunName);
-      const ammoItem = this.props.selectedAmmos[i];
+      const gunItem = this.props.selectedGunItems[i];
+      if (!gunItem) continue;
+      const ammoItem = this.props.selectedAmmoItems[i];
 
       const range = gunItem.Range * getAmmoEffect("ModifyProjectileSpeed", ammoItem) * getAmmoEffect("ModifyLifetime", ammoItem);
       const side_angle = degToRad(gunItem.MaxYaw);

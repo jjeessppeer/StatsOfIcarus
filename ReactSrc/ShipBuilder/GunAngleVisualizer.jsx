@@ -31,8 +31,7 @@ export class GunAngleVisualizer extends React.PureComponent {
 
     const gunSlots = getSortedGunSlots(this.props.shipItem);
     for (let i=0; i < this.props.shipItem.GunCount; i++){
-      const gunName = this.props.gunSelections[i];
-      const gunItem = this.props.gunItems.find(el => el.Name == gunName);
+      const gunItem = this.props.selectedGunItems[i];
       if (!gunItem) continue;
       let side_angle = degToRad(gunItem.MaxYaw);
       let initial_angle = degToRad(gunSlots[i].Angle);

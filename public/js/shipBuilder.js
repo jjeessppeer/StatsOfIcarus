@@ -8,9 +8,11 @@ async function initializeShipBuilder(){
 
   const gunsFetch = await fetch("/guns");
   const gunItems = await gunsFetch.json();
+  gunItems.sort((a, b) => (a.Name > b.Name));
 
   const ammoFetch = await fetch("/ammos");
   const ammoItems = await ammoFetch.json();
+  ammoItems.sort((a, b) => (a.Name > b.Name));
 
   const rootDiv = document.querySelector('#shipBuilderReactRoot');
   const reactRoot = ReactDOM.createRoot(rootDiv);

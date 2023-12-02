@@ -15,6 +15,15 @@ function getUrlParam(url) {
     return false;
 }
 
+function updateQueryParams(urlParams) {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const pathname = window.location.pathname;
+    const hash = window.location.hash;
+    const newUrl = `${protocol}//${host}${pathname}?${urlParams.toString()}${hash}`;
+    window.history.pushState({path:newUrl},'',newUrl);
+}
+
 function getCookie(cookiename) {
     var cookiestring = RegExp("" + cookiename + "[^;]+").exec(document.cookie);
     return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./, "") : "");
@@ -108,10 +117,6 @@ function laserAvgDamage(gun_data, ammo_data, distance, time) {
 
 }
 
-// Array.prototype.injectArray = function( idx, arr ) {
-//     return this.slice( 0, idx ).concat( arr ).concat( this.slice( idx ) );
-// };
-
 CanvasRenderingContext2D.prototype.zoomAround = function (x, y, factor) {
     [x, y] = transformPoint(x, y, this.getTransform().invertSelf());
     this.translate(x, y);
@@ -197,60 +202,6 @@ function htmlToElement(html) {
     template.innerHTML = html;
     return template.content.firstChild;
 }
-
-
-function httpxPostRequest(url, data, callback = null, timeout_callback = null) {
-    let xhttp = new XMLHttpRequest();
-    xhttp.timeout = 5000;
-    xhttp.open("POST", url);
-    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.onreadystatechange = callback;
-    xhttp.ontimeout = timeout_callback;
-    xhttp.send(JSON.stringify(data));
-}
-
-function httpxGetRequest(url, callback = null, timeout_callback = null) {
-    let xhttp = new XMLHttpRequest();
-    xhttp.open("GET", url);
-    xhttp.timeout = 5000;
-    // xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhttp.onload = callback;
-    xhttp.ontimeout = timeout_callback;
-    xhttp.send();
-}
-
-
-// TODO use fetch instead of these.
-
-function asyncPostRequest(url, data) {
-    let xhttp = new XMLHttpRequest();
-    xhttp.timeout = 5000;
-    xhttp.open("POST", url);
-    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    let promise = new Promise((resolve, reject) => {
-        xhttp.onload = evt => resolve(evt.target);
-        xhttp.ontimeout = reject;
-        xhttp.onerror = reject;
-    });
-    xhttp.send(JSON.stringify(data));
-    return promise;
-}
-
-function asyncGetRequest(url, data) {
-    let xhttp = new XMLHttpRequest();
-    xhttp.open("GET", url);
-    xhttp.timeout = 5000;
-    let promise = new Promise((resolve, reject) => {
-        xhttp.onload = evt => resolve(evt.target);
-        xhttp.ontimeout = reject;
-        xhttp.onerror = reject;
-    });
-    xhttp.send();
-    return promise;
-}
-
-
-
 
 function spreadPoints(points, iconSize, iterations = 10) {
     let adjustedPositions = [];
