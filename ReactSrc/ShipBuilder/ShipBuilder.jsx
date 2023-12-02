@@ -60,7 +60,9 @@ export class ShipBuilder extends React.PureComponent {
   shipChanged = (evt) => {
     const shipItem = this.props.shipItems.find(el => el.Name == evt.target.value);
     this.setState({
-      selectedShip: shipItem.Id
+      selectedShip: shipItem.Id,
+      gunSelections: [-1, -1, -1, -1, -1, -1],
+      selectedAmmos: [-1, -1, -1, -1, -1, -1]
     });
   }
 
