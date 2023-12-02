@@ -42,7 +42,7 @@ app.use(express.urlencoded({
 app.use(express.static('public'));
 
 app.get('/mod', function(req, res) {
-    res.redirect('https://github.com/jjeessppeer/StatsOfIcarus/releases');
+    res.redirect('https://github.com/jjeessppeer/MatchHistoryMod/releases');
 });
 
 app.get('/get_datasets', async function (req, res) {
