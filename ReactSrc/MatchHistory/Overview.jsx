@@ -1,4 +1,4 @@
-import { game_modes } from '/js/MatchHistory/matchHistory.js';
+import { game_modes } from '/js/constants.js';
 import { getShipLoadout, getShipItem, getPlayerInfo, getLoadoutInfo } from '/js/MatchHistory/matchHistoryUtils.js';
 
 export class Overview extends React.PureComponent {

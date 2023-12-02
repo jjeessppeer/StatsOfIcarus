@@ -1,5 +1,6 @@
-import { ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
-
+import { ship_image_srcs2 } from '/js/constants.js';
+import { toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/MatchHistoryUtils.js';
+import * as matrix from '/js/MatrixMath.js';
 
 export class ShipCanvas extends React.Component {
   static defaultProps = {
@@ -75,23 +76,23 @@ export class ShipCanvas extends React.Component {
     // let centerX = (minX + maxX) / 2;
     let centerY = (minY + maxY) / 2;
 
-    resetMatrix(transform);
-    applyMatrix(ctx, transform);
+    matrix.resetMatrix(transform);
+    matrix.applyMatrix(ctx, transform);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     
-    translateMatrix(transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
-    zoomMatrixAround(transform, canvas.width / 2, canvas.height / 2, 0.5);
-    applyMatrix(ctx, transform);
+    matrix.translateMatrix(transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
+    matrix.zoomMatrixAround(transform, canvas.width / 2, canvas.height / 2, 0.5);
+    matrix.applyMatrix(ctx, transform);
 
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(shipImage, 0, 0);
 
 
-    const inverseTransform = getInvertedMatrix(transform);
-    const localMin = transformPointMatrix(0, 0, inverseTransform);
-    const localMax = transformPointMatrix(canvas.width, canvas.height, inverseTransform);
+    const inverseTransform = matrix.getInvertedMatrix(transform);
+    const localMin = matrix.transformPointMatrix(0, 0, inverseTransform);
+    const localMax = matrix.transformPointMatrix(canvas.width, canvas.height, inverseTransform);
 
     // const localX = []
 

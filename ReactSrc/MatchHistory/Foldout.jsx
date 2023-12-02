@@ -7,7 +7,7 @@ export class Foldout extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      currentTabIdx: 2
+      currentTabIdx: 0
     }
 
     this.tabChanged = this.tabChanged.bind(this);
@@ -22,13 +22,13 @@ export class Foldout extends React.PureComponent {
       <div className="foldout">
         <ul>
           <TabButton title="Overview" tabIdx={0} currentTabIdx={this.state.currentTabIdx} onClick={this.tabChanged}></TabButton>
-          <TabButton title="Gunning" tabIdx={1} currentTabIdx={this.state.currentTabIdx} onClick={this.tabChanged}></TabButton>
-          <TabButton title="Positions" tabIdx={2} currentTabIdx={this.state.currentTabIdx} onClick={this.tabChanged}></TabButton>
+          <TabButton title="Positions" tabIdx={1} currentTabIdx={this.state.currentTabIdx} onClick={this.tabChanged}></TabButton>
+          <TabButton title="Gunning" tabIdx={2} currentTabIdx={this.state.currentTabIdx} onClick={this.tabChanged}></TabButton>
         </ul>
         <div class="content">
           {this.state.currentTabIdx == 0 && <MatchDetails {...this.props}></MatchDetails>}
-          {this.state.currentTabIdx == 1 && <GunnerTab {...this.props}></GunnerTab>}
-          {this.state.currentTabIdx == 2 && <HeatmapTab {...this.props}></HeatmapTab>}
+          {this.state.currentTabIdx == 1 && <HeatmapTab {...this.props}></HeatmapTab>}
+          {this.state.currentTabIdx == 2 && <GunnerTab {...this.props}></GunnerTab>}
         </div>
       </div>
     )

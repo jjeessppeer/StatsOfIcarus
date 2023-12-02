@@ -1,4 +1,4 @@
-import { SKILL_ORDER } from '/js/MatchHistory/matchHistory.js';
+import { SKILL_ORDER } from '/js/constants.js';
 import { getShipLoadout, getPlayerInfo, getLoadoutInfo, getSkillItem } from '/js/MatchHistory/matchHistoryUtils.js';
 import { ShipCanvas } from '/React/ShipCanvas.js';
 

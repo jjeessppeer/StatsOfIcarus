@@ -71,11 +71,11 @@ export class Heatmap extends React.Component {
     }
     const heat = simpleheat(canvas);
     heat.gradient({
-      0.08: 'blue',
-      0.6: 'cyan',
-      0.7: 'lime',
-      0.8: 'yellow',
-      1.0: 'red'
+      0.08: 'rgba(0, 0, 255, 1)',
+      0.6: 'rgba(0, 255, 255, 1)',
+      0.7: 'rgba(0, 255, 0, 1)',
+      0.8: 'rgba(255, 255, 0, 1)',
+      1.0: 'rgba(255, 0, 0, 1)'
     });
     heat.radius(this.props.heatmapRadius, this.props.heatmapBlur);
     heat.data(heatmapData);

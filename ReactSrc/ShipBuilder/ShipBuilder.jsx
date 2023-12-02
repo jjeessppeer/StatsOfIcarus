@@ -5,11 +5,21 @@ import { GunAngleVisualizer } from "/React/ShipBuilder/GunAngleVisualizer.js";
 export class ShipBuilder extends React.PureComponent {
   constructor(props) {
     super(props);
+
+    // Load state from url.
+    // console.log("LOADEDSTATE");
+    // console.log(window.location.hash.split('?')[1]);
+
     this.state = {
       selectedShip: this.props.shipItems[0],
       gunSelections: ["None", "None", "None", "None", "None", "None"],
-      selectedAmmos: [undefined, undefined, undefined, undefined, undefined, undefined]
+      selectedAmmos: [undefined, undefined, undefined, undefined, undefined, undefined],
+      loadStateFromUrl: true
     }
+  }
+
+  getStateFromExportString = (str) => {
+
   }
 
   nameChanged = (evt) => {

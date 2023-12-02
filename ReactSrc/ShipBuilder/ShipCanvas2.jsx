@@ -1,6 +1,8 @@
-import { ship_image_srcs2, toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/matchHistory.js';
+import { ship_image_srcs2 } from '/js/constants.js';
 import { getAmmoEffect, getGunParam } from '/React/DamageCalculator/DamageCalculator.js';
 import { getSortedGunSlots } from '/React/ShipBuilder/ShipBuilderUtils.js'
+import { toShipImageCoordinates, spreadGunPositions } from '/js/MatchHistory/MatchHistoryUtils.js';
+import * as matrix from '/js/MatrixMath.js';
 
 export class ShipCanvas extends React.Component {
   static defaultProps = {
@@ -58,7 +60,7 @@ export class ShipCanvas extends React.Component {
     let dy = evt.movementY;
     dx /= transform[0];
     dy /= transform[4];
-    translateMatrix(transform, dx, dy);
+    matrix.translateMatrix(transform, dx, dy);
     this.setState({
       transform: transform
     })
@@ -73,7 +75,7 @@ export class ShipCanvas extends React.Component {
     const factor = (evt.deltaY < 0) ? 1.1 : 0.9;
 
     const transform = [...this.state.transform];
-    zoomMatrixAround(transform, pos_x, pos_y, factor);
+    matrix.zoomMatrixAround(transform, pos_x, pos_y, factor);
     this.setState({
       transform: transform
     });
@@ -112,19 +114,19 @@ export class ShipCanvas extends React.Component {
       minY = toShipImageCoordinates([0, minY], shipModel, shipImage)[1];
       let centerX = shipImage.width / 2
       let centerY = (minY + maxY) / 2;
-      resetMatrix(transform);
-      translateMatrix(transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
-      zoomMatrixAround(transform, canvas.width / 2, canvas.height / 2, 1);
+      matrix.resetMatrix(transform);
+      matrix.translateMatrix(transform, canvas.width / 2 - centerX, canvas.height / 2 - centerY);
+      matrix.zoomMatrixAround(transform, canvas.width / 2, canvas.height / 2, 1);
     }
-    applyMatrix(ctx, transform);
+    matrix.applyMatrix(ctx, transform);
 
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(shipImage, 0, 0);
 
-    const inverseTransform = getInvertedMatrix(transform);
-    const localMin = transformPointMatrix(0, 0, inverseTransform);
-    const localMax = transformPointMatrix(canvas.width, canvas.height, inverseTransform);
+    const inverseTransform = matrix.getInvertedMatrix(transform);
+    const localMin = matrix.transformPointMatrix(0, 0, inverseTransform);
+    const localMax = matrix.transformPointMatrix(canvas.width, canvas.height, inverseTransform);
 
     const iconSize = 75;
     // Convert to pixel space
@@ -179,7 +181,7 @@ export class ShipCanvas extends React.Component {
       
       off_ctx.resetTransform();
       off_ctx.clearRect(0, 0, offscreen.width, offscreen.height);
-      applyMatrix(off_ctx, transform);
+      matrix.applyMatrix(off_ctx, transform);
 
       off_ctx.fillStyle = "rgb(50, 50, 50)";
       off_ctx.globalAlpha = 0.3;

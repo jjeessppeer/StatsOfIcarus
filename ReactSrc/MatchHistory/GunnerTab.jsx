@@ -7,7 +7,7 @@ export class GunnerTab extends React.Component {
   render() {
     return (
       <div>
-        gunner stuff
+        {"not implemented yet :("}
       </div>
     )
   }
