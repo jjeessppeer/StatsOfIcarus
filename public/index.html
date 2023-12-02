@@ -157,7 +157,7 @@
         </div>
       </div>
 
-      <div id="damageCalculator" class="content-panel" style="display:block">
+      <div id="damageCalculator" class="content-panel" style="display:none">
         <div id="dcReactRoot">
         </div>
       </div>
@@ -226,6 +226,7 @@
 
       const activeTabLink = document.querySelector("[data-show='#" + window.location.hash.substr(1).split("?")[0] + "'] > a");
       if (activeTabLink) activeTabLink.dispatchEvent(new Event('click'));
+      else document.querySelector("#sidebar [data-show='#matchHistory'] > a").dispatchEvent(new Event('click'));
     });
 
     function openPageFromUrl(evt) {
