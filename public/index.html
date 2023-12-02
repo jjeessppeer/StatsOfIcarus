@@ -7,15 +7,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script> -->
-
-
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-  <script src="https://unpkg.com/recharts@2.9.3/umd/Recharts.js"></script>
-
   <script type="importmap">
     {
       "imports": {
@@ -25,28 +16,18 @@
     }
   </script>
 
-  <!-- <script type="importmap">
-    {
-      "imports": {
-        "square": "./module/shapes/square.js",
-        "circle": "https://example.com/shapes/circle.js"
-      }
-    }
-  </script> -->
-  
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+  <!-- <script src="https://unpkg.com/recharts@2.9.3/umd/Recharts.js"></script> -->
 
   <script src="deps/jquery-3.4.1.min.js"></script>
   <script src="deps/popper.min.js"></script>
   <script src="deps/bootstrap-4.3.1.min.js"></script>
   <script src="deps/lz-string-1.4.4.min.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   
-  <!-- <script src="deps/Chart-2.8.0.min.js"></script> -->
-  <!-- <script src="deps/chartjs-plugin-datalabels-0.5.0.js"></script> -->
-
-
   <script src="deps/darkreader-4.9.22.js"></script>
   <script src="deps/jquery-ui-1.12.1.min.js"></script>
   
@@ -57,8 +38,6 @@
   
   <script src="js/utils.js"></script>
   <script src="js/scsTime.js"></script>
-  <script src="js/aimCalculator.js"></script>
-  <script src="js/shipBuilderTranslations.js"></script>
 
   <script type="module" src="js/MatchHistory/matchHistory.js"></script>
   <script type="module" src="js/DamageCalculator.js"></script>
@@ -99,8 +78,6 @@
           <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
         </div>
         <div>
-          <!-- Latest update: <a href="https://discordapp.com/channels/99903812700999680/562361262340833290/737086849822097420" style="color: blue;">
-            <u>2020-07-27</u></a> -->
         </div>
         <br>
         <div id="scsTime">
@@ -112,7 +89,6 @@
       </div>
 
       <ul class="list-unstyled components">
-
         <li id="matchHistoryLink" data-show="#matchHistory">
           <a href="#matchHistory">
             <i class="fas fa-glasses"></i>
@@ -125,18 +101,10 @@
             Ship builder
           </a>
         </li>
-
         <li id="damageCalculatorLink" data-show="#damageCalculator">
           <a href="#damageCalculator" class="active">
             <i class="fas fa-bomb"></i>
             Damage calculator
-          </a>
-        </li>
-
-        <li id="projectileArcsLink" data-show="#projectileArcs">
-          <a href="#projectileArcs">
-            <i class="fas fa-meteor"></i>
-            Projectile arcs
           </a>
         </li>
         <li id="mapSpawnsLink" data-show="#spawns">
@@ -157,9 +125,7 @@
             About
           </a>
         </li>
-
       </ul>
-
     </nav>
     <!-- Page Content  -->
     <div id="content" class="container-fluid">
@@ -201,111 +167,6 @@
         </div>
       </div>
 
-      <div id="projectileArcs" class="content-panel" style="display:none">
-        <h1>Projectile arcs and aiming</h1>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Gun</div>
-              </div>
-              <select class="form-control" id="arcGunSelect" autocomplete="off">
-                <option>Lumberjack</option>
-                <!-- <option>Hades</option> -->
-                <option>Heavy Flak Mk. II</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Ammo</div>
-              </div>
-              <select class="form-control" id="arcAmmoSelect" autocomplete="off">
-                <option>Normal</option>
-                <option>Lochnagar</option>
-                <option>Heavy</option>
-                <option>Incendiary</option>
-                <option>Burst</option>
-                <option>Greased</option>
-                <option>Lesmok</option>
-                <option>Heatsink</option>
-                <option>Charged</option>
-                <option>Extended</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="row row-margin">
-          <div class="col-sm-4">
-            <div class="input-group">
-              <div class="input-group-prepend small">
-                <div class="input-group-text">Map</div>
-              </div>
-              <select class="form-control" id="arcMapSelect" autocomplete="off">
-                <option>Battle on the Dunes</option>
-                <option selected>Northern Fjords</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <!-- <h5>Drag the points on either of the first images to change altitudes and distances.</h5>¨ -->
-
-        <div class="sbs-container">
-          <div id="mapContainer" class="img-canvas-container sbs-column">
-            <b>Select ship positions (distance)</b>
-            <br>
-            <img id="mapImage" class='img' src="images/map-images/Fjords.jpg" width="400" height="400" />
-            <canvas id="mapCanvas" width="400" height="400">Your browser does not support the HTML5 canvas tag.</canvas>
-          </div>
-
-          <div class="sbs-column">
-            <b>Projectile arc side view. Height changeable.</b>
-            <br>
-            <canvas id="arcCanvas" width="400" height="400" style="border:1px solid #d3d3d3;">
-              Your browser does not support the HTML5 canvas tag.</canvas>
-          </div>
-        </div>
-
-
-        <div class="sbs-container">
-          <div class="sbs-column">
-
-            <b>Gunner view, aim with the red line</b>
-            <br>
-            <div id="gunContainer" class="img-canvas-container column">
-              <img id="gunImage" class='img' src="images/gun-images/lumberjack.jpg" width="334" height="400" />
-              <canvas id="gunCanvas" width="334" height="400">
-                Your browser does not support the HTML5 canvas tag.</canvas>
-            </div>
-          </div>
-
-          <div class="sbs-column">
-            <b>Data</b>
-            <table id="arcDataTable" class="fixed table table-bordered">
-              <tr>
-                <th class="medium">Time to hit</th>
-                <td id="arcTableTime">10m</td>
-              </tr>
-              <tr>
-                <th class="medium">Distance</th>
-                <td id="arcTableDistance">10s</td>
-              </tr>
-              <tr>
-                <th class="medium">Aim angle over target</th>
-                <td id="arcTableAngleRel">10</td>
-              </tr>
-              <tr>
-                <th class="medium">Aim angle over horizon</th>
-                <td id="arcTableAngleAbs">10</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-
       <div id="spawns" class="content-panel" style="display:none">
         
         <h2>Spawn points</h2>
@@ -342,8 +203,6 @@
 
 
     </div>
-
-
   </div>
 
   <script>
@@ -362,8 +221,6 @@
           DarkReader.disable();
           document.cookie = "dark_mode=false";
         }
-        // updateRangeVis();
-        // updateArcPanel();
       });
       
       dark_mode_switch.prop("checked", getCookie("dark_mode")=="true");
@@ -372,8 +229,6 @@
       
     });
 
-
-    // initializeSpawns();
     updateScsTime();
 
     function openPageFromUrl() {
