@@ -24,7 +24,6 @@ const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
 const MOD_VERSION_LATEST = "1.0.0";
-const MOD_VERSION_REQUIRED = "0.1.3";
 
 const zlib = require('zlib');
 const util = require('util');
@@ -70,8 +69,6 @@ app.get('/get_datasets', async function (req, res) {
 
 app.get('/match/:matchId/gunneryDetails',
     async function(req, res) {
-    console.log(req.params);
-
     const matchesCollection = mongoClient.db("mhtest").collection("Matches");
     let agg = matchesCollection.aggregate([
         {$match: {MatchId: req.params.matchId}},
@@ -91,8 +88,6 @@ app.get('/match/:matchId/gunneryDetails',
 
 app.get('/match/:matchId/positionData',
     async function(req, res) {
-    console.log(req.params);
-
     const matchesCollection = mongoClient.db("mhtest").collection("Matches");
     let agg = matchesCollection.aggregate([
         {$match: {MatchId: req.params.matchId}},
@@ -115,7 +110,6 @@ app.post('/submit_match_history',
     async function (req, res) {
     let ip = requestIp.getClientIp(req);
 
-    console.log("Match recieved");
     let modVersion;
     try {
         modVersion = Joi.attempt(req.body.ModVersion, Joi.string().required());
@@ -124,12 +118,9 @@ app.post('/submit_match_history',
         return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
     }
 
-    console.log("MODVER: ", modVersion);
-
     modVersion = semver.valid(modVersion);
     if (modVersion == null) return;
     if (semver.satisfies(modVersion, '>=1.0.0')) {
-        console.log("1.0")
         const validationResult = schemas.MATCH_SUBMISSION_2.validate(req.body);
         if (validationResult.error)
             return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
@@ -140,13 +131,11 @@ app.post('/submit_match_history',
         return res.status(200).send();
     }
     else if(semver.satisfies(modVersion, '>=0.1.3')) {
-        console.log("0.1")
         const validationResult = schemas.MATCH_SUBMISSION_1.validate(req.body);
         if (validationResult.error)
             return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
         // Upload 0.1 data.
         matchHistory.submitRecord(req.body, false, false, ip);
-        console.log("MID: ", req.body.MatchId);
         return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}\nUpdate on github or statsoficarus.xyz/mod`);
     }
 
@@ -158,7 +147,6 @@ app.post('/match_history_search',
 
     let validationResult = HISTORY_SEARCH_SCHEMA.validate(req.body);
     if (validationResult.error){
-        console.log(validationResult.error)
         return res.status(400).send();
     }
     let responseData = await matchHistoryRetrieve.matchHistorySearch(req.body);
@@ -232,7 +220,6 @@ app.post('/ship_loadouts',
 app.post('/ship_matchup_stats',
     async function(req, res) {
     const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
-    // console.log()
     res.status(200).json(dat);
 });
 
