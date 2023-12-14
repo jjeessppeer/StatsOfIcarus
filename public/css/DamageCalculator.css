@@ -16,3 +16,24 @@
     color: gray;
     margin-left: 2px;
 }
+
+.damage-calculator .input-group {
+    width: 300px;
+}
+
+
+.damage-calculator .laser-input {
+    margin-bottom: 10px;
+}
+.damage-calculator .laser-input .number-box {
+    max-width: 80px;
+}
+.damage-calculator .laser-input .input-group{
+    width: 400px;
+}
+.damage-calculator .laser-input .laser-range{
+    margin-left: 10px;
+}
+.damage-calculator .laser-input .input-group-text{
+    width: 90px;
+}

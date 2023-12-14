@@ -260,10 +260,6 @@ select.btn-mini + .caret {
     font-size: 22px;
 }
 
-#damageCalculator .input-group {
-    width: 300px;
-}
-
 #ttkTable {
     width: 150px;
 }

@@ -11,7 +11,9 @@ export class DamageCalculator extends React.PureComponent {
       selectedAmmo: undefined,
       buffEnabled: false,
       directEnabled: true,
-      aoeEnabled: true
+      aoeEnabled: true,
+      laserRange: 800,
+      laserTime: 10
     }
   }
 
@@ -41,6 +43,14 @@ export class DamageCalculator extends React.PureComponent {
     this.setState({aoeEnabled: evt.target.checked});
   }
 
+  laserRangeChanged = (evt) => {
+    this.setState({laserRange: evt.target.value});
+  }
+
+  laserTimeChanged = (evt) => {
+    this.setState({laserTime: evt.target.value});
+  }
+
   render() {
     const gunOptions = [];
     for (const gunItem of this.props.gunItems) {
@@ -62,33 +72,11 @@ export class DamageCalculator extends React.PureComponent {
     }
     if (ammoItem == undefined) ammoItem = defaultAmmo;
 
-    
-
-    // Calculate damage per shot.
-    const damages = {}
-    const ammoDamageMod = getAmmoEffect("ModifyDamage", ammoItem);
-    const ammoDirectMod = getAmmoEffect("ModifyPrimaryDamage", ammoItem);
-    const ammoBurstMod = getAmmoEffect("ModifySecondaryDamage", ammoItem);
-    const buffMod = (this.state.buffEnabled ? 1.1 : 1);
-    const shots = getGunParam("iRaysPerShot", gunItem, 1);
-    for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type]) {
-      damages[componentType] = {};
-      const modifier = DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type][componentType];
-      damages[componentType].direct = gunItem.Damage.DirectHit.Amount * modifier * ammoDamageMod * ammoDirectMod * buffMod * shots;
-    }
-    for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type]) {
-      const modifier = DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type][componentType];
-      damages[componentType].burst = gunItem.Damage.BurstHit.Amount * modifier * ammoDamageMod * ammoBurstMod * buffMod * shots;
-    }
-    for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type]) {
-      damages[componentType].total = damages[componentType].burst + damages[componentType].direct;
-    }
-
     const cooldownTime = gunItem.CooldownTime / getAmmoEffect("ModifyRateOfFire", ammoItem);
+    const warmupTime = getGunParam('fChargeUpTime', gunItem, 0);
     const reloadTime = gunItem.ReloadTime / (this.state.buffEnabled ? 1.1 : 1);
-    // console.log("RT: ", reloadTime, )
     const clipSize = Math.max(1, Math.round(gunItem.MaxAmmunition * getAmmoEffect("ModifyAmmoCount", ammoItem)));
-    const secondsPerClip = Math.max((clipSize - 1) * cooldownTime, 1);
+    const secondsPerClip = Math.max((clipSize - 1) * cooldownTime, 1) + warmupTime;
     const secondsPerCycle = secondsPerClip + reloadTime;
 
     const range = gunItem.Range * getAmmoEffect("ModifyProjectileSpeed", ammoItem) * getAmmoEffect("ModifyLifetime", ammoItem);
@@ -97,10 +85,32 @@ export class DamageCalculator extends React.PureComponent {
     const armingDistance = muzzleSpeed * armingDelay;
     const aoe = getGunParam("fShellBurstSize", gunItem, 0) * getAmmoEffect("ModifyAreaOfEffect", ammoItem);
 
+    // Calculate damage per shot.
+    const damages = {}
+    const ammoDamageMod = getAmmoEffect("ModifyDamage", ammoItem);
+    const ammoDirectMod = getAmmoEffect("ModifyPrimaryDamage", ammoItem);
+    const ammoBurstMod = getAmmoEffect("ModifySecondaryDamage", ammoItem);
+    const laserModifier = laserDistanceModifier(gunItem, ammoItem, this.state.laserRange) * laserTimeModifier(gunItem, ammoItem, secondsPerClip);
+    const buffMod = (this.state.buffEnabled ? 1.1 : 1);
+    const shots = getGunParam("iRaysPerShot", gunItem, 1);
+    for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type]) {
+      damages[componentType] = {};
+      const modifier = DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type][componentType];
+      damages[componentType].direct = gunItem.Damage.DirectHit.Amount * modifier * ammoDamageMod * ammoDirectMod * buffMod * laserModifier * shots;
+    }
+    for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type]) {
+      const modifier = DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type][componentType];
+      damages[componentType].burst = gunItem.Damage.BurstHit.Amount * modifier * ammoDamageMod * ammoBurstMod * buffMod * laserModifier * shots;
+    }
+    for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type]) {
+      damages[componentType].total = damages[componentType].burst + damages[componentType].direct;
+    }
+
     // Damage scaling for the table rows.
     const perClipScale = clipSize;
     const perSecondScale = clipSize / secondsPerClip;
     const perCycleScale = clipSize / secondsPerCycle;
+    // const laserTimeScale = perSecondScale * this.state.laserTime * laserTimeModifier(gunItem, ammoItem, this.state.laserTime);
 
     return (
       <div className={"damage-calculator"}>
@@ -134,6 +144,15 @@ export class DamageCalculator extends React.PureComponent {
           <input type="checkbox" onChange={this.aoeChanged} checked={this.state.aoeEnabled}/>
           AoE damage
         </label>
+        {gunItem.Name == "Aten Lens Array [Mk. S]" && 
+        <LaserInput
+          maxTime={secondsPerClip}
+          maxRange={range}
+          laserRange={this.state.laserRange}
+          laserTime={this.state.laserTime}
+          rangeChanged={this.laserRangeChanged} 
+          timeChanged={this.laserTimeChanged} />}
+        
         <GunTable
           range={range}
           armingDistance={armingDistance}
@@ -150,6 +169,38 @@ export class DamageCalculator extends React.PureComponent {
         />
       </div>
     );
+  }
+}
+
+class LaserInput extends React.PureComponent {
+  render() {
+    return (
+      <div className="laser-input">
+        <div className="input-group">
+          <div className="input-group-prepend">
+            <div className="input-group-text">
+              Distance
+            </div>
+          </div>
+          <input className="form-control number-box" type="text" disabled={true} value={`${this.props.laserRange}m`}></input>
+          <input className="laser-range" type="range" onChange={this.props.rangeChanged}
+            value={this.props.laserRange}
+            max={this.props.maxRange}></input>
+        </div>
+        {/* <div className="input-group">
+          <div className="input-group-prepend">
+            <div className="input-group-text">
+              Time
+            </div>
+          </div>
+          <input className="form-control number-box" type="text" disabled={true} value={`${this.props.laserTime}s`}></input>
+          <input className="laser-range" type="range" onChange={this.props.timeChanged} 
+            value={this.props.laserTime}
+            max={this.props.maxTime} 
+            step={0.1}></input>
+        </div> */}
+      </div>
+    )
   }
 }
 
@@ -287,6 +338,41 @@ const DAMAGE_MODIFIERS = {
   }
 }
 
+function laserDistanceModifier(gunItem, ammoItem, distance) {
+  if (gunItem.Name != "Aten Lens Array [Mk. S]") return 1.0;
+  // Distance damage falloff.
+  // Damage falls per second out of ideal range
+  const muzzleSpeed = getGunParam("fMuzzleSpeed", gunItem, 1) * getAmmoEffect("ModifyProjectileSpeed", ammoItem);
+  const falloffStartTime = getGunParam('fDamageFalloffStart', gunItem);
+  const falloffStartDistance = falloffStartTime * muzzleSpeed;
+  const falloffRate = getGunParam('fDamageFalloff', gunItem);
+  const falloffPerMeter = falloffRate / muzzleSpeed;
+
+  const overIdealRange = Math.max(0, distance - falloffStartDistance);
+  const distanceModifier = 1 - falloffPerMeter * overIdealRange;
+
+  return distanceModifier;
+}
+
+function laserTimeModifier(gunItem, ammoItem, time) {
+  if (gunItem.Name != "Aten Lens Array [Mk. S]") return 1.0;
+  // Chargeup damage
+  // Damage ramps per second continuously fired
+  const warmupTime = getGunParam('fChargeUpTime', gunItem);
+  const chargeupSpeed = getGunParam('fDamageAcceleration', gunItem);
+  const chargeupMax = getGunParam('fMaxDamageModifier', gunItem);
+
+  const timeToMaxCharge = chargeupMax / chargeupSpeed;
+  const rampingTime = Math.min(time - warmupTime, timeToMaxCharge);
+  const stableTime = Math.max(0, time - rampingTime - warmupTime);
+
+  const stableDamage =  stableTime * chargeupMax;
+  const rampingDamage = rampingTime * rampingTime * chargeupSpeed / 2;
+
+  const chargeupModifier = (stableDamage + rampingDamage) / time;
+
+  return chargeupModifier;
+}
 
 export function getAmmoEffect(effect, ammoItem) {
   try{
