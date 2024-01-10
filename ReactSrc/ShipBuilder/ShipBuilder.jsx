@@ -1,4 +1,5 @@
 import { ShipCanvas } from "/React/ShipBuilder/ShipCanvas2.js";
+import { ShipStatBox } from '/React/ShipBuilder/ShipStatBox.js'
 import { RangeVisualizer } from "/React/ShipBuilder/RangeVisualizer.js";
 import { GunAngleVisualizer } from "/React/ShipBuilder/GunAngleVisualizer.js";
 import { getSortedGunSlots } from '/React/ShipBuilder/ShipBuilderUtils.js'
@@ -131,7 +132,7 @@ export class ShipBuilder extends React.PureComponent {
 
         <div className="my-col">
           <b>Ship stats</b>
-          <ShipStatBox shipItem={this.state.selectedShip} />
+          <ShipStatBox shipItem={selectedShipItem} />
         </div>
 
         <div className="my-col">
@@ -273,56 +274,3 @@ class GunAmmoSelector extends React.PureComponent {
   }
 }
 
-class ShipStatBox extends React.PureComponent {
-  constructor(props) {
-    super(props);
-  }
-  render() {
-    return (
-      <div className="ship-stats-box">
-        <table className="ship-stats-table">
-          <tr>
-            <th>Armor: </th>
-            <td></td>
-          </tr>
-          <tr>
-            <th>Hull: </th>
-            <td></td>
-          </tr>
-          <tr className="spacer"></tr>
-          <tr>
-            <th>Speed: </th>
-            <td></td>
-          </tr>
-          <tr>
-            <th>Acceleration: </th>
-            <td></td>
-          </tr>
-          <tr className="spacer"></tr>
-          <tr>
-            <th>Vert Speed: </th>
-            <td></td>
-          </tr>
-          <tr>
-            <th>Vert Acceleration: </th>
-            <td></td>
-          </tr>
-          <tr className="spacer"></tr>
-          <tr>
-            <th>Turn Speed: </th>
-            <td></td>
-          </tr>
-          <tr>
-            <th>Turn Acceleration:&nbsp;&nbsp;</th>
-            <td></td>
-          </tr>
-          <tr className="spacer"></tr>
-          <tr>
-            <th>Mass: </th>
-            <td></td>
-          </tr>
-        </table>
-      </div>
-    )
-  }
-}
