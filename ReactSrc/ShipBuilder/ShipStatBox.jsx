@@ -5,18 +5,13 @@ export class ShipStatBox extends React.PureComponent {
       super(props);
     }
     render() {
-      console.log(this.props.shipItem)
-      console.log("HELLO")
-
       let totalTorque = 0;
       let totalThrust = 0;
-      console.log(this.props.shipItem.Slots);
       for (const c_name in this.props.shipItem.Engines) {
         const engine = this.props.shipItem.Engines[c_name];
         const slot = this.props.shipItem.Slots[c_name];
         totalThrust += engine.MaxSpeed;
         totalTorque += engine.MaxSpeed * Math.abs(slot.Position.X);
-        console.log(engine.Position);
       }
       const mass = this.props.shipItem.BaseSetting.HullWeight;
       const drag = this.props.shipItem.BaseSetting.Drag;
