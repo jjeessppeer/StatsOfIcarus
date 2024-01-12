@@ -1,5 +1,5 @@
-import { Overview } from '/React/MatchHistory/Overview.js';
-import { Foldout } from '/React/MatchHistory/Foldout.js';
+import { Overview } from '/React/MatchHistory/MatchList/Overview.js';
+import { Foldout } from '/React/MatchHistory/MatchList/Foldout.js';
 import { Slider } from '/React/Slider.js';
 
 export class MatchHistoryList extends React.Component {

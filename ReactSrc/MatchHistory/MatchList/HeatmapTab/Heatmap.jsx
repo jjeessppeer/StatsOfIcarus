@@ -1,5 +1,5 @@
 
-import { getDeaths, positionToCanvasPixel } from '/React/MatchHistory/HeatmapTab/HeatmapUtils.js';
+import { getDeaths, positionToCanvasPixel } from '/React/MatchHistory/MatchList/HeatmapTab/HeatmapUtils.js';
 import simpleheat from 'simpleheat';
 
 
