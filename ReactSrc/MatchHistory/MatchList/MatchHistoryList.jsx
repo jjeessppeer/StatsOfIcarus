@@ -1,6 +1,5 @@
 import { Overview } from '/React/MatchHistory/MatchList/Overview.js';
 import { Foldout } from '/React/MatchHistory/MatchList/Foldout.js';
-import { Slider } from '/React/Slider.js';
 
 export class MatchHistoryList extends React.Component {
   constructor(props) {
@@ -13,22 +12,44 @@ export class MatchHistoryList extends React.Component {
   }
 
   componentDidMount() {
-    this.loadMatchListPage();
+    this.reloadMatches();
   }
 
-  loadMatchListPage = async () => {
-    this.setState({ loading: true });
+  componentDidUpdate(prevProps) {
+    if (JSON.stringify(prevProps) != JSON.stringify(this.props)) {
+      this.reloadMatches();
+    }
+  }
+
+  fetchMatchListPage = async (page) => {
+    console.log("Fetching matches...")
     const response = await fetch('/matches', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        page: this.state.loadedPages, 
-        filter: {}
+        page: page, 
+        filter: this.props.filter
       })
     });
     const matches = await response.json();
+    return matches;
+  }
+
+  reloadMatches = async () => {
+    this.setState({loading: true});
+    const matches = await this.fetchMatchListPage(0);
+    this.setState((oldState) => ({
+      loading: false,
+      loadedPages: 1,
+      matches: matches
+    }));
+  }
+
+  loadNextMatchPage = async () => {
+    this.setState({loading: true});
+    const matches = await this.fetchMatchListPage(this.state.loadedPages);
     this.setState((oldState) => ({
       loading: false,
       loadedPages: oldState.loadedPages + 1,
@@ -51,7 +72,7 @@ export class MatchHistoryList extends React.Component {
           {listElements}
         </ul>
         <button class="load-more-matches-button" 
-          onClick={this.loadMatchListPage} 
+          onClick={this.loadNextMatchPage} 
           disabled={this.state.loading}>
           Show Older</button>
       </div>

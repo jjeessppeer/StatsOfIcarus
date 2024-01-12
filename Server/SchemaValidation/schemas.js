@@ -34,7 +34,9 @@ const lobbyBalance = Joi.object({
 const matchListRequest = Joi.object({
     page: Joi.number().integer().min(0).max(1000).required(),
     filter: Joi.object({
-        PlayerId: Joi.number().integer().optional()
+        PlayerId: Joi.number().integer().optional(),
+        tagsInclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
+        tagsExclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
     })
 });
 

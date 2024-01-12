@@ -9,12 +9,12 @@ function generateFilterPipeline(filter) {
     const query = { $match: { FlatPlayers: filter.PlayerId } };
     filterPipeline.push(query);
   }
-  if (filter.TagsInclude) {
-    const query = { $match: { MatchTags: { $all: filter.TagsInclude } } };
+  if (filter.tagsInclude) {
+    const query = { $match: { MatchTags: { $all: filter.tagsInclude } } };
     filterPipeline.push(query);
   }
-  if (filter.TagsExclude) {
-    const query = { $match: { MatchTags: { $not: { $all: filter.TagsExclude } } } };
+  if (filter.tagsExclude) {
+    const query = { $match: { MatchTags: { $not: { $all: filter.tagsExclude } } } };
     filterPipeline.push(query);
   }
   if (filter.TimestampStart) {

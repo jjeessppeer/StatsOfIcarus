@@ -188,15 +188,7 @@
 .filter-category .category-content {
     overflow: hidden;
     transition: height 0.1s linear;
-}
-
-.filter-category .category-content {
-    overflow: hidden;
-    transition: height 0.1s linear;
-}
-
-.filter-category .category-content > div{
-    padding: 5px;
+    padding: 4px;
 }
 
 /* ------------------------------- */

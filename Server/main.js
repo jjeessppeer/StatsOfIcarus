@@ -297,8 +297,6 @@ app.post(
     '/matches', 
     schemaMiddleware(schemas.matchListRequest),
     async function(req, res) {
-    // Get filter pipeline
-    // Return matching matches.
     const matches = await matchRetrieve.getMatches(mongoClient, req.body.filter, req.body.page);
     res.status(200).json(matches);
 });

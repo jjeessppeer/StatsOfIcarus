@@ -6,6 +6,7 @@ export class Searchbar extends React.PureComponent {
     super(props);
 
     this.searchbarRef = React.createRef();
+    this.filterBoxRef = React.createRef();
 
     const [categoryTitles, categoryItems] = this.generateSuggestionCategories("");
     this.state = {
@@ -13,6 +14,7 @@ export class Searchbar extends React.PureComponent {
       searchText: "",
       categoryTitles: categoryTitles,
       categoryItems: categoryItems,
+      filter: {}
     }
   }
 
@@ -22,8 +24,8 @@ export class Searchbar extends React.PureComponent {
 
     // Overview category
     if (searchText == "") {
-      categoryTitles.push("Full match history");
-      categoryItems["Full match history"] = [{
+      categoryTitles.push("Overview");
+      categoryItems["Overview"] = [{
         text: "Full match history",
         imgSrc: "images/item-icons/coopMap244.jpg"
       }];
@@ -63,6 +65,9 @@ export class Searchbar extends React.PureComponent {
     document.removeEventListener('click', this.onDocClick);
   }
 
+  // loadState = () => {
+  // }
+
   onDocClick = (evt) => {
     if (!this.searchbarRef.current.contains(evt.target)) this.hideSuggestionBox();
   }
@@ -74,8 +79,12 @@ export class Searchbar extends React.PureComponent {
   }
 
   executeSearch = (category, text) => {
-    this.setState({displaySuggestions: false, searchText: text});
-    this.props.executeSearch(category, text);
+    if (category == 'Overview') text = "";
+    this.setState({
+      displaySuggestions: false, 
+      searchText: text
+    });
+    this.props.executeSearch(category, text, this.filterBoxRef.current.getFilterData());
   }
 
   searchInputChanged = (evt) => {
@@ -131,7 +140,7 @@ export class Searchbar extends React.PureComponent {
         <div class="search-suggestion-box">
           {suggestionCategories}
         </div>
-        <FilterBox
+        <FilterBox ref={this.filterBoxRef}
         />
       </div>
     );

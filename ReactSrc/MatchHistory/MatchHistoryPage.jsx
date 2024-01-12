@@ -4,29 +4,25 @@ import { OverviewPerspective } from "./OverviewPerspective/OverviewPerspective.j
 export class MatchHistoryPage extends React.PureComponent {
   constructor(props) {
     super(props);
-
     this.state = {
-      loading: true,
       searchMode: 'Overview',
-      matchList: []
+      searchText: '',
+      filter: {}
     }
-
-    this.searchRef = React.createRef();
   }
 
-  executeSearch = (category, searchText) => {
-    console.log("EXECUTING SEARCH");
-    console.log(this.searchRef.current)
-  }
-
-  fetchMatches = (filter) => {
-
+  executeSearch = (category, searchText, filter) => {
+    console.log(category, searchText, filter);
+    this.setState({
+      searchMode: category,
+      filter: filter
+    });
   }
 
   render() {
     let pageContent;
     if (this.state.searchMode == "Overview") {
-      pageContent = <OverviewPerspective></OverviewPerspective>
+      pageContent = <OverviewPerspective filter={this.state.filter}></OverviewPerspective>
     }
 
     return (
@@ -39,8 +35,7 @@ export class MatchHistoryPage extends React.PureComponent {
             </a>
           </span>
         </div>
-        <Searchbar 
-          ref={this.searchRef}
+        <Searchbar
           executeSearch={this.executeSearch}
         ></Searchbar>
         {pageContent}

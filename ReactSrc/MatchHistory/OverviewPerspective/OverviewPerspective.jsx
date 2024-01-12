@@ -5,18 +5,20 @@ export class OverviewPerspective extends React.PureComponent {
       super(props);
   
       this.state = {
-        loading: true
+        loading: false
       }
     }
 
 
   
     render() {
-    //   if (this.state.loading) {
-    //     return (<div>Loading...</div>);
-    //   }
-        return (
-            <MatchHistoryList></MatchHistoryList>
-        )
+      if (this.state.loading) {
+        return (<div>Loading...</div>);
+      }
+
+      console.log("Overview render...")
+      return (
+          <MatchHistoryList filter={this.props.filter}></MatchHistoryList>
+      )
     }
   }
