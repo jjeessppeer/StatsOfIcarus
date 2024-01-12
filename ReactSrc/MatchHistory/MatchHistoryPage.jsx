@@ -1,4 +1,5 @@
 import { Searchbar } from "./Search/Searchbar.js"
+import { OverviewPerspective } from "./OverviewPerspective/OverviewPerspective.js";
 
 export class MatchHistoryPage extends React.PureComponent {
   constructor(props) {
@@ -6,18 +7,28 @@ export class MatchHistoryPage extends React.PureComponent {
 
     this.state = {
       loading: true,
-      searchMode: 'full',
+      searchMode: 'Overview',
       matchList: []
     }
+
+    this.searchRef = React.createRef();
   }
 
-
+  executeSearch = (category, searchText) => {
+    console.log("EXECUTING SEARCH");
+    console.log(this.searchRef.current)
+  }
 
   fetchMatches = (filter) => {
 
   }
 
   render() {
+    let pageContent;
+    if (this.state.searchMode == "Overview") {
+      pageContent = <OverviewPerspective></OverviewPerspective>
+    }
+
     return (
       <div>
         <div id="ModInfobox">
@@ -28,8 +39,13 @@ export class MatchHistoryPage extends React.PureComponent {
             </a>
           </span>
         </div>
-        <Searchbar></Searchbar>
+        <Searchbar 
+          ref={this.searchRef}
+          executeSearch={this.executeSearch}
+        ></Searchbar>
+        {pageContent}
       </div>
-    )
+    );
   }
 }
+

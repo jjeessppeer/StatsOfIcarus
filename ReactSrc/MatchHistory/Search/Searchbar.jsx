@@ -1,20 +1,22 @@
 import { SHIP_ITEMS } from '/js/constants.js';
+import { FilterBox } from './SearchFilters.js';
 
 export class Searchbar extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.searchbarRef = React.createRef();
+
     const [categoryTitles, categoryItems] = this.generateSuggestionCategories("");
     this.state = {
-      displaySuggestions: true,
+      displaySuggestions: false,
       searchText: "",
       categoryTitles: categoryTitles,
       categoryItems: categoryItems,
     }
   }
 
-  generateSuggestionCategories = (searchText) => {
-    const suggestionCategories = [];
+  generateSuggestionCategories(searchText) {
     const categoryTitles = [];
     const categoryItems = [];
 
@@ -38,26 +40,42 @@ export class Searchbar extends React.PureComponent {
         imgSrc: `images/item-icons/ship${shipId}.jpg`
       });
     }
-
     if (shipSuggestionItems.length > 0) {
       categoryTitles.push("Ship");
       categoryItems["Ship"] = shipSuggestionItems;
     }
 
     // Player category
-      categoryTitles.push("Player");
+    categoryTitles.push("Player");
     categoryItems["Player"] = [{
-      text: searchText + "...",
+      text: searchText,
       imgSrc: "images/item-icons/item1182.jpg"
     }];
 
     return [categoryTitles, categoryItems]
   }
 
+  componentDidMount() {
+    document.addEventListener('click', this.onDocClick);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('click', this.onDocClick);
+  }
+
+  onDocClick = (evt) => {
+    if (!this.searchbarRef.current.contains(evt.target)) this.hideSuggestionBox();
+  }
+
+  searchTextSubmit = (evt) => {
+    if (evt.type == "keydown" && evt.key !== 'Enter') return;
+    const category = this.state.categoryTitles[0];
+    this.executeSearch(category, this.state.searchText);
+  }
 
   executeSearch = (category, text) => {
-    if (category == "Player") text = text.slice(0, -3);
-    console.log(category, text)
+    this.setState({displaySuggestions: false, searchText: text});
+    this.props.executeSearch(category, text);
   }
 
   searchInputChanged = (evt) => {
@@ -70,23 +88,12 @@ export class Searchbar extends React.PureComponent {
   }
 
   showSuggestionBox = () => {
-    // this.setState({ displaySuggestions: true });
+    this.setState({ displaySuggestions: true });
   }
 
   hideSuggestionBox = () => {
-    // this.setState({ displaySuggestions: false });
+    this.setState({ displaySuggestions: false });
   }
-
-  playerSearch = () => {
-    console.log("PLAYER SEARCH");
-    console.log(this.suggestionRef)
-    console.log(this.suggestionRef.current.getthing())
-  }
-
-  shipSearch = (searchText) => {
-
-  }
-
 
   render() {
     const suggestionCategories = [];
@@ -101,34 +108,29 @@ export class Searchbar extends React.PureComponent {
         />
         suggestionItems.push(suggestionItem);
       }
-      suggestionCategories.push(<SuggestionCategory 
+      suggestionCategories.push(<SuggestionCategory
         title={category}
         items={suggestionItems}
-        />)
+      />)
     }
 
     return (
-      <div className={"fancy-search filters-open" + (this.state.displaySuggestions ? " open" : "")}>
+      <div className={"fancy-search filters-open" + (this.state.displaySuggestions ? " open" : "")} ref={this.searchbarRef}>
         <div class="searchbar">
           <input class="search-input" type="text" placeholder="Search for player or ship" autocomplete="off"
             value={this.state.searchText}
             onChange={this.searchInputChanged}
             onFocus={this.showSuggestionBox}
-            onBlur={this.hideSuggestionBox} />
+            onClick={this.showSuggestionBox}
+            // onBlur={this.hideSuggestionBox}
+            onKeyDown={this.searchTextSubmit} />
           <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
-          <button class="search-button"><i class="fas fa-search" onClick={this.e}></i></button>
+          <button class="search-button"><i class="fas fa-search" onClick={this.searchTextSubmit}></i></button>
         </div>
 
         <div class="search-suggestion-box">
-          {/* {this.state.suggestionCategories} */}
           {suggestionCategories}
         </div>
-
-        {/* <SuggestionBox
-          ref={this.suggestionRef}
-          searchText={this.state.searchText}
-          executePlayerSearch={this.executePlayerSearch}
-        /> */}
         <FilterBox
         />
       </div>
@@ -160,24 +162,3 @@ class SuggestionItem extends React.PureComponent {
     )
   }
 }
-
-class FilterBox extends React.PureComponent {
-  render() {
-    return (
-      <div class="filter-box">
-        FILTERS
-        <ul>
-        </ul>
-      </div>
-    );
-  }
-}
-
-
-// class SearchCategory extends React.PureComponent {
-//   render() {
-//     return (
-
-//     )
-//   }
-// }

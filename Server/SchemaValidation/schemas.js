@@ -31,10 +31,18 @@ const lobbyBalance = Joi.object({
     teamSize: Joi.number().integer().required()
 });
 
+const matchListRequest = Joi.object({
+    page: Joi.number().integer().min(0).max(1000).required(),
+    filter: Joi.object({
+        PlayerId: Joi.number().integer().optional()
+    })
+});
+
 module.exports = {
     leaderboardRequest,
     eloTimelineRequest,
     lobbyBalance,
+    matchListRequest,
     MATCH_SUBMISSION_1: MATCH_SUBMISSION_1.MATCH_SUBMISSION_SCHEMA,
     MATCH_SUBMISSION_2: MATCH_SUBMISSION_2.MATCH_SUBMISSION_SCHEMA,
 }

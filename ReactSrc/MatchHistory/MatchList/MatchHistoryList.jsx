@@ -6,32 +6,33 @@ export class MatchHistoryList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      matches: this.props.matches,
-      currentPage: 0,
-      loading: false
+      matches: [],
+      loading: false,
+      loadedPages: 0
     }
-    this.requestNextPage = this.requestNextPage.bind(this);
   }
 
-  async requestNextPage() {
-    this.setState({
-      loading: true,
+  componentDidMount() {
+    this.loadMatchListPage();
+  }
+
+  loadMatchListPage = async () => {
+    this.setState({ loading: true });
+    const response = await fetch('/matches', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        page: this.state.loadedPages, 
+        filter: {}
+      })
     });
-    let response = await fetch('/request_matches', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          page: this.state.currentPage + 1, 
-          filters: this.props.searchFilters
-        })
-    });
-    let json = await response.json();
+    const matches = await response.json();
     this.setState((oldState) => ({
-        loading: false,
-        currentPage: oldState.currentPage + 1,
-        matches: oldState.matches.concat(json.Matches)
+      loading: false,
+      loadedPages: oldState.loadedPages + 1,
+      matches: oldState.matches.concat(matches)
     }));
   }
 
@@ -49,7 +50,10 @@ export class MatchHistoryList extends React.Component {
         <ul className="match-history-list">
           {listElements}
         </ul>
-        <button class="load-more-matches-button" onClick={this.requestNextPage} disabled={this.state.loading}>Show Older</button>
+        <button class="load-more-matches-button" 
+          onClick={this.loadMatchListPage} 
+          disabled={this.state.loading}>
+          Show Older</button>
       </div>
 
     )

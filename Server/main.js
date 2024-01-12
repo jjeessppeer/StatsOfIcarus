@@ -18,6 +18,8 @@ const elo = require("./Elo/EloHelper.js");
 const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 const { HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA } = require("./MatchHistory/requestSchemas.js");
 
+const matchRetrieve = require('./MatchHistory/Retrieve.js');
+
 const shipStats = require('./ShipStats/ShipStats.js');
 
 const { MONGODB_URL_STRING } = require("../config.json");
@@ -270,7 +272,7 @@ app.get('/maps/:mode/:teams/:ships', async function(req, res) {
     const ships = Number(req.params.ships);
     const teams = Number(req.params.teams);
     if (!ships || !teams || !mode) return res.status(404).send();
-    collection = mongoClient.db("mhtest").collection("Items-Maps");
+    const collection = mongoClient.db("mhtest").collection("Items-Maps");
     const maps = await collection.find({
         GameMode: mode,
         TeamSize: {$size: teams},
@@ -278,6 +280,56 @@ app.get('/maps/:mode/:teams/:ships', async function(req, res) {
         Public: true
     }).toArray();
     res.status(200).json(maps);
+});
+
+
+
+
+app.post('/search/player', async function(req, res) {
+    // Get player specific data. Winrate, elo and stuff.
+});
+
+app.post('/search/ship', async function(req, res) {
+    // Get ship specific data
+});
+
+app.post(
+    '/matches', 
+    schemaMiddleware(schemas.matchListRequest),
+    async function(req, res) {
+    // Get filter pipeline
+    // Return matching matches.
+    const matches = await matchRetrieve.getMatches(mongoClient, req.body.filter, req.body.page);
+    res.status(200).json(matches);
+});
+
+app.get('/pickrate/:shipModel/:timestampStart/:timestampEnd', async function(req, res) {
+    const shipModel = Number(req.params.shipModel);
+    const timestampStart = Number(req.params.timestampStart);
+    const timestampEnd = Number(req.params.timestampEnd);
+    const timeSpan = timestampEnd - timestampStart;
+    const weeks = Math.ceil(timeSpan / 1000 / 60 / 60 / 24 / 7);
+    const buckets = Math.max(0, Math.min(weeks, 100));
+    const collection = mongoClient.db("mhtest").collection("Matches");
+    const agg = collection.aggregate([
+        { $match: {Timestamp: {$gt: timestampStart, $lt: timestampEnd}}},
+        { "$unwind": {
+            path: "$ShipModels",
+            includeArrayIndex: "TeamIndex"}},
+        { "$unwind": {
+            path: "$ShipModels"
+        }},
+        { $bucketAuto: {
+            groupBy: "$Timestamp",
+            buckets: buckets,
+            output: {
+                picks: { $sum: { $cond: [{$eq: ["$ShipModels", shipModel]}, 1, 0] } },
+                count: { $sum: 1 }
+            }
+        }}
+    ]);
+    const r = await agg.toArray();
+    res.status(200).json(r);
 });
 
 async function run() {
