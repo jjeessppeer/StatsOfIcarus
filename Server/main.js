@@ -20,6 +20,9 @@ const { HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA } = require("./MatchHistory/
 
 const matchRetrieve = require('./MatchHistory/Retrieve.js');
 
+
+const MatchHistory = require("./MatchHistory/MatchHistory.js");
+
 const shipStats = require('./ShipStats/ShipStats.js');
 
 const { MONGODB_URL_STRING } = require("../config.json");
@@ -299,6 +302,14 @@ app.post(
     async function(req, res) {
     const matches = await matchRetrieve.getMatches(mongoClient, req.body.filter, req.body.page);
     res.status(200).json(matches);
+});
+
+app.post(
+    '/ship_popularity',
+    async function(req, res) {
+    console.log(req.body)
+    const shiprates = await MatchHistory.getShipPickWinrate(mongoClient, req.body.filter);
+    res.status(200).json(shiprates);
 });
 
 app.get('/pickrate/:shipModel/:timestampStart/:timestampEnd', async function(req, res) {
