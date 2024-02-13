@@ -1,173 +1,159 @@
 import { SHIP_ITEMS } from '/js/constants.js';
 import { FilterBox } from './SearchFilters.js';
+import { SearchContext } from "../MatchHistoryPage.js";
 
-export class Searchbar extends React.PureComponent {
-  constructor(props) {
-    super(props);
 
-    this.searchbarRef = React.createRef();
-    this.filterBoxRef = React.createRef();
+function generateSuggestionCategories(searchText) {
+  const categoryTitles = [];
+  const categoryItems = [];
 
-    const [categoryTitles, categoryItems] = this.generateSuggestionCategories("");
-    this.state = {
-      displaySuggestions: false,
-      searchText: "",
-      categoryTitles: categoryTitles,
-      categoryItems: categoryItems,
-      filter: {}
-    }
-  }
-
-  generateSuggestionCategories(searchText) {
-    const categoryTitles = [];
-    const categoryItems = [];
-
-    // Overview category
-    if (searchText == "") {
-      categoryTitles.push("Overview");
-      categoryItems["Overview"] = [{
-        text: "Full match history",
-        imgSrc: "images/item-icons/coopMap244.jpg"
-      }];
-    }
-
-    // Ship category
-    const shipSuggestionItems = [];
-    for (const shipId in SHIP_ITEMS) {
-      // if (this.props.searchText == "") continue;
-      const shipName = SHIP_ITEMS[shipId].Name;
-      if (!shipName.toLowerCase().includes(searchText.toLowerCase())) continue;
-      shipSuggestionItems.push({
-        text: shipName,
-        imgSrc: `images/item-icons/ship${shipId}.jpg`
-      });
-    }
-    if (shipSuggestionItems.length > 0) {
-      categoryTitles.push("Ship");
-      categoryItems["Ship"] = shipSuggestionItems;
-    }
-
-    // Player category
-    categoryTitles.push("Player");
-    categoryItems["Player"] = [{
-      text: searchText,
-      imgSrc: "images/item-icons/item1182.jpg"
+  // Overview category
+  if (searchText == "") {
+    categoryTitles.push("Overview");
+    categoryItems["Overview"] = [{
+      text: "Full match history",
+      imgSrc: "images/item-icons/coopMap244.jpg"
     }];
-
-    return [categoryTitles, categoryItems]
   }
 
-  componentDidMount() {
-    document.addEventListener('click', this.onDocClick);
+  // Ship category
+  const shipSuggestionItems = [];
+  for (const shipId in SHIP_ITEMS) {
+    // if (this.props.searchText == "") continue;
+    const shipName = SHIP_ITEMS[shipId].Name;
+    if (!shipName.toLowerCase().includes(searchText.toLowerCase())) continue;
+    shipSuggestionItems.push({
+      text: shipName,
+      imgSrc: `images/item-icons/ship${shipId}.jpg`
+    });
+  }
+  if (shipSuggestionItems.length > 0) {
+    categoryTitles.push("Ship");
+    categoryItems["Ship"] = shipSuggestionItems;
   }
 
-  componentWillUnmount() {
-    document.removeEventListener('click', this.onDocClick);
+  // Player category
+  categoryTitles.push("Player");
+  categoryItems["Player"] = [{
+    text: searchText,
+    imgSrc: "images/item-icons/item1182.jpg"
+  }];
+
+  return categoryItems
+}
+
+// Searchbar react element
+export function Searchbar() {
+  const submitSearch = () => {
+    console.log("SEARCHING!!!!");
+    console.log(preSearch);
+    setSearch(preSearch);
   }
 
-  // loadState = () => {
+  const onDocClick = (evt) => {
+    if (searchbarRef.current.contains(evt.target)) return;
+    setSuggestionsOpen(false);
+  }
+
+  // Active search state
+  const { search, setSearch } = React.useContext(SearchContext);
+  // Uncommitted Search state in the UI
+  const [preSearch, setPreSearch] = React.useState({
+    ...search,
+    filter: {},
+    executeSearch: submitSearch
+  });
+  const [suggestionsOpen, setSuggestionsOpen] = React.useState(false);
+
+  const searchbarRef = React.useRef(null);
+
+  React.useEffect(() => {
+    // Close suggestions if document is clicked.
+    document.addEventListener('click', onDocClick);
+    return () => {
+      document.removeEventListener('click', onDocClick)
+    }
+  }, []);
+  
+  // Generate and add suggestions.
+  const categories = generateSuggestionCategories(preSearch.text);
+  const suggestionCategories = [];
+  for (const categoryTitle in categories) {
+    suggestionCategories.push(<SuggestionCategory
+      title={categoryTitle}
+      items={categories[categoryTitle]}
+    />);
+  }
+
+  // Check if the search input has been changed.
+  // let searchChanged = false;
+  // for (const key in preSearch) {
+  //   if (key === "executeSearch") continue;
+  //   if (search[key] !== preSearch[key]) {
+  //     console.log(key)
+  //     searchChanged = true;
+  //     break;
+  //   }
   // }
 
-  onDocClick = (evt) => {
-    if (!this.searchbarRef.current.contains(evt.target)) this.hideSuggestionBox();
-  }
-
-  searchTextSubmit = (evt) => {
-    if (evt.type == "keydown" && evt.key !== 'Enter') return;
-    const category = this.state.categoryTitles[0];
-    this.executeSearch(category, this.state.searchText);
-  }
-
-  executeSearch = (category, text) => {
-    if (category == 'Overview') text = "";
-    this.setState({
-      displaySuggestions: false, 
-      searchText: text
-    });
-    this.props.executeSearch(category, text, this.filterBoxRef.current.getFilterData());
-  }
-
-  searchInputChanged = (evt) => {
-    const [categoryTitles, categoryItems] = this.generateSuggestionCategories(evt.target.value);
-    this.setState({
-      searchText: evt.target.value,
-      categoryTitles: categoryTitles,
-      categoryItems: categoryItems
-    });
-  }
-
-  showSuggestionBox = () => {
-    this.setState({ displaySuggestions: true });
-  }
-
-  hideSuggestionBox = () => {
-    this.setState({ displaySuggestions: false });
-  }
-
-  render() {
-    const suggestionCategories = [];
-    for (const category of this.state.categoryTitles) {
-      const suggestionItems = [];
-      for (const item of this.state.categoryItems[category]) {
-        const suggestionItem = <SuggestionItem
-          text={item.text}
-          category={category}
-          imgSrc={item.imgSrc}
-          executeSearch={this.executeSearch}
-        />
-        suggestionItems.push(suggestionItem);
-      }
-      suggestionCategories.push(<SuggestionCategory
-        title={category}
-        items={suggestionItems}
-      />)
-    }
-
-    return (
-      <div className={"fancy-search filters-open" + (this.state.displaySuggestions ? " open" : "")} ref={this.searchbarRef}>
-        <div class="searchbar">
-          <input class="search-input" type="text" placeholder="Search for player or ship" autocomplete="off"
-            value={this.state.searchText}
-            onChange={this.searchInputChanged}
-            onFocus={this.showSuggestionBox}
-            onClick={this.showSuggestionBox}
-            // onBlur={this.hideSuggestionBox}
-            onKeyDown={this.searchTextSubmit} />
+  return (
+    <SearchContext.Provider value={{ search: preSearch, setSearch: setPreSearch }}>
+      <div className={"fancy-search filters-open" + (suggestionsOpen ? " open" : "")} ref={searchbarRef}>
+        <div className="searchbar">
+          <input className="search-input" type="text" placeholder="Search for player or ship" autocomplete="off"
+            value={preSearch.text}
+            onChange={evt => setPreSearch({...preSearch, text: evt.target.value})}
+            onFocus={() => setSuggestionsOpen(true)}
+            // onClick={() => setSuggestionsOpen(true)}
+            // onBlur={() => setSuggestionsOpen(false)}
+            onKeyDown={evt => { if (evt.type === "keydown" && evt.key === 'Enter') submitSearch() }} />
           <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
-          <button class="search-button"><i class="fas fa-search" onClick={this.searchTextSubmit}></i></button>
+          <button class="search-button"><i class="fas fa-search" onClick={submitSearch}></i></button>
         </div>
 
         <div class="search-suggestion-box">
           {suggestionCategories}
         </div>
-        <FilterBox ref={this.filterBoxRef}
-        />
+        <FilterBox />
       </div>
-    );
-  }
+    </SearchContext.Provider>
+  );
 }
 
-class SuggestionCategory extends React.PureComponent {
-  render() {
-    return (
-      <div class="search-category">
-        <span class="category-title"><strong>{this.props.title}</strong></span>
-        <ul class="category-content">
-          {this.props.items}
-        </ul>
-      </div>
-    )
+function SuggestionCategory({title, items}) {
+  const suggestionItems = [];
+  for (const item of items) {
+    const suggestionItem = <SuggestionItem
+      category={title}
+      text={item.text}
+      imgSrc={item.imgSrc}
+    />
+    suggestionItems.push(suggestionItem);
   }
+
+  return (
+    <div class="search-category">
+      <span class="category-title"><strong>{title}</strong></span>
+      <ul class="category-content">
+        {suggestionItems}
+      </ul>
+    </div>
+  );
 }
 
-class SuggestionItem extends React.PureComponent {
-  render() {
-    return (
-      <li className="category-entry" onClick={() => this.props.executeSearch(this.props.category, this.props.text)}>
-        <img src={this.props.imgSrc} />
-        &nbsp;
-        <span>{this.props.text}</span>
-      </li>
-    )
-  }
+function SuggestionItem({category, text, imgSrc}) {
+  const { search, setSearch } = React.useContext(SearchContext);
+
+  const onClick = () => {
+      setSearch({...search, text: text});
+      search.executeSearch();
+  };
+
+  return (
+    <li className="category-entry" onClick={onClick}>
+      <img src={imgSrc} />
+      &nbsp;
+      <span>{text}</span>
+    </li>
+  )
 }

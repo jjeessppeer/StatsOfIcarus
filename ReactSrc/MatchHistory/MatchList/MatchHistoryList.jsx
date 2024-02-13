@@ -23,11 +23,10 @@ export class MatchHistoryList extends React.Component {
 
   fetchMatchListPage = async (page) => {
     console.log("Fetching matches...")
+    console.log(this.props.filter);
     const response = await fetch('/matches', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         page: page, 
         filter: this.props.filter
