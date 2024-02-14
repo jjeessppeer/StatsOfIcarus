@@ -33,7 +33,6 @@ async function getShipPickWinrate(mongoClient, filter) {
           ModelWinrates: "$ModelWinrates"
         }}
       ]).next();
-  console.log(shipPickWinrate);
   return shipPickWinrate;
 }
 

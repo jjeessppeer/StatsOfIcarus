@@ -16,21 +16,21 @@ function generateSuggestionCategories(searchText) {
     }];
   }
 
-  // Ship category
-  const shipSuggestionItems = [];
-  for (const shipId in SHIP_ITEMS) {
-    // if (this.props.searchText == "") continue;
-    const shipName = SHIP_ITEMS[shipId].Name;
-    if (!shipName.toLowerCase().includes(searchText.toLowerCase())) continue;
-    shipSuggestionItems.push({
-      text: shipName,
-      imgSrc: `images/item-icons/ship${shipId}.jpg`
-    });
-  }
-  if (shipSuggestionItems.length > 0) {
-    categoryTitles.push("Ship");
-    categoryItems["Ship"] = shipSuggestionItems;
-  }
+  // // Ship category
+  // const shipSuggestionItems = [];
+  // for (const shipId in SHIP_ITEMS) {
+  //   // if (this.props.searchText == "") continue;
+  //   const shipName = SHIP_ITEMS[shipId].Name;
+  //   if (!shipName.toLowerCase().includes(searchText.toLowerCase())) continue;
+  //   shipSuggestionItems.push({
+  //     text: shipName,
+  //     imgSrc: `images/item-icons/ship${shipId}.jpg`
+  //   });
+  // }
+  // if (shipSuggestionItems.length > 0) {
+  //   categoryTitles.push("Ship");
+  //   categoryItems["Ship"] = shipSuggestionItems;
+  // }
 
   // Player category
   categoryTitles.push("Player");
@@ -45,26 +45,21 @@ function generateSuggestionCategories(searchText) {
 // Searchbar react element
 export function Searchbar() {
   const submitSearch = () => {
-    console.log("SEARCHING!!!!");
-    console.log(preSearch);
-    setSearch(preSearch);
+    console.log("SEARCHING!")
+    setSearch(s => ({
+      ...s,
+      active: JSON.parse(JSON.stringify(s.ui))
+    }));
   }
 
   const onDocClick = (evt) => {
-    if (searchbarRef.current.contains(evt.target)) return;
+    // Close suggeston box if 
+    if (searchbarRef.current.contains(evt.target)) return true;
     setSuggestionsOpen(false);
   }
 
-  // Active search state
   const { search, setSearch } = React.useContext(SearchContext);
-  // Uncommitted Search state in the UI
-  const [preSearch, setPreSearch] = React.useState({
-    ...search,
-    filter: {},
-    executeSearch: submitSearch
-  });
   const [suggestionsOpen, setSuggestionsOpen] = React.useState(false);
-
   const searchbarRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -74,15 +69,27 @@ export function Searchbar() {
       document.removeEventListener('click', onDocClick)
     }
   }, []);
-  
-  // Generate and add suggestions.
-  const categories = generateSuggestionCategories(preSearch.text);
+
+  // Generate suggestions.
+  const categories = generateSuggestionCategories(search.ui.text);
   const suggestionCategories = [];
   for (const categoryTitle in categories) {
-    suggestionCategories.push(<SuggestionCategory
-      title={categoryTitle}
-      items={categories[categoryTitle]}
-    />);
+    const suggestionItems = [];
+    for (const item of categories[categoryTitle]) {
+      const suggestionItem = <SuggestionItem
+        category={categoryTitle}
+        text={item.text}
+        imgSrc={item.imgSrc}
+      />
+      suggestionItems.push(suggestionItem);
+    }
+
+    suggestionCategories.push(
+      <SuggestionCategory
+        title={categoryTitle}
+        items={categories[categoryTitle]}>
+        {suggestionItems}
+      </SuggestionCategory>);
   }
 
   // Check if the search input has been changed.
@@ -97,60 +104,56 @@ export function Searchbar() {
   // }
 
   return (
-    <SearchContext.Provider value={{ search: preSearch, setSearch: setPreSearch }}>
-      <div className={"fancy-search filters-open" + (suggestionsOpen ? " open" : "")} ref={searchbarRef}>
-        <div className="searchbar">
-          <input className="search-input" type="text" placeholder="Search for player or ship" autocomplete="off"
-            value={preSearch.text}
-            onChange={evt => setPreSearch({...preSearch, text: evt.target.value})}
-            onFocus={() => setSuggestionsOpen(true)}
-            // onClick={() => setSuggestionsOpen(true)}
-            // onBlur={() => setSuggestionsOpen(false)}
-            onKeyDown={evt => { if (evt.type === "keydown" && evt.key === 'Enter') submitSearch() }} />
-          <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
-          <button class="search-button"><i class="fas fa-search" onClick={submitSearch}></i></button>
-        </div>
-
-        <div class="search-suggestion-box">
-          {suggestionCategories}
-        </div>
-        <FilterBox />
+    <div className={"fancy-search filters-open" + (suggestionsOpen ? " open" : "")} ref={searchbarRef}>
+      <div className="searchbar">
+        <input className="search-input" type="text" placeholder="Search for a player" autocomplete="off"
+          value={search.ui.text}
+          onChange={evt => setSearch({ ...search, ui: { ...search.ui, text: evt.target.value } })}
+          onFocus={() => setSuggestionsOpen(true)}
+          // onClick={() => setSuggestionsOpen(true)}
+          // onBlur={() => setSuggestionsOpen(false)}
+          onKeyDown={evt => { if (evt.type === "keydown" && evt.key === 'Enter') submitSearch() }} />
+        <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
+        <button class="search-button"><i class="fas fa-search" onClick={submitSearch}></i></button>
       </div>
-    </SearchContext.Provider>
+
+      <div class="search-suggestion-box">
+        {suggestionCategories}
+      </div>
+      <FilterBox />
+    </div>
   );
 }
 
-function SuggestionCategory({title, items}) {
-  const suggestionItems = [];
-  for (const item of items) {
-    const suggestionItem = <SuggestionItem
-      category={title}
-      text={item.text}
-      imgSrc={item.imgSrc}
-    />
-    suggestionItems.push(suggestionItem);
-  }
-
+function SuggestionCategory({ title, items, children }) {
   return (
     <div class="search-category">
       <span class="category-title"><strong>{title}</strong></span>
       <ul class="category-content">
-        {suggestionItems}
+        {children}
       </ul>
     </div>
   );
 }
 
-function SuggestionItem({category, text, imgSrc}) {
+function SuggestionItem({ category, text, imgSrc }) {
   const { search, setSearch } = React.useContext(SearchContext);
 
-  const onClick = () => {
-      setSearch({...search, text: text});
-      search.executeSearch();
-  };
+  const submitSearch = () => {
+    setSearch(s => {
+      const ui = JSON.parse(JSON.stringify(s.ui));
+      ui.mode = category;
+      ui.text = category == "Overview" ? "" : text;
+      return {
+        ...s,
+        ui: ui,
+        active: JSON.parse(JSON.stringify(ui))
+      };
+    });
+  }
 
   return (
-    <li className="category-entry" onClick={onClick}>
+    <li className="category-entry" onClick={submitSearch}>
       <img src={imgSrc} />
       &nbsp;
       <span>{text}</span>

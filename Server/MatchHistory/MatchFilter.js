@@ -26,6 +26,8 @@ function generateFilterPipeline(filter) {
   if (filter.ShipId) {
     // TODO.
   }
+  console.log("FILTER PIPELING");
+  console.log(JSON.stringify(filterPipeline));
   return filterPipeline;
 }
 

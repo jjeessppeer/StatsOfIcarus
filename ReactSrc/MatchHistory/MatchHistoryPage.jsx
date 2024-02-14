@@ -1,28 +1,44 @@
 import { Searchbar } from "./Search/Searchbar.js"
 import { OverviewPerspective } from "./OverviewPerspective/OverviewPerspective.js";
+import { PlayerPerspective } from "./PlayerPerspective/PlayerPerspective.js";
 
 export const SearchContext = React.createContext({
   search: {
-    mode: 'Overview',
-    text: '',
-    filter: {},
-    executeSearch: () => {}
+    ui: {
+      mode: 'Overview',
+      text: "",
+      filter: {}
+    },
+    active: {
+      mode: 'Overview',
+      text: '',
+      filter: {},
+    }
   },
   setSearch: () => { }
 });
 
-let c1 = 0;
 export function MatchHistoryPage() {
   const [search, setSearch] = React.useState({
-    mode: 'Overview',
-    text: '',
-    filter: {}
+    ui: {
+      mode: 'Overview',
+      text: "",
+      filter: {}
+    },
+    active: {
+      mode: 'Overview',
+      text: '',
+      filter: {},
+    }
   });
-  c1 += 1;
-  console.log("FILTER PAGE: ", search.filter)
+
+  console.log("PAGE UPDATE: ", JSON.stringify(search))
   let pageContent;
-  if (search.mode == "Overview") {
-    pageContent = <OverviewPerspective key={JSON.stringify(search.filter)} filter={search.filter}></OverviewPerspective>
+  if (search.active.mode == "Overview") {
+    pageContent = <OverviewPerspective></OverviewPerspective>
+  }
+  else if (search.active.mode === "Player") {
+    pageContent = <PlayerPerspective></PlayerPerspective>
   }
 
   return (
