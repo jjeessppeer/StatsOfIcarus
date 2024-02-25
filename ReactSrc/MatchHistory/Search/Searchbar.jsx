@@ -7,13 +7,22 @@ function generateSuggestionCategories(searchText) {
   const categoryTitles = [];
   const categoryItems = [];
 
+  const categories = [];
+
   // Overview category
   if (searchText == "") {
-    categoryTitles.push("Overview");
-    categoryItems["Overview"] = [{
-      text: "Full match history",
-      imgSrc: "images/item-icons/coopMap244.jpg"
-    }];
+    categories.push({
+      title: "Overview",
+      items: [{
+        text: "Full match history",
+        imgSrc: "images/item-icons/coopMap244.jpg"
+      }]
+    });
+    // categoryTitles.push("Overview");
+    // categoryItems["Overview"] = [{
+    //   text: "Full match history",
+    //   imgSrc: "images/item-icons/coopMap244.jpg"
+    // }];
   }
 
   // // Ship category
@@ -33,23 +42,38 @@ function generateSuggestionCategories(searchText) {
   // }
 
   // Player category
-  categoryTitles.push("Player");
-  categoryItems["Player"] = [{
-    text: searchText,
-    imgSrc: "images/item-icons/item1182.jpg"
-  }];
+  
+  categories.push({
+    title: "Player",
+    items: [{
+      text: searchText,
+      imgSrc: "images/item-icons/item1182.jpg"
+    }]
+  });
 
-  return categoryItems
+  // categoryTitles.push("Player");
+  // categoryItems["Player"] = [{
+  //   text: searchText,
+  //   imgSrc: "images/item-icons/item1182.jpg"
+  // }];
+
+  return categories;
 }
 
 // Searchbar react element
 export function Searchbar() {
   const submitSearch = () => {
-    console.log("SEARCHING!")
-    setSearch(s => ({
-      ...s,
-      active: JSON.parse(JSON.stringify(s.ui))
-    }));
+    const mode = categories[0].title;
+    setSearch(s => {
+      const ui = JSON.parse(JSON.stringify(s.ui));
+      ui.mode = mode;
+      ui.text = mode == "Overview" ? "" : ui.text;
+      return {
+        ...s,
+        ui: ui,
+        active: JSON.parse(JSON.stringify(ui))
+      };
+    });
   }
 
   const onDocClick = (evt) => {
@@ -73,21 +97,21 @@ export function Searchbar() {
   // Generate suggestions.
   const categories = generateSuggestionCategories(search.ui.text);
   const suggestionCategories = [];
-  for (const categoryTitle in categories) {
+  for (const category of categories) {
     const suggestionItems = [];
-    for (const item of categories[categoryTitle]) {
+    for (const categoryItem of category.items) {
       const suggestionItem = <SuggestionItem
-        category={categoryTitle}
-        text={item.text}
-        imgSrc={item.imgSrc}
+        category={category.title}
+        text={categoryItem.text}
+        imgSrc={categoryItem.imgSrc}
       />
       suggestionItems.push(suggestionItem);
     }
 
     suggestionCategories.push(
       <SuggestionCategory
-        title={categoryTitle}
-        items={categories[categoryTitle]}>
+        title={category.title}
+        items={category.items}>
         {suggestionItems}
       </SuggestionCategory>);
   }
@@ -110,11 +134,15 @@ export function Searchbar() {
           value={search.ui.text}
           onChange={evt => setSearch({ ...search, ui: { ...search.ui, text: evt.target.value } })}
           onFocus={() => setSuggestionsOpen(true)}
-          // onClick={() => setSuggestionsOpen(true)}
-          // onBlur={() => setSuggestionsOpen(false)}
-          onKeyDown={evt => { if (evt.type === "keydown" && evt.key === 'Enter') submitSearch() }} />
+          onKeyDown={evt => {
+            if (evt.type === "keydown" && evt.key === 'Enter')
+              submitSearch();
+          }}
+        />
         <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
-        <button class="search-button"><i class="fas fa-search" onClick={submitSearch}></i></button>
+        <button class="search-button" onClick={submitSearch}>
+          <i class="fas fa-search" />
+        </button>
       </div>
 
       <div class="search-suggestion-box">

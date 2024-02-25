@@ -37,7 +37,7 @@ const matchListRequest = Joi.object({
         PlayerId: Joi.number().integer().optional(),
         tagsInclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
         tagsExclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
-    })
+    }).required()
 });
 
 module.exports = {

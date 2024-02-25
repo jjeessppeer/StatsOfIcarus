@@ -18,7 +18,7 @@ const elo = require("./Elo/EloHelper.js");
 const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 const { HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA } = require("./MatchHistory/requestSchemas.js");
 
-const matchRetrieve = require('./MatchHistory/Retrieve.js');
+// const matchRetrieve = require('./MatchHistory/Retrieve.js');
 
 
 const MatchHistory = require("./MatchHistory/MatchHistory.js");
@@ -300,8 +300,46 @@ app.post(
     '/matches', 
     schemaMiddleware(schemas.matchListRequest),
     async function(req, res) {
-    const matches = await matchRetrieve.getMatches(mongoClient, req.body.filter, req.body.page);
+    const matches = await MatchHistory.getMatches(mongoClient, req.body.filter, req.body.page);
     res.status(200).json(matches);
+});
+
+
+app.get(
+    '/player_id/:playerName',
+    async function(req, res) {
+    const playerId = await getPlayerIdFromName(req.params.playerName);
+    if (playerId !== undefined) res.status(200).send(playerId);
+    res.status(404).send()
+});
+
+app.post(
+    '/player_info/:playerId',
+    async function(req, res) {
+        
+
+});
+
+app.get(
+    '/player_search/:playerName',
+    async function(req, res) {
+    const playerId = await MatchHistory.getPlayerIdFromName(mongoClient, req.params.playerName);
+    if (isNaN(playerId)) {
+        res.status(404).send();
+        return;
+    }
+    res.redirect(`/player_info/${playerId}`);
+});
+
+app.get(
+    '/player_info/:playerId',
+    async function(req, res) {
+    const playerInfo = await MatchHistory.getPlayerInfo(mongoClient, Number(req.params.playerId));
+    if (!playerInfo) {
+        res.status(404).send();
+        return;
+    }
+    res.status(200).json(playerInfo);
 });
 
 app.post(

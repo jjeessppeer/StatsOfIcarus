@@ -4,7 +4,6 @@ import { SearchContext } from "../MatchHistoryPage.js";
 
 export function OverviewPerspective() {
   const { search, setSearch } = React.useContext(SearchContext);
-  console.log(search.active)
   return (
     <div className="content-area">
       <div className="left-area">

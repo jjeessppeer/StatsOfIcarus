@@ -2,6 +2,7 @@ import { Searchbar } from "./Search/Searchbar.js"
 import { OverviewPerspective } from "./OverviewPerspective/OverviewPerspective.js";
 import { PlayerPerspective } from "./PlayerPerspective/PlayerPerspective.js";
 
+
 export const SearchContext = React.createContext({
   search: {
     ui: {
@@ -18,6 +19,23 @@ export const SearchContext = React.createContext({
   setSearch: () => { }
 });
 
+export const SearchContext2 = React.createContext({
+  search: {
+    text: "",
+    changed: false,
+    tagsInclude: [],
+    tagsExclude: []
+  },
+  setSearch: () => { },
+  executeSearch: () => {}
+});
+
+export const FilterContext = React.createContext({
+  filter: {},
+  setFilter: () => {}
+});
+
+
 export function MatchHistoryPage() {
   const [search, setSearch] = React.useState({
     ui: {
@@ -32,7 +50,12 @@ export function MatchHistoryPage() {
     }
   });
 
-  console.log("PAGE UPDATE: ", JSON.stringify(search))
+  // const getFilter = () => {
+
+  // }
+
+
+
   let pageContent;
   if (search.active.mode == "Overview") {
     pageContent = <OverviewPerspective></OverviewPerspective>

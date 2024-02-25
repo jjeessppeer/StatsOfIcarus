@@ -79,7 +79,7 @@ function ShipPopularityElement({matchCount, shipRates}) {
             {`Picked: ${(100 * shipRates.PlayedGames / matchCount).toPrecision(2)}% [${shipRates.PlayedGames}]`}
             </div>
           <div class="shipwins">
-            {`Winrate: ${(100 * shipRates.Wins / matchCount).toPrecision(2)}% [${shipRates.Wins}]`}
+            {`Winrate: ${(100 * shipRates.Wins / shipRates.PlayedGames).toPrecision(2)}% [${shipRates.Wins}]`}
           </div>
       </div>
     </li>
