@@ -10,13 +10,6 @@ const ELO_CATEGORIES = {
     'Overall': (match) => { return true; },
 }
 
-function getOldestAllowedPlayerTimestamp(ratingGroup) {
-    if (ratingGroup == 'Overall') return 0;
-    const currentTimestamp = new Date().getTime();
-    const oldestTimestamp = currentTimestamp - MAX_INACTIVITY_MS;
-    return oldestTimestamp;
-}
-
 async function getPlayerELO(client, playerId, ratingGroup) {
     const playerCollection = client.db("mhtest").collection("Players");
     const player = await playerCollection.findOne(
@@ -123,14 +116,6 @@ async function processMatch(client, match, ratingGroup) {
     }
 }
 
-async function getLatestLeaderboardTimestamp() {
-    const leaderboardCollection = client.db("mhtest").collection("EloLeaderboard");
-    const el = await leaderboardCollection.aggregate([
-        { $sort: {Timestamp: -1} }
-    ]).next();
-    return el.Timestamp;
-}
-
 async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
     const playersCollection = client.db("mhtest").collection("Players");
     const aggregate = playersCollection.aggregate([
@@ -162,144 +147,141 @@ async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
     const res = await aggregate.next();
 }
 
-async function getLeaderboardPosition(client, ratingGroup, playerId) {
-    const playersCollection = client.db("mhtest").collection("Players");
-    const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
-    const aggregate = playersCollection.aggregate([
-        { $match: { 
-            ELOCategories: ratingGroup, 
-            [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
-            LastMatchTimestamp: { $gt: oldestTimestamp }
-        }},
-        { $setWindowFields: {
-            // partitionBy: ,
-            sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
-            output: {
-                LadderRank: {
-                    $rank: {}
-                }
-            }
-        }},
-        { $match: {_id: playerId} },
-        { $project: {
-            _id: 0,
-            PlayerId: '$_id',
-            LadderRank: 1,
-            Name: 1,
-            Points: `$ELORating.${ratingGroup}.ELOPoints`,
-        }},
-        { $addFields: {
-            RatingGroup: ratingGroup
-        }},
-    ]);
-    let playerInfo = await aggregate.next();
-    if (!playerInfo) return 0; 
+// async function getLeaderboardPosition(client, ratingGroup, playerId) {
+//     const playersCollection = client.db("mhtest").collection("Players");
+//     const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
+//     const aggregate = playersCollection.aggregate([
+//         { $match: { 
+//             ELOCategories: ratingGroup, 
+//             [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
+//             LastMatchTimestamp: { $gt: oldestTimestamp }
+//         }},
+//         { $setWindowFields: {
+//             // partitionBy: ,
+//             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
+//             output: {
+//                 LadderRank: {
+//                     $rank: {}
+//                 }
+//             }
+//         }},
+//         { $match: {_id: playerId} },
+//         { $project: {
+//             _id: 0,
+//             PlayerId: '$_id',
+//             LadderRank: 1,
+//             Name: 1,
+//             Points: `$ELORating.${ratingGroup}.ELOPoints`,
+//         }},
+//         { $addFields: {
+//             RatingGroup: ratingGroup
+//         }},
+//     ]);
+//     let playerInfo = await aggregate.next();
+//     if (!playerInfo) return 0; 
     
-    return playerInfo.LadderRank;
-}
+//     return playerInfo.LadderRank;
+// }
 
-async function getLeaderboardPage(client, ratingGroup, startPos, count) {
-    const playersCollection = client.db("mhtest").collection("Players");
-    const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
-    const aggregate = playersCollection.aggregate([
-        { $match: { 
-            ELOCategories: ratingGroup, 
-            [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
-            LastMatchTimestamp: { $gt: oldestTimestamp }
-        } },
-        { $setWindowFields: {
-            // partitionBy: ,
-            sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
-            output: {
-                LadderRank: {
-                    $rank: {}
-                }
-            }
-        }},
-        { $sort: {LadderRank: 1} },
-        { $skip: startPos},
-        { $limit: count },
+// async function getLeaderboardPage(client, ratingGroup, startPos, count) {
+//     const playersCollection = client.db("mhtest").collection("Players");
+//     const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
+//     const aggregate = playersCollection.aggregate([
+//         { $match: { 
+//             ELOCategories: ratingGroup, 
+//             [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
+//             LastMatchTimestamp: { $gt: oldestTimestamp }
+//         } },
+//         { $setWindowFields: {
+//             // partitionBy: ,
+//             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
+//             output: {
+//                 LadderRank: {
+//                     $rank: {}
+//                 }
+//             }
+//         }},
+//         { $sort: {LadderRank: 1} },
+//         { $skip: startPos},
+//         { $limit: count },
 
-        { $project: {
-            LadderRank: 1,
-            Name: 1,
-            Points: `$ELORating.${ratingGroup}.ELOPoints`,
-        }}
-    ]);
-    const res = await aggregate.toArray();
-    return res;
-}
+//         { $project: {
+//             LadderRank: 1,
+//             Name: 1,
+//             Points: `$ELORating.${ratingGroup}.ELOPoints`,
+//         }}
+//     ]);
+//     const res = await aggregate.toArray();
+//     return res;
+// }
 
-async function getPlayerEloData(client, playerId, ratingGroup) {
-    // const playerId = await getPlayerIdFromName(client, playerName);
-    // await createLeaderboardSnapshot(client, ratingGroup, 1000)
-    const playersCollection = client.db("mhtest").collection("Players");
-    const aggregate = playersCollection.aggregate([
-        { $match: {_id: playerId} },
-        { $project: {
-            ELORating: `$ELORating.${ratingGroup}`,
-        }},
-        { $unwind: {
-            path: "$ELORating.Timeline"
-        }},
-        { $project: {
-            Timestamp: "$ELORating.Timeline.Timestamp",
-            EloPoints: "$ELORating.Timeline.Points",
-            Delta: "$ELORating.Timeline.Delta",
-        }},
-        // { $bucketAuto: {
-        //     groupBy: "$Timestamp",
-        //     buckets: 5,
-        //     output: {
-        //         count: { $sum: 1 },
-        //         delta: { $sum: "$Delta" },
-        //         min: { $min: "$Timestamp" },
-        //         max: { $max: "$Timestamp" },
-        //         elo: { $last: "$EloPoints" }
-        //     }
-        // }},
-        { $group: {
-            // "_id": {
-            //     "time": {
-            //       "$subtract": [
-            //         "$Timestamp",
-            //         { "$mod": [ "$Timestamp", ( 1000 * 60 * 60 ) ] }
-            //       ]
-            //     }
-            // },
-            _id: {
-                "$subtract": [
-                    "$Timestamp",
-                    { "$mod": [ "$Timestamp", ( 1000 * 60 * 60 * 24 *7) ] }
-                ]
-            },
-            count: { $sum: 1 },
-            delta: { $sum: "$Delta" },
-            deltaArr: { $push: "$Delta" },
-            eloArr: { $push: "$EloPoints" },
-            start: { $min: "$Timestamp" },
-            end: { $max: "$Timestamp" },
-            elo: { $last: "$EloPoints" },
-        }},
-        { $sort: {
-            _id: 1
-        }}
+// async function getPlayerEloData(client, playerId, ratingGroup) {
+//     // const playerId = await getPlayerIdFromName(client, playerName);
+//     // await createLeaderboardSnapshot(client, ratingGroup, 1000)
+//     const playersCollection = client.db("mhtest").collection("Players");
+//     const aggregate = playersCollection.aggregate([
+//         { $match: {_id: playerId} },
+//         { $project: {
+//             ELORating: `$ELORating.${ratingGroup}`,
+//         }},
+//         { $unwind: {
+//             path: "$ELORating.Timeline"
+//         }},
+//         { $project: {
+//             Timestamp: "$ELORating.Timeline.Timestamp",
+//             EloPoints: "$ELORating.Timeline.Points",
+//             Delta: "$ELORating.Timeline.Delta",
+//         }},
+//         // { $bucketAuto: {
+//         //     groupBy: "$Timestamp",
+//         //     buckets: 5,
+//         //     output: {
+//         //         count: { $sum: 1 },
+//         //         delta: { $sum: "$Delta" },
+//         //         min: { $min: "$Timestamp" },
+//         //         max: { $max: "$Timestamp" },
+//         //         elo: { $last: "$EloPoints" }
+//         //     }
+//         // }},
+//         { $group: {
+//             // "_id": {
+//             //     "time": {
+//             //       "$subtract": [
+//             //         "$Timestamp",
+//             //         { "$mod": [ "$Timestamp", ( 1000 * 60 * 60 ) ] }
+//             //       ]
+//             //     }
+//             // },
+//             _id: {
+//                 "$subtract": [
+//                     "$Timestamp",
+//                     { "$mod": [ "$Timestamp", ( 1000 * 60 * 60 * 24 *7) ] }
+//                 ]
+//             },
+//             count: { $sum: 1 },
+//             delta: { $sum: "$Delta" },
+//             deltaArr: { $push: "$Delta" },
+//             eloArr: { $push: "$EloPoints" },
+//             start: { $min: "$Timestamp" },
+//             end: { $max: "$Timestamp" },
+//             elo: { $last: "$EloPoints" },
+//         }},
+//         { $sort: {
+//             _id: 1
+//         }}
 
-    ]);
-    let playerInfo = await aggregate.toArray();
-    return playerInfo;
-}
+//     ]);
+//     let playerInfo = await aggregate.toArray();
+//     return playerInfo;
+// }
 
-async function getPlayerLadderRank() {
+// async function getPlayerLadderRank() {
 
-}
+// }
 
 module.exports = {
     processMatch,
     processMatchAllCategories,
-    getPlayerEloData,
     createLeaderboardSnapshot,
-    getLeaderboardPosition,
-    getLeaderboardPage,
     ELO_CATEGORIES
 }

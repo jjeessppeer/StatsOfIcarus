@@ -48,12 +48,17 @@
     margin: 0;
     padding: 10px;
     border: 0;
+    position: relative;
     box-shadow: 0;
     text-shadow: 0;
     height: 100%;
     border-left: 1px solid;
     border-color: rgb(205, 210, 210);
 }
+
+/* .fancy-search .searchbar button > i {
+    padding: 10px;
+} */
 
 .fancy-search.filters-changed .searchbar .search-button {
     transition: background-color ease-in 0.5s;

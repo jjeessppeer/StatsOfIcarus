@@ -3,23 +3,8 @@ import { OverviewPerspective } from "./OverviewPerspective/OverviewPerspective.j
 import { PlayerPerspective } from "./PlayerPerspective/PlayerPerspective.js";
 
 
-export const SearchContext = React.createContext({
-  search: {
-    ui: {
-      mode: 'Overview',
-      text: "",
-      filter: {}
-    },
-    active: {
-      mode: 'Overview',
-      text: '',
-      filter: {},
-    }
-  },
-  setSearch: () => { }
-});
 
-export const SearchContext2 = React.createContext({
+export const SearchContext = React.createContext({
   search: {
     text: "",
     changed: false,
@@ -27,40 +12,55 @@ export const SearchContext2 = React.createContext({
     tagsExclude: []
   },
   setSearch: () => { },
-  executeSearch: () => {}
+  executeSearch: () => { }
 });
 
 export const FilterContext = React.createContext({
-  filter: {},
-  setFilter: () => {}
+  filterState: {
+    filter: {},
+    mode: "Overview"
+  },
+  setFilterStater: () => {}
 });
-
 
 export function MatchHistoryPage() {
   const [search, setSearch] = React.useState({
-    ui: {
-      mode: 'Overview',
-      text: "",
-      filter: {}
-    },
-    active: {
-      mode: 'Overview',
-      text: '',
-      filter: {},
-    }
+    text: "",
+    changed: false,
+    tagsInclude: [],
+    tagsExclude: []
   });
 
-  // const getFilter = () => {
+  const [filterState, setFilterState] = React.useState({
+    filter: {},
+    mode: "Overview"
+  });
 
-  // }
+  // const [searchMode, setSearchMode] = React.useState("Overview");
+  // const [filter, setFilter] = React.useState({});
 
+  const executeSearch = async (mode) => {
+    // Load search state into filters.
+    console.log("EXECUTING SEARCH: ", mode);
+    const f = {};
+    if (search.tagsExclude.length > 0) f.tagsExclude = JSON.parse(JSON.stringify(search.tagsExclude));
+    if (search.tagsInclude.length > 0) f.tagsInclude = JSON.parse(JSON.stringify(search.tagsInclude));
+    if (mode === "Player") {
+      const r = await fetch(`/player_id/${search.text}`);
+      if (r.status !== 404) f.playerId = await r.json();
+    }
 
+    setFilterState({
+      filter: f,
+      mode: mode
+    });
+  };
 
   let pageContent;
-  if (search.active.mode == "Overview") {
+  if (filterState.mode == "Overview") {
     pageContent = <OverviewPerspective></OverviewPerspective>
   }
-  else if (search.active.mode === "Player") {
+  else if (filterState.mode === "Player") {
     pageContent = <PlayerPerspective></PlayerPerspective>
   }
 
@@ -74,55 +74,13 @@ export function MatchHistoryPage() {
           </a>
         </span>
       </div>
-      <SearchContext.Provider value={{ search, setSearch }}>
-        <Searchbar></Searchbar>
-        {pageContent}
+      <SearchContext.Provider value={{ search, setSearch, executeSearch }}>
+        <FilterContext.Provider value={{filterState, setFilterState}}>
+          <Searchbar></Searchbar>
+          {pageContent}
+        </FilterContext.Provider>
       </SearchContext.Provider>
     </div>
   )
 }
-
-
-// export class MatchHistoryPage extends React.PureComponent {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       searchMode: 'Overview',
-//       searchText: '',
-//       filter: {}
-//     }
-//   }
-
-//   executeSearch = (category, searchText, filter) => {
-//     console.log(category, searchText, filter);
-//     this.setState({
-//       searchMode: category,
-//       filter: filter
-//     });
-//   }
-
-//   render() {
-//     let pageContent;
-//     if (this.state.searchMode == "Overview") {
-//       pageContent = <OverviewPerspective filter={this.state.filter}></OverviewPerspective>
-//     }
-
-//     return (
-//       <div>
-//         <div id="ModInfobox">
-//           <span>
-//             <a href="https://github.com/jjeessppeer/MatchHistoryMod" target="_blank">
-//               Install the mod to have your match history uploaded
-//               <svg viewBox="0 0 24 24"><use href="icons.svg#launch" /></svg>
-//             </a>
-//           </span>
-//         </div>
-//         <Searchbar
-//           executeSearch={this.executeSearch}
-//         ></Searchbar>
-//         {pageContent}
-//       </div>
-//     );
-//   }
-// }
 

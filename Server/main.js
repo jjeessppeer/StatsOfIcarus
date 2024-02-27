@@ -180,6 +180,33 @@ app.post('/player_rating',
     res.status(200).json({Timeline: eloTimeline, LadderRank: ladderRank});
 });
 
+app.get(
+    '/leaderboard_page/:page',
+    async function(req, res) {
+    // TODO: 
+});
+
+app.get(
+    '/player/:playerId/elo/:category',
+    async function(req, res) {
+    const playerId = Number(req.params.playerId);
+    const category = String(req.params.category);
+    const eloTimeline = await MatchHistory.getEloTimeline(mongoClient, playerId, category);
+    const leaderboardPosition = 0;
+    res.status(200).json({
+        EloTimeline: eloTimeline, 
+        LeaderboardPosition: leaderboardPosition});
+});
+
+app.get(
+    '/elo_timeline/:playerId/:category',
+    async function(req, res) {
+    const playerId = Number(req.params.playerId);
+    const category = String(req.params.category);
+    const eloTimeline = await MatchHistory.getEloTimeline(mongoClient, playerId, category);
+    res.status(200).json(eloTimeline);
+});
+
 app.post('/balance_lobby',
     schemaMiddleware(schemas.lobbyBalance),
     async function(req, res) {
@@ -193,15 +220,15 @@ app.post('/balance_lobby',
     res.status(200).json(balancedTeams);
 });
 
-app.post('/leaderboard_page',
-    schemaMiddleware(schemas.leaderboardRequest),
-    async function(req, res) {
+// app.post('/leaderboard_page',
+//     schemaMiddleware(schemas.leaderboardRequest),
+//     async function(req, res) {
     
-    const pageSize = 10;
-    const start = Math.floor(req.body.Position / pageSize) * pageSize;
-    let page = await elo.getLeaderboardPage(mongoClient, req.body.RatingGroup, start, pageSize);
-    res.status(200).json(page);
-});
+//     const pageSize = 10;
+//     const start = Math.floor(req.body.Position / pageSize) * pageSize;
+//     let page = await elo.getLeaderboardPage(mongoClient, req.body.RatingGroup, start, pageSize);
+//     res.status(200).json(page);
+// });
 
 
 const {processHistoryQuery, generateMatchFilterPipeline} = require('./MatchHistory/HistoryFilter.js');
@@ -285,50 +312,24 @@ app.get('/maps/:mode/:teams/:ships', async function(req, res) {
     res.status(200).json(maps);
 });
 
-
-
-
-app.post('/search/player', async function(req, res) {
-    // Get player specific data. Winrate, elo and stuff.
-});
-
-app.post('/search/ship', async function(req, res) {
-    // Get ship specific data
-});
-
 app.post(
     '/matches', 
-    schemaMiddleware(schemas.matchListRequest),
+    schemaMiddleware(schemas.matchList),
     async function(req, res) {
+    console.log("FILTER: ", res.filter);
     const matches = await MatchHistory.getMatches(mongoClient, req.body.filter, req.body.page);
     res.status(200).json(matches);
 });
 
-
 app.get(
     '/player_id/:playerName',
-    async function(req, res) {
-    const playerId = await getPlayerIdFromName(req.params.playerName);
-    if (playerId !== undefined) res.status(200).send(playerId);
-    res.status(404).send()
-});
-
-app.post(
-    '/player_info/:playerId',
-    async function(req, res) {
-        
-
-});
-
-app.get(
-    '/player_search/:playerName',
     async function(req, res) {
     const playerId = await MatchHistory.getPlayerIdFromName(mongoClient, req.params.playerName);
     if (isNaN(playerId)) {
         res.status(404).send();
         return;
     }
-    res.redirect(`/player_info/${playerId}`);
+    res.status(200).json(playerId);
 });
 
 app.get(
@@ -344,6 +345,7 @@ app.get(
 
 app.post(
     '/ship_popularity',
+    schemaMiddleware(schemas.shipPopularity),
     async function(req, res) {
     console.log(req.body)
     const shiprates = await MatchHistory.getShipPickWinrate(mongoClient, req.body.filter);

@@ -31,20 +31,29 @@ const lobbyBalance = Joi.object({
     teamSize: Joi.number().integer().required()
 });
 
-const matchListRequest = Joi.object({
+// Match filter
+const filterSchema = Joi.object({
+    playerId: Joi.number().integer().optional(),
+    tagsInclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
+    tagsExclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
+});
+
+
+const matchList = Joi.object({
     page: Joi.number().integer().min(0).max(1000).required(),
-    filter: Joi.object({
-        PlayerId: Joi.number().integer().optional(),
-        tagsInclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
-        tagsExclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
-    }).required()
+    filter: filterSchema.required()
+});
+
+const shipPopularity = Joi.object({
+    filter: filterSchema.required()
 });
 
 module.exports = {
     leaderboardRequest,
     eloTimelineRequest,
     lobbyBalance,
-    matchListRequest,
+    matchList,
+    shipPopularity,
     MATCH_SUBMISSION_1: MATCH_SUBMISSION_1.MATCH_SUBMISSION_SCHEMA,
     MATCH_SUBMISSION_2: MATCH_SUBMISSION_2.MATCH_SUBMISSION_SCHEMA,
 }

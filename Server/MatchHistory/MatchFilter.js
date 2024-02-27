@@ -5,8 +5,8 @@ function generateFilterPipeline(filter) {
   // if (filter.PlayerName) {
   //   filterPipeline.push(playerFilter(filter.PlayerName, mongoClient))
   // }
-  if (filter.PlayerId) {
-    const query = { $match: { FlatPlayers: filter.PlayerId } };
+  if (filter.playerId) {
+    const query = { $match: { FlatPlayers: filter.playerId } };
     filterPipeline.push(query);
   }
   if (filter.tagsInclude) {

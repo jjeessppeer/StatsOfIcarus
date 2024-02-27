@@ -2,14 +2,14 @@ import { SearchContext } from "../MatchHistoryPage.js";
 
 export function FilterBox() {
   const tagRadioState = (label) => {
-    if (search.ui.filter.tagsExclude?.includes(label)) return 0;
-    if (search.ui.filter.tagsInclude?.includes(label)) return 2;
+    if (search.tagsExclude?.includes(label)) return 0;
+    if (search.tagsInclude?.includes(label)) return 2;
     return 1;
   }
 
   const tagChanged = (label, value) => {
-    const tagsInclude = new Set(search.ui.filter.tagsInclude);
-    const tagsExclude = new Set(search.ui.filter.tagsExclude);
+    const tagsInclude = new Set(search.tagsInclude);
+    const tagsExclude = new Set(search.tagsExclude);
     if (value == 0) {
       tagsInclude.delete(label);
       tagsExclude.add(label);
@@ -24,10 +24,10 @@ export function FilterBox() {
     }
     setSearch(s => {
       const newSearch = { ...s };
-      newSearch.ui.filter.tagsExclude = [...tagsExclude];
-      newSearch.ui.filter.tagsInclude = [...tagsInclude];
-      if (tagsExclude.size === 0) delete newSearch.ui.filter.tagsExclude;
-      if (tagsInclude.size === 0) delete newSearch.ui.filter.tagsInclude;
+      newSearch.tagsExclude = [...tagsExclude];
+      newSearch.tagsInclude = [...tagsInclude];
+      // if (tagsExclude.size === 0) delete newSearch.tagsExclude;
+      // if (tagsInclude.size === 0) delete newSearch.tagsInclude;
       return newSearch;
     });
   }

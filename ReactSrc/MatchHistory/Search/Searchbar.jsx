@@ -62,27 +62,14 @@ function generateSuggestionCategories(searchText) {
 
 // Searchbar react element
 export function Searchbar() {
-  const submitSearch = () => {
-    const mode = categories[0].title;
-    setSearch(s => {
-      const ui = JSON.parse(JSON.stringify(s.ui));
-      ui.mode = mode;
-      ui.text = mode == "Overview" ? "" : ui.text;
-      return {
-        ...s,
-        ui: ui,
-        active: JSON.parse(JSON.stringify(ui))
-      };
-    });
-  }
-
   const onDocClick = (evt) => {
-    // Close suggeston box if 
+    // Close suggeston box if document clicked
     if (searchbarRef.current.contains(evt.target)) return true;
     setSuggestionsOpen(false);
   }
 
-  const { search, setSearch } = React.useContext(SearchContext);
+  const { search, setSearch, executeSearch } = React.useContext(SearchContext);
+
   const [suggestionsOpen, setSuggestionsOpen] = React.useState(false);
   const searchbarRef = React.useRef(null);
 
@@ -95,7 +82,7 @@ export function Searchbar() {
   }, []);
 
   // Generate suggestions.
-  const categories = generateSuggestionCategories(search.ui.text);
+  const categories = generateSuggestionCategories(search.text);
   const suggestionCategories = [];
   for (const category of categories) {
     const suggestionItems = [];
@@ -104,6 +91,7 @@ export function Searchbar() {
         category={category.title}
         text={categoryItem.text}
         imgSrc={categoryItem.imgSrc}
+        setSuggestionsOpen={setSuggestionsOpen}
       />
       suggestionItems.push(suggestionItem);
     }
@@ -116,31 +104,31 @@ export function Searchbar() {
       </SuggestionCategory>);
   }
 
-  // Check if the search input has been changed.
-  // let searchChanged = false;
-  // for (const key in preSearch) {
-  //   if (key === "executeSearch") continue;
-  //   if (search[key] !== preSearch[key]) {
-  //     console.log(key)
-  //     searchChanged = true;
-  //     break;
-  //   }
-  // }
-
   return (
     <div className={"fancy-search filters-open" + (suggestionsOpen ? " open" : "")} ref={searchbarRef}>
       <div className="searchbar">
         <input className="search-input" type="text" placeholder="Search for a player" autocomplete="off"
-          value={search.ui.text}
-          onChange={evt => setSearch({ ...search, ui: { ...search.ui, text: evt.target.value } })}
+          value={search.text}
+          onChange={evt => {
+            setSearch(s => ({
+              ...search,
+              text: evt.target.value
+            }));
+          }}
           onFocus={() => setSuggestionsOpen(true)}
+          onClick={() => setSuggestionsOpen(true)}
           onKeyDown={evt => {
-            if (evt.type === "keydown" && evt.key === 'Enter')
-              submitSearch();
+            if (evt.type === "keydown" && evt.key === 'Enter') {
+              setSuggestionsOpen(false);
+              executeSearch(categories[0].title);
+            }
           }}
         />
         <button class="filter-button">Filters<i class="fas fa-chevron-down"></i></button>
-        <button class="search-button" onClick={submitSearch}>
+        <button class="search-button" onClick={evt => {
+          setSuggestionsOpen(false);
+          executeSearch(categories[0].title);
+        }}>
           <i class="fas fa-search" />
         </button>
       </div>
@@ -164,20 +152,12 @@ function SuggestionCategory({ title, items, children }) {
   );
 }
 
-function SuggestionItem({ category, text, imgSrc }) {
-  const { search, setSearch } = React.useContext(SearchContext);
+function SuggestionItem({ category, text, imgSrc, setSuggestionsOpen }) {
+  const { search, setSearch, executeSearch } = React.useContext(SearchContext);
 
   const submitSearch = () => {
-    setSearch(s => {
-      const ui = JSON.parse(JSON.stringify(s.ui));
-      ui.mode = category;
-      ui.text = category == "Overview" ? "" : text;
-      return {
-        ...s,
-        ui: ui,
-        active: JSON.parse(JSON.stringify(ui))
-      };
-    });
+    setSuggestionsOpen(false);
+    executeSearch(category);
   }
 
   return (
