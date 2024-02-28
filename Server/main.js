@@ -146,11 +146,11 @@ app.post('/submit_match_history',
     return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
 });
 
-app.get('/match_list',
+app.get('/match_list/page/:page',
     queryValidator(schemas.matchFilter),
     async function (req, res) {
-    console.log("FILTER: ", req.query);
-    const matches = await MatchHistory.getMatches(mongoClient, req.query, req.query.page);
+    const page = Number(req.params.page);
+    const matches = await MatchHistory.getMatches(mongoClient, req.query, page);
     res.status(200).json(matches);
 });
 

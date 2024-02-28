@@ -35,8 +35,7 @@ const lobbyBalance = Joi.object({
 const matchFilter = Joi.object({
     playerId: Joi.number().integer().optional(),
     tagsInclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
-    tagsExclude: Joi.array().min(1).max(3).items(Joi.string()).optional(),
-    page: Joi.number().integer().optional()
+    tagsExclude: Joi.array().min(1).max(3).items(Joi.string()).optional()
 });
 
 
