@@ -181,9 +181,12 @@ app.post('/player_rating',
 });
 
 app.get(
-    '/leaderboard_page/:page',
+    '/leaderboard/:category/:page',
     async function(req, res) {
-    // TODO: 
+    const page = Number(req.params.page);
+    const category = String(req.params.category);
+    const leaderboardPage = await MatchHistory.getLeaderboardPage(mongoClient, page, category);
+    res.status(200).json(leaderboardPage);
 });
 
 app.get(
@@ -192,20 +195,20 @@ app.get(
     const playerId = Number(req.params.playerId);
     const category = String(req.params.category);
     const eloTimeline = await MatchHistory.getEloTimeline(mongoClient, playerId, category);
-    const leaderboardPosition = 0;
+    const leaderboardPosition = await MatchHistory.getLeaderboardPosition(mongoClient, playerId, category);
     res.status(200).json({
         EloTimeline: eloTimeline, 
         LeaderboardPosition: leaderboardPosition});
 });
 
-app.get(
-    '/elo_timeline/:playerId/:category',
-    async function(req, res) {
-    const playerId = Number(req.params.playerId);
-    const category = String(req.params.category);
-    const eloTimeline = await MatchHistory.getEloTimeline(mongoClient, playerId, category);
-    res.status(200).json(eloTimeline);
-});
+// app.get(
+//     '/elo_timeline/:playerId/:category',
+//     async function(req, res) {
+//     const playerId = Number(req.params.playerId);
+//     const category = String(req.params.category);
+//     const eloTimeline = await MatchHistory.getEloTimeline(mongoClient, playerId, category);
+//     res.status(200).json(eloTimeline);
+// });
 
 app.post('/balance_lobby',
     schemaMiddleware(schemas.lobbyBalance),

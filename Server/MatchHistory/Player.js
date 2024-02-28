@@ -35,11 +35,6 @@ async function getPlayerInfo(mongoClient, playerId) {
   return playerInfo;
 }
 
-
-
-
-
-
 function getPlayerStats(mongoClient, playerId) {
   const playersCollection = client.db("mhtest").collection("Players");
   return [1, 2, 3];

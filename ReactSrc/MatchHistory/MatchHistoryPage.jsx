@@ -25,7 +25,7 @@ export const FilterContext = React.createContext({
 
 export function MatchHistoryPage() {
   const [search, setSearch] = React.useState({
-    text: "",
+    text: "w",
     changed: false,
     tagsInclude: [],
     tagsExclude: []
@@ -55,6 +55,10 @@ export function MatchHistoryPage() {
       mode: mode
     });
   };
+
+  React.useEffect(() => {
+    executeSearch("Player");
+  }, []);
 
   let pageContent;
   if (filterState.mode == "Overview") {

@@ -32,6 +32,7 @@ async function getEloTimeline(mongoClient, playerId, category) {
 }
 
 // Return the oldest last match timestamp that should be included in the leaderboard.
+const MAX_INACTIVITY_MS = 1000 * 60 * 60 * 24 * 60;
 function oldestAllowedPlayerTimestamp(category) {
   if (category == 'Overall') return 0;
   const currentTimestamp = new Date().getTime();
@@ -40,19 +41,19 @@ function oldestAllowedPlayerTimestamp(category) {
 }
 
 async function getLeaderboardPosition(mongoClient, playerId, category) {
-  const playersCollection = client.db("mhtest").collection("Players");
+  const playersCollection = mongoClient.db("mhtest").collection("Players");
   const oldestTimestamp = oldestAllowedPlayerTimestamp(category);
   const ladderInfo = await playersCollection.aggregate([
     {
       $match: {
         ELOCategories: category,
-        [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
+        [`ELORating.${category}.MatchCount`]: { $gt: 3 },
         LastMatchTimestamp: { $gt: oldestTimestamp }
       }
     },
     {
       $setWindowFields: {
-        sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
+        sortBy: { [`ELORating.${category}.ELOPoints`]: -1 },
         output: { LadderRank: { $rank: {} } }
       }
     },
@@ -63,12 +64,12 @@ async function getLeaderboardPosition(mongoClient, playerId, category) {
         PlayerId: '$_id',
         LadderRank: 1,
         Name: 1,
-        Points: `$ELORating.${ratingGroup}.ELOPoints`,
+        Points: `$ELORating.${category}.ELOPoints`,
       }
     },
     {
       $addFields: {
-        RatingGroup: ratingGroup
+        RatingGroup: category
       }
     },
   ]).next();
@@ -77,36 +78,40 @@ async function getLeaderboardPosition(mongoClient, playerId, category) {
   return ladderInfo.LadderRank;
 }
 
-async function getLeaderboardPage(client, ratingGroup, startPos, count) {
-  const playersCollection = client.db("mhtest").collection("Players");
-  const oldestTimestamp = getOldestAllowedPlayerTimestamp(ratingGroup);
-  const aggregate = playersCollection.aggregate([
+const PAGE_SIZE = 10;
+async function getLeaderboardPage(mongoClient, page, category) {
+  const playersCollection = mongoClient.db("mhtest").collection("Players");
+
+  const oldestTimestamp = oldestAllowedPlayerTimestamp(category);
+  // const startPos = Math.floor(page / PAGE_SIZE) * PAGE_SIZE;
+  const startPos = page * PAGE_SIZE;
+
+  const leaderboardPage = await playersCollection.aggregate([
     {
       $match: {
-        ELOCategories: ratingGroup,
-        [`ELORating.${ratingGroup}.MatchCount`]: { $gt: 3 },
+        ELOCategories: category,
+        [`ELORating.${category}.MatchCount`]: { $gt: 3 },
         LastMatchTimestamp: { $gt: oldestTimestamp }
       }
     },
     {
       $setWindowFields: {
-        sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
+        sortBy: { [`ELORating.${category}.ELOPoints`]: -1 },
         output: { LadderRank: { $rank: {} } }
       }
     },
     { $sort: { LadderRank: 1 } },
     { $skip: startPos },
-    { $limit: count },
+    { $limit: PAGE_SIZE },
     {
       $project: {
         LadderRank: 1,
         Name: 1,
-        Points: `$ELORating.${ratingGroup}.ELOPoints`,
+        Points: `$ELORating.${category}.ELOPoints`,
       }
     }
-  ]);
-  const res = await aggregate.toArray();
-  return res;
+  ]).toArray();
+  return leaderboardPage;
 }
 
 module.exports = {

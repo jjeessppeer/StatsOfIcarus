@@ -1,5 +1,5 @@
 import { EloCard } from "./MatchHistory/EloCard.js";
-import { PlayerLeaderboard } from "./MatchHistory/PlayerLeaderboard.js";
+import { PlayerInfoBox } from "./MatchHistory/PlayerInfo.js";
 
-customElements.define('player-leaderboard', PlayerLeaderboard, { extends: 'div' });
 customElements.define('elo-card', EloCard, { extends: 'div' });
+customElements.define('player-info-box', PlayerInfoBox, { extends: 'div' });

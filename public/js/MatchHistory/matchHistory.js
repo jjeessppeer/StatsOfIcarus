@@ -1,7 +1,5 @@
-import '/js/MatchHistory/elements/FancySearch.js';
 import '/js/MatchHistory/elements/ShipPopularity.js';
 import '/js/MatchHistory/elements/PlayerShipInfo.js';
-import '/js/MatchHistory/elements/PlayerInfo.js';
 
 import { SKILL_ORDER, ship_image_srcs2, game_modes, SHIP_ITEMS, CLASS_COLORS, ship_scales, ship_offsets } from '/js/constants.js';
 import { ShipLoadoutInfoList } from '/React/ShipStats/LoadoutInfoList.js';

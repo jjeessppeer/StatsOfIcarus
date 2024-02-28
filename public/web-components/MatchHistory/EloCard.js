@@ -1,5 +1,16 @@
 export class EloCard extends HTMLDivElement {
-  static observedAttributes = ["player-id"];
+  set page(v) {
+    this._page = v;
+    this.querySelector(".page-indicator").textContent = v + 1;
+  }
+
+  get page() {
+    return this._page;
+  }
+
+  get category() {
+    return this.querySelector('.elo-group-select').value;
+  }
 
   constructor() {
     super();
@@ -21,13 +32,27 @@ export class EloCard extends HTMLDivElement {
         </div>
         </div>
       </div>
-      <div is="player-leaderboard" />
-      `;
-    this.querySelector('.elo-group-select').addEventListener('change', (event) => {
-      // const rankingGroup = this.querySelector('.elo-group-select').value;
-      // this.requestDataUpdate(this.playerId, rankingGroup);
-      this.requestData();
-    });
+      <div class="player-leaderboard">
+      <h5>Leaderboard</h5>
+        <div>
+          <table>
+          </table>
+        </div>
+        <div class="input-group pagination">
+          <div class="input-group-prepend">
+            <button class="btn btn-info back-button" type="button" data-delta="-1">🠔</button>
+            <button class="btn btn-warn indicator-button page-indicator" type="button" disabled>1</button>
+          </div>
+          <div class="input-group-append">
+            <button class="btn btn-info forward-button" type="button" data-delta="1">🠖</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.playerId;
+    this.page;
+
     this.addCategory("Overall");
     this.addCategory("Competitive");
     this.addCategory("SCS");
@@ -35,24 +60,39 @@ export class EloCard extends HTMLDivElement {
     this.initializeChart();
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    switch (name) {
-      case "player-id":
-        console.log("PLAYER ID CHANGED");
-        this.requestData();
-        break;
-    }
+  connectedCallback() {
+    this.querySelector("h5").textContent = `Leaderboard - ${this.category}`;
+
+    this.querySelector('.elo-group-select').addEventListener('change', (event) => {
+      this.querySelector("h5").textContent = `Leaderboard - ${this.category}`;
+      this.fetchEloData().then(() => {this.fetchLeaderboardPage();});
+    });
+
+    this.querySelector('.back-button').addEventListener('click', evt => {
+      this.page = Math.max(0, this.page - 1);
+      this.fetchLeaderboardPage();
+    });
+    this.querySelector('.forward-button').addEventListener('click', evt => {
+      this.page = this.page + 1;
+      this.fetchLeaderboardPage();
+    });
   }
 
-  async requestData() {
-    const category = this.querySelector(".elo-group-select").value;
-    const playerId = this.getAttribute("player-id");
-    console.log("FETCHING ELO DATA", playerId, category);
+  async load(playerId) {
+    this.playerId = playerId;
+    await this.fetchEloData();
+    await this.fetchLeaderboardPage();
+  }
+
+  async fetchEloData() {
+    const category = this.category;
+    const playerId = this.playerId;
     const eloData = await fetch(`/player/${playerId}/elo/${category}`).then(res => res.json());
-    console.log(eloData);
 
     const eloTimeline = eloData.EloTimeline;
     const matchCount = eloTimeline.reduce((acc, el) => (acc + el.count), 0);
+
+    this.page = Math.floor(eloData.LeaderboardPosition / 10);
 
     this.querySelector('.ladder-text').textContent = `#${eloData.LeaderboardPosition}`;
     this.querySelector('.elo-text').textContent = eloTimeline[eloTimeline.length - 1].elo;
@@ -68,12 +108,30 @@ export class EloCard extends HTMLDivElement {
     this.chart.update();
   }
 
+  async fetchLeaderboardPage() {
+    const category = this.category;
+    const page = this.page;
+
+    const leaderboardPage = await fetch(`/leaderboard/${category}/${page}`).then(res => res.json());
+
+    this.querySelector('table').innerHTML = '';
+    for (const playerRank of leaderboardPage) {
+      const li = document.createElement('tr');
+      li.innerHTML = `
+        <td class="ladder-rank">#${playerRank.LadderRank}</td>
+        <td class="ladder-name">${playerRank.Name.slice(0, -5)}</td>
+        <td class="ladder-points">${playerRank.Points}p</td>`;
+      li.classList.toggle('highlight', playerRank.Name == this.highlightName);
+      this.querySelector('table').append(li);
+    }
+  }
+
 
   addCategory(categoryTitle) {
     const option = document.createElement('option');
     option.value = categoryTitle;
     option.text = categoryTitle;
-    if (option.text == 'SCS') option.selected = 'selected';
+    if (option.text == "SCS") option.selected = 'selected';
     this.querySelector('.elo-group-select').append(option);
   }
 

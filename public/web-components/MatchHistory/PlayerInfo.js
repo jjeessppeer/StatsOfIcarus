@@ -1,6 +1,6 @@
 import { CLASS_COLORS } from '/js/constants.js';
 
-class PlayerInfoBox extends HTMLDivElement {
+export class PlayerInfoBox extends HTMLDivElement {
   constructor() {
     super();
     this.classList.add('player-infobox')
@@ -28,10 +28,11 @@ class PlayerInfoBox extends HTMLDivElement {
     // Initialize charts
   }
 
-  initialize(playerData) {
-    this.querySelector('.clan-name').textContent = playerData.Clan === "" ? "" : `[${playerData.Clan}]`;
-    this.querySelector('.player-name').textContent = playerData.Name.substring(0, playerData.Name.length - 5);
+  load(playerInfo) {
+    this.querySelector('.clan-name').textContent = playerInfo.Clan === "" ? "" : `[${playerInfo.Clan}]`;
+    this.querySelector('.player-name').textContent = playerInfo.Name.substring(0, playerInfo.Name.length - 5);
     this.querySelector('.match-count').textContent = ``;
+
   }
 
   initializePlayrateChart(winrates) {
@@ -177,5 +178,3 @@ class PlayerInfoBox extends HTMLDivElement {
 
 
 
-
-customElements.define('player-info-box', PlayerInfoBox, { extends: 'div' });
