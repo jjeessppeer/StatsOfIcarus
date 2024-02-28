@@ -147,29 +147,29 @@ app.post('/submit_match_history',
     return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
 });
 
-app.post('/match_history_search',
-    async function(req, res) {
+// app.post('/match_history_search',
+//     async function(req, res) {
 
-    let validationResult = HISTORY_SEARCH_SCHEMA.validate(req.body);
-    if (validationResult.error){
-        return res.status(400).send();
-    }
-    let responseData = await matchHistoryRetrieve.matchHistorySearch(req.body);
-    res.status(200).json(responseData);
-});
+//     let validationResult = HISTORY_SEARCH_SCHEMA.validate(req.body);
+//     if (validationResult.error){
+//         return res.status(400).send();
+//     }
+//     let responseData = await matchHistoryRetrieve.matchHistorySearch(req.body);
+//     res.status(200).json(responseData);
+// });
 
-app.post('/request_matches', 
-    async function(req, res) {
+// app.post('/request_matches', 
+//     async function(req, res) {
 
-    let requestValidation = MATCH_REQUEST_SCHEMA.validate(req.body);
-    if (requestValidation.error){
-        return res.status(400).send();
-    }
+//     let requestValidation = MATCH_REQUEST_SCHEMA.validate(req.body);
+//     if (requestValidation.error){
+//         return res.status(400).send();
+//     }
 
-    let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, req.body.page);
+//     let matches = await matchHistoryRetrieve.getRecentMatches(req.body.filters, req.body.page);
     
-    res.status(200).json(matches);
-});
+//     res.status(200).json(matches);
+// });
 
 app.post('/player_rating',
     schemaMiddleware(schemas.eloTimelineRequest),
