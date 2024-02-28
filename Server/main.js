@@ -11,19 +11,9 @@ const { schemaMiddleware, queryValidator, bodyValidator } = require('./SchemaVal
 const schemas = require('./SchemaValidation/schemas.js');
 
 const matchHistory = require("./matchHistory.js");
-const matchHistorySubmit = require("./MatchHistory/matchHistorySubmit.js");
-const matchHistoryRetrieve = require("./MatchHistory/matchHistoryRetrieve.js");
-const matchHistoryUtils = require("./MatchHistory/matchHistoryUtils.js");
-const elo = require("./Elo/EloHelper.js");
-const lobbyBalancer = require("./Elo/LobbyBalancer.js");
-const { HISTORY_SEARCH_SCHEMA, MATCH_REQUEST_SCHEMA } = require("./MatchHistory/requestSchemas.js");
-
-// const matchRetrieve = require('./MatchHistory/Retrieve.js');
-
-
 const MatchHistory = require("./MatchHistory/MatchHistory.js");
-
-const shipStats = require('./ShipStats/ShipStats.js');
+// const lobbyBalancer = require("./Elo/LobbyBalancer.js");
+// const shipStats = require('./ShipStats/ShipStats.js');
 
 const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
@@ -164,7 +154,8 @@ app.get('/leaderboard/:category/:page',
 
 app.get('/player_id/:playerName',
     async function(req, res) {
-    const playerId = await MatchHistory.getPlayerIdFromName(mongoClient, req.params.playerName);
+    const playerName = String(req.params.playerName);
+    const playerId = await MatchHistory.getPlayerIdFromName(mongoClient, playerName);
     if (isNaN(playerId)) {
         return res.status(404).send();
     }
@@ -195,9 +186,9 @@ app.get('/player/:playerId/elo/:category',
 app.get('/player/:playerId/ship_stats',
     queryValidator(schemas.matchFilter),
     async function(req, res) {
-    console.log("FILTER: ", req.body);
     const playerId = Number(req.params.playerId);
-    const stats = await MatchHistory.getPlayerShipStats(mongoClient, req.query, playerId);
+    const filter = req.query;
+    const stats = await MatchHistory.getPlayerShipStats(mongoClient, filter, playerId);
     res.status(200).json(stats);
 });
 
@@ -296,14 +287,10 @@ app.get('/maps/:mode/:teams/:ships', async function(req, res) {
 });
 
 
-
-
-
 app.post(
     '/ship_popularity',
     schemaMiddleware(schemas.shipPopularity),
     async function(req, res) {
-    console.log(req.body)
     const shiprates = await MatchHistory.getShipPickWinrate(mongoClient, req.body.filter);
     res.status(200).json(shiprates);
 });
@@ -343,7 +330,6 @@ async function run() {
         console.log("Connecting to db...")
         await mongoClient.connect();
         matchHistory.setMongoClient(mongoClient);
-        matchHistoryRetrieve.setMongoClient(mongoClient);
         console.log("Connected to db...");
 
         // Start Http server

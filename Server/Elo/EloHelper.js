@@ -116,36 +116,35 @@ async function processMatch(client, match, ratingGroup) {
     }
 }
 
-async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
-    const playersCollection = client.db("mhtest").collection("Players");
-    const aggregate = playersCollection.aggregate([
-        { $match: { ELOCategories: ratingGroup } },
-        { $setWindowFields: {
-            sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
-            output: {
-                LadderRank: {
-                    $rank: {}
-                }
-            }
-        }},
-        { $project: {
-            _id: 0,
-            PlayerId: '$_id',
-            LadderRank: 1,
-            Name: 1,
-            Points: `$ELORating.${ratingGroup}.ELOPoints`,
-        }},
-        { $addFields: {
-            RatingGroup: ratingGroup,
-            Timestamp: timestamp
-        }},
-        { $merge: {
-            into: 'EloLeaderboard'
-        }}
-        
-    ]);
-    const res = await aggregate.next();
-}
+// async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
+//     const playersCollection = client.db("mhtest").collection("Players");
+//     const aggregate = playersCollection.aggregate([
+//         { $match: { ELOCategories: ratingGroup } },
+//         { $setWindowFields: {
+//             sortBy: { [`ELORating.${ratingGroup}.ELOPoints`]: -1 },
+//             output: {
+//                 LadderRank: {
+//                     $rank: {}
+//                 }
+//             }
+//         }},
+//         { $project: {
+//             _id: 0,
+//             PlayerId: '$_id',
+//             LadderRank: 1,
+//             Name: 1,
+//             Points: `$ELORating.${ratingGroup}.ELOPoints`,
+//         }},
+//         { $addFields: {
+//             RatingGroup: ratingGroup,
+//             Timestamp: timestamp
+//         }},
+//         { $merge: {
+//             into: 'EloLeaderboard'
+//         }}
+//     ]);
+//     const res = await aggregate.next();
+// }
 
 // async function getLeaderboardPosition(client, ratingGroup, playerId) {
 //     const playersCollection = client.db("mhtest").collection("Players");
@@ -282,6 +281,6 @@ async function createLeaderboardSnapshot(client, ratingGroup, timestamp) {
 module.exports = {
     processMatch,
     processMatchAllCategories,
-    createLeaderboardSnapshot,
+    // createLeaderboardSnapshot,
     ELO_CATEGORIES
 }

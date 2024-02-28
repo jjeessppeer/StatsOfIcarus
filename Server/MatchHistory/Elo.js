@@ -1,6 +1,5 @@
 async function getEloTimeline(mongoClient, playerId, category) {
   const playersCollection = mongoClient.db("mhtest").collection("Players");
-  console.log("getting elo timeline: ", playerId, category);
   const eloTimeline = await playersCollection.aggregate([
       { $match: {_id: playerId} },
       { $project: { ELORating: `$ELORating.${category}` }},

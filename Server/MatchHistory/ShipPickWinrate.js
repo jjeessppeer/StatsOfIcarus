@@ -4,7 +4,6 @@ const { generateFilterPipeline } = require("./MatchFilter.js");
 async function getShipPickWinrate(mongoClient, filter) {
     const matchCollection = mongoClient.db("mhtest").collection("Matches");
     const filterPipeline = generateFilterPipeline(filter);
-    console.log(filterPipeline);
     const shipPickWinrate = await matchCollection.aggregate(
       [
         ...filterPipeline,

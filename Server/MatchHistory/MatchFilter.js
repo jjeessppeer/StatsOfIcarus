@@ -1,5 +1,4 @@
 
-
 function generateFilterPipeline(filter) {
   const filterPipeline = [];
   // if (filter.PlayerName) {

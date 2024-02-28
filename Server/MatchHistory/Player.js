@@ -38,11 +38,9 @@ async function getPlayerInfo(mongoClient, playerId) {
 }
 
 async function getPlayerShipStats(mongoClient, filter, playerId) {
-  // const playersCollection = mongoClient.db("mhtest").collection("Players");
   const matchCollection = mongoClient.db("mhtest").collection("Matches");
 
   const filterPipeline = generateFilterPipeline(filter);
-  console.log("PIPE: ", filterPipeline);
   const rates = await matchCollection.aggregate([
     ...filterPipeline,
     { $match: { FlatPlayers: playerId } },
@@ -135,8 +133,6 @@ async function getPlayerShipStats(mongoClient, filter, playerId) {
       ]
     }},
   ]).next();
-
-  // console.log(rates);
 
   return rates;
 }
