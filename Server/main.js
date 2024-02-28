@@ -192,46 +192,46 @@ app.get('/player/:playerId/elo/:category',
         LeaderboardPosition: leaderboardPosition});
 });
 
-app.post('/balance_lobby',
-    schemaMiddleware(schemas.lobbyBalance),
-    async function(req, res) {
-    const balancedTeams = await lobbyBalancer.generateBalancedTeams(
-        mongoClient, 
-        req.body.playerIds, 
-        req.body.randomness,
-        req.body.teamCount,
-        req.body.teamSize,
-        req.body.keepPilots);
-    res.status(200).json(balancedTeams);
-});
+// app.post('/balance_lobby',
+//     schemaMiddleware(schemas.lobbyBalance),
+//     async function(req, res) {
+//     const balancedTeams = await lobbyBalancer.generateBalancedTeams(
+//         mongoClient, 
+//         req.body.playerIds, 
+//         req.body.randomness,
+//         req.body.teamCount,
+//         req.body.teamSize,
+//         req.body.keepPilots);
+//     res.status(200).json(balancedTeams);
+// });
 
-const {processHistoryQuery, generateMatchFilterPipeline} = require('./MatchHistory/HistoryFilter.js');
-app.post('/ship_loadouts',
-    async function(req, res) {
+// const {processHistoryQuery, generateMatchFilterPipeline} = require('./MatchHistory/HistoryFilter.js');
+// app.post('/ship_loadouts',
+//     async function(req, res) {
             
-    const collection = mongoClient.db("mhtest").collection("Items-Ships");
-    const item = await collection.findOne({Name: req.body.perspective.name});
+//     const collection = mongoClient.db("mhtest").collection("Items-Ships");
+//     const item = await collection.findOne({Name: req.body.perspective.name});
     
-    const queryResponse = await processHistoryQuery(mongoClient, req.body);
-    const filterPipeline = await generateMatchFilterPipeline(mongoClient, queryResponse.modifiedQuery.filters);
-    const loadoutList = await shipStats.getShipLoadouts(mongoClient, item._id, filterPipeline);
-    const shipsWinrates = await shipStats.getShipsWinrates(mongoClient, filterPipeline);
+//     const queryResponse = await processHistoryQuery(mongoClient, req.body);
+//     const filterPipeline = await generateMatchFilterPipeline(mongoClient, queryResponse.modifiedQuery.filters);
+//     const loadoutList = await shipStats.getShipLoadouts(mongoClient, item._id, filterPipeline);
+//     const shipsWinrates = await shipStats.getShipsWinrates(mongoClient, filterPipeline);
 
-    queryResponse.loadoutList = loadoutList;
-    queryResponse.shipsWinrates = shipsWinrates;
+//     queryResponse.loadoutList = loadoutList;
+//     queryResponse.shipsWinrates = shipsWinrates;
 
-    res.status(200).json(queryResponse);
-});
+//     res.status(200).json(queryResponse);
+// });
 
-app.post('/ship_matchup_stats',
-    async function(req, res) {
-    const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
-    res.status(200).json(dat);
-});
+// app.post('/ship_matchup_stats',
+//     async function(req, res) {
+//     const dat = await shipStats.getShipMatchupStats(mongoClient, req.body.TargetShip);
+//     res.status(200).json(dat);
+// });
 
 app.get('/game-item/:itemType/:itemId',
     async function(req, res) {
-    const itemType = req.params.itemType;
+    const itemType = String(req.params.itemType);
     const itemId = Number(req.params.itemId);
     let collection; 
     if (itemType === 'gun') 
