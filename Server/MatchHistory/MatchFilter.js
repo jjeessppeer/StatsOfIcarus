@@ -6,7 +6,7 @@ function generateFilterPipeline(filter) {
   //   filterPipeline.push(playerFilter(filter.PlayerName, mongoClient))
   // }
   if (filter.playerId) {
-    const query = { $match: { FlatPlayers: filter.playerId } };
+    const query = { $match: { FlatPlayers: Number(filter.playerId) } };
     filterPipeline.push(query);
   }
   if (filter.tagsInclude) {
@@ -17,17 +17,15 @@ function generateFilterPipeline(filter) {
     const query = { $match: { MatchTags: { $not: { $all: filter.tagsExclude } } } };
     filterPipeline.push(query);
   }
-  if (filter.TimestampStart) {
-    filterPipeline.push({ $match: { Timestamp: { $gt: timestampStart } } });
-  }
-  if (filter.TimestampEnd) {
-    filterPipeline.push({ $match: { Timestamp: { $lt: TimestampEnd } } });
-  }
-  if (filter.ShipId) {
-    // TODO.
-  }
-  console.log("FILTER PIPELING");
-  console.log(JSON.stringify(filterPipeline));
+  // if (filter.TimestampStart) {
+  //   filterPipeline.push({ $match: { Timestamp: { $gt: timestampStart } } });
+  // }
+  // if (filter.TimestampEnd) {
+  //   filterPipeline.push({ $match: { Timestamp: { $lt: TimestampEnd } } });
+  // }
+  // if (filter.ShipId) {
+  //   // TODO.
+  // }
   return filterPipeline;
 }
 

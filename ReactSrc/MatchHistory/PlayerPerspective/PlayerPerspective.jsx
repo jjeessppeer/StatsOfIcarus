@@ -11,7 +11,7 @@ export function PlayerPerspective() {
   React.useEffect(() => {
     const fetchPlayerInfo = async () => {
       console.log("fetching player info...")
-      const playerInfo = await fetch(`/player_info/${filterState.filter.playerId}`).then(res => res.json());
+      const playerInfo = await fetch(`/player/${filterState.filter.playerId}/info`).then(res => res.json());
       console.log(playerInfo);
       setSearch(s => ({
         ...s,

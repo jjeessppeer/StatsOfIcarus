@@ -2,6 +2,7 @@
 const { generateFilterPipeline } = require("./MatchFilter.js");
 
 async function getMatches(mongoClient, filter, page=0, pageSize=10) {
+  page = Number(page);
   // TODO: Remove lookups. Instead let the client fetch and cache needed items.
   const matchCollection = mongoClient.db("mhtest").collection("Matches");
   const filterPipeline = generateFilterPipeline(filter);
@@ -83,50 +84,6 @@ async function getMatches(mongoClient, filter, page=0, pageSize=10) {
       }}
   ]).toArray();
   return matches;
-}
-
-async function getPlayerInfo(mongoClient, playerName, filter) {
-  const playersCollection = client.db("mhtest").collection("Players");
-  const matchCollection = client.db("mhtest").collection("Matches");
-
-  // Find searched player
-  const nameEscaped = playerName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const playerInfo = await playersCollection.aggregate([
-    { $match: { "Name": new RegExp(nameEscaped, "i") } },
-    { $project: {
-        Name: 1,
-        Clan: 1,
-        ELOCategories: 1,
-        LastMatchTimestamp: 1
-    }}
-  ]).next();
-
-  if (!playerInfo) {
-    return -2;
-  }
-
-  const filterPipeline = generateFilterPipeline(filter);
-
-  return {
-    PlayerInfo: playerInfo
-  }
-  // Get winrates
-
-
-  // const playerId = await utils.getPlayerIdFromName(mongoClient, playerName);
-
-
-  // let playerInfoPipeline = pipelines.playerInfoPipeline(playerId);
-  // let playerInfoAggregate = playersCollection.aggregate(playerInfoPipeline);
-  // let playerInfo = await playerInfoAggregate.next();
-
-  // let playerWinratePipeline = pipelines.playerWinratesPipeline(filterPipeline, playerId);
-  // let winrateAggregate = matchCollection.aggregate(playerWinratePipeline);
-  // let playerWinrates = await winrateAggregate.next();
-
-  // playerInfo.Winrates = playerWinrates;
-
-  return playerInfo;
 }
 
 module.exports = {

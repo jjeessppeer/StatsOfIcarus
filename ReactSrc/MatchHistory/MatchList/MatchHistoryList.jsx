@@ -1,5 +1,6 @@
 import { Overview } from '/React/MatchHistory/MatchList/Overview.js';
 import { Foldout } from '/React/MatchHistory/MatchList/Foldout.js';
+import qs from 'qs';
 
 export class MatchHistoryList extends React.Component {
   constructor(props) {
@@ -22,18 +23,22 @@ export class MatchHistoryList extends React.Component {
   }
 
   fetchMatchListPage = async (page) => {
-    console.log("Fetching matches...")
-    console.log(this.props.filter);
-    const response = await fetch('/matches', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        page: page, 
-        filter: this.props.filter
-      })
-    });
-    const matches = await response.json();
+    const q = qs.stringify({...this.props.filter, page: page}, { encode: true });
+    const matches = await fetch(`/match_list?${q}`).then(res => res.json());
     return matches;
+
+    // console.log("Fetching matches...")
+    // console.log(this.props.filter);
+    // const response = await fetch('/matches', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     page: page, 
+    //     filter: this.props.filter
+    //   })
+    // });
+    // const matches = await response.json();
+
   }
 
   reloadMatches = async () => {
