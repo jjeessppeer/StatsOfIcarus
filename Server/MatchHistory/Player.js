@@ -1,3 +1,5 @@
+const { generateFilterPipeline } = require("./MatchFilter.js");
+
 async function getPlayerIdFromName(mongoClient, name, exactMatch = false) {
   const playersCollection = mongoClient.db("mhtest").collection("Players");
   let player;
@@ -35,13 +37,17 @@ async function getPlayerInfo(mongoClient, playerId) {
   return playerInfo;
 }
 
-async function getPlayerShipStats(mongoClient, playerId) {
-  const playersCollection = mongoClient.db("mhtest").collection("Players");
+async function getPlayerShipStats(mongoClient, filter, playerId) {
+  // const playersCollection = mongoClient.db("mhtest").collection("Players");
+  const matchCollection = mongoClient.db("mhtest").collection("Matches");
 
-  const rates = await playersCollection.aggregate([
+  const filterPipeline = generateFilterPipeline(filter);
+  console.log("PIPE: ", filterPipeline);
+  const rates = await matchCollection.aggregate([
     ...filterPipeline,
-    { $addFields: {
-      playerFlatIndex: { $indexOfArray: [ "$FlatPlayers", playerId ] },
+    { $match: { FlatPlayers: playerId } },
+    { $addFields: { 
+      playerFlatIndex: { $indexOfArray: [ "$FlatPlayers", playerId ] } 
     }},
     { $addFields: {
       playerTeamIndex: { $floor: { $divide: [ 
@@ -129,6 +135,8 @@ async function getPlayerShipStats(mongoClient, playerId) {
       ]
     }},
   ]).next();
+
+  // console.log(rates);
 
   return rates;
 }

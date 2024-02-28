@@ -35,7 +35,12 @@ export class PlayerInfoBox extends HTMLDivElement {
 
   }
 
-  initializePlayrateChart(winrates) {
+  loadCharts(playerShipStats) {
+    this.initializeClassChart(playerShipStats);
+    this.initializeWinrateChart(playerShipStats);
+  }
+
+  initializeClassChart(winrates) {
     let classCounts = [0, 0, 0];
     let classIndexMap = {
       1: 2,

@@ -192,6 +192,15 @@ app.get('/player/:playerId/elo/:category',
         LeaderboardPosition: leaderboardPosition});
 });
 
+app.get('/player/:playerId/ship_stats',
+    queryValidator(schemas.matchFilter),
+    async function(req, res) {
+    console.log("FILTER: ", req.body);
+    const playerId = Number(req.params.playerId);
+    const stats = await MatchHistory.getPlayerShipStats(mongoClient, req.query, playerId);
+    res.status(200).json(stats);
+});
+
 // app.post('/balance_lobby',
 //     schemaMiddleware(schemas.lobbyBalance),
 //     async function(req, res) {

@@ -1,4 +1,4 @@
-class PlayerShipsCard extends HTMLDivElement {
+export class PlayerShipsCard extends HTMLDivElement {
   constructor() {
     super();
 
@@ -9,7 +9,7 @@ class PlayerShipsCard extends HTMLDivElement {
         `;
   }
 
-  initialize(shipRates) {
+  load(shipRates) {
     for (let rates of shipRates.ModelRates) {
       // if (rates._id != 15) continue;
       let cell = document.createElement('div', { is: 'player-ship-info-cell' });
@@ -20,7 +20,7 @@ class PlayerShipsCard extends HTMLDivElement {
   }
 }
 
-class PlayerShipInfoCell extends HTMLDivElement {
+export class PlayerShipInfoCell extends HTMLDivElement {
   constructor() {
     super();
 
@@ -145,8 +145,3 @@ class PlayerShipInfoCell extends HTMLDivElement {
     let chart = new Chart(canvas, config);
   }
 }
-
-
-
-customElements.define('player-ship-info-table', PlayerShipInfoTable, { extends: 'div' });
-customElements.define('player-ship-info-cell', PlayerShipInfoCell, { extends: 'div' });
