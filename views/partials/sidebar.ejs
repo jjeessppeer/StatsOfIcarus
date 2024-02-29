@@ -19,19 +19,19 @@
 
   <ul class="list-unstyled components">
     <li>
-      <a href="/MatchHistory" class="<%- (page === 'MatchHistory') ? 'active' : ''%>">
+      <a href="/MatchHistory">
         <i class="fas fa-glasses"></i>
         Match history
       </a>
     </li>
     <li>
-      <a href="/ShipBuilder" class="<%- (page === 'ShipBuilder') ? 'active' : ''%>">
+      <a href="/ShipBuilder">
         <i class="fas fa-hammer"></i>
         Ship builder
       </a>
     </li>
     <li>
-      <a href="/DamageCalculator" class="<%- (page === 'DamageCalculator') ? 'active' : ''%>">
+      <a href="/DamageCalculator">
         <i class="fas fa-bomb"></i>
         Damage calculator
       </a>
@@ -65,21 +65,30 @@
 
 <script type="module" src="js/scsTime.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    DarkReader.setFetchMethod(window.fetch);
-    // Setup dark mode
-    let dark_mode_switch = document.getElementById("darkModeSwitch");
-    dark_mode_switch.addEventListener("change", function () {
-      if (this.checked) {
-        DarkReader.enable({ brightness: 100, contrast: 100 });
-        document.cookie = "dark_mode=true";
-      }
-      else {
-        DarkReader.disable();
-        document.cookie = "dark_mode=false";
-      }
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#sidebar ul a").forEach(el => {
+      if (window.location.pathname === el.pathname) el.classList.add('active');
     });
-    dark_mode_switch.checked = getCookie("dark_mode") == "true";
-    dark_mode_switch.dispatchEvent(new InputEvent('change'));
+  });
+</script>
+<script>
+  // Setup dark mode
+  DarkReader.setFetchMethod(window.fetch);
+  if (getCookie("dark_mode") == "true") {
+    console.log("cookie true")
+    DarkReader.enable({ brightness: 100, contrast: 100 });
+  }
+  const dark_mode_switch = document.getElementById("darkModeSwitch");
+  dark_mode_switch.checked = getCookie("dark_mode") == "true";
+  dark_mode_switch.addEventListener("change", function () {
+    if (this.checked) {
+      console.log("checked")
+      DarkReader.enable({ brightness: 100, contrast: 100 });
+      document.cookie = "dark_mode=true";
+    }
+    else {
+      DarkReader.disable();
+      document.cookie = "dark_mode=false";
+    }
   });
 </script>
