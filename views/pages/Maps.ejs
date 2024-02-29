@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('../partials/head'); %>
+  <script type="module" src="/js/SpawnMaps.js"></script>
+</head>
+
+<body>
+  <div class="wrapper">
+    <%- include('../partials/sidebar'); %>
+      <div id="content" class="container-fluid">
+        <div id="spawns" class="content-panel">
+
+          <h2>Spawn points</h2>
+          <div class="input-group" style="width:250px;">
+            <div class="input-group-prepend">
+              <div class="input-group-text">Map</div>
+            </div>
+            <select class="form-control" id="spawnMapSelect" autocomplete="off">
+            </select>
+            <img id="spawnImage" src="/images/spawn-images/2v2DM_CanyonAmbush.jpg" width="700" height="700">
+          </div>
+        </div>
+      </div>
+  </div>
+</body>
+
+</html>
