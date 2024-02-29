@@ -27,13 +27,31 @@ const inflate = util.promisify(zlib.inflate);
 
 var requestIp = require('request-ip');
 
-var app = express()
+const app = express()
 app.use(express.json({ limit: '30mb' }));
 app.use(express.text({ limit: '30mb' }));
 app.use(express.urlencoded({
     limit: '30mb', 
     extended: true}));
 app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+
+app.get('/', function(req, res) {
+  res.redirect('/MatchHistory');
+});
+
+app.get('/MatchHistory', function(req, res) {
+  res.render('pages/MatchHistory', {page: "MatchHistory"});
+});
+
+app.get('/DamageCalculator', function(req, res) {
+    res.render('pages/DamageCalculator', {page: "DamageCalculator"});
+});
+
+app.get('/ShipBuilder', function(req, res) {
+    res.render('pages/ShipBuilder', {page: "ShipBuilder"});
+});
 
 app.get('/mod', function(req, res) {
     res.redirect('https://github.com/jjeessppeer/MatchHistoryMod/releases');

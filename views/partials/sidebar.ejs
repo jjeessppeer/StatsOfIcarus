@@ -1,0 +1,85 @@
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h3>Stats of Icarus</h3>
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+      <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
+    </div>
+    <div>
+    </div>
+    <br>
+    <div id="scsTime">
+      SCS
+    </div>
+  </div>
+  <div class="sidebar-header collapsed">
+    <h3><i class="fas fa-atom"></i></h3>
+  </div>
+
+
+  <ul class="list-unstyled components">
+    <li>
+      <a href="/MatchHistory" class="<%- (page === 'MatchHistory') ? 'active' : ''%>">
+        <i class="fas fa-glasses"></i>
+        Match history
+      </a>
+    </li>
+    <li>
+      <a href="/ShipBuilder" class="<%- (page === 'ShipBuilder') ? 'active' : ''%>">
+        <i class="fas fa-hammer"></i>
+        Ship builder
+      </a>
+    </li>
+    <li>
+      <a href="/DamageCalculator" class="<%- (page === 'DamageCalculator') ? 'active' : ''%>">
+        <i class="fas fa-bomb"></i>
+        Damage calculator
+      </a>
+    </li>
+    <!-- <li data-show="#repairTools">
+        <a href="#repairTools">
+          <i class="fas fa-hammer"></i>
+          Repair tools
+        </a>
+      </li> -->
+    <li>
+      <a href="/Maps">
+        <i class="fas fa-map"></i>
+        Maps
+      </a>
+    </li>
+    <li>
+      <a href="/MapRandomizer">
+        <i class="fas fa-random"></i>
+        Map randomizer
+      </a>
+    </li>
+    <li id="aboutLink">
+      <a href="/About">
+        <i class="far fa-question-circle"></i>
+        About
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<script type="module" src="js/scsTime.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    DarkReader.setFetchMethod(window.fetch);
+    // Setup dark mode
+    let dark_mode_switch = document.getElementById("darkModeSwitch");
+    dark_mode_switch.addEventListener("change", function () {
+      if (this.checked) {
+        DarkReader.enable({ brightness: 100, contrast: 100 });
+        document.cookie = "dark_mode=true";
+      }
+      else {
+        DarkReader.disable();
+        document.cookie = "dark_mode=false";
+      }
+    });
+    dark_mode_switch.checked = getCookie("dark_mode") == "true";
+    dark_mode_switch.dispatchEvent(new InputEvent('change'));
+  });
+</script>
