@@ -28,9 +28,7 @@ async function getPlayerInfo(mongoClient, playerId) {
       $project: {
         _id: 1,
         Name: 1,
-        Clan: 1,
-        SkillRatings: 1,
-        ELORating: 1
+        Clan: 1
       }
     }
   ]).next();
