@@ -58,6 +58,8 @@ export function MatchHistoryPage() {
 
   React.useEffect(() => {
     executeSearch("Player");
+    // Load state from url.
+    
   }, []);
 
   let pageContent;
