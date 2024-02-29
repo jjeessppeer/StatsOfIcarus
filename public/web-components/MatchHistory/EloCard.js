@@ -116,12 +116,13 @@ export class EloCard extends HTMLDivElement {
 
     this.querySelector('table').innerHTML = '';
     for (const playerRank of leaderboardPage) {
+      console.log(playerRank);
       const li = document.createElement('tr');
       li.innerHTML = `
         <td class="ladder-rank">#${playerRank.LadderRank}</td>
         <td class="ladder-name">${playerRank.Name.slice(0, -5)}</td>
         <td class="ladder-points">${playerRank.Points}p</td>`;
-      li.classList.toggle('highlight', playerRank.Name == this.highlightName);
+      li.classList.toggle('highlight', playerRank._id == this.playerId);
       this.querySelector('table').append(li);
     }
   }
