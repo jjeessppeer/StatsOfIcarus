@@ -37,7 +37,7 @@ export class ShipBuilder extends React.PureComponent {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams();
     urlParams.set('build_code', this.getExportString());
-    updateQueryParams(urlParams);
+    updateQueryParams(urlParams.toString());
   }
 
   getExportString() {

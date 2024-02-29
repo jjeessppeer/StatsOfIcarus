@@ -3,7 +3,9 @@ function updateQueryParams(urlParams) {
     const host = window.location.host;
     const pathname = window.location.pathname;
     const hash = window.location.hash;
-    const newUrl = `${protocol}//${host}${pathname}?${urlParams.toString()}${hash}`;
+    const params = urlParams.length === 0 ? "" : `?${urlParams}`;
+    console.log(params);
+    const newUrl = `${protocol}//${host}${pathname}${params}${hash}`;
     window.history.pushState({path:newUrl},'',newUrl);
 }
 

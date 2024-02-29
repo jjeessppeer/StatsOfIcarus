@@ -1,8 +1,7 @@
 import { Searchbar } from "./Search/Searchbar.js"
 import { OverviewPerspective } from "./OverviewPerspective/OverviewPerspective.js";
 import { PlayerPerspective } from "./PlayerPerspective/PlayerPerspective.js";
-
-
+import qs from 'qs';
 
 export const SearchContext = React.createContext({
   search: {
@@ -25,7 +24,7 @@ export const FilterContext = React.createContext({
 
 export function MatchHistoryPage() {
   const [search, setSearch] = React.useState({
-    text: "w",
+    text: "",
     changed: false,
     tagsInclude: [],
     tagsExclude: []
@@ -56,11 +55,29 @@ export function MatchHistoryPage() {
     });
   };
 
+  
+
   React.useEffect(() => {
-    executeSearch("Player");
-    // Load state from url.
-    
+    // Load search state from url.
+    const search = window.location.search;
+    if (search.length === 0) return;
+    const ld = qs.parse(search.substring(1));
+    const mode = ld.mode;
+    delete ld.mode;
+    setFilterState({
+      filter: ld,
+      mode: mode
+    });
   }, []);
+
+  React.useEffect(() => {
+    if (Object.keys(filterState.filter).length === 0) {
+      updateQueryParams("");
+      return;
+    }
+    const q = qs.stringify({mode: filterState.mode, ...filterState.filter}, { encode: true });
+    updateQueryParams(q);
+  }, [filterState]);
 
   let pageContent;
   if (filterState.mode == "Overview") {
