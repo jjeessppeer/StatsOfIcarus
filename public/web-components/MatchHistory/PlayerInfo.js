@@ -1,6 +1,6 @@
 import { CLASS_COLORS } from '/js/constants.js';
 
-class PlayerInfoBox extends HTMLDivElement {
+export class PlayerInfoBox extends HTMLDivElement {
   constructor() {
     super();
     this.classList.add('player-infobox')
@@ -28,24 +28,26 @@ class PlayerInfoBox extends HTMLDivElement {
     // Initialize charts
   }
 
-  initialize(playerData){
-    this.querySelector('.clan-name').textContent = playerData.PlayerInfo.Clan == "" ? "" : `[${playerData.PlayerInfo.Clan}]`;
-    this.querySelector('.player-name').textContent = playerData.PlayerInfo.Name.substring(0, playerData.PlayerInfo.Name.length - 5);
-    // this.querySelector('.match-count').textContent = `${playerData.PlayerInfo.MatchCount} matches recorded`;
+  load(playerInfo) {
+    this.querySelector('.clan-name').textContent = playerInfo.Clan === "" ? "" : `[${playerInfo.Clan}]`;
+    this.querySelector('.player-name').textContent = playerInfo.Name.substring(0, playerInfo.Name.length - 5);
     this.querySelector('.match-count').textContent = ``;
-       
-    this.initializePlayrateChart(playerData.Winrates);
-    this.initializeWinrateChart(playerData.Winrates);
-    
+
   }
 
-  initializePlayrateChart(winrates) {
+  loadCharts(playerShipStats) {
+    this.initializeClassChart(playerShipStats);
+    this.initializeWinrateChart(playerShipStats);
+  }
+
+  initializeClassChart(winrates) {
     let classCounts = [0, 0, 0];
-    let classIndexMap = { 
-      1: 2, 
-      2: 0, 
-      4: 1 };
-    
+    let classIndexMap = {
+      1: 2,
+      2: 0,
+      4: 1
+    };
+
     winrates.ClassRates.forEach(el => {
       classCounts[classIndexMap[el._id]] = el.MatchCount;
     });
@@ -92,14 +94,15 @@ class PlayerInfoBox extends HTMLDivElement {
 
   initializeWinrateChart(winrates) {
     let classCounts = [
-      [0, 1], 
-      [0, 1], 
+      [0, 1],
+      [0, 1],
       [0, 1]
     ];
-    let classIndexMap = { 
-      1: 2, 
-      2: 0, 
-      4: 1 };
+    let classIndexMap = {
+      1: 2,
+      2: 0,
+      4: 1
+    };
     winrates.ClassRates.forEach(el => {
       classCounts[classIndexMap[el._id]][0] = el.Wins;
       classCounts[classIndexMap[el._id]][1] = el.MatchCount - el.Wins;
@@ -160,10 +163,10 @@ class PlayerInfoBox extends HTMLDivElement {
               label: function (context) {
                 let sum = 0;
                 context.dataset.data.map(data => {
-                    sum += data;
+                  sum += data;
                 });
-                let percentage = (context.raw*100 / sum).toFixed(0)+"%";
-                let description = `${context.dataset.label} ${context.label} ${percentage} [${context.raw}]` 
+                let percentage = (context.raw * 100 / sum).toFixed(0) + "%";
+                let description = `${context.dataset.label} ${context.label} ${percentage} [${context.raw}]`
                 return description;
               }
             }
@@ -180,5 +183,3 @@ class PlayerInfoBox extends HTMLDivElement {
 
 
 
-
-customElements.define('player-info-box', PlayerInfoBox, { extends: 'div' });

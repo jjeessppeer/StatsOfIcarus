@@ -1,0 +1,84 @@
+.elo-group-select {
+    border: 0;
+    padding: 8px;
+    margin: 0;
+    font-weight: bold;
+    /* font-size: 40px; */
+}
+
+.elo-top {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-evenly; */
+    justify-content: flex-end;
+}
+
+.elo-top > span:last-of-type {
+    margin-right: auto;
+}
+
+.elo-top > span {
+    padding-right: 15px;
+    font-size: 12px;
+}
+
+.chart-flex {
+    display: flex;
+}
+
+.chart-flex .chart-container {
+    flex-grow: 1;
+}
+
+.player-leaderboard {
+    padding: 0;
+    padding-top: 10px;
+    /* border-top: 1px solid; */
+}
+
+.player-leaderboard .pagination {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
+.player-leaderboard .pagination button{
+    border: 1px solid black;
+}
+
+.player-leaderboard table {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.player-leaderboard table tr {
+    border-bottom: 1px solid var(--card-border);
+    height: 30px;
+}
+
+.player-leaderboard table tr:first-child {
+    border-top: 1px solid var(--card-border);
+}
+
+.player-leaderboard table tr.highlight {
+    background-color: var(--blue-2);
+}
+
+.player-leaderboard table td:nth-child(1) {
+    font-weight: bold;
+    padding-left: 10px;
+    width: 40px;
+}
+
+.player-leaderboard table td:nth-child(2) {
+    padding-left: 10px;
+    width: 200px;
+}
+
+.player-leaderboard h5 {
+    padding: 10px;
+    padding-bottom: 4px;
+    margin: 0;
+}

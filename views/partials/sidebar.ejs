@@ -1,0 +1,94 @@
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <h3>Stats of Icarus</h3>
+    <div class="custom-control custom-switch">
+      <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+      <label class="custom-control-label" for="darkModeSwitch">DARK MODE</label>
+    </div>
+    <div>
+    </div>
+    <br>
+    <div id="scsTime">
+      SCS
+    </div>
+  </div>
+  <div class="sidebar-header collapsed">
+    <h3><i class="fas fa-atom"></i></h3>
+  </div>
+
+
+  <ul class="list-unstyled components">
+    <li>
+      <a href="/MatchHistory">
+        <i class="fas fa-glasses"></i>
+        Match history
+      </a>
+    </li>
+    <li>
+      <a href="/ShipBuilder">
+        <i class="fas fa-hammer"></i>
+        Ship builder
+      </a>
+    </li>
+    <li>
+      <a href="/DamageCalculator">
+        <i class="fas fa-bomb"></i>
+        Damage calculator
+      </a>
+    </li>
+    <!-- <li data-show="#repairTools">
+        <a href="#repairTools">
+          <i class="fas fa-hammer"></i>
+          Repair tools
+        </a>
+      </li> -->
+    <li>
+      <a href="/Maps">
+        <i class="fas fa-map"></i>
+        Maps
+      </a>
+    </li>
+    <li>
+      <a href="/TournamentRandomizer">
+        <i class="fas fa-random"></i>
+        Map randomizer
+      </a>
+    </li>
+    <li id="aboutLink">
+      <a href="/About">
+        <i class="far fa-question-circle"></i>
+        About
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<script type="module" src="js/scsTime.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#sidebar ul a").forEach(el => {
+      if (window.location.pathname === el.pathname) el.classList.add('active');
+    });
+  });
+</script>
+<script>
+  // Setup dark mode
+  DarkReader.setFetchMethod(window.fetch);
+  if (getCookie("dark_mode") == "true") {
+    console.log("cookie true")
+    DarkReader.enable({ brightness: 100, contrast: 100 });
+  }
+  const dark_mode_switch = document.getElementById("darkModeSwitch");
+  dark_mode_switch.checked = getCookie("dark_mode") == "true";
+  dark_mode_switch.addEventListener("change", function () {
+    if (this.checked) {
+      console.log("checked")
+      DarkReader.enable({ brightness: 100, contrast: 100 });
+      document.cookie = "dark_mode=true";
+    }
+    else {
+      DarkReader.disable();
+      document.cookie = "dark_mode=false";
+    }
+  });
+</script>

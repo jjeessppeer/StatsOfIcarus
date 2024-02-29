@@ -1,0 +1,15 @@
+@import "/css/style.css";
+@import "/css/MatchHistory.css";
+@import "/css/HistorySearch.css";
+@import "/css/HistoryGraphs.css";
+@import "/css/MatchHistory/FancySearch.css";
+@import "/css/ShipStats/IconDropdown.css";
+@import "/css/TournamentGenerator.css";
+
+
+@import "/css/ShipStats/LoadoutOverview.css";
+@import "/css/ShipStats/LoadoutSettings.css";
+@import "/css/MatchHistory/HeatmapTab.css";
+@import "/css/MatchHistory/Slider.css";
+@import "/css/DamageCalculator.css";
+@import "/css/ShipBuilder.css";
