@@ -49,6 +49,10 @@ app.get('/DamageCalculator', function(req, res) {
     res.render('pages/DamageCalculator', {page: "DamageCalculator"});
 });
 
+app.get('/About', function(req, res) {
+    res.render('pages/About');
+});
+
 app.get('/ShipBuilder', function(req, res) {
     res.render('pages/ShipBuilder', {page: "ShipBuilder"});
 });
