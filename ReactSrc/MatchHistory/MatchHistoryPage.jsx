@@ -35,12 +35,8 @@ export function MatchHistoryPage() {
     mode: "Overview"
   });
 
-  // const [searchMode, setSearchMode] = React.useState("Overview");
-  // const [filter, setFilter] = React.useState({});
-
   const executeSearch = async (mode) => {
     // Load search state into filters.
-    console.log("EXECUTING SEARCH: ", mode);
     const f = {};
     if (search.tagsExclude.length > 0) f.tagsExclude = JSON.parse(JSON.stringify(search.tagsExclude));
     if (search.tagsInclude.length > 0) f.tagsInclude = JSON.parse(JSON.stringify(search.tagsInclude));
@@ -55,8 +51,6 @@ export function MatchHistoryPage() {
     });
   };
 
-  
-
   React.useEffect(() => {
     // Load search state from url.
     const search = window.location.search;
@@ -68,9 +62,14 @@ export function MatchHistoryPage() {
       filter: ld,
       mode: mode
     });
+    setSearch({
+      ...search,
+      ...ld
+    });
   }, []);
 
   React.useEffect(() => {
+    // Set search state from url.
     if (Object.keys(filterState.filter).length === 0) {
       updateQueryParams("");
       return;

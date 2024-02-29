@@ -88,15 +88,17 @@ export class EloCard extends HTMLDivElement {
     const category = this.category;
     const playerId = this.playerId;
     const eloData = await fetch(`/player/${playerId}/elo/${category}`).then(res => res.json());
-
     const eloTimeline = eloData.EloTimeline;
+
+    const ladderRank = eloData.LeaderboardPosition !== 0 ? `#${eloData.LeaderboardPosition}` : "unranked"
+    const currentElo = eloTimeline.length !== 0 ? eloTimeline[eloTimeline.length - 1].elo : "-";
     const matchCount = eloTimeline.reduce((acc, el) => (acc + el.count), 0);
 
-    this.page = Math.floor(eloData.LeaderboardPosition / 10);
-
-    this.querySelector('.ladder-text').textContent = `#${eloData.LeaderboardPosition}`;
-    this.querySelector('.elo-text').textContent = eloTimeline[eloTimeline.length - 1].elo;
+    this.querySelector('.ladder-text').textContent = ladderRank;
+    this.querySelector('.elo-text').textContent = currentElo;
     this.querySelector('.matches-text').textContent = matchCount;
+
+    this.page = Math.floor(eloData.LeaderboardPosition / 10);
 
     this.chart.data.datasets.pop();
     this.chart.data.datasets.push({
@@ -116,7 +118,6 @@ export class EloCard extends HTMLDivElement {
 
     this.querySelector('table').innerHTML = '';
     for (const playerRank of leaderboardPage) {
-      console.log(playerRank);
       const li = document.createElement('tr');
       li.innerHTML = `
         <td class="ladder-rank">#${playerRank.LadderRank}</td>

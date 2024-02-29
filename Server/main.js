@@ -42,11 +42,11 @@ app.get('/', function(req, res) {
 });
 
 app.get('/MatchHistory', function(req, res) {
-  res.render('pages/MatchHistory', {page: "MatchHistory"});
+  res.render('pages/MatchHistory');
 });
 
 app.get('/DamageCalculator', function(req, res) {
-    res.render('pages/DamageCalculator', {page: "DamageCalculator"});
+    res.render('pages/DamageCalculator');
 });
 
 app.get('/Maps', function(req, res) {
@@ -62,7 +62,7 @@ app.get('/About', function(req, res) {
 });
 
 app.get('/ShipBuilder', function(req, res) {
-    res.render('pages/ShipBuilder', {page: "ShipBuilder"});
+    res.render('pages/ShipBuilder');
 });
 
 app.get('/mod', function(req, res) {
