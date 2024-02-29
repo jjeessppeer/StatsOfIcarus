@@ -53,6 +53,10 @@ app.get('/Maps', function(req, res) {
     res.render('pages/Maps');
 });
 
+app.get('/TournamentRandomizer', function(req, res) {
+    res.render('pages/TournamentRandomizer');
+});
+
 app.get('/About', function(req, res) {
     res.render('pages/About');
 });
