@@ -97,10 +97,12 @@ export class DamageCalculator extends React.PureComponent {
       damages[componentType] = {};
       const modifier = DAMAGE_MODIFIERS[gunItem.Damage.DirectHit.Type][componentType];
       damages[componentType].direct = gunItem.Damage.DirectHit.Amount * modifier * ammoDamageMod * ammoDirectMod * buffMod * laserModifier * shots;
+      damages[componentType].direct *= this.state.directEnabled ? 1 : 0;
     }
     for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type]) {
       const modifier = DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type][componentType];
       damages[componentType].burst = gunItem.Damage.BurstHit.Amount * modifier * ammoDamageMod * ammoBurstMod * buffMod * laserModifier * shots;
+      damages[componentType].burst *= this.state.aoeEnabled ? 1 : 0;
     }
     for (const componentType in DAMAGE_MODIFIERS[gunItem.Damage.BurstHit.Type]) {
       damages[componentType].total = damages[componentType].burst + damages[componentType].direct;
@@ -262,10 +264,6 @@ class DamageTable extends React.PureComponent {
 }
 
 class DamageRow extends React.PureComponent {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return (
       <tr>
@@ -280,12 +278,7 @@ class DamageRow extends React.PureComponent {
 }
 
 class DamageCell extends React.PureComponent {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
-    // const total = precise(this.props.damage.total * this.props.scale, 3);
     const total = (this.props.damage.total * this.props.scale).toFixed(0);
     const direct = (this.props.damage.direct * this.props.scale).toFixed(0);
     const burst = (this.props.damage.burst * this.props.scale).toFixed(0);
