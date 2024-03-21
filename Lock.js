@@ -1,11 +1,14 @@
 class Semaphore {
-    constructor(maxSimultaneous){
+    constructor(maxSimultaneous, maxAwaiting=100){
         this.resolveQueue = [];
         this.promiseQueue = [];
         this.maxSimultaneous = maxSimultaneous;
+        this.maxAwaiting = maxAwaiting
     }
 
     acquire() {
+        if (this.promiseQueue.length > this.maxAwaiting)
+            throw new Error("Maximum simultaneous waiting on semaphore.")
         let promise = new Promise(resolve => {
             this.resolveQueue.push(resolve);
         });
