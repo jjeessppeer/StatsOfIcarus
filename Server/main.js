@@ -23,7 +23,7 @@ const acmi = require("./Acmi/acmi.js");
 const { MONGODB_URL_STRING } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
-const MOD_VERSION_LATEST = "1.0.0";
+const MOD_VERSION_LATEST = "2.0.0";
 
 const zlib = require('zlib');
 const util = require('util');
@@ -177,7 +177,7 @@ app.post('/submit_match_history',
             uploadFailed = true;
         else
             MatchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip, insertionLock);
-        updateAvailable = true;
+        // updateAvailable = true;
     }
     else if(semver.satisfies(modVersion, '>=0.1.3')) {
         const validationResult = schemas.MatchSubmission['0.1.3'].validate(req.body);
