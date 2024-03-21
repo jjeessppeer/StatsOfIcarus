@@ -1,6 +1,7 @@
 const Joi = require('joi'); 
-const MATCH_SUBMISSION_1 = require("./Schemas/HistorySubmission_1.3.js");
-const MATCH_SUBMISSION_2 = require("./Schemas/HistorySubmission_2.0.js");
+const match_0_1_3 = require("./HistoryUpload/0.1.3.js");
+const match_1_0_0 = require("./HistoryUpload/1.0.0.js");
+const match_2_0_0 = require("./HistoryUpload/2.0.0.js");
 
 const leaderboardRequest = Joi.object({
     RatingGroup: Joi.string()
@@ -55,6 +56,9 @@ module.exports = {
     matchFilter,
     matchList,
     shipPopularity,
-    MATCH_SUBMISSION_1: MATCH_SUBMISSION_1.MATCH_SUBMISSION_SCHEMA,
-    MATCH_SUBMISSION_2: MATCH_SUBMISSION_2.MATCH_SUBMISSION_SCHEMA,
+    MatchSubmission: {
+        "0.1.3": match_0_1_3.MATCH_SUBMISSION_SCHEMA,
+        "1.0.0": match_1_0_0.MATCH_SUBMISSION_SCHEMA,
+        "2.0.0": match_2_0_0.MATCH_SUBMISSION_SCHEMA
+    }
 }

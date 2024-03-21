@@ -2,16 +2,21 @@
 
 var express = require('express');
 const Joi = require('joi');
+const mongodb = require("mongodb");
 const { MongoClient, ReturnDocument } = require("mongodb");
 var fs = require('fs');
+const stream = require('stream');
 var http = require('http');
 const semver = require('semver');
+const { Lock } = require("../Lock.js");
+const insertionLock = new Lock();
 
 const { schemaMiddleware, queryValidator, bodyValidator } = require('./SchemaValidation/middleware.js');
 const schemas = require('./SchemaValidation/schemas.js');
 
-const matchHistory = require("./matchHistory.js");
+// const matchHistory = require("./matchHistory.js");
 const MatchHistory = require("./MatchHistory/MatchHistory.js");
+const acmi = require("./Acmi/acmi.js");
 // const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 // const shipStats = require('./ShipStats/ShipStats.js');
 
@@ -91,79 +96,119 @@ app.get('/get_datasets', async function (req, res) {
     res.status(200).json(datasets);
 });
 
-app.get('/match/:matchId/gunneryDetails',
-    async function(req, res) {
-    const matchesCollection = mongoClient.db("mhtest").collection("Matches");
-    let agg = matchesCollection.aggregate([
-        {$match: {MatchId: req.params.matchId}},
-        {$project: {
-            GunneryData: 1
-        }}
-    ]);
-    let doc = await agg.next();
+// app.get('/match/:matchId/gunneryDetails',
+//     async function(req, res) {
+//     const matchesCollection = mongoClient.db("mhtest").collection("Matches");
+//     let agg = matchesCollection.aggregate([
+//         {$match: {MatchId: req.params.matchId}},
+//         {$project: {
+//             GunneryData: 1
+//         }}
+//     ]);
+//     let doc = await agg.next();
+//     if (!doc) {
+//         return res.status(404).send('Match not found.');
+//     }
+//     var inflated = (await unzip(Buffer.from(doc.GunneryData, 'base64'))).toString();
+//     var gunneryData = JSON.parse(inflated);
+//     res.status(200).json(gunneryData);
+// });
+
+// app.get('/match/:matchId/positionData',
+//     async function(req, res) {
+//     const matchesCollection = mongoClient.db("mhtest").collection("Matches");
+//     let agg = matchesCollection.aggregate([
+//         {$match: {MatchId: req.params.matchId}},
+//         {$project: {
+//             PositionData: 1
+//         }}
+//     ]);
+//     let doc = await agg.next();
+//     if (!doc || !doc.PositionData) {
+//         return res.status(404).send('Match not found.');
+//     }
+//     var inflated = (await unzip(Buffer.from(doc.PositionData, 'base64'))).toString();
+//     var positionData = JSON.parse(inflated);
+//     res.status(200).json(positionData);
+// });
+
+app.get('/match/:matchId/replay', async function(req, res) {
+    const matchId = req.params.matchId
+
+    const db = mongoClient.db("mhtest");
+    const bucket = new mongodb.GridFSBucket(db, { bucketName: 'fsReplays' });
+    const cursor = bucket.find({filename: matchId});
+    const doc = await cursor.next();
     if (!doc) {
-        return res.status(404).send('Match not found.');
-
+        return res.status(404).send("Match not found.");
     }
-    var inflated = (await unzip(Buffer.from(doc.GunneryData, 'base64'))).toString();
-    var gunneryData = JSON.parse(inflated);
-    res.status(200).json(gunneryData);
-});
-
-app.get('/match/:matchId/positionData',
-    async function(req, res) {
-    const matchesCollection = mongoClient.db("mhtest").collection("Matches");
-    let agg = matchesCollection.aggregate([
-        {$match: {MatchId: req.params.matchId}},
-        {$project: {
-            PositionData: 1
-        }}
-    ]);
-    let doc = await agg.next();
-    if (!doc || !doc.PositionData) {
-        return res.status(404).send('Match not found.');
-
+    const matchDoc = await db.collection("Matches").findOne({MatchId: matchId});
+    if (!matchDoc) {
+        return res.status(404).send("Match not found.");
     }
-    var inflated = (await unzip(Buffer.from(doc.PositionData, 'base64'))).toString();
-    var positionData = JSON.parse(inflated);
-    res.status(200).json(positionData);
+    const mapItem = await db.collection("Items-Maps").findOne({_id: matchDoc.MapId});
+    res.attachment(`${doc.uploadDate.toISOString().substring(0, 10)}_${mapItem.Name}.acmi`);
+    bucket.openDownloadStream(doc._id).pipe(res);
 });
 
 app.post('/submit_match_history', 
-    // schemaMiddleware(schemas.MATCH_SUBMISSION_SCHEMA),
     async function (req, res) {
     let ip = requestIp.getClientIp(req);
 
-    let modVersion;
-    try {
-        modVersion = Joi.attempt(req.body.ModVersion, Joi.string().required());
-    }
-    catch (err) {
+    const modVersion = semver.valid(req.body.ModVersion);
+    if (modVersion == null){
         return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
     }
 
-    modVersion = semver.valid(modVersion);
-    if (modVersion == null) return;
-    if (semver.satisfies(modVersion, '>=1.0.0')) {
-        const validationResult = schemas.MATCH_SUBMISSION_2.validate(req.body);
+    // TODO: Come up with cleaner backwards compatibility.
+    let updateAvailable = false;
+    let uploadFailed = false;
+
+    if (semver.satisfies(modVersion, '>=2.0.0')) {
+        const validationResult = schemas.MatchSubmission['2.0.0'].validate(req.body);
         if (validationResult.error)
-            return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
-        // var inflated = (await unzip(Buffer.from(req.body.CompressedPositionData, 'base64'))).toString();
-        // var positionData = JSON.parse(inflated);
-        // console.log(positionData);
-        matchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip);
-        return res.status(200).send();
+            uploadFailed = true;
+        else
+            MatchHistory.submitRecord(req.body.LobbyData, false, false, ip, insertionLock);
+    }
+    else if (semver.satisfies(modVersion, '>=1.0.0')) {
+        const validationResult = schemas.MatchSubmission['1.0.0'].validate(req.body);
+        if (validationResult.error)
+            uploadFailed = true;
+        else
+            MatchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip, insertionLock);
+        updateAvailable = true;
     }
     else if(semver.satisfies(modVersion, '>=0.1.3')) {
-        const validationResult = schemas.MATCH_SUBMISSION_1.validate(req.body);
+        const validationResult = schemas.MatchSubmission['0.1.3'].validate(req.body);
         if (validationResult.error)
-            return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
-        // Upload 0.1 data.
-        matchHistory.submitRecord(req.body, false, false, ip);
+            uploadFailed = true;
+        else
+            MatchHistory.submitRecord(req.body, false, false, ip, insertionLock);
+        updateAvailable = true;
+    }
+    else {
+        uploadFailed = true;
+    }
+
+    // Return status.
+    if (uploadFailed) {
+        return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
+    }
+    else if (updateAvailable) {
         return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}\nUpdate on github or statsoficarus.xyz/mod`);
     }
 
-    return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
+    return res.status(200).send();
+});
+
+app.post('/submit_replay', async function(req, res) {
+    const matchId = req.body.MatchId;
+    const acmiString = req.body.AcmiString;
+    const success = await MatchHistory.submitReplay(mongoClient, acmiString, matchId, insertionLock);
+
+    if (success) return res.status(200).send();
+    return res.status(400).send("Failed to upload replay.");
 });
 
 app.get('/match_list/page/:page',
@@ -359,7 +404,7 @@ async function run() {
         // Connect to mongodb
         console.log("Connecting to db...")
         await mongoClient.connect();
-        matchHistory.setMongoClient(mongoClient);
+        MatchHistory.setMongoClient(mongoClient);
         console.log("Connected to db...");
 
         // Start Http server

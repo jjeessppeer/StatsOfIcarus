@@ -1,18 +1,12 @@
 const assert = require('assert');
-const Elo = require('./Elo/EloHelper.js');
-const MatchTagger = require('../Server/MatchHistory/MatchTagger.js');
+const Elo = require('../Elo/EloHelper.js');
+const MatchTagger = require('./MatchTagger.js');
+const mongodb = require("mongodb");
 
 const MIN_SUBMISSION_INTERVAL_MINUTES = 1;
 const MIN_SUBMISSION_INTERVAL_MS = MIN_SUBMISSION_INTERVAL_MINUTES * 30 * 1000;
 
-var client;
-
-// Lock for insertMatchHistory. Function waits unil false to run.
-let insertionRunning = false;
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+let client;
 
 async function getPlayerId(playerName) {
     // TODO handle ps4 players?
@@ -23,19 +17,16 @@ async function getPlayerId(playerName) {
     return res._id;
 }
 
-async function submitRecord(lobbyData, gunneryData, positionData, ip) {
-    // Wait until no concurrent insertion is running.
-    while (insertionRunning) {
-        await sleep(10);
-    }
-
-    insertionRunning = true;
+async function submitRecord(lobbyData, gunneryData, positionData, ip, insertionLock) {
     try {
+        await insertionLock.acquire();
         await insertMatchHistory(lobbyData, gunneryData, positionData, ip);
-    } catch (err) {
-        console.log(err)
-    } finally {
-        insertionRunning = false;
+    }
+    catch (err) {
+        console.log(err);
+    }
+    finally {
+        insertionLock.release();
     }
     return true;
 }
@@ -254,7 +245,16 @@ async function insertMatchHistory(lobbyData, gunneryData, positionData, ip) {
     let playersFull = playerCount == lobbyData.TeamSize * lobbyData.TeamCount * 4;
     let emptySlots = lobbyData.TeamSize * lobbyData.TeamCount * 4 - playerCount;
 
-    
+    // Check if replay exists.
+    const db = client.db("mhtest");
+    const replayBucket = new mongodb.GridFSBucket(db, { bucketName: 'fsReplays' });
+    const replayCursor = replayBucket.find({filename: lobbyData.MatchId});
+    const replayDoc = await replayCursor.next();
+    let replayExists = false;
+    if (replayDoc) {
+        replayExists = true;
+    }
+
 
     // Insert the match.
     let newMatch = {
@@ -287,7 +287,8 @@ async function insertMatchHistory(lobbyData, gunneryData, positionData, ip) {
         FlatSkills: flatSkills,
         FlatPlayerLevels: flatPlayerLevels,
         GunneryData: gunneryData,
-        PositionData: positionData
+        PositionData: positionData,
+        ReplaySaved: replayExists
     }
 
     if (lobbyData.Passworded)
@@ -317,16 +318,6 @@ async function insertMatchHistory(lobbyData, gunneryData, positionData, ip) {
     await matchesCollection.insertOne(newMatch);
     await Elo.processMatchAllCategories(client, newMatch);
 
-    // let doc = await matchesCollection.findOne({MatchId: lobbyData.MatchId});
-    let s = await matchesCollection.aggregate([
-        { $match: {MatchId: lobbyData.MatchId} },
-        {$project: {
-            MatchId: 1,
-            object_size: { $bsonSize: "$$ROOT"}
-        }}
-    ])
-    let doc = await s.next();
-    console.log(doc);
 
     return true;
 }
