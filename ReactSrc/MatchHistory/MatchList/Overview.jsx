@@ -2,9 +2,6 @@ import { game_modes } from '/js/constants.js';
 import { getShipLoadout, getShipItem, getPlayerInfo, getLoadoutInfo } from '/js/MatchHistory/matchHistoryUtils.js';
 
 export class Overview extends React.PureComponent {
-  constructor(props) {
-    super(props);
-  }
   render() {
     let mapName = "unknown map";
     let gameMode = "unknown game mode";
@@ -117,6 +114,13 @@ export class Overview extends React.PureComponent {
           <div>{timeString}</div>
           <div>{timeAgoString}</div>
           {eloDiv}
+        </div>
+        <div className="buttons">
+          {this.props.ReplaySaved &&
+            <a href={`/match/${this.props.MatchId}/replay`} download><button class="btn btn-info">Download replay</button></a>
+          }
+
+
         </div>
         <div className="tags">{tagSpans}</div>
         <div className="players">

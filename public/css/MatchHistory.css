@@ -117,6 +117,11 @@
 
 /* Matchup and score table */
 
+/* .match-history-entry .overview-table > div {
+    margin-left: 10px;
+    margin-right: 10px;
+} */
+
 .match-history-entry .overview-table .matchup {
     width: 150px;
 }
@@ -143,37 +148,21 @@
     font-weight: bold;
     /* font-family: "Goudy Bookletter 1911", monospace; */
     /* font-family: system-ui; */
-    /* color: #c6443e; */
-    /* color: rgb(66, 177, 198); */
 }
 
 
 /* Info box */
 .match-history-entry .overview-table .info {
     width: 140px;
-    /* padding-top: 8px; */
     text-align: center;
-    /* vertical-align: top; */
-    /* padding-left: 4px; */
-    /* padding-right: 4px; */
 
     display: flex;
-    /* flex: 1; */
     align-items: stretch;
     flex-direction: column;
-    /* align-content: space-between; */
-    
-    /* justify-content: start; */
-    /* align-items: center; */
 
     font-size: 14px;
     color: #555e5e;
 }
-
-/* .match-history-entry .overview-table > .info {
-    padding-right: 5px;
-    padding-left: 5px;
-} */
 
 .match-history-entry.blue-winner .overview-table > .info {
     border-right: 1px solid var(--blue-3);
@@ -246,6 +235,19 @@
     color: var(--blue-4);
 }
 
+.match-history-entry .overview-table .buttons {
+    margin: 10px;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    /* align-items: end; */
+    /* align-items: end; */
+    justify-content: end;
+}
+.match-history-entry .overview-table .buttons button{
+    font-size: 12px;
+}
+
 .match-history-entry .overview-table .tags {
     flex: 1;
     display: flex;
@@ -253,8 +255,6 @@
     justify-content: start;
     padding-top: 25px;
     align-items: center;
-    /* text-align: ;
-    vertical-align: top; */
 }
 
 .match-history-entry .overview-table .tags span {
@@ -262,16 +262,12 @@
     margin: 5px;
     padding: 2px 5px;
     line-height: 1;
-    font-size: 10px;
+    font-size: 12px;
     color: rgb(234, 234, 234);
     border-radius: 10px;
 
     border: 1px solid var(--tag-border-1);
     background-color: var(--tag-fill-1);
-
-    /* border-top-left-radius: 5px; */
-
-    /* width: 100px; */
 }
 
 /* Player list */

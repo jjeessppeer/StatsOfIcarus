@@ -70,6 +70,7 @@ async function getMatches(mongoClient, filter, page=0, pageSize=10) {
         },
         Players: 1,
         Ranking: 1,
+        ReplaySaved: 1,
         Scores: 1,
         Ships: 1,
         ShipItems: 1,
