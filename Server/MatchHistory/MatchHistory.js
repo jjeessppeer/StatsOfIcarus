@@ -4,6 +4,7 @@ const { getPlayerInfo, getPlayerShipStats, getPlayerIdFromName } = require("./Pl
 const { getEloTimeline, getLeaderboardPage, getLeaderboardPosition } = require("./Elo.js");
 const { submitReplay } = require("./SubmitReplay.js");
 const { submitRecord, setMongoClient } = require("./Submit.js");
+const { getStatDump } = require("./StatDump.js");
 
 module.exports = {
     getShipPickWinrate,
@@ -11,5 +12,6 @@ module.exports = {
     getPlayerIdFromName, getPlayerInfo, getPlayerShipStats,
     getEloTimeline, getLeaderboardPage, getLeaderboardPosition,
     submitReplay,
-    submitRecord, setMongoClient
+    submitRecord, setMongoClient,
+    getStatDump
 };

@@ -20,7 +20,7 @@ const acmi = require("./Acmi/acmi.js");
 // const lobbyBalancer = require("./Elo/LobbyBalancer.js");
 // const shipStats = require('./ShipStats/ShipStats.js');
 
-const { MONGODB_URL_STRING } = require("../config.json");
+const { MONGODB_URL_STRING, STAT_DUMP_API_KEY } = require("../config.json");
 let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
 const MOD_VERSION_LATEST = "2.0.0";
@@ -94,6 +94,20 @@ app.get('/get_datasets', async function (req, res) {
     }
 
     res.status(200).json(datasets);
+});
+
+app.get('/stat_dump', async function(req, res) {
+    const api_key = req.query.api_key;
+    if (STAT_DUMP_API_KEY != api_key) {
+        return res.status(401).send("Unauthorized.");
+    }
+    try {
+        const stats = await MatchHistory.getStatDump(mongoClient);
+        return res.json(stats);
+    }
+    catch {
+        return res.status(500).send("500");
+    }
 });
 
 // app.get('/match/:matchId/gunneryDetails',

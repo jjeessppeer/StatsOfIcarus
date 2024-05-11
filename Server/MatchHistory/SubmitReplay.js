@@ -5,9 +5,11 @@ const acmi = require("../Acmi/acmi");
 async function submitReplay(mongoClient, acmiString, matchId, insertionLock) {
     try {
         await insertionLock.acquire();
+        console.log("Replay starting...")
         return await executeSubmission(mongoClient, acmiString, matchId);
     }
     catch (err) {
+        console.log("Failed.")
         console.log(err);
         return false;
     }
@@ -24,10 +26,12 @@ async function executeSubmission(mongoClient, acmiString, matchId) {
     const cursor = bucket.find({ filename: matchId });
     const doc = await cursor.next();
     if (doc) {
+        console.log("Match already uploaded.")
         return true;
     }
 
     if (!acmi.isValidAcmi(acmiString)) {
+        console.log("Invalid acmi.")
         return false;
     }
 
@@ -43,6 +47,7 @@ async function executeSubmission(mongoClient, acmiString, matchId) {
             { MatchId: matchId },
             { $set: { ReplaySaved: true } });
     }
+    console.log("OK.")
 }
 
 module.exports = {
