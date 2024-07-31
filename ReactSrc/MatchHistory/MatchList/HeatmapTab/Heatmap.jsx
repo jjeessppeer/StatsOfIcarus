@@ -18,6 +18,11 @@ export class Heatmap extends React.Component {
       let startNewPath = true;
       for (let i = 0; i < shipPath.length; i++) {
         const position = shipPath[i].position;
+        const alive = shipPath[i].alive;
+        if (!alive && startNewPath) {
+          continue;
+        }
+
         const p = positionToCanvasPixel([position.x, 0, position.y], this.props.mapItem, this.props.width);
         if (startNewPath) {
           ctx.beginPath();
@@ -29,10 +34,12 @@ export class Heatmap extends React.Component {
           const yc = (lastP[1] + p[1]) / 2;
           ctx.quadraticCurveTo(lastP[0], lastP[1], xc, yc);
         }
-        // if (shipPositions.Dead[i]) {
-        //   startNewPath = true;
-        // }
         lastP = p;
+
+        if (!alive) {
+          startNewPath = true;
+        }
+        
 
         if ((startNewPath && i != 0) || i == shipPath.length - 1) {
           ctx.lineWidth = 4;

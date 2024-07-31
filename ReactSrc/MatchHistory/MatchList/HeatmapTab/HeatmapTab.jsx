@@ -39,9 +39,6 @@ export class HeatmapTab extends React.Component {
 
     const text = await response.text();
     const [timelines, startTimestamp, endTimestamp] = parseObjectTimelines(text);
-    console.log(timelines);
-    const paths = getShipPaths(timelines, startTimestamp, endTimestamp);
-    console.log(paths);
 
     const mapItemFetch = await fetch(`/game-item/map/${this.props.MapId}`);
     const mapItem = await mapItemFetch.json();

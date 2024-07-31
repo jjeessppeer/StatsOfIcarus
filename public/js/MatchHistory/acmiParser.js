@@ -1,11 +1,13 @@
 const timestampRgx = /^#([\d]*\.?[\d]*)$/;  // Match timestamp line
-const objectRgx = /^([0-9A-Fa-f]*),(.*)$/;  // Match object description line
+const objectRgx = /^([0-9A-Fa-f]+),(.*)$/;  // Match object description line
+const objRemoveRgx = /^-([0-9A-Fa-f]+)$/;    // Match object removal line
 const propRgx = /([\w]*)=([\w|\-\.]*)/g;    // Match single property definition
 
 export function parseObjectTimelines(acmiFile) {
     // Parse an acmi text file into arrays of objects property timelines.
     
     let objectTimelines = {};
+    let objectsAlive = {};
     let lastTimestamp = 0;
     let startTimestamp, endTimestamp;
     let i, j = 0;
@@ -26,21 +28,24 @@ export function parseObjectTimelines(acmiFile) {
         if (obj) {
             const objectId = obj[1];
             const properties = parseObjectProperties(obj[2]);
-
             if (!(objectId in objectTimelines)) {
                 objectTimelines[objectId] = [];
+                objectsAlive[objectId] = false;
             }
-            
-            // Insert properties in timeline.
-            // Merge properties updating on the same timestamp.
-            let idx = objectTimelines[objectId].findIndex(el => el.timestamp == lastTimestamp);
-            if (idx === -1) {
-                objectTimelines[objectId].push({timestamp: lastTimestamp, properties: properties});
+            if (!objectsAlive[objectId]) {
+                objectsAlive[objectId] = true;
+                properties["alive"] = true;
+                
             }
-            else {
-                objectTimelines[objectId][idx].properties = {
-                    ...objectTimelines[objectId][idx].properties, 
-                    ...properties };
+            addProperties(objectTimelines[objectId], properties, lastTimestamp)
+        }
+
+        const objRemove = line.match(objRemoveRgx);
+        if (objRemove) {
+            const objectId = objRemove[1];
+            if (objectsAlive[objectId]) {
+                objectsAlive[objectId] = false;
+                addProperties(objectTimelines[objectId], {alive: false}, lastTimestamp);
             }
         }
     }
@@ -56,6 +61,20 @@ export function parseObjectTimelines(acmiFile) {
     ];
 }
 
+function addProperties(objectTimeline, properties, timestamp) {
+    // Insert properties in timeline.
+    // Merge properties updating on the same timestamp.
+    let idx = objectTimeline.findIndex(el => el.timestamp == timestamp);
+    if (idx === -1) {
+        objectTimeline.push({timestamp: timestamp, properties: properties});
+    }
+    else {
+        objectTimeline[idx].properties = {
+            ...objectTimeline[idx].properties, 
+            ...properties };
+    }
+}
+
 export function getShipPaths(acmiObjectTimeline, startTimestamp, endTimestamp, timeResolution=2) {
     const shipPaths = {};
     for (const objectId in acmiObjectTimeline) {
@@ -64,7 +83,8 @@ export function getShipPaths(acmiObjectTimeline, startTimestamp, endTimestamp, t
         for (let t = startTimestamp; t <= endTimestamp; t += timeResolution) {
             const transform = getPropertyValue(acmiObjectTimeline, objectId, "T", t);
             const position = parseAcmiTransform(transform);
-            shipPaths[objectId].push({timestamp: t, position});
+            const alive = getPropertyValue(acmiObjectTimeline, objectId, "alive", t);
+            shipPaths[objectId].push({timestamp: t, position, alive});
         }
     }
     return shipPaths;
@@ -72,24 +92,21 @@ export function getShipPaths(acmiObjectTimeline, startTimestamp, endTimestamp, t
 
 export function getPropertyValue(acmiObjectTimeline, objectId, propertyKey, targetTimestamp, interpolate=false) {
     // Very inefficient search for property value at given time.
-    let value, prevValue;
+    let value;
     for (const timelineObj of acmiObjectTimeline[objectId]) {
         const properties = timelineObj.properties;
         const timestamp = timelineObj.timestamp;
+        if (targetTimestamp <= timestamp && value != undefined) {
+            break;
+        }
         if (propertyKey in properties) {
-            prevValue = value;
             value = properties[propertyKey];
-            if (targetTimestamp <= timestamp) {
-                break;
-            }
-            
         }
     }
-    if (prevValue !== undefined) return prevValue;
+    // TODO: interpolate values.
+    // TODO: data conversion.
     return value;
 }
-
-// export function generateShipPosition
 
 function parseObjectProperties(line) {
     const propMatches = line.matchAll(propRgx);
