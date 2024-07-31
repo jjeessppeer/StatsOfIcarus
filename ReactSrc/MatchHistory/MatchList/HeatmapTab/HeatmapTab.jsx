@@ -2,7 +2,7 @@
 import { Slider } from '/React/Slider.js';
 import { SliderTimelineBackground } from '/React/MatchHistory/MatchList/HeatmapTab/SliderBackground.js';
 import { Heatmap } from '/React/MatchHistory/MatchList/HeatmapTab/Heatmap.js';
-import { getDeaths, getEndTimestamp, filterPositonData, fixPositionData } from '/React/MatchHistory/MatchList/HeatmapTab/HeatmapUtils.js';
+import { getDeaths, getEndTimestamp, filterPositonData } from '/React/MatchHistory/MatchList/HeatmapTab/HeatmapUtils.js';
 
 import { positionToCanvasPixel } from '/React/MatchHistory/MatchList/HeatmapTab/HeatmapUtils.js';
 
@@ -121,7 +121,9 @@ export class HeatmapTab extends React.Component {
     const shipPaths = getShipPaths(
       this.state.matchTimelines,
       this.state.timelineRange[0], 
-      this.state.timelineRange[1]
+      this.state.timelineRange[1],
+      this.state.enabledShips,
+      this.state.enabledTeams
     )
 
     return (

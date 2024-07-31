@@ -75,10 +75,14 @@ function addProperties(objectTimeline, properties, timestamp) {
     }
 }
 
-export function getShipPaths(acmiObjectTimeline, startTimestamp, endTimestamp, timeResolution=2) {
+export function getShipPaths(acmiObjectTimeline, startTimestamp, endTimestamp, enabledShips, enabledTeams, timeResolution=2) {
     const shipPaths = {};
     for (const objectId in acmiObjectTimeline) {
         if (objectId.substring(0, 2) !== "01") continue;
+        const team = parseInt(objectId.substring(2, 4));
+        const ship = parseInt(objectId.substring(4, 6));
+        if (!enabledShips[team * 2 + ship] || !enabledTeams[team]) continue;
+
         shipPaths[objectId] = [];
         for (let t = startTimestamp; t <= endTimestamp; t += timeResolution) {
             const transform = getPropertyValue(acmiObjectTimeline, objectId, "T", t);
