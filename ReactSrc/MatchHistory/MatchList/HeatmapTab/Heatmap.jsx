@@ -46,7 +46,8 @@ export class Heatmap extends React.Component {
           ctx.strokeStyle = 'white';
           ctx.stroke();
           ctx.lineWidth = 2;
-          // ctx.strokeStyle = colors[shipPositions.TeamIdx * 2 + shipPositions.ShipIdx];
+          const colorIdx = parseInt(objectId.substring(2,4)) + 2 * parseInt(objectId.substring(4,6));
+          ctx.strokeStyle = colors[colorIdx];
           ctx.strokeStyle = colors[0];
           ctx.stroke();
         }
