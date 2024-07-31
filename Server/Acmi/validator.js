@@ -1,7 +1,7 @@
 // const entity_regex = /^[0-9a-fA-F]{8}(,[a-zA-Z0-9]{20}=[^,]{500}){100}$/;
 // const timestamp_regex = /^#[0-9]{0,100}(\.[0-9]{0,100})?$/;
 
-const line_regex = /(^[0-9a-fA-F-]{1,8}(,[a-zA-Z0-9]{1,50}=[^,]{1,500}){1,100}$)|(^#[0-9]{1,100}(\.[0-9]{0,100})?$)/;
+const line_regex = /(^[0-9a-fA-F-]{1,10}(,[a-zA-Z0-9]{1,50}=[^,]{1,500}){1,100}$)|(^#[0-9]{1,100}(\.[0-9]{0,100})?$)/;
 
 function isValidAcmi(acmiString) {
     if (typeof(acmiString) !== "string") return false;

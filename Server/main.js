@@ -25,10 +25,10 @@ let mongoClient = new MongoClient(MONGODB_URL_STRING);
 
 const MOD_VERSION_LATEST = "2.0.0";
 
-const zlib = require('zlib');
-const util = require('util');
-const unzip = util.promisify(zlib.unzip);
-const inflate = util.promisify(zlib.inflate);
+// const zlib = require('zlib');
+// const util = require('util');
+// const unzip = util.promisify(zlib.unzip);
+// const inflate = util.promisify(zlib.inflate);
 
 var requestIp = require('request-ip');
 
@@ -98,14 +98,23 @@ app.get('/get_datasets', async function (req, res) {
 
 app.get('/stat_dump', async function(req, res) {
     const api_key = req.query.api_key;
+    const format = req.query.format;
     if (STAT_DUMP_API_KEY != api_key) {
         return res.status(401).send("Unauthorized.");
     }
     try {
-        const stats = await MatchHistory.getStatDump(mongoClient);
-        return res.json(stats);
+        const stats = await MatchHistory.getStatDump(mongoClient, format);
+        if (format == "csv") {
+            const date = new Date().toISOString();
+            return res.attachment(`stat_dump_${date.substring(0,date.length-14)}.csv`).send(stats);
+            // return res.send(stats);
+        }
+        else {
+            return res.json(stats);
+        }
     }
-    catch {
+    catch (e){
+        console.log(e);
         return res.status(500).send("500");
     }
 });
@@ -167,52 +176,21 @@ app.get('/match/:matchId/replay', async function(req, res) {
 
 app.post('/submit_match_history', 
     async function (req, res) {
+    console.log("recieving match...");
     let ip = requestIp.getClientIp(req);
 
     const modVersion = semver.valid(req.body.ModVersion);
-    if (modVersion == null){
-        return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
+    if (modVersion == null || semver.satisfies(modVersion, '<2.0.0')) {
+        return res.status(400).send(`MatchHistoryMod version outdated.\nGet update from https://statsoficarus.xyz/mod (redirects to github)`);
     }
 
-    // TODO: Come up with cleaner backwards compatibility.
-    let updateAvailable = false;
-    let uploadFailed = false;
-
-    if (semver.satisfies(modVersion, '>=2.0.0')) {
-        const validationResult = schemas.MatchSubmission['2.0.0'].validate(req.body);
-        if (validationResult.error)
-            uploadFailed = true;
-        else
-            MatchHistory.submitRecord(req.body.LobbyData, false, false, ip, insertionLock);
+    const validationResult = schemas.MatchSubmission['2.0.0'].validate(req.body);
+    if (validationResult.error) {
+        return res.status(400).send(`Rejected by server.`);
     }
-    else if (semver.satisfies(modVersion, '>=1.0.0')) {
-        const validationResult = schemas.MatchSubmission['1.0.0'].validate(req.body);
-        if (validationResult.error)
-            uploadFailed = true;
-        else
-            MatchHistory.submitRecord(req.body.LobbyData, req.body.CompressedGunneryData, req.body.CompressedPositionData, ip, insertionLock);
-        // updateAvailable = true;
-    }
-    else if(semver.satisfies(modVersion, '>=0.1.3')) {
-        const validationResult = schemas.MatchSubmission['0.1.3'].validate(req.body);
-        if (validationResult.error)
-            uploadFailed = true;
-        else
-            MatchHistory.submitRecord(req.body, false, false, ip, insertionLock);
-        updateAvailable = true;
-    }
-    else {
-        uploadFailed = true;
-    }
-
-    // Return status.
-    if (uploadFailed) {
-        return res.status(400).send(`MatchHistoryMod version incompatible.\nUpdate on github or statsoficarus.xyz/mod`);
-    }
-    else if (updateAvailable) {
-        return res.status(400).send(`New version of MatchHistoryMod available. \nCurrent: ${req.body.ModVersion} \nLatest: ${MOD_VERSION_LATEST}\nUpdate on github or statsoficarus.xyz/mod`);
-    }
-
+    
+    MatchHistory.submitRecord(req.body.LobbyData, false, false, ip, insertionLock);
+    
     return res.status(200).send();
 });
 

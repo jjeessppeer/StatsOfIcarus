@@ -1,6 +1,6 @@
-async function getStatDump(mongoClient) {
+async function getStatDump(mongoClient, format) {
   const matchCollection = mongoClient.db("mhtest").collection("Matches");
-  const matches = await matchCollection.aggregate([
+  let matches = await matchCollection.aggregate([
     { $match: { TeamSize: 2, TeamCount: 2, GameMode: 2, MatchTags: "ShipsFull" } },
     { $sort: { "Timestamp": -1 } }, 
     { $lookup: {
@@ -75,10 +75,15 @@ async function getStatDump(mongoClient) {
       Winner: 1
     }}
   ]).toArray();
+
+  // if (format == "csv") {
+  //   matches = csvDump(matches);
+  // }
+  // else {
   for (let i = 0; i < matches.length; i++) {
     cleanUpMatchRecord(matches[i]);
   }
-  // cleanUpMatchRecord(matches)
+  // }
   return matches;
 }
 
@@ -87,6 +92,83 @@ const CLASS_MAP = {
   1: "Gunner",
   2: "Pilot"
 }
+
+// function csvDump(matches) {
+//   const header = "Timestamp,Map,GameMode,MatchSeconds,Tags,T1_points,T2_points,T1_elo,T2_elo," +
+//         "T1S1_model,T1S1_loadout,T1S1_pilot,T1S1_crew," +
+//         "T1S1P1_loadout,T1S1P2_loadout,T1S1P3_loadout,T1S1P4_loadout," +
+
+//         "T1S2_model,T1S2_loadout,T1S2_pilot,T1S2_crew," +
+//         "T1S2P1_loadout,T1S2P2_loadout,T1S2P3_loadout,T1S2P4_loadout," +
+        
+//         "T2S1_model,T2S1_loadout,T2S1_pilot,T2S1_crew," +
+//         "T2S1P1_loadout,T21S1P2_loadout,T21S1P3_loadout,T21S1P4_loadout," +
+
+//         "T2S2_model,T2S2_loadout,T2S2_pilot,T2S2_crew," +
+//         "T2S2P1_loadout,T2S2P2_loadout,T2S2P3_loadout,T2S2P4_loadout";
+
+//   const rows = [header];
+//   for (const match of matches) {
+//     rows.push(matchToCsvRow(match));
+//   }
+//   return rows.join("\n");
+// }
+
+// function matchToCsvRow(match) {
+//   const mapItem = match.MapItem[0];
+
+//   const csvCols = [
+//     match.Timestamp,
+//     mapItem.Name,
+//     mapItem.GameModeName,
+//     match.MatchTime,
+//     "\"" + JSON.stringify(match.MatchTags).replaceAll('"', '') + "\"",
+//     match.Scores[0],
+//     match.Scores[1]
+//   ];
+
+//   if (match.Ranking) {
+//     csvCols.push(match.Ranking.TeamRankings[0])
+//     csvCols.push(match.Ranking.TeamRankings[1]);
+//   }
+//   else {
+//     csvCols.push("");
+//     csvCols.push("");
+//   }
+  
+//   for (let t = 0; t < 2; t++) {
+//     for (let s = 0; s < 2; s++) {
+//       const gunNames = [];
+//       const shipLoadout = match.ShipLoadouts.find(el => el._id.toString() == match.Ships[t][s].toString());
+//       for (const gunId of shipLoadout.Loadout) {
+//           const gunItem = match.GunItems.find(el => el._id == gunId);
+//           gunNames.push(gunItem.Name);
+//       }
+//       csvCols.push("\"" + JSON.stringify(gunNames).replaceAll('"', '') + "\"");
+
+//       const playerNames = [];
+//       for (const playerId of match.Players[t][s]) {
+//         const player = match.PlayerInfo.find(el => el._id == playerId);
+//         playerNames.push(player.Name.substring(0, player.Name.length - 5));
+//       }
+
+//       csvCols.push(playerNames[0]);
+//       csvCols.push("\"" + JSON.stringify(playerNames).replaceAll('"', '') + "\"");
+
+      
+//       for (const eqId of match.Skills[t][s]) {
+//         const eqp = match.LoadoutInfo.find(el => eqId.toString() == el._id.toString());
+//         const skillNames = [];
+//         for (const skillId of eqp.Skills) {
+//             const skillItem = match.SkillItems.find(el => el._id == skillId);
+//             skillNames.push(skillItem.Name);
+//         }
+//         csvCols.push("\"" + JSON.stringify(skillNames).replaceAll('"', '') + "\"");
+//       }
+//     }
+//   }
+//   return csvCols.join(",");
+// }
 
 function cleanUpMatchRecord(match) {
   for (let t = 0; t < match.Ships.length; t++) {

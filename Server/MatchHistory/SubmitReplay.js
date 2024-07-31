@@ -1,16 +1,12 @@
-
 const mongodb = require("mongodb");
 const acmi = require("../Acmi/acmi");
 
 async function submitReplay(mongoClient, acmiString, matchId, insertionLock) {
     try {
         await insertionLock.acquire();
-        console.log("Replay starting...")
-        return await executeSubmission(mongoClient, acmiString, matchId);
+        return await executeReplaySubmission(mongoClient, acmiString, matchId);
     }
     catch (err) {
-        console.log("Failed.")
-        console.log(err);
         return false;
     }
     finally {
@@ -18,7 +14,7 @@ async function submitReplay(mongoClient, acmiString, matchId, insertionLock) {
     }
 }
 
-async function executeSubmission(mongoClient, acmiString, matchId) {
+async function executeReplaySubmission(mongoClient, acmiString, matchId) {
     const db = mongoClient.db("mhtest");
     const bucket = new mongodb.GridFSBucket(db, { bucketName: 'fsReplays' });
 
@@ -41,13 +37,17 @@ async function executeSubmission(mongoClient, acmiString, matchId) {
 
     // Update match doc to indicate replay exists.
     const matchesCollection = db.collection("Matches");
-    let match = await matchesCollection.findOne({ MatchId: matchId });
-    if (match && !match.ReplaySaved) {
-        await matchesCollection.updateOne(
-            { MatchId: matchId },
-            { $set: { ReplaySaved: true } });
-    }
+    await matchesCollection.updateOne(
+        { MatchId: matchId },
+        { $set: { ReplaySaved: true } });
+    // let match = await matchesCollection.findOne({ MatchId: matchId });
+    // if (match && !match.ReplaySaved) {
+    //     await matchesCollection.updateOne(
+    //         { MatchId: matchId },
+    //         { $set: { ReplaySaved: true } });
+    // }
     console.log("OK.")
+    return true;
 }
 
 module.exports = {
