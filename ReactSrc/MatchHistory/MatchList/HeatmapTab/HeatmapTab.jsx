@@ -6,6 +6,9 @@ import { getDeaths, getEndTimestamp, filterPositonData, fixPositionData } from '
 
 import { positionToCanvasPixel } from '/React/MatchHistory/MatchList/HeatmapTab/HeatmapUtils.js';
 
+
+import { parseObjectTimelines, getShipPaths } from '/js/MatchHistory/acmiParser.js';
+
 export class HeatmapTab extends React.Component {
   constructor(props) {
     super(props);
@@ -28,18 +31,20 @@ export class HeatmapTab extends React.Component {
   }
 
   async fetchData() {
-    const response = await fetch(`/match/${this.props.MatchId}/positionData`);
+    const response = await fetch(`/match/${this.props.MatchId}/replay`);
     if (response.status != 200) {
       this.setState({ loading: false, noData: true });
       return;
     }
-    const json = await response.json();
-    const positionData = fixPositionData(json, this.props);
-    const endTimestamp = getEndTimestamp(positionData);
+
+    const text = await response.text();
+    const [timelines, startTimestamp, endTimestamp] = parseObjectTimelines(text);
+    console.log(timelines);
+    const paths = getShipPaths(timelines, startTimestamp, endTimestamp);
+    console.log(paths);
 
     const mapItemFetch = await fetch(`/game-item/map/${this.props.MapId}`);
     const mapItem = await mapItemFetch.json();
-    console.log("MAP: ", mapItem);
 
     const minutes = this.props.MatchTime / 60;
     const strengthScale = 10 / minutes;
@@ -47,7 +52,7 @@ export class HeatmapTab extends React.Component {
     this.setState({
       loading: false,
       noData: false,
-      shipPositions: positionData,
+      matchTimelines: timelines,
       timelineRange: [0, endTimestamp],
       maxTime: endTimestamp,
       heatmapStrength: 0.05 * strengthScale,
@@ -115,17 +120,19 @@ export class HeatmapTab extends React.Component {
     if (this.state.noData) {
       return (<div>No position data for match.</div>);
     }
-    const filteredPos = filterPositonData(
-      this.state.shipPositions,
-      this.state.timelineRange[0], this.state.timelineRange[1],
-      this.state.enabledShips,
-      this.state.enabledTeams);
+
+    const shipPaths = getShipPaths(
+      this.state.matchTimelines,
+      this.state.timelineRange[0], 
+      this.state.timelineRange[1]
+    )
+
     return (
       <div className="heatmap-tab">
         <Heatmap
           MapId={this.props.MapId}
           mapItem={this.state.mapItem}
-          shipPositions={filteredPos}
+          shipPaths={shipPaths}
           width={500} height={500}
           heatmapRadius={this.state.heatmapRadius}
           heatmapStrength={this.state.heatmapStrength}

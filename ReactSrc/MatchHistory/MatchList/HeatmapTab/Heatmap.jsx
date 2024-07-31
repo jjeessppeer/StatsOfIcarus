@@ -9,16 +9,19 @@ export class Heatmap extends React.Component {
     this.canvasRef = React.createRef();
   }
 
-  drawShipPaths(ctx, positionData) {
+  drawShipPaths(ctx, shipPaths) {
     const colors = ['red', 'orange', 'blue', 'cyan'];
-    for (const shipPositions of positionData) {
+    
+    for (const [objectId, shipPath] of Object.entries(shipPaths)) {
+      
       let lastP;
       let startNewPath = true;
-      for (let i = 0; i < shipPositions.Timestamp.length; i++) {
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width);
+      for (let i = 0; i < shipPath.length; i++) {
+        const position = shipPath[i].position;
+        const p = positionToCanvasPixel([position.x, 0, position.y], this.props.mapItem, this.props.width);
         if (startNewPath) {
           ctx.beginPath();
-          ctx.moveTo(p[0][0], p[0][1]);
+          ctx.moveTo(p[0], p[1]);
           startNewPath = false;
         }
         else {
@@ -26,49 +29,78 @@ export class Heatmap extends React.Component {
           const yc = (lastP[1] + p[1]) / 2;
           ctx.quadraticCurveTo(lastP[0], lastP[1], xc, yc);
         }
-        if (shipPositions.Dead[i]) {
-          startNewPath = true;
-        }
+        // if (shipPositions.Dead[i]) {
+        //   startNewPath = true;
+        // }
         lastP = p;
 
-        if ((startNewPath && i != 0) || i == shipPositions.Timestamp.length - 1) {
+        if ((startNewPath && i != 0) || i == shipPath.length - 1) {
           ctx.lineWidth = 4;
           ctx.strokeStyle = 'white';
           ctx.stroke();
           ctx.lineWidth = 2;
-          ctx.strokeStyle = colors[shipPositions.TeamIdx * 2 + shipPositions.ShipIdx];
+          // ctx.strokeStyle = colors[shipPositions.TeamIdx * 2 + shipPositions.ShipIdx];
+          ctx.strokeStyle = colors[0];
           ctx.stroke();
         }
       }
     }
+      // let lastP;
+      // let startNewPath = true;
+      // for (let i = 0; i < shipPositions.Timestamp.length; i++) {
+      //   const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width);
+      //   if (startNewPath) {
+      //     ctx.beginPath();
+      //     ctx.moveTo(p[0][0], p[0][1]);
+      //     startNewPath = false;
+      //   }
+      //   else {
+      //     const xc = (lastP[0] + p[0]) / 2;
+      //     const yc = (lastP[1] + p[1]) / 2;
+      //     ctx.quadraticCurveTo(lastP[0], lastP[1], xc, yc);
+      //   }
+      //   if (shipPositions.Dead[i]) {
+      //     startNewPath = true;
+      //   }
+      //   lastP = p;
+
+      //   if ((startNewPath && i != 0) || i == shipPositions.Timestamp.length - 1) {
+      //     ctx.lineWidth = 4;
+      //     ctx.strokeStyle = 'white';
+      //     ctx.stroke();
+      //     ctx.lineWidth = 2;
+      //     ctx.strokeStyle = colors[shipPositions.TeamIdx * 2 + shipPositions.ShipIdx];
+      //     ctx.stroke();
+      //   }
+      // }
   }
 
   drawDeathPoints(ctx, positionData) {
-    for (const shipPositions of positionData) {
-      for (let i = 0; i < shipPositions.Timestamp.length; i++) {
-        if (!shipPositions.Dead[i]) continue;
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width);
-        ctx.beginPath();
-        ctx.fillStyle = 'white';
-        ctx.arc(p[0], p[1], 10, 0, 2 * Math.PI);
-        ctx.fill();
+    // for (const shipPositions of positionData) {
+    //   for (let i = 0; i < shipPositions.Timestamp.length; i++) {
+    //     if (!shipPositions.Dead[i]) continue;
+    //     const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width);
+    //     ctx.beginPath();
+    //     ctx.fillStyle = 'white';
+    //     ctx.arc(p[0], p[1], 10, 0, 2 * Math.PI);
+    //     ctx.fill();
 
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(p[0], p[1], 8, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-    }
+    //     ctx.fillStyle = 'black';
+    //     ctx.beginPath();
+    //     ctx.arc(p[0], p[1], 8, 0, 2 * Math.PI);
+    //     ctx.fill();
+    //   }
+    // }
   }
 
   drawHeatmap(canvas, positionData) {
     const heatmapData = [];
-    for (const shipPositions of positionData) {
-      for (let i = 0; i < shipPositions.Timestamp.length; i++) {
-        const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width, this.props.heatmapStrength);
-        heatmapData.push(p);
-      }
-    }
+    // for (const shipPositions of positionData) {
+    //   for (let i = 0; i < shipPositions.Timestamp.length; i++) {
+    //     const p = positionToCanvasPixel(shipPositions.Position[i], this.props.mapItem, this.props.width, this.props.heatmapStrength);
+    //     heatmapData.push(p);
+    //   }
+    // }
     const heat = simpleheat(canvas);
     heat.gradient({
       0.08: 'rgba(0, 0, 255, 1)',
@@ -89,15 +121,16 @@ export class Heatmap extends React.Component {
     ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (this.props.canvasType == 'heatmap') {
-      ctx.save();
-      this.drawHeatmap(canvas, this.props.shipPositions);
-      ctx.restore();
-    }
-    else if (this.props.canvasType == 'paths') {
-      this.drawShipPaths(ctx, this.props.shipPositions);
-      this.drawDeathPoints(ctx, this.props.shipPositions);  
-    } 
+    // if (this.props.canvasType == 'heatmap') {
+    //   ctx.save();
+    //   this.drawHeatmap(canvas, this.props.shipPositions);
+    //   ctx.restore();
+    // }
+    // else if (this.props.canvasType == 'paths') {
+    //   this.drawShipPaths(ctx, this.props.shipPositions);
+    //   this.drawDeathPoints(ctx, this.props.shipPositions);  
+    // } 
+    this.drawShipPaths(ctx, this.props.shipPaths);
   }
 
   componentDidUpdate() {
@@ -112,7 +145,6 @@ export class Heatmap extends React.Component {
     // let imgSrc = MAP_IMAGES[this.props.MapId];
     // console.log("MAP: ")
     let imgSrc = `images/map-images/${this.props.mapItem.Name.replaceAll(' ', '_')}.jpg`;
-    console.log(imgSrc);
     // if (imgSrc == undefined) {
     //   imgSrc = "images/map-images/Duel_at_Dawn.jpg";
     // }
