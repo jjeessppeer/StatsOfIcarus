@@ -19,7 +19,7 @@
   "homepage": "https://github.com/jjeessppeer/jjeessppeer.github.io#readme",
   "dependencies": {
     "ejs": "^3.1.9",
-    "express": "^4.17.3",
+    "express": "^4.19.2",
     "joi": "^17.6.0",
     "lz-string": "^1.4.4",
     "mongodb": "^4.4.1",
