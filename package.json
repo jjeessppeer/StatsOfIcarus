@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/jjeessppeer/jjeessppeer.github.io#readme",
   "dependencies": {
-    "ejs": "^3.1.9",
+    "ejs": "^3.1.10",
     "express": "^4.17.3",
     "joi": "^17.6.0",
     "lz-string": "^1.4.4",
